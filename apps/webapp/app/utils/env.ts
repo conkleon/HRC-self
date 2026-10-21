@@ -29,6 +29,9 @@ declare global {
       FULL_CALENDAR_LICENSE_KEY: string;
       SHOW_HOW_DID_YOU_FIND_US: string;
       COLLECT_BUSINESS_INTEL: string;
+      APP_NAME: string;
+      INSTANCE_NAME: string;
+      BRAND_PRIMARY_COLOR: string;
     };
   }
 }
@@ -80,6 +83,9 @@ declare global {
       POSTHOG_HOST: string;
       COMPANION_SERVERS: string;
       INSTANCE_NAME: string;
+      APP_NAME: string;
+      BRAND_PRIMARY_COLOR: string;
+      BRANDING_DIR: string;
       MIN_COMPANION_VERSION: string;
       LATEST_COMPANION_VERSION: string;
     }
@@ -288,6 +294,42 @@ export const INSTANCE_NAME = getEnv("INSTANCE_NAME", {
 });
 
 /**
+ * Product name shown to users in place of "Shelf": tab titles, auth and
+ * onboarding screens, the sidebar, non-billing emails and PDFs. Read through
+ * `getAppName()`, which supplies the "Shelf" default.
+ *
+ * @see {@link file://./../modules/branding/instance-branding.ts}
+ */
+export const APP_NAME = getEnv("APP_NAME", {
+  isSecret: false,
+  isRequired: false,
+});
+
+/**
+ * Brand accent color as a hex value (e.g. `#C8102E`). Replaces Shelf orange in
+ * the `primary` palette and in emails. Invalid values fall back to the default
+ * with a startup warning.
+ *
+ * @see {@link file://./brand-palette.ts}
+ */
+export const BRAND_PRIMARY_COLOR = getEnv("BRAND_PRIMARY_COLOR", {
+  isSecret: false,
+  isRequired: false,
+});
+
+/**
+ * Absolute path of the folder holding `icon.*`, `favicon.ico` and
+ * `login-bg.*`. Server side only: the browser receives resolved URLs, never
+ * the folder path.
+ *
+ * @see {@link file://./../modules/branding/instance-branding.server.ts}
+ */
+export const BRANDING_DIR = getEnv("BRANDING_DIR", {
+  isSecret: true,
+  isRequired: false,
+});
+
+/**
  * Lowest companion-app version this instance will accept, e.g. "1.4.0".
  *
  * Served on `/api/mobile/config`. An app older than this shows a blocking
@@ -462,5 +504,8 @@ export function getBrowserEnv() {
     FULL_CALENDAR_LICENSE_KEY,
     SENTRY_DSN,
     SENTRY_RELEASE,
+    APP_NAME,
+    INSTANCE_NAME,
+    BRAND_PRIMARY_COLOR,
   };
 }

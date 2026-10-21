@@ -26,6 +26,10 @@ yarn.lock
 
 tsconfig.tsbuildinfo
 
+# Operator branding images stay on the server, not in git
+deploy/branding/*
+!deploy/branding/.gitkeep
+
 # Claude Code development notes (local only)
 .claude-notes/
 

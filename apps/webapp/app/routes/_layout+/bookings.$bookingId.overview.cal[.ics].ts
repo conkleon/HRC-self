@@ -1,6 +1,7 @@
 import { data, type LoaderFunctionArgs } from "react-router";
 import { z } from "zod";
 import { getBooking } from "~/modules/booking/service.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { assertCanDownloadBookingDocuments } from "~/utils/booking-authorization.server";
 import { SERVER_URL } from "~/utils/env";
 import { makeShelfError } from "~/utils/error";
@@ -71,12 +72,12 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     ]);
 
     // Use ASCII-safe filename for the basic filename parameter, and
-    // RFC 5987 filename* for non-ASCII booking names (e.g. Thai, Chinese)
-    const safeFilename = `${booking.name
+    // RFC 5987 filename* for non-ASCII booking or app names (e.g. Thai, Greek)
+    const safeFilename = `${booking.name} - ${getAppName()}.ics`
       .replace(/[^\x20-\x7E]/g, "_")
-      .replace(/["\\]/g, "_")} - shelf.nu.ics`;
+      .replace(/["\\]/g, "_");
     const encodedFilename = `UTF-8''${encodeURIComponent(
-      `${booking.name} - shelf.nu.ics`
+      `${booking.name} - ${getAppName()}.ics`
     )}`;
 
     return new Response(ics, {

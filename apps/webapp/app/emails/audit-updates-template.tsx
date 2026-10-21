@@ -6,6 +6,7 @@ import {
   Container,
   Heading,
 } from "@react-email/components";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { formatDate, type ResolvedFormatPrefs } from "~/utils/date-format";
 import { SERVER_URL } from "~/utils/env";
 import type { UserNameFields } from "~/utils/user";
@@ -77,7 +78,7 @@ export function AuditUpdatesEmailTemplate({
   return (
     <Html>
       <Head>
-        <title>Audit update from Shelf.nu</title>
+        <title>{`Audit update from ${getAppName()}`}</title>
       </Head>
 
       <Container
@@ -209,7 +210,7 @@ export function AuditUpdatesEmailTemplate({
             >
               Thanks,
               <br />
-              The Shelf Team
+              {`The ${getAppName()} Team`}
             </p>
           )}
           <p
@@ -220,7 +221,7 @@ export function AuditUpdatesEmailTemplate({
               color: "#344054",
             }}
           >
-            © {new Date().getFullYear()} Shelf.nu
+            {`© ${new Date().getFullYear()} ${getAppName()}`}
           </p>
         </div>
       </Container>

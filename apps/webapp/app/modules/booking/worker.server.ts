@@ -4,6 +4,7 @@ import type PgBoss from "pg-boss";
 import { db } from "~/database/db.server";
 import { bookingUpdatesTemplateString } from "~/emails/bookings-updates-template";
 import { sendEmail } from "~/emails/mail.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { getTimeRemainingMessage } from "~/utils/date-fns";
 import { resolveFormatPrefs } from "~/utils/date-format";
 import { isNotFoundError, ShelfError } from "~/utils/error";
@@ -62,7 +63,9 @@ const checkoutReminder = async ({ data }: PgBoss.Job<SchedulerData>) => {
         resolveUserDisplayName(booking.custodianUser) ||
         (booking.custodianTeamMember?.name as string);
 
-      const subject = `🔔 Checkout reminder (${booking.name}) - shelf.nu`;
+      const subject = `🔔 Checkout reminder (${
+        booking.name
+      }) - ${getAppName()}`;
 
       for (const recipient of recipients) {
         // Pure resolve from the loaded recipient row; hints as null-field
@@ -203,7 +206,7 @@ const overdueHandler = async ({ data }: PgBoss.Job<SchedulerData>) => {
       resolveUserDisplayName(booking.custodianUser) ||
       (booking.custodianTeamMember?.name as string);
 
-    const subject = `⚠️ Overdue booking (${booking.name}) - shelf.nu`;
+    const subject = `⚠️ Overdue booking (${booking.name}) - ${getAppName()}`;
 
     for (const recipient of recipients) {
       // Pure resolve from the loaded recipient row; hints as null-field

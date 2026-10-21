@@ -21,6 +21,11 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 # open http://localhost:3000
 ```
 
+To rebrand the instance (name, accent color, icon, login background), set
+`APP_NAME`, `INSTANCE_NAME` and `BRAND_PRIMARY_COLOR` in `.env`, put
+`icon.png` and `login-bg.jpg` in `deploy/branding/`, and run
+`docker compose up -d shelf`. Details: [apps/docs/instance-branding.md](../apps/docs/instance-branding.md).
+
 In production, Shelf is served on `127.0.0.1:3000`, the Supabase gateway on `127.0.0.1:8000`
 and Studio on `127.0.0.1:54323`. Only the host nginx should expose the first
 two; reach Studio through an SSH tunnel.

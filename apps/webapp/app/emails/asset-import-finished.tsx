@@ -25,6 +25,7 @@ import {
 } from "@react-email/components";
 import { db } from "~/database/db.server";
 import { formatAssetCount, formatCount } from "~/modules/asset-import/format";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { USER_NAME_SELECT } from "~/modules/user/fields";
 import { SERVER_URL } from "~/utils/env";
 import { ShelfError } from "~/utils/error";
@@ -138,9 +139,9 @@ export const assetImportFinishedEmailText = (
     footerReason(workspaceName),
     "",
     "Thanks,",
-    "The Shelf Team",
+    `The ${getAppName()} Team`,
     "",
-    `© ${new Date().getFullYear()} Shelf.nu`,
+    `© ${new Date().getFullYear()} ${getAppName()}`,
     ""
   );
   return lines.join("\n");
@@ -281,7 +282,7 @@ function AssetImportFinishedEmailTemplate(
           >
             Thanks,
             <br />
-            The Shelf Team
+            {`The ${getAppName()} Team`}
           </p>
           <p
             style={{
@@ -291,7 +292,7 @@ function AssetImportFinishedEmailTemplate(
               color: "#344054",
             }}
           >
-            © {new Date().getFullYear()} Shelf.nu
+            {`© ${new Date().getFullYear()} ${getAppName()}`}
           </p>
         </div>
       </Container>

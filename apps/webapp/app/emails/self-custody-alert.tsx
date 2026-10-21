@@ -17,6 +17,7 @@ import {
   Text,
 } from "@react-email/components";
 
+import { getAppName } from "~/modules/branding/instance-branding";
 import { LogoForEmail } from "./logo";
 import { styles } from "./styles";
 
@@ -92,7 +93,7 @@ View item: ${props.assetUrl}
 
 You receive this because self-service custody is turned on for this workspace.
 
-The Shelf Team
+The ${getAppName()} Team
 `;
 }
 
@@ -134,7 +135,7 @@ function SelfCustodyAlertTemplate(props: SelfCustodyAlertProps) {
           </Text>
 
           <Text style={{ ...styles.p, marginBottom: "32px" }}>
-            The Shelf Team
+            {`The ${getAppName()} Team`}
           </Text>
         </div>
       </Container>

@@ -29,6 +29,7 @@ import {
   Text,
 } from "@react-email/components";
 import { config } from "~/config/shelf.config";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { CustomEmailFooter } from "./custom-footer";
 import { LogoForEmail } from "../logo";
 import {
@@ -221,7 +222,9 @@ export function StockLevelEmail({
             {content.notice}
           </Text>
 
-          <Text style={{ marginTop: "24px", ...styles.p }}>The Shelf Team</Text>
+          <Text style={{ marginTop: "24px", ...styles.p }}>
+            The {getAppName()} Team
+          </Text>
 
           <Text style={footerStyle}>
             <Segments
@@ -234,7 +237,7 @@ export function StockLevelEmail({
           </Text>
           <CustomEmailFooter footerText={facts.customEmailFooter} />
           <Text style={{ ...footerStyle, marginBottom: "32px" }}>
-            © {new Date().getFullYear()} Shelf.nu
+            {`© ${new Date().getFullYear()} ${getAppName()}`}
           </Text>
         </div>
       </Container>
@@ -277,10 +280,10 @@ export function stockLevelEmailText({
     ...(factLines.length > 0 ? [factLines.join("\n")] : []),
     `Open asset: ${facts.serverUrl}/assets/${facts.assetId}/overview`,
     content.notice,
-    "The Shelf Team",
+    `The ${getAppName()} Team`,
     footer,
     ...(facts.customEmailFooter ? [`---\n${facts.customEmailFooter}`] : []),
-    `© ${new Date().getFullYear()} Shelf.nu`,
+    `© ${new Date().getFullYear()} ${getAppName()}`,
   ];
 
   return `${blocks.join("\n\n")}\n`;

@@ -6,11 +6,13 @@ import {
   Container,
   Heading,
 } from "@react-email/components";
+import { config } from "~/config/shelf.config";
 import {
   BOOKING_EMAIL_ASSETS_DISPLAY_LIMIT,
   type ReservationEmailAsset,
   type ReservationEmailModelRequest,
 } from "~/modules/booking/constants";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { formatDate, type ResolvedFormatPrefs } from "~/utils/date-format";
 import { SERVER_URL } from "~/utils/env";
 import { resolveUserDisplayName } from "~/utils/user";
@@ -119,7 +121,7 @@ export function BookingUpdatesEmailTemplate({
   return (
     <Html>
       <Head>
-        <title>Bookings update from Shelf.nu</title>
+        <title>{`Bookings update from ${getAppName()}`}</title>
       </Head>
 
       <Container
@@ -241,7 +243,7 @@ export function BookingUpdatesEmailTemplate({
                 and {assets.length - BOOKING_EMAIL_ASSETS_DISPLAY_LIMIT} more —{" "}
                 <a
                   href={`${SERVER_URL}/bookings/${booking.id}?orgId=${booking.organizationId}`}
-                  style={{ color: "#EF6820" }}
+                  style={{ color: config.emailPrimaryColor }}
                 >
                   View full booking
                 </a>

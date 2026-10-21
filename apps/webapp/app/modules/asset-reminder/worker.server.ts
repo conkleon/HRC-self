@@ -2,6 +2,7 @@ import type { Prisma, User } from "@prisma/client";
 import type PgBoss from "pg-boss";
 import { db } from "~/database/db.server";
 import { sendEmail } from "~/emails/mail.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
 import { stripMarkdocDelimiters } from "~/utils/markdoc-sanitize";
@@ -153,7 +154,7 @@ const ASSET_SCHEDULER_EVENT_HANDLERS: Record<
         });
 
         sendEmail({
-          subject: "⏰ Asset Reminder Notice - Shelf",
+          subject: `⏰ Asset Reminder Notice - ${getAppName()}`,
           to: user.email,
           text: assetAlertEmailText({
             asset: reminder.asset,

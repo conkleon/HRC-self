@@ -25,9 +25,10 @@ import { CloudflareWebAnalytics } from "./components/marketing/cloudflare-web-an
 import { AnimationProvider } from "./components/shared/animation-provider";
 import { Button } from "./components/shared/button";
 import { TooltipProvider } from "./components/shared/tooltip";
-import { config } from "./config/shelf.config";
 import { db } from "./database/db.server";
 import { useNprogress } from "./hooks/use-nprogress";
+import { DEFAULT_INSTANCE_BRANDING } from "./modules/branding/instance-branding";
+import { getInstanceBranding } from "./modules/branding/instance-branding.server";
 import { detectAndPersistFormatPrefs } from "./modules/user/format-prefs.server";
 import fontsStylesheetUrl from "./styles/fonts.css?url";
 import globalStylesheetUrl from "./styles/global.css?url";
@@ -69,9 +70,7 @@ export const handle = {
 };
 
 export const links: LinksFunction = () => [
-  { rel: "manifest", href: "/static/manifest.json" },
-  { rel: "apple-touch-icon", href: config.faviconPath },
-  { rel: "icon", href: config.faviconPath },
+  { rel: "manifest", href: "/manifest.webmanifest" },
   ...splashScreenLinks,
   { rel: "stylesheet", href: styles },
   { rel: "stylesheet", href: fontsStylesheetUrl },
@@ -81,9 +80,9 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: nProgressCustomStyles },
 ];
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction<typeof loader> = ({ data }) => [
   {
-    title: "shelf.nu",
+    title: data?.branding.appName ?? DEFAULT_INSTANCE_BRANDING.appName,
   },
 ];
 
@@ -145,6 +144,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
   return payload({
     env: getBrowserEnv(),
+    branding: getInstanceBranding(),
     maintenanceMode: MAINTENANCE_MODE && !admin,
     requestInfo: {
       hints,
@@ -189,6 +189,7 @@ const getCookieEnabledServerSnapshot = () => true;
 
 export function Layout({ children }: { children: ReactNode }) {
   const data = useRouteLoaderData<typeof loader>("root");
+  const branding = data?.branding ?? DEFAULT_INSTANCE_BRANDING;
   const nonce = useNonce();
   const hasCookies = useSyncExternalStore(
     subscribeCookieEnabled,
@@ -240,7 +241,14 @@ export function Layout({ children }: { children: ReactNode }) {
         <ClientHintCheck nonce={nonce} />
         <style data-fullcalendar />
         <Meta />
+        {/* Favicon and brand palette come from the instance branding, so they
+            render from loader data rather than the static `links` export. The
+            palette follows <Links /> so it overrides the defaults in
+            global.css. */}
+        <link rel="icon" href={branding.faviconUrl} />
+        <link rel="apple-touch-icon" href={branding.iconUrl} />
         <Links />
+        <style nonce={nonce}>{branding.primaryCssVars}</style>
         <Clarity />
       </head>
       <body suppressHydrationWarning>
@@ -249,7 +257,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div id={UNSUPPORTED_BROWSER_SCREEN_ID}>
           <BlockInteractions
             title="Your browser is out of date"
-            content="Shelf needs a current browser. Please update your browser, or switch to the latest Chrome, Firefox, Edge or Safari."
+            content={`${branding.appName} needs a current browser. Please update your browser, or switch to the latest Chrome, Firefox, Edge or Safari.`}
             icon="x"
           />
         </div>
@@ -259,7 +267,7 @@ export function Layout({ children }: { children: ReactNode }) {
             the watchdog, not React, because React never attached here. */}
         <div id={HYDRATION_FAILED_SCREEN_ID}>
           <BlockInteractions
-            title="Shelf could not finish loading"
+            title={`${branding.appName} could not finish loading`}
             content="Part of the app did not download. This is usually a brief network problem, or a firewall or proxy blocking files from this site. Reloading normally fixes it."
             icon="x"
           >

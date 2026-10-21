@@ -9,6 +9,7 @@ import type Stripe from "stripe";
 
 import { db } from "~/database/db.server";
 import { sendEmail } from "~/emails/mail.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { DEFAULT_MAX_IMAGE_UPLOAD_SIZE } from "~/utils/constants";
 import { ADMIN_EMAIL } from "~/utils/env";
 import type { ErrorLabel } from "~/utils/error";
@@ -1245,7 +1246,9 @@ export async function transferOwnership({
 
     /** Send email to new owner */
     sendEmail({
-      subject: `🎉 You're now the Owner of ${currentOrganization.name} - Shelf`,
+      subject: `🎉 You're now the Owner of ${
+        currentOrganization.name
+      } - ${getAppName()}`,
       to: newOwnerUserOrg.user.email,
       text: newOwnerEmailText({
         newOwnerName: resolveUserDisplayName(newOwnerUserOrg.user),

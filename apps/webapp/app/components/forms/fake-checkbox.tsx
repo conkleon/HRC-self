@@ -7,7 +7,7 @@ type FakeCheckboxProps = SVGProps<SVGSVGElement> & {
 
 export const FakeCheckbox = ({
   checked,
-  fillColor = "#FEF6EE",
+  fillColor = "rgb(var(--primary-50))",
   ...svgProps
 }: FakeCheckboxProps) =>
   checked ? (
@@ -19,7 +19,14 @@ export const FakeCheckbox = ({
       xmlns="http://www.w3.org/2000/svg"
       {...svgProps}
     >
-      <rect x="0.5" y="0.5" width="19" height="19" rx="5.5" fill={fillColor} />
+      <rect
+        x="0.5"
+        y="0.5"
+        width="19"
+        height="19"
+        rx="5.5"
+        style={{ fill: fillColor }}
+      />
       <path
         d="M14.6668 6.5L8.25016 12.9167L5.3335 10"
         stroke="currentColor"

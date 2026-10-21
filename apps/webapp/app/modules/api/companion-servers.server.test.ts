@@ -14,6 +14,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // process.env, which would leak across the suite.
 const mockEnv = { COMPANION_SERVERS: "" };
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  INSTANCE_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   get COMPANION_SERVERS() {
     return mockEnv.COMPANION_SERVERS;
   },

@@ -23,6 +23,7 @@ import { useSearchParams } from "~/hooks/search-params";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
 import { ContinueWithEmailForm } from "~/modules/auth/components/continue-with-email-form";
 import { signUpWithEmailPass } from "~/modules/auth/service.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import {
   clearSignupIntentHeaders,
   readSignupIntent,
@@ -56,7 +57,7 @@ import { passwordSchema } from "~/utils/zod";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const title = "Create an account";
-  const subHeading = "Start your journey with Shelf";
+  const subHeading = `Start your journey with ${getAppName()}`;
   const { disableSignup } = config;
 
   try {

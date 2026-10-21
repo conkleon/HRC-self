@@ -23,8 +23,8 @@ export const config: Config = {
     fullLogo: "/static/images/logo-full-color(x2).png",
     symbol: "/static/images/shelf-symbol.png",
   },
-  faviconPath: "/static/favicon.ico",
-  emailPrimaryColor: "#EF6820",
+  emailPrimaryColor:
+    normalizeHexColor(BRAND_PRIMARY_COLOR) ?? DEFAULT_PRIMARY_COLOR,
   showHowDidYouFindUs: SHOW_HOW_DID_YOU_FIND_US || false,
 };
 ```
@@ -163,27 +163,14 @@ logoPath: {
 }
 ```
 
-### faviconPath
-
-Path to your application's favicon.
-
-**Default value:** `"/static/favicon.ico"`
-
-```ts
-// Custom favicon
-faviconPath: "/static/my-favicon.ico";
-```
-
 ### emailPrimaryColor
 
-Primary color used in email templates and notifications.
+Primary color used in email templates and notifications. Set it with the
+`BRAND_PRIMARY_COLOR` environment variable, which also recolors the app; see
+[Instance Branding](./instance-branding.md). The favicon is configured there
+too.
 
 **Default value:** `"#EF6820"` (Shelf orange)
-
-```ts
-// Custom email color
-emailPrimaryColor: "#FF5733";
-```
 
 ## Environment Variables
 

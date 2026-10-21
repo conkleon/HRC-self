@@ -12,7 +12,9 @@ import { ViewButtonGroup } from "~/components/calendar/view-button-group";
 import { ErrorContent } from "~/components/errors";
 import type { HeaderData } from "~/components/layout/header/types";
 import { Button } from "~/components/shared/button";
+import { config } from "~/config/shelf.config";
 import { useDisabled } from "~/hooks/use-disabled";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import { EMAIL_FOOTER_MAX_LENGTH } from "~/modules/email-footer/constants";
 import { processEmailFooter } from "~/modules/email-footer/email-footer-validator.server";
 import { updateOrganization } from "~/modules/organization/service.server";
@@ -283,11 +285,12 @@ export default function EmailSettingsPage() {
  * trips react-doctor's `no-inline-exhaustive-style` check.
  *
  * Kept as CSS-in-JS (not Tailwind) because the preview intentionally
- * mirrors the transactional email template, which uses raw hex colours.
+ * mirrors the transactional email template, which uses the configured
+ * email primary color.
  */
 const EMAIL_PREVIEW_VIEW_BUTTON_STYLE = {
   display: "inline-block",
-  backgroundColor: "#EF6820",
+  backgroundColor: config.emailPrimaryColor,
   color: "white",
   fontSize: "14px",
   fontWeight: "700",
@@ -307,6 +310,7 @@ function EmailPreview({
   previewMode: "desktop" | "mobile";
 }) {
   const isMobile = previewMode === "mobile";
+  const { appName, hasCustomIcon, iconUrl } = useInstanceBranding();
 
   return (
     <div
@@ -325,7 +329,7 @@ function EmailPreview({
         <p>
           <span className="text-gray-400">From:</span>{" "}
           <span className="text-gray-700">
-            Shelf &lt;notifications@shelf.nu&gt;
+            {`${appName} <notifications@example.org>`}
           </span>
         </p>
         <p>
@@ -335,7 +339,7 @@ function EmailPreview({
         <p>
           <span className="text-gray-400">Subject:</span>{" "}
           <span className="text-gray-700">
-            ✅ Booking reserved (Office Equipment Booking) - shelf.nu
+            {`✅ Booking reserved (Office Equipment Booking) - ${appName}`}
           </span>
         </p>
       </div>
@@ -368,11 +372,28 @@ function EmailPreview({
                 marginBottom: "32px",
               }}
             >
-              <img
-                src="/static/images/logo-full-color(x2).png"
-                alt="Shelf logo"
-                style={{ height: "32px", width: "auto" }}
-              />
+              {hasCustomIcon ? (
+                <span style={{ display: "flex", alignItems: "center" }}>
+                  <img
+                    src={iconUrl}
+                    alt={`${appName} logo`}
+                    style={{
+                      height: "32px",
+                      width: "32px",
+                      marginRight: "8px",
+                    }}
+                  />
+                  <span style={{ fontSize: "20px", fontWeight: 600 }}>
+                    {appName}
+                  </span>
+                </span>
+              ) : (
+                <img
+                  src="/static/images/logo-full-color(x2).png"
+                  alt={`${appName} logo`}
+                  style={{ height: "32px", width: "auto" }}
+                />
+              )}
             </div>
 
             {/* Email heading */}
@@ -466,7 +487,7 @@ function EmailPreview({
                 marginBottom: "32px",
               }}
             >
-              &copy; 2026 Shelf.nu
+              {`© ${new Date().getFullYear()} ${appName}`}
             </p>
           </div>
         </div>

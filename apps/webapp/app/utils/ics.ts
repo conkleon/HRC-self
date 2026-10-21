@@ -9,6 +9,7 @@
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc5545}
  */
+import { getAppName } from "~/modules/branding/instance-branding";
 import { formatDateForICal } from "~/utils/date-fns";
 
 /** Escapes text for ICS property values per RFC 5545 §3.3.11 */
@@ -126,7 +127,7 @@ export function buildBookingVEvent(booking: ICalBookingInput): string[] {
     `DTEND:${formatDateForICal(booking.to)}`,
     // Booking-derived (not fetch time) so a subscribed feed is stable per poll.
     `DTSTAMP:${formatDateForICal(booking.updatedAt)}`,
-    "CATEGORIES:Shelf.nu booking",
+    `CATEGORIES:${getAppName()} booking`,
     `DESCRIPTION:${description}`,
     `URL:${booking.bookingUrl}`,
     "BEGIN:VALARM",

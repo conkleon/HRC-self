@@ -23,6 +23,7 @@ import {
   mayHaveCreatedSubscription,
   releaseAddonTrial,
 } from "~/modules/billing/addon-trial-claim.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { signalsTeamIntent } from "~/modules/onboarding/constants";
 import { getOrganizationByUserId } from "~/modules/organization/service.server";
 import { getUserByID } from "~/modules/user/service.server";
@@ -34,7 +35,7 @@ import { Logger } from "~/utils/logger";
 import { getOrCreateCustomerId } from "~/utils/stripe.server";
 
 export const meta: MetaFunction = () => [
-  { title: appendToMetaTitle("Welcome to shelf.nu") },
+  { title: appendToMetaTitle(`Welcome to ${getAppName()}`) },
 ];
 
 export async function loader({ context }: LoaderFunctionArgs) {

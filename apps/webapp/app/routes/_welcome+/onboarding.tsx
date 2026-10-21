@@ -34,6 +34,7 @@ import {
   getAuthUserById,
   signInWithEmail,
 } from "~/modules/auth/service.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { upsertBusinessIntel } from "~/modules/business-intel/service.server";
 import {
   ROLE_OPTIONS,
@@ -290,8 +291,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     });
 
     const title = "Set up your account";
-    const subHeading =
-      "You are almost ready to use Shelf. We just need some basic information to get you started.";
+    const subHeading = `You are almost ready to use ${getAppName()}. We just need some basic information to get you started.`;
 
     return data(
       payload({
@@ -737,7 +737,7 @@ export default function Onboarding() {
                 className="flex w-full items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-left font-medium text-gray-700 hover:bg-gray-100"
               >
                 <span>
-                  Help us customize Shelf
+                  Help us customize {getAppName()}
                   <span className="ml-1 text-sm font-normal text-gray-500">
                     (optional)
                   </span>

@@ -41,6 +41,7 @@ import {
   signInWithEmail,
   updateAccountPassword,
 } from "~/modules/auth/service.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import {
   signupIntentEventProperties,
   signupIntentInitialPersonProperties,
@@ -1775,7 +1776,7 @@ export async function softDeleteUser(id: User["id"]) {
     void sendEmail({
       to: user.email,
       subject: "Your account has been deleted",
-      text: `Your shelf account has been deleted. \n\n Kind regards, \n Shelf Team\n\n`,
+      text: `Your ${getAppName()} account has been deleted. \n\n Kind regards, \n ${getAppName()} Team\n\n`,
     });
 
     if (error) {

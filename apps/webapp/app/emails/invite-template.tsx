@@ -8,6 +8,7 @@ import {
   Section,
 } from "@react-email/components";
 import { config } from "~/config/shelf.config";
+import { getAppName } from "~/modules/branding/instance-branding";
 import type { InviteWithInviterAndOrg } from "~/modules/invite/types";
 import { SERVER_URL, SUPPORT_EMAIL } from "~/utils/env";
 import { resolveUserDisplayName } from "~/utils/user";
@@ -30,7 +31,7 @@ export function InvitationEmailTemplate({
   return (
     <Html>
       <Head>
-        <title>Invitation to join Shelf</title>
+        <title>{`Invitation to join ${getAppName()}`}</title>
       </Head>
 
       <Container
@@ -42,7 +43,8 @@ export function InvitationEmailTemplate({
           <Text style={{ marginBottom: "24px", ...styles.p }}>
             Howdy,
             <br />
-            {resolveUserDisplayName(invite.inviter)} invites you to join Shelf
+            {resolveUserDisplayName(invite.inviter)} invites you to join{" "}
+            {getAppName()}
             as a member of {invite.organization.name}
             's workspace. Click the link to accept the invite:
           </Text>
@@ -98,7 +100,7 @@ export function InvitationEmailTemplate({
 
           <Text style={{ marginBottom: "32px", ...styles.p }}>
             Thanks, <br />
-            The Shelf team
+            {`The ${getAppName()} team`}
           </Text>
 
           <CustomEmailFooter
@@ -106,7 +108,7 @@ export function InvitationEmailTemplate({
           />
 
           <Text style={{ fontSize: "14px", color: "#344054" }}>
-            This is an automatic email sent from shelf.nu to{" "}
+            This is an automatic email sent from {getAppName()} to{" "}
             <span style={{ color: emailPrimaryColor }}>
               {invite.inviteeEmail}
             </span>
