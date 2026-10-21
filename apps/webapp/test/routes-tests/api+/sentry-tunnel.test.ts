@@ -26,6 +26,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // reads `process.env` at import time. Pinning it here is what makes "the
 // configured project" a fixed, assertable value.
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  INSTANCE_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   SENTRY_DSN: "https://pubkey@o123.ingest.sentry.io/456",
 }));
 

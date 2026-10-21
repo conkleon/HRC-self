@@ -8,6 +8,10 @@ import { describe, expect, it, vi } from "vitest";
 
 // why: env vars are read at import time; shelf.config.ts also imports from this module
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  INSTANCE_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   SERVER_URL: "https://assets.example.org",
   SUPPORT_EMAIL: "it@example.org",
   SEND_ONBOARDING_EMAIL: false,

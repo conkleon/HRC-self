@@ -41,6 +41,9 @@ const latestVersion = vi.hoisted(() => ({ value: "1.6.0" }));
 // why: the route reads module-scope env exports; mocking the env module keeps
 // the assertions independent of the developer's local .env.
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   SUPABASE_URL: "https://xyz.supabase.co",
   SUPABASE_ANON_PUBLIC: "anon-key-123",
   INSTANCE_NAME: "Acme University",

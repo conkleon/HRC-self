@@ -95,6 +95,7 @@ import {
   RESERVATION_BATCH_TX_TIMEOUT_MS,
   writeBookingModelRequestInTx,
 } from "~/modules/booking-model-request/service.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { checkAndNotifyLowStock } from "~/modules/consumption-log/low-stock.server";
 import { lockAssetForQuantityUpdate } from "~/modules/consumption-log/quantity-lock.server";
 import { createConsumptionLog } from "~/modules/consumption-log/service.server";
@@ -2737,7 +2738,7 @@ export async function reserveBooking({
       await sendBookingEmailToAllRecipients({
         recipients,
         booking: bookingFound,
-        subject: `✅ Booking reserved (${bookingFound.name}) - shelf.nu`,
+        subject: `✅ Booking reserved (${bookingFound.name}) - ${getAppName()}`,
         buildText: (textArgs) =>
           assetReservedEmailContent({
             ...textArgs,
@@ -7001,7 +7002,9 @@ export async function checkinBooking({
       await sendBookingEmailToAllRecipients({
         recipients,
         booking: updatedBooking,
-        subject: `🎉 Booking complete (${updatedBooking.name}) - shelf.nu`,
+        subject: `🎉 Booking complete (${
+          updatedBooking.name
+        }) - ${getAppName()}`,
         buildText: (textArgs) =>
           completedBookingEmailContent({
             ...textArgs,
@@ -12424,7 +12427,7 @@ export async function cancelBooking({
       await sendBookingEmailToAllRecipients({
         recipients,
         booking,
-        subject: `❌ Booking cancelled (${booking.name}) - shelf.nu`,
+        subject: `❌ Booking cancelled (${booking.name}) - ${getAppName()}`,
         buildText: (textArgs) =>
           cancelledBookingEmailContent({
             ...textArgs,
@@ -12587,7 +12590,9 @@ export async function revertBookingToDraft({
         await sendBookingEmailToAllRecipients({
           recipients,
           booking: draftBooking,
-          subject: `↩️ Booking reverted to draft (${draftBooking.name}) - shelf.nu`,
+          subject: `↩️ Booking reverted to draft (${
+            draftBooking.name
+          }) - ${getAppName()}`,
           buildText: (textArgs) =>
             revertedToDraftEmailContent({
               ...textArgs,
@@ -12985,7 +12990,7 @@ export async function extendBooking({
       await sendBookingEmailToAllRecipients({
         recipients,
         booking: updatedBooking,
-        subject: `Booking extended (${updatedBooking.name}) - shelf.nu`,
+        subject: `Booking extended (${updatedBooking.name}) - ${getAppName()}`,
         buildText: (textArgs) =>
           extendBookingEmailContent({
             ...textArgs,
@@ -14736,7 +14741,7 @@ export async function deleteBooking(
       await sendBookingEmailToAllRecipients({
         recipients,
         booking: b,
-        subject: `🗑️ Booking deleted (${b.name}) - shelf.nu`,
+        subject: `🗑️ Booking deleted (${b.name}) - ${getAppName()}`,
         buildText: (textArgs) =>
           deletedBookingEmailContent({
             ...textArgs,
@@ -16306,7 +16311,7 @@ export async function bulkDeleteBookings({
         await sendBookingEmailToAllRecipients({
           recipients,
           booking: b,
-          subject: `🗑️ Booking deleted (${b.name}) - shelf.nu`,
+          subject: `🗑️ Booking deleted (${b.name}) - ${getAppName()}`,
           buildText: (textArgs) =>
             deletedBookingEmailContent({
               ...textArgs,
@@ -16828,7 +16833,7 @@ export async function bulkCancelBookings({
         await sendBookingEmailToAllRecipients({
           recipients,
           booking: b,
-          subject: `❌ Booking cancelled (${b.name}) - shelf.nu`,
+          subject: `❌ Booking cancelled (${b.name}) - ${getAppName()}`,
           buildText: (textArgs) =>
             cancelledBookingEmailContent({
               ...textArgs,

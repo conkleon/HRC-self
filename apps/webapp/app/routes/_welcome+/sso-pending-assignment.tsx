@@ -12,6 +12,7 @@ import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { Form, redirect } from "react-router";
 import { ShelfSymbolLogo } from "~/components/marketing/logos";
 import { Button } from "~/components/shared/button";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { getUserOrganizations } from "~/modules/organization/service.server";
 import { getUserByID } from "~/modules/user/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
@@ -56,8 +57,9 @@ export default function SsoPendingAssignment() {
       <h1 className="mb-2 text-[24px] font-semibold">No workspace assigned</h1>
 
       <p className="mx-auto mb-6 max-w-md text-gray-600">
-        You don&apos;t currently have access to any workspace in Shelf. This
-        usually means your administrator hasn&apos;t assigned you to one yet.
+        You don&apos;t currently have access to any workspace in {getAppName()}.
+        This usually means your administrator hasn&apos;t assigned you to one
+        yet.
       </p>
 
       <p className="mx-auto mb-8 max-w-md text-sm text-gray-500">

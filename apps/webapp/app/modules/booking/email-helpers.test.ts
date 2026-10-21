@@ -244,7 +244,7 @@ describe("sendBookingUpdatedEmail", () => {
     );
 
     expect(toNew.to).toBe("new-custodian@example.com");
-    expect(toNew.subject).toBe("📝 Booking updated (Field kit) - shelf.nu");
+    expect(toNew.subject).toBe("📝 Booking updated (Field kit) - Shelf");
     expect(toNew.text).toContain(
       'Your booking "Field kit" has been updated.\n' +
         "Updated by: Jo Display on 30/09/2026, 16:15\n"

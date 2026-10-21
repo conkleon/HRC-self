@@ -17,6 +17,7 @@ import {
   createSsoRequiredError,
   getLegacyLoginDecision,
 } from "~/modules/auth/sso-enforcement.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import {
   generateRandomCode,
   normalizeInviteEmail,
@@ -317,8 +318,8 @@ export default function AcceptInvite() {
           <div>
             <h2>Accept invite</h2>
             <p className="mt-2">
-              <strong>{inviter}</strong> invites you to join Shelf as a member
-              of <strong>{workspace}’s</strong> workspace.
+              <strong>{inviter}</strong> invites you to join {getAppName()} as a
+              member of <strong>{workspace}’s</strong> workspace.
             </p>
             <Form method="post" className="my-3">
               <input

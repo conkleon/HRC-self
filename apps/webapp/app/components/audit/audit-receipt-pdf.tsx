@@ -11,6 +11,7 @@ import useApiQuery from "~/hooks/use-api-query";
 import { getAuditStatusLabel } from "~/modules/audit/audit-filter-utils";
 import type { AuditPdfDbResult } from "~/modules/audit/pdf-helpers";
 import { PDF_CODE_COLUMN_PERCENT } from "~/modules/barcode/pdf-code-image";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { sanitizeFilename } from "~/utils/sanitize-filename";
 import { tw } from "~/utils/tw";
 import { resolveUserDisplayName } from "~/utils/user";
@@ -705,7 +706,7 @@ export const AuditPDFContent = ({
 
       {/* Footer */}
       <div className="mt-8 border-t border-gray-300 pt-4 text-center text-xs text-gray-500">
-        Generated on <DateS date={new Date()} /> | Powered by shelf.nu
+        Generated on <DateS date={new Date()} /> | Powered by {getAppName()}
       </div>
     </div>
   );

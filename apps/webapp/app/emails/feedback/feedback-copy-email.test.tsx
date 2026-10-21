@@ -38,6 +38,10 @@ const INSTANCE = vi.hoisted(() => ({
 
 // why: env vars are read at import time; shelf.config.ts also imports from this module
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  INSTANCE_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   get SUPPORT_EMAIL() {
     return INSTANCE.supportEmail;
   },

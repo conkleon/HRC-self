@@ -36,6 +36,7 @@ import { sendEmail } from "~/emails/mail.server";
 import { getSupabaseAdmin } from "~/integrations/supabase/client";
 import { refreshAccessToken } from "~/modules/auth/service.server";
 import { assertEmailChangeAllowed } from "~/modules/auth/sso-enforcement.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import {
   getUserByID,
   getUserWithContact,
@@ -313,7 +314,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
         sendEmail({
           to: email,
           subject: "Delete account request received",
-          text: `We have received your request to delete your account. It will be processed within 72 hours.\n\n Kind regards,\nthe Shelf team \n\n`,
+          text: `We have received your request to delete your account. It will be processed within 72 hours.\n\n Kind regards,\nthe ${getAppName()} team \n\n`,
         });
 
         sendNotification({
@@ -381,7 +382,9 @@ export async function action({ context, request }: ActionFunctionArgs) {
         // Send email with OTP using our email service
         sendEmail({
           to: newEmail,
-          subject: `🔐 Shelf verification code: ${linkData.properties.email_otp}`,
+          subject: `🔐 ${getAppName()} verification code: ${
+            linkData.properties.email_otp
+          }`,
           text: changeEmailAddressTextEmail({
             otp: linkData.properties.email_otp,
             user,

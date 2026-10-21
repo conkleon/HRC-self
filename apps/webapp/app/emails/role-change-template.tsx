@@ -1,5 +1,6 @@
 import { Html, Text, Head, render, Container } from "@react-email/components";
 import { config } from "~/config/shelf.config";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { SUPPORT_EMAIL } from "~/utils/env";
 import { CustomEmailFooter } from "./components/custom-footer";
 import { LogoForEmail } from "./logo";
@@ -48,13 +49,13 @@ export function RoleChangeEmailTemplate({
 
           <Text style={{ marginBottom: "32px", ...styles.p }}>
             Thanks, <br />
-            The Shelf team
+            {`The ${getAppName()} team`}
           </Text>
 
           <CustomEmailFooter footerText={customEmailFooter} />
 
           <Text style={{ fontSize: "14px", color: "#344054" }}>
-            This is an automatic email sent from shelf.nu to{" "}
+            This is an automatic email sent from {getAppName()} to{" "}
             <span style={{ color: emailPrimaryColor }}>{recipientEmail}</span>.
           </Text>
         </div>

@@ -25,14 +25,9 @@ export interface Config {
   };
 
   /**
-   * Primary color for emails
+   * Primary color for emails: `BRAND_PRIMARY_COLOR`, or Shelf orange
    */
   emailPrimaryColor: string;
-
-  /**
-   * Path to favicon
-   */
-  faviconPath: string;
 
   /**
    * Disable the signup functionality

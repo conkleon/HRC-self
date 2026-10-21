@@ -284,6 +284,9 @@ export default createHonoServer<ServerEnv>({
           // them unauthenticated to verify the Companion app's domain claim.
           "/.well-known/apple-app-site-association",
           "/.well-known/assetlinks.json",
+          // Operator branding images (icon, favicon, login background): the
+          // login screen and emails show them to people without a session.
+          "/branding/:file",
           "/api/public-stats",
           "/api/oss-friends",
           "/api/stripe-webhook",

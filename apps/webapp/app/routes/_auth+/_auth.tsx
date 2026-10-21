@@ -2,6 +2,7 @@ import { Link, useMatches, Outlet } from "react-router";
 import { ErrorContent } from "~/components/errors";
 import { ShelfSymbolLogo } from "~/components/marketing/logos";
 import SubHeading from "~/components/shared/sub-heading";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 
 export const loader = () => null;
@@ -16,6 +17,7 @@ export default function App() {
     subHeading?: string;
   };
   const { title, subHeading } = data;
+  const { instanceName, loginBgUrl } = useInstanceBranding();
 
   return (
     <main className="flex h-screen">
@@ -24,6 +26,11 @@ export default function App() {
           <Link to="/" reloadDocument>
             <ShelfSymbolLogo />
           </Link>
+          {/* Names the server people are signing in to, when it differs
+              from the product name. */}
+          {instanceName ? (
+            <p className="mb-4 text-sm text-gray-600">{instanceName}</p>
+          ) : null}
 
           <h1>{title}</h1>
           {subHeading && (
@@ -35,19 +42,30 @@ export default function App() {
         </div>
       </div>
       <aside className="relative hidden h-full flex-col items-end justify-end p-8 lg:flex lg:w-[700px] xl:w-[900px]">
-        {/* eslint-disable react/jsx-no-target-blank */}
-        <a
-          href="https://www.shelf.nu/?ref=shelf_app_auth_image"
-          className="relative z-20 mt-4 w-[150px] text-right text-sm text-white no-underline hover:text-white/80"
-          target="_blank"
-        >
-          shelf.nu
-        </a>
-        <img
-          className="absolute inset-0 size-full max-w-none object-cover"
-          src="/static/images/auth-cover.webp"
-          alt="John Singer Sargent - A Corner of the Library in Venice, 1904/1907 "
-        />
+        {loginBgUrl ? (
+          // Decorative operator-supplied background, so empty alt text.
+          <img
+            className="absolute inset-0 size-full max-w-none object-cover"
+            src={loginBgUrl}
+            alt=""
+          />
+        ) : (
+          <>
+            {/* eslint-disable react/jsx-no-target-blank */}
+            <a
+              href="https://www.shelf.nu/?ref=shelf_app_auth_image"
+              className="relative z-20 mt-4 w-[150px] text-right text-sm text-white no-underline hover:text-white/80"
+              target="_blank"
+            >
+              shelf.nu
+            </a>
+            <img
+              className="absolute inset-0 size-full max-w-none object-cover"
+              src="/static/images/auth-cover.webp"
+              alt="John Singer Sargent - A Corner of the Library in Venice, 1904/1907 "
+            />
+          </>
+        )}
       </aside>
     </main>
   );

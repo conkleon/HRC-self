@@ -1,4 +1,5 @@
 import { Link, useFetcher, useLoaderData } from "react-router";
+import { getAppName } from "~/modules/branding/instance-branding";
 import type { loader } from "~/routes/_layout+/home";
 import { tw } from "~/utils/tw";
 import {
@@ -242,8 +243,8 @@ export default function OnboardingChecklist() {
         <div className="mb-4">
           <h4 className=" text-lg font-semibold">Customize your experience</h4>
           <p className="text-[14px] text-gray-600">
-            Optimize your workflow and use Shelf in way that works for you and
-            your organizations.
+            Optimize your workflow and use {getAppName()} in way that works for
+            you and your organizations.
           </p>
         </div>
         <ul className="onboarding-checklist -mx-1 xl:flex xl:flex-wrap">

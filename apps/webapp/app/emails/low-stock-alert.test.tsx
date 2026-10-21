@@ -14,6 +14,10 @@ import { describe, expect, it, vi } from "vitest";
 // why: env vars are read at import time; the logo and shelf.config.ts import
 // from this module
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  INSTANCE_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   SERVER_URL: "https://app.shelf.nu",
   SUPPORT_EMAIL: "support@shelf.nu",
   SEND_ONBOARDING_EMAIL: false,
@@ -134,7 +138,7 @@ describe("low-stock alert email", () => {
       'This email was sent to sam@clearwater.test because your role in "Clearwater Supply" receives inventory alerts, and everyone with such a role received it. To change when it fires, edit the minimum quantity on the asset.';
     expect(visible).toContain(footer);
     expect(text).toContain(footer);
-    expect(visible).toContain(`© ${new Date().getFullYear()} Shelf.nu`);
+    expect(visible).toContain(`© ${new Date().getFullYear()} Shelf`);
   });
 
   it("shows the workspace's custom footer when one is set", async () => {

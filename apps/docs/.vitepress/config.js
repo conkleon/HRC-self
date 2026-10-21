@@ -80,6 +80,7 @@ export default {
         collapsed: true,
         items: [
           { text: "App Configuration", link: "/app-configuration" },
+          { text: "Instance Branding", link: "/instance-branding" },
           {
             text: "Tracking & Analytics Scripts",
             link: "/tracking-scripts",

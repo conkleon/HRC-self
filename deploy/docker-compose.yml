@@ -50,6 +50,10 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?connection_limit=${DB_CONNECTION_LIMIT:-10}
       DIRECT_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
       SMTP_FROM: ${SMTP_SENDER_NAME} <${SMTP_SENDER_EMAIL}>
+      # Branding images (icon.*, favicon.ico, login-bg.*) from deploy/branding.
+      BRANDING_DIR: /branding
+    volumes:
+      - ./branding:/branding:ro
     # Shelf calls Supabase server-side through the public SUPABASE_PUBLIC_URL
     # (the same URL it hands to browsers). Setting SUPABASE_HOST in .env pins
     # that hostname to the Docker host, so those calls go straight to the

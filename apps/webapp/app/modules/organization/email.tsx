@@ -1,3 +1,4 @@
+import { getAppName } from "~/modules/branding/instance-branding";
 export function newOwnerEmailText({
   newOwnerName,
   workspaceName,
@@ -27,7 +28,7 @@ This means you now have full control over:
 - User management
 ${subscriptionSection}
 Thanks,
-The Shelf Team
+The ${getAppName()} Team
 `;
 }
 
@@ -60,6 +61,6 @@ As a result:
 - You no longer have access to billing or ownership-level settings
 ${subscriptionSection}
 Thanks,
-The Shelf Team
+The ${getAppName()} Team
 `;
 }

@@ -1,6 +1,7 @@
 import { useFetcher, useLoaderData } from "react-router";
 import { XIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
+import { getAppName } from "~/modules/branding/instance-branding";
 import type { loader } from "~/routes/_layout+/_layout";
 
 export const SidebarNoticeCard = () => {
@@ -17,7 +18,7 @@ export const SidebarNoticeCard = () => {
     <div className="support-banner mb-6 hidden rounded border bg-gray-50 px-2 py-3 md:block">
       <div className="flex justify-between align-middle">
         <h5 className="mb-1 font-semibold text-gray-900">
-          Install Shelf for Mobile
+          Install {getAppName()} for Mobile
         </h5>
         <div className="mt-[-6px]">
           <fetcher.Form

@@ -25,11 +25,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import type { ChartSeries } from "~/modules/reports/types";
 
-/** Color palette for multi-series charts */
-const SERIES_COLORS = [
-  "#EF6820", // primary-500 (Shelf orange)
+/**
+ * Colors for the second and later series. The first series uses the instance's
+ * brand color, which only exists at runtime.
+ */
+const SECONDARY_SERIES_COLORS = [
   "#22c55e", // green-500
   "#3b82f6", // blue-500
   "#a855f7", // purple-500
@@ -74,6 +77,12 @@ export function BarChart({
   tooltipFormatter,
   className,
 }: BarChartProps) {
+  const { primaryColor } = useInstanceBranding();
+  const seriesColors = useMemo(
+    () => [primaryColor, ...SECONDARY_SERIES_COLORS],
+    [primaryColor]
+  );
+
   // Transform series data into Recharts format
   // Each data point has { name, series1Value, series2Value, ... }
   const chartData = useMemo(() => {
@@ -227,7 +236,7 @@ export function BarChart({
             key={s.id}
             dataKey={s.id}
             name={s.name}
-            fill={s.color || SERIES_COLORS[index % SERIES_COLORS.length]}
+            fill={s.color || seriesColors[index % seriesColors.length]}
             radius={
               isVerticalBars ? [radius, radius, 0, 0] : [0, radius, radius, 0]
             }

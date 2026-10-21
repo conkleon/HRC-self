@@ -9,6 +9,7 @@ import type {
   BookingEmailActorLabel,
   BookingForEmail,
 } from "~/emails/types";
+import { getAppName } from "~/modules/branding/instance-branding";
 import type { ClientHint } from "~/utils/client-hints";
 import { getTimeRemainingMessage } from "~/utils/date-fns";
 import type { ResolvedFormatPrefs } from "~/utils/date-format";
@@ -76,7 +77,7 @@ To view the booking, follow the link below:
 ${SERVER_URL}/bookings/${bookingId}
 ${customEmailFooter ? `\n---\n${customEmailFooter}` : ""}
 Thanks,
-The Shelf Team
+The ${getAppName()} Team
 `;
 };
 
@@ -220,7 +221,7 @@ export async function sendCheckinReminder(
     resolveUserDisplayName(booking.custodianUser) ||
     (booking.custodianTeamMember?.name as string);
 
-  const subject = `🔔 Checkin reminder (${booking.name}) - shelf.nu`;
+  const subject = `🔔 Checkin reminder (${booking.name}) - ${getAppName()}`;
 
   for (const recipient of recipients) {
     // Recipient prefs resolved from the ALREADY-LOADED row (raw pref fields on
@@ -410,7 +411,7 @@ export async function sendBookingUpdatedEmail({
         booking.custodianTeamMember?.name) ??
       "";
 
-    const subject = `📝 Booking updated (${booking.name}) - shelf.nu`;
+    const subject = `📝 Booking updated (${booking.name}) - ${getAppName()}`;
 
     // Shared args for every recipient's plain-text body. `prefs` is supplied
     // per recipient inside the loop, so it is omitted here.

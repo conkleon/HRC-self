@@ -125,6 +125,10 @@ added there. The values both sides must agree on (database URL, Supabase
 URL and keys, SMTP sender) are derived in `docker-compose.yml` from one source,
 so they cannot drift apart.
 
+To show your organization's name, accent color, icon and login background
+instead of Shelf's, see [Instance Branding](./instance-branding.md). Images go
+in `deploy/branding/`, which is mounted into the Shelf container.
+
 ### 3. Configure the host nginx
 
 ```bash

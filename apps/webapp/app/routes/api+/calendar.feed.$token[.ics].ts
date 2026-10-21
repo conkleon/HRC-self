@@ -15,6 +15,7 @@
  */
 import { type LoaderFunctionArgs } from "react-router";
 import { getBookingsForICalFeed } from "~/modules/booking/service.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import {
   getCalendarFeedContext,
   resolveCalendarVisibility,
@@ -84,7 +85,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     );
 
     const ics = buildBookingICalendar(events, {
-      calendarName: `${context.organization.name} · Shelf bookings`,
+      calendarName: `${context.organization.name} · ${getAppName()} bookings`,
     });
 
     return new Response(ics, {

@@ -22,6 +22,10 @@ vi.mock("~/utils/logger", () => ({ Logger: { error: mockLoggerError } }));
 
 // why: env vars are read at import time
 vi.mock("~/utils/env", () => ({
+  APP_NAME: "",
+  INSTANCE_NAME: "",
+  BRANDING_DIR: "",
+  BRAND_PRIMARY_COLOR: "",
   SERVER_URL: "https://assets.example.org",
   SUPPORT_EMAIL: "it@example.org",
   SEND_ONBOARDING_EMAIL: false,
