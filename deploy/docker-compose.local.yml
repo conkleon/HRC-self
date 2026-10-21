@@ -1,0 +1,44 @@
+# Local testing override for the HRC Shelf stack.
+#
+# Runs the whole stack on one machine without DNS, certificates or a real mail
+# server. Use with an .env created by `bash scripts/generate-secrets.sh --local`:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+#
+#   Shelf      http://localhost:3000
+#   Supabase   http://supabase.localhost:8000  (browsers resolve *.localhost)
+#   Mailpit    http://localhost:8025           (every email, login codes too)
+#   Studio     http://localhost:54323
+#
+# Not for production: it skips TLS and captures all outgoing mail.
+
+services:
+  gateway:
+    networks:
+      default:
+        # Inside Docker, supabase.localhost must reach the gateway itself, so
+        # SUPABASE_PUBLIC_URL works for both the browser and the shelf
+        # container. The gateway listens on 8000 inside and out, so the port in
+        # the URL matches too.
+        aliases:
+          - kong
+          - supabase.localhost
+
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "127.0.0.1:8025:8025"
+
+  auth:
+    depends_on:
+      mailpit:
+        condition: service_started
+
+  shelf:
+    depends_on:
+      mailpit:
+        condition: service_started

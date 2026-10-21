@@ -219,6 +219,7 @@ const bucketKeys = {
     `app:${resolveAppLoaderIdentity(c).identity}:${c.req.path}`,
   calendarFeed: (c: Context) => `calendar:${c.req.path}`,
   sentryTunnel: (c: Context) => `sentry-tunnel:ip:${getClientIp(c)}`,
+  selfCustody: (c: Context) => `self-custody:ip:${getClientIp(c)}`,
 };
 
 /**
@@ -278,6 +279,48 @@ export const mobileIpRateLimit = () =>
             message: "Too many requests. Please try again later.",
           },
         },
+        429
+      );
+    },
+  });
+
+/**
+ * Logged path of a self-custody request. The browse page's token is a secret
+ * link, so it is replaced; a QR id is printed on the sticker and stays.
+ */
+export const redactSelfCustodyPath = (path: string) =>
+  path.replace(/^\/self-service\/[^/]+/, "/self-service/:token");
+
+/**
+ * IP-based rate limit for the public self-service custody pages: the scan
+ * page (`/qr/:qrId/self-custody`) and the browse page
+ * (`/self-service/:token`), where anyone holding a QR sticker or the link can
+ * search volunteer names, try the workspace PIN, and take or return items.
+ * Capped per client IP across every page, so a phone moving between stickers
+ * and the list shares one bucket. The wrong-PIN lockout (`~/modules/self-custody/lockout.server`) is a
+ * separate, stricter counter on top of this one.
+ *
+ * In-memory, per machine, like {@link mobileIpRateLimit}.
+ *
+ * @param limit - Max requests per IP per 60s window. Defaults to 30; exposed so
+ *   tests can drive a low threshold.
+ */
+export const selfCustodyRateLimit = (limit = 30) =>
+  rateLimiter({
+    windowMs: 60_000,
+    limit,
+    standardHeaders: "draft-7",
+    keyGenerator: bucketKeys.selfCustody,
+    handler: (c) => {
+      // Anonymous surface: no user id, and no secret token in the log.
+      logRateLimitHit({
+        scope: "self-custody-ip",
+        bucket: bucketKeys.selfCustody(c),
+        detail: redactSelfCustodyPath(c.req.path),
+      });
+
+      return c.text(
+        "Too many requests. Please wait a minute and try again.",
         429
       );
     },

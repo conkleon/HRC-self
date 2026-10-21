@@ -87,6 +87,7 @@ import { loader as emails } from "~/routes/_layout+/settings.emails";
 import { loader as general } from "~/routes/_layout+/settings.general";
 import { loader as index } from "~/routes/_layout+/settings.index";
 import { loader as layout } from "~/routes/_layout+/settings";
+import { loader as selfService } from "~/routes/_layout+/settings.self-service";
 import { loader as team } from "~/routes/_layout+/settings.team";
 import { loader as teamInvites } from "~/routes/_layout+/settings.team.invites";
 import { loader as teamNrm } from "~/routes/_layout+/settings.team.nrm";
@@ -135,6 +136,7 @@ const CHILDREN = {
   teamUsers,
   teamInvites,
   teamNrm,
+  selfService,
 };
 
 /**
@@ -165,6 +167,7 @@ describe("settings hierarchy", () => {
         "custom-fields",
         "asset-models",
         "team",
+        "self-service",
       ]);
       const outcomes = await childOutcomes();
       for (const outcome of Object.values(outcomes)) {
@@ -196,6 +199,7 @@ describe("settings hierarchy", () => {
         teamUsers: "denied",
         teamInvites: "denied",
         teamNrm: "denied",
+        selfService: "denied",
       });
     }
   );

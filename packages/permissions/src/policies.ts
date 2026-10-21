@@ -99,6 +99,8 @@ type RolePolicyShape = {
     inventoryAlerts: boolean;
     /** May be picked as an extra booking-notification or reminder recipient. */
     selectableAsRecipient: boolean;
+    /** Receives an email when a volunteer takes or returns an item by self-service scan. */
+    selfCustodyAlerts: boolean;
   };
   ui: {
     /** Where `/` sends the user. */
@@ -180,6 +182,7 @@ export const ROLE_POLICIES: Record<OrganizationRole, RolePolicy> = {
       manageBookingRecipients: true,
       inventoryAlerts: true,
       selectableAsRecipient: true,
+      selfCustodyAlerts: true,
     },
     ui: {
       landing: "/assets",
@@ -222,6 +225,7 @@ export const ROLE_POLICIES: Record<OrganizationRole, RolePolicy> = {
       manageBookingRecipients: true,
       inventoryAlerts: true,
       selectableAsRecipient: true,
+      selfCustodyAlerts: true,
     },
     ui: {
       landing: "/assets",
@@ -269,6 +273,7 @@ export const ROLE_POLICIES: Record<OrganizationRole, RolePolicy> = {
       manageBookingRecipients: true,
       inventoryAlerts: false,
       selectableAsRecipient: true,
+      selfCustodyAlerts: true,
     },
     ui: {
       landing: "/bookings",
@@ -313,6 +318,7 @@ export const ROLE_POLICIES: Record<OrganizationRole, RolePolicy> = {
       manageBookingRecipients: false,
       inventoryAlerts: false,
       selectableAsRecipient: false,
+      selfCustodyAlerts: false,
     },
     ui: {
       landing: "/assets",
@@ -355,6 +361,7 @@ export const ROLE_POLICIES: Record<OrganizationRole, RolePolicy> = {
       manageBookingRecipients: false,
       inventoryAlerts: false,
       selectableAsRecipient: false,
+      selfCustodyAlerts: false,
     },
     ui: {
       landing: "/assets",

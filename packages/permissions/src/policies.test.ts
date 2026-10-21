@@ -128,6 +128,7 @@ describe("ROLE_POLICIES", () => {
       manageBookingRecipients: true,
       inventoryAlerts: false,
       selectableAsRecipient: true,
+      selfCustodyAlerts: true,
     });
     assert.deepEqual(manager.ui, {
       landing: "/bookings",
@@ -187,6 +188,17 @@ describe("ROLE_POLICIES", () => {
         assert.equal(ROLE_POLICIES[role].bookings.see, "all", role);
       }
     }
+  });
+
+  test("sends self-service custody alerts to owners, administrators and managers only", () => {
+    assert.equal(ROLE_POLICIES.OWNER.notifications.selfCustodyAlerts, true);
+    assert.equal(ROLE_POLICIES.ADMIN.notifications.selfCustodyAlerts, true);
+    assert.equal(ROLE_POLICIES.MANAGER.notifications.selfCustodyAlerts, true);
+    assert.equal(
+      ROLE_POLICIES.SELF_SERVICE.notifications.selfCustodyAlerts,
+      false
+    );
+    assert.equal(ROLE_POLICIES.BASE.notifications.selfCustodyAlerts, false);
   });
 });
 

@@ -1,0 +1,5 @@
+# Files that run inside Linux containers must keep LF line endings even on a
+# Windows checkout with core.autocrlf=true: a CRLF shebang such as
+# "#!/bin/sh -ex\r" makes the container exit with "Illegal option -".
+*.sh text eol=lf
+deploy/** text=auto eol=lf
