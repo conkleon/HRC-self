@@ -287,6 +287,9 @@ export default createHonoServer<ServerEnv>({
           // Operator branding images (icon, favicon, login background): the
           // login screen and emails show them to people without a session.
           "/branding/:file",
+          // Web app manifest, named after the instance; browsers fetch it
+          // without credentials.
+          "/manifest.webmanifest",
           "/api/public-stats",
           "/api/oss-friends",
           "/api/stripe-webhook",

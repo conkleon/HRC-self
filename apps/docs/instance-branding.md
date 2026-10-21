@@ -17,6 +17,9 @@ Shelf.
 | `BRAND_PRIMARY_COLOR` | `#C8102E`    | The accent color: buttons, links, focus rings, highlights, charts, email buttons                      |
 | `BRANDING_DIR`        | `/branding`  | The folder the images below are read from                                                             |
 
+The app name and icon also name the installed app: `/manifest.webmanifest` is
+built from them, so "Add to Home Screen" on a phone shows your name and icon.
+
 ## Images
 
 Put these files in `BRANDING_DIR` (with the Docker stack in `deploy/`, that is

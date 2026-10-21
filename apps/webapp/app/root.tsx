@@ -70,7 +70,7 @@ export const handle = {
 };
 
 export const links: LinksFunction = () => [
-  { rel: "manifest", href: "/static/manifest.json" },
+  { rel: "manifest", href: "/manifest.webmanifest" },
   ...splashScreenLinks,
   { rel: "stylesheet", href: styles },
   { rel: "stylesheet", href: fontsStylesheetUrl },
