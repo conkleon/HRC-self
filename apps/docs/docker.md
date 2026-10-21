@@ -3,6 +3,11 @@
 > [!NOTE]
 > The Docker configuration for shelf.nu is an effort powered by people within the community, done by [@anatolinicolae](https://github.com/anatolinicolae). Shelf Asset Management Inc. does not yet provide official support for Docker, but we will accept fixes and documentation at this time. Use at your own risk.
 
+> [!TIP]
+> To run Shelf together with a self-hosted Supabase on your own server, use the
+> Compose stack described in [Self-Hosted Stack](./self-hosted-stack.md). It sets
+> up the database, auth, storage buckets and email templates for you.
+
 ## Prerequisites
 
 > [!IMPORTANT]

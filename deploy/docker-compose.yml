@@ -1,0 +1,353 @@
+# Hellenic Red Cross: self-hosted Shelf + Supabase stack
+#
+# One Docker network runs the Shelf webapp and the subset of Supabase that
+# Shelf uses (Postgres, Auth, Storage, plus Studio for admins). Every service
+# reads its settings from the single `deploy/.env` file.
+#
+# Nothing listens on a public interface. The host's nginx terminates HTTPS and
+# proxies two hostnames to the loopback ports published below:
+#   SERVER_URL          -> 127.0.0.1:${APP_PORT}      (shelf)
+#   SUPABASE_PUBLIC_URL -> 127.0.0.1:${GATEWAY_PORT}  (gateway: /auth/v1, /storage/v1)
+# Studio is reachable on 127.0.0.1:${STUDIO_PORT} only (use an SSH tunnel).
+#
+# Usage (from the deploy/ directory):
+#   ./scripts/generate-secrets.sh   # first run only: fills the secrets in .env
+#   docker compose up -d --build
+#   docker compose logs -f shelf
+#
+# See apps/docs/self-hosted-stack.md for the full guide.
+
+name: hrc-shelf
+
+services:
+  # ---------------------------------------------------------------------------
+  # Shelf webapp
+  # ---------------------------------------------------------------------------
+  shelf:
+    build:
+      context: ..
+      dockerfile: apps/webapp/Dockerfile.image
+    image: hrc-shelf:local
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      storage-init:
+        condition: service_completed_successfully
+    # The whole shared .env is passed through, so any optional Shelf variable
+    # (SENTRY_DSN, FULL_CALENDAR_LICENSE_KEY, ...) can be set there directly.
+    env_file: .env
+    # Values below are derived from the shared .env so Shelf and Supabase can
+    # never disagree on keys, passwords or URLs.
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
+      SUPABASE_ANON_PUBLIC: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE: ${SERVICE_ROLE_KEY}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?connection_limit=${DB_CONNECTION_LIMIT:-10}
+      DIRECT_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+      SMTP_FROM: ${SMTP_SENDER_NAME} <${SMTP_SENDER_EMAIL}>
+    # Shelf calls Supabase server-side through the public SUPABASE_PUBLIC_URL
+    # (the same URL it hands to browsers). Setting SUPABASE_HOST in .env pins
+    # that hostname to the Docker host, so those calls go straight to the
+    # host's nginx instead of out through the internet and back (hairpin NAT).
+    extra_hosts:
+      - "${SUPABASE_HOST:-hairpin.invalid}:host-gateway"
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://127.0.0.1:8080/healthcheck'').then((r) => {if (!r.ok) throw new Error(r.status)})"',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      # The entrypoint applies Prisma migrations before the server listens.
+      start_period: 180s
+
+  # ---------------------------------------------------------------------------
+  # API gateway: the public entry point for Supabase (replaces Kong/Envoy)
+  # ---------------------------------------------------------------------------
+  gateway:
+    image: nginx:1.27.4-alpine
+    restart: unless-stopped
+    depends_on:
+      auth:
+        condition: service_healthy
+      storage:
+        condition: service_healthy
+    networks:
+      default:
+        # Studio and other Supabase tooling address the gateway as "kong".
+        aliases:
+          - kong
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./supabase/templates:/usr/share/nginx/email-templates:ro
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:8000/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Supabase
+  # ---------------------------------------------------------------------------
+  db:
+    image: supabase/postgres:17.6.1.136
+    restart: unless-stopped
+    volumes:
+      # Init scripts run once, on an empty data volume only.
+      - ./supabase/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+      - ./supabase/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:ro
+      - db-data:/var/lib/postgresql/data
+      # Persists the pgsodium key between restarts.
+      - db-config:/etc/postgresql-custom
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_EXP: ${JWT_EXPIRY:-3600}
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      # First boot runs the init scripts and restarts Postgres once.
+      start_period: 30s
+
+  auth:
+    image: supabase/gotrue:v2.197.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${SUPABASE_PUBLIC_URL}
+
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+
+      # Shelf is the only site that sends users through Supabase Auth.
+      GOTRUE_SITE_URL: ${SERVER_URL}
+      GOTRUE_URI_ALLOW_LIST: ${SERVER_URL}/**
+      # Shelf's own DISABLE_SIGNUP gates registration. Auth signup must stay on
+      # because Shelf's join and invite flows create users through it.
+      GOTRUE_DISABLE_SIGNUP: "false"
+
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY:-3600}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_ISSUER: ${SUPABASE_PUBLIC_URL}/auth/v1
+
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "false"
+
+      # Shelf only accepts 6-digit one-time passwords.
+      GOTRUE_MAILER_OTP_LENGTH: 6
+      GOTRUE_MAILER_OTP_EXP: ${AUTH_OTP_EXPIRY:-3600}
+      GOTRUE_RATE_LIMIT_EMAIL_SENT: ${AUTH_RATE_LIMIT_EMAIL_SENT:-100}
+
+      GOTRUE_SMTP_HOST: ${SMTP_HOST}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT}
+      GOTRUE_SMTP_USER: ${SMTP_USER}
+      GOTRUE_SMTP_PASS: ${SMTP_PWD}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_SENDER_EMAIL}
+      GOTRUE_SMTP_SENDER_NAME: ${SMTP_SENDER_NAME}
+
+      # The gateway strips /auth/v1, so links built from API_EXTERNAL_URL
+      # need the prefix added back.
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+
+      # OTP email templates, served to Auth by the gateway's internal listener.
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://gateway:8080/confirmation.html
+      GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: http://gateway:8080/magic-link.html
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: http://gateway:8080/recovery.html
+      GOTRUE_MAILER_TEMPLATES_INVITE: http://gateway:8080/invite.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://gateway:8080/email-change.html
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: ${AUTH_SUBJECT_CONFIRMATION:-Confirm your account}
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: ${AUTH_SUBJECT_MAGIC_LINK:-Your login code}
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: ${AUTH_SUBJECT_RECOVERY:-Reset your password}
+      GOTRUE_MAILER_SUBJECTS_INVITE: ${AUTH_SUBJECT_INVITE:-You have been invited}
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: ${AUTH_SUBJECT_EMAIL_CHANGE:-Confirm your new email}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9999/health",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Internal only. Storage depends on it; it is not routed by the gateway, so
+  # the public tables are never reachable over the REST API.
+  rest:
+    image: postgrest/postgrest:v14.18
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_SCHEMAS: public,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY:-3600}
+      PGRST_ADMIN_SERVER_PORT: 3001
+      PGRST_ADMIN_SERVER_HOST: localhost
+    command: ["postgrest"]
+    healthcheck:
+      test: ["CMD", "postgrest", "--ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  storage:
+    image: supabase/storage-api:v1.81.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://rest:3000
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      STORAGE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL}
+      REQUEST_ALLOW_X_FORWARDED_PATH: "true"
+      # 50 MB. Keep in step with client_max_body_size in gateway/nginx.conf
+      # and in the host nginx config.
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      GLOBAL_S3_BUCKET: stub
+      TENANT_ID: stub
+      REGION: stub
+      # Shelf generates its own thumbnails, so imgproxy is not needed.
+      ENABLE_IMAGE_TRANSFORMATION: "false"
+    volumes:
+      - storage-data:/var/lib/storage
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:5000/status",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # One-shot job: creates the storage buckets Shelf expects, then exits.
+  storage-init:
+    image: curlimages/curl:8.11.1
+    restart: "no"
+    depends_on:
+      storage:
+        condition: service_healthy
+    environment:
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+    volumes:
+      - ./supabase/init/create-buckets.sh:/create-buckets.sh:ro
+    entrypoint: ["sh", "/create-buckets.sh"]
+
+  meta:
+    image: supabase/postgres-meta:v0.100.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
+
+  # Admin dashboard. Published on loopback only and has no login of its own:
+  # reach it through an SSH tunnel, never expose it through nginx.
+  studio:
+    image: supabase/studio:2026.10.12-sha-3699278
+    restart: unless-stopped
+    depends_on:
+      meta:
+        condition: service_started
+    environment:
+      HOSTNAME: "0.0.0.0"
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER_READ_WRITE: postgres
+      PG_META_CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
+      PGRST_DB_SCHEMAS: public,graphql_public
+      DEFAULT_ORGANIZATION_NAME: ${STUDIO_DEFAULT_ORGANIZATION:-Hellenic Red Cross}
+      DEFAULT_PROJECT_NAME: ${STUDIO_DEFAULT_PROJECT:-Shelf}
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL}
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      ENABLED_FEATURES_LOGS_ALL: "false"
+    ports:
+      - "127.0.0.1:${STUDIO_PORT:-54323}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://localhost:3000/api/platform/profile'').then((r) => {if (r.status !== 200) throw new Error(r.status)})"',
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  db-data:
+  db-config:
+  storage-data:

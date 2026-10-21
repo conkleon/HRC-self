@@ -48,6 +48,7 @@ superpowers
 .editorconfig
 
 # Not needed to build the webapp
+deploy
 .github
 .gitignore
 .husky
