@@ -278,7 +278,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      # Storage applies its own migrations before it listens, which takes
+      # well over 10s on a first boot.
+      start_period: 90s
 
   # One-shot job: creates the storage buckets Shelf expects, then exits.
   storage-init:

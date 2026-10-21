@@ -21577,7 +21577,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "ADMIN": [
       "general",
@@ -21585,7 +21586,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "MANAGER": [
       "team"
@@ -21598,7 +21600,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "OWNER+MANAGER": [
       "general",
@@ -21606,7 +21609,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "OWNER+SELF_SERVICE": [
       "general",
@@ -21614,7 +21618,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "OWNER+BASE": [
       "general",
@@ -21622,7 +21627,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "ADMIN+OWNER": [
       "general",
@@ -21630,7 +21636,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "ADMIN+MANAGER": [
       "general",
@@ -21638,7 +21645,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "ADMIN+SELF_SERVICE": [
       "general",
@@ -21646,7 +21654,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "ADMIN+BASE": [
       "general",
@@ -21654,7 +21663,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "MANAGER+OWNER": [
       "general",
@@ -21662,7 +21672,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "MANAGER+ADMIN": [
       "general",
@@ -21670,7 +21681,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "MANAGER+SELF_SERVICE": [
       "team"
@@ -21684,7 +21696,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "SELF_SERVICE+ADMIN": [
       "general",
@@ -21692,7 +21705,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "SELF_SERVICE+MANAGER": [
       "team"
@@ -21704,7 +21718,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "BASE+ADMIN": [
       "general",
@@ -21712,7 +21727,8 @@
       "emails",
       "custom-fields",
       "asset-models",
-      "team"
+      "team",
+      "self-service"
     ],
     "BASE+MANAGER": [
       "team"
