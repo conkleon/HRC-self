@@ -59,10 +59,10 @@ describe("self-service unlock cookie", () => {
     await expect(isUnlocked(requestWith(tampered), orgA)).resolves.toBe(false);
   });
 
-  it("lasts 12 hours and is scoped to the QR pages", async () => {
+  it("lasts 12 hours and reaches both the scan page and the browse page", async () => {
     const cookie = await serializeUnlockCookie(orgA);
     expect(cookie).toContain("Max-Age=43200");
-    expect(cookie).toContain("Path=/qr");
+    expect(cookie).toMatch(/Path=\/(;|$)/);
     expect(cookie).toContain("HttpOnly");
   });
 });

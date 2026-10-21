@@ -3,15 +3,22 @@
  *
  * Reads and writes the workspace's self-service switch and PIN
  * (`Organization.selfCustodyEnabled`, `selfCustodyPinHash`,
- * `selfCustodyPinUpdatedAt`). The plain PIN never reaches the database or
- * leaves this module's callers: only its hash is stored.
+ * `selfCustodyPinUpdatedAt`), and the browse page's tag and link token
+ * (`selfCustodyTagId`, `selfCustodyBrowseToken`). The plain PIN never reaches
+ * the database or leaves this module's callers: only its hash is stored.
  *
  * @see {@link file://./../../routes/_layout+/settings.self-service.tsx}
  * @see {@link file://./../../routes/qr+/_public+/$qrId.tsx}
  */
+import { randomBytes } from "node:crypto";
+import QRCode from "qrcode-generator";
+
 import { db } from "~/database/db.server";
+import { SERVER_URL } from "~/utils/env";
 import { ShelfError } from "~/utils/error";
+import { gifToPng } from "~/utils/gif-to-png";
 import { Logger } from "~/utils/logger";
+import { assertTagsBelongToOrg } from "~/utils/org-validation.server";
 import { hashPin } from "./pin.server";
 
 /** What the settings page shows; the PIN hash never leaves the server. */
@@ -19,6 +26,10 @@ export type SelfCustodySettings = {
   enabled: boolean;
   hasPin: boolean;
   pinUpdatedAt: Date | null;
+  /** The tag that marks items for the browse list, null when none is chosen. */
+  tagId: string | null;
+  /** The browse link's secret path segment, null until one is created. */
+  browseToken: string | null;
 };
 
 /**
@@ -36,12 +47,16 @@ export async function getSelfCustodySettings(
       selfCustodyEnabled: true,
       selfCustodyPinHash: true,
       selfCustodyPinUpdatedAt: true,
+      selfCustodyTagId: true,
+      selfCustodyBrowseToken: true,
     },
   });
   return {
     enabled: organization?.selfCustodyEnabled ?? false,
     hasPin: Boolean(organization?.selfCustodyPinHash),
     pinUpdatedAt: organization?.selfCustodyPinUpdatedAt ?? null,
+    tagId: organization?.selfCustodyTagId ?? null,
+    browseToken: organization?.selfCustodyBrowseToken ?? null,
   };
 }
 
@@ -136,4 +151,71 @@ export async function isSelfCustodyEnabled(
     );
     return false;
   }
+}
+
+/**
+ * Chooses the tag that marks items for the browse list, or clears it.
+ *
+ * @param args.organizationId - The current workspace
+ * @param args.tagId - A tag of this workspace, or null for none
+ * @throws {ShelfError} 400 when the tag belongs to another workspace
+ */
+export async function setSelfCustodyTag({
+  organizationId,
+  tagId,
+}: {
+  organizationId: string;
+  tagId: string | null;
+}): Promise<void> {
+  if (tagId) {
+    await assertTagsBelongToOrg({ tagIds: [tagId], organizationId });
+  }
+  await db.organization.update({
+    where: { id: organizationId },
+    data: { selfCustodyTagId: tagId },
+  });
+}
+
+/**
+ * Creates the browse link's token, or replaces it. A replaced token stops
+ * working at once, which retires every printed poster and saved bookmark.
+ *
+ * 18 random bytes (144 bits) make the link unguessable; it is a locator, and
+ * the workspace PIN still guards everything behind it.
+ *
+ * @param organizationId - The current workspace
+ * @returns The new token
+ */
+export async function rotateSelfCustodyBrowseToken(
+  organizationId: string
+): Promise<string> {
+  const token = randomBytes(18).toString("base64url");
+  await db.organization.update({
+    where: { id: organizationId },
+    data: { selfCustodyBrowseToken: token },
+  });
+  return token;
+}
+
+/**
+ * The browse page's absolute address for a token.
+ *
+ * @param token - The workspace's browse token
+ * @returns The link volunteers open
+ */
+export function browseLinkUrl(token: string): string {
+  return `${SERVER_URL}/self-service/${token}`;
+}
+
+/**
+ * Renders the browse link as a QR code, for a poster at the depot.
+ *
+ * @param url - The browse link
+ * @returns A PNG data URL, 8 pixels per module with a 4-module quiet zone
+ */
+export async function renderBrowseLinkQr(url: string): Promise<string> {
+  const code = QRCode(0, "M");
+  code.addData(url);
+  code.make();
+  return gifToPng(code.createDataURL(8, 32));
 }

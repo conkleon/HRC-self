@@ -2,8 +2,8 @@
  * Self-Service Custody Manager Alerts
  *
  * Emails everyone whose role has `notifications.selfCustodyAlerts` (Owner,
- * Administrator, Manager) after a volunteer takes or returns an item by
- * self-service scan. Alerting never fails the volunteer's action: errors are
+ * Administrator, Manager) after a volunteer takes or returns an item through
+ * self-service, by scan or from the browse list. Alerting never fails the volunteer's action: errors are
  * logged and swallowed, and `sendEmail` queues a retry when SMTP is down.
  *
  * @see {@link file://./../../emails/self-custody-alert.tsx}
@@ -30,6 +30,7 @@ type SelfCustodyAlert = {
   assetId: string;
   assetTitle: string;
   volunteerName: string;
+  source: NonNullable<SelfCustodyAlertProps["source"]>;
 };
 
 /**
@@ -57,6 +58,7 @@ export async function sendSelfCustodyAlert(
         assetUrl,
         volunteerName: alert.volunteerName,
         workspaceName: alert.workspaceName,
+        source: alert.source,
       };
 
       sendEmail({

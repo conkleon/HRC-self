@@ -1,12 +1,13 @@
 /**
  * Self-Service Custody Steps
  *
- * The screens a volunteer moves through on the public self-service page:
+ * The screens a volunteer moves through on the public self-service pages:
  * PIN entry, picking or adding their name, confirming a take or a return,
  * and the result. Presentational only; every form posts to the route's
  * action, which decides everything on the server.
  *
  * @see {@link file://./../../routes/qr+/_public+/$qrId_.self-custody.tsx}
+ * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
 import { useReducer, useRef } from "react";
 import { Form, useFetcher } from "react-router";
@@ -107,11 +108,15 @@ function pickerReducer(state: PickerState, action: PickerAction): PickerState {
 }
 
 /**
- * Lets the volunteer find their name (3 letters or more) or add it, then
- * confirm taking the item.
+ * Lets the volunteer find their name (3 letters or more) or add it.
  *
- * @param props.itemTitle - Shown on the confirm button
- * @param props.error - Message from a failed take
+ * With an `itemTitle` (the scan page) the last step takes that item: intents
+ * `take` and `take-new`. Without one (the browse page) it only says who the
+ * volunteer is: a found name continues with `?member=<id>`, a new name posts
+ * intent `add-me`.
+ *
+ * @param props.itemTitle - The item to take, shown on the confirm button
+ * @param props.error - Message from a failed take or add
  * @param props.nameError - Validation message for a new name
  */
 export function VolunteerPicker({
@@ -119,7 +124,7 @@ export function VolunteerPicker({
   error,
   nameError,
 }: {
-  itemTitle: string;
+  itemTitle?: string;
   error?: string | null;
   nameError?: string | null;
 }) {
@@ -145,7 +150,11 @@ export function VolunteerPicker({
   if (state.addingNew) {
     return (
       <Form method="post" className="text-left">
-        <input type="hidden" name="intent" value="take-new" />
+        <input
+          type="hidden"
+          name="intent"
+          value={itemTitle ? "take-new" : "add-me"}
+        />
         <FormError error={error} />
         <Input
           label="Your full name"
@@ -163,7 +172,11 @@ export function VolunteerPicker({
           disabled={disabled}
           className="mb-3 w-full max-w-full"
         >
-          {disabled ? "Saving..." : `Take ${itemTitle}`}
+          {disabled
+            ? "Saving..."
+            : itemTitle
+            ? `Take ${itemTitle}`
+            : "Continue"}
         </Button>
         <Button
           type="button"
@@ -216,7 +229,18 @@ export function VolunteerPicker({
         <p className="mb-4 text-sm text-gray-600">No one by that name yet.</p>
       ) : null}
 
-      {state.selected ? (
+      {state.selected && !itemTitle ? (
+        <Form method="get" className="mb-4">
+          <input type="hidden" name="member" value={state.selected.id} />
+          <Button
+            type="submit"
+            disabled={disabled}
+            className="w-full max-w-full"
+          >
+            {`Continue as ${state.selected.name}`}
+          </Button>
+        </Form>
+      ) : state.selected ? (
         <Form method="post" className="mb-4">
           <input type="hidden" name="intent" value="take" />
           <input type="hidden" name="teamMemberId" value={state.selected.id} />

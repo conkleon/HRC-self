@@ -162,13 +162,16 @@ export default createHonoServer<ServerEnv>({
     server.use("/api/calendar/feed/*", calendarFeedRateLimit());
 
     /**
-     * Self-service custody rate limit. The page is public (in publicPaths):
-     * anyone holding a QR sticker can reach it. One limiter instance, so the
-     * document request and its single-fetch `.data` twin share the bucket.
+     * Self-service custody rate limit. Both pages are public (in publicPaths):
+     * anyone holding a QR sticker or the browse link can reach them. One
+     * limiter instance, so the scan page, the browse page and their
+     * single-fetch `.data` twins share each IP's bucket.
      */
     const selfCustodyLimiter = selfCustodyRateLimit();
     server.use("/qr/:qrId/self-custody", selfCustodyLimiter);
     server.use("/qr/:qrId/self-custody.data", selfCustodyLimiter);
+    server.use("/self-service/:token", selfCustodyLimiter);
+    server.use("/self-service/:token.data", selfCustodyLimiter);
 
     /**
      * Sentry tunnel bounds. The tunnel is public (below), so it is an anonymous
@@ -290,6 +293,7 @@ export default createHonoServer<ServerEnv>({
           "/qr/:qrId/not-logged-in",
           "/qr/:qrId/contact-owner",
           "/qr/:qrId/self-custody", // Volunteer take/return; workspace PIN, not a session
+          "/self-service/:token", // Volunteer browse list; secret link + workspace PIN, not a session
           "/api/mobile/*path", // Mobile companion app API (JWT auth, not cookie)
           // why: auth-bypassed. The iCal feed authenticates via a secret URL
           // token (calendar clients can't send cookies). Scoped to the feed

@@ -7,11 +7,16 @@
  * return it under their NRM name. Managers are emailed about every take and
  * return.
  *
+ * The same page sets up the browse list for items without a usable label:
+ * the tag that marks the items it offers, and its secret link (shown as a QR
+ * code for a poster), which can be replaced to retire old copies.
+ *
  * Gated like the General settings page (`generalSettings`: read to view,
  * update to change), and only offered in team workspaces, where NRMs exist.
  *
  * @see {@link file://./../../modules/self-custody/settings.server.ts}
  * @see {@link file://./../qr+/_public+/$qrId_.self-custody.tsx}
+ * @see {@link file://./../self-service+/$token.tsx}
  */
 import { OrganizationType } from "@prisma/client";
 import type {
@@ -32,10 +37,15 @@ import { DateS } from "~/components/shared/date";
 import { useDisabled } from "~/hooks/use-disabled";
 import { PinSchema } from "~/modules/self-custody/schemas";
 import {
+  browseLinkUrl,
   getSelfCustodySettings,
+  renderBrowseLinkQr,
+  rotateSelfCustodyBrowseToken,
   setSelfCustodyEnabled,
   setSelfCustodyPin,
+  setSelfCustodyTag,
 } from "~/modules/self-custody/settings.server";
+import { getTagsForAssetTagsFilter } from "~/modules/tag/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { sendNotification } from "~/utils/emitter/send-notification.server";
 import { ShelfError, makeShelfError } from "~/utils/error";
@@ -68,8 +78,12 @@ export const SetPinSchema = z
     }
   });
 
-const IntentSchema = z.object({ intent: z.enum(["toggle", "set-pin"]) });
+const IntentSchema = z.object({
+  intent: z.enum(["toggle", "set-pin", "set-tag", "rotate-link"]),
+});
 const ToggleSchema = z.object({ enabled: z.string().optional() });
+/** An empty value clears the tag. */
+const TagSchema = z.object({ tagId: z.string().optional() });
 
 /** Refuses personal workspaces: they have no NRMs to hand items to. */
 function assertTeamWorkspace(type: OrganizationType | undefined) {
@@ -98,9 +112,21 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     assertTeamWorkspace(currentOrganization.type);
 
     const header: HeaderData = { title: "Self-service" };
+    const [settings, { tags }] = await Promise.all([
+      getSelfCustodySettings(organizationId),
+      getTagsForAssetTagsFilter({ organizationId }),
+    ]);
+    const browseUrl = settings.browseToken
+      ? browseLinkUrl(settings.browseToken)
+      : null;
     return payload({
       header,
-      settings: await getSelfCustodySettings(organizationId),
+      settings,
+      tags: tags
+        .map((tag) => ({ id: tag.id, name: tag.name }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      browseUrl,
+      browseQr: browseUrl ? await renderBrowseLinkQr(browseUrl) : null,
     });
   } catch (cause) {
     const reason = makeShelfError(cause, { userId });
@@ -137,6 +163,31 @@ export async function action({ context, request }: ActionFunctionArgs) {
       return data(payload({ success: true }));
     }
 
+    if (intent === "set-tag") {
+      const tagId = parseData(formData, TagSchema).tagId || null;
+      await setSelfCustodyTag({ organizationId, tagId });
+      sendNotification({
+        title: "Browse list updated",
+        message: tagId
+          ? "Volunteers see the available items with this tag."
+          : "The browse list offers no items until you choose a tag.",
+        icon: { name: "success", variant: "success" },
+        senderId: userId,
+      });
+      return data(payload({ success: true }));
+    }
+
+    if (intent === "rotate-link") {
+      await rotateSelfCustodyBrowseToken(organizationId);
+      sendNotification({
+        title: "New link created",
+        message: "Old links and posters no longer work. Print the new QR code.",
+        icon: { name: "success", variant: "success" },
+        senderId: userId,
+      });
+      return data(payload({ success: true }));
+    }
+
     const { pin } = parseData(formData, SetPinSchema, {
       additionalData: { userId, organizationId },
       shouldBeCaptured: false,
@@ -166,7 +217,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 export const ErrorBoundary = () => <ErrorContent />;
 
 export default function SelfServiceSettings() {
-  const { settings } = useLoaderData<typeof loader>();
+  const { settings, tags, browseUrl, browseQr } =
+    useLoaderData<typeof loader>();
   const actionData = useActionData<DataOrErrorResponse>();
   const zo = useZorm("SetPin", SetPinSchema);
   const disabled = useDisabled();
@@ -269,6 +321,113 @@ export default function SelfServiceSettings() {
           </div>
         </Form>
       </section>
+
+      <BrowseListSection
+        tags={tags}
+        tagId={settings.tagId}
+        browseUrl={browseUrl}
+        browseQr={browseQr}
+      />
     </div>
+  );
+}
+
+/**
+ * Sets up the browse list: which tag marks its items, and its link and QR.
+ *
+ * @param props.tags - The workspace's asset tags, by name
+ * @param props.tagId - The chosen tag, null for none
+ * @param props.browseUrl - The current link, null until one is created
+ * @param props.browseQr - The link as a PNG data URL, null without a link
+ */
+function BrowseListSection({
+  tags,
+  tagId,
+  browseUrl,
+  browseQr,
+}: {
+  tags: { id: string; name: string }[];
+  tagId: string | null;
+  browseUrl: string | null;
+  browseQr: string | null;
+}) {
+  const disabled = useDisabled();
+  return (
+    <section className="rounded-md border border-gray-200 bg-white p-6">
+      <h2 className="mb-1 text-lg font-semibold">Browse list</h2>
+      <p className="mb-4 max-w-2xl text-gray-600">
+        For items whose QR label is missing or hard to reach. Volunteers open
+        the link below, enter the PIN and say who they are. They can take any
+        available item with the chosen tag, and return items they hold
+        themselves.
+      </p>
+
+      <Form method="post" className="mb-6 flex max-w-sm flex-col gap-2">
+        <input type="hidden" name="intent" value="set-tag" />
+        <label htmlFor="self-service-tag" className="font-medium text-gray-700">
+          Items with this tag are listed
+        </label>
+        <select
+          id="self-service-tag"
+          name="tagId"
+          defaultValue={tagId ?? ""}
+          aria-describedby="self-service-tag-hint"
+          className="rounded-md border border-gray-300 px-3 py-2"
+        >
+          <option value="">No tag (list offers nothing)</option>
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.name}
+            </option>
+          ))}
+        </select>
+        <p id="self-service-tag-hint" className="text-sm text-gray-600">
+          Add the tag to items from the asset list, one by one or in bulk.
+        </p>
+        <div>
+          <Button type="submit" disabled={disabled}>
+            Save tag
+          </Button>
+        </div>
+      </Form>
+
+      {browseUrl && browseQr ? (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <img
+            src={browseQr}
+            alt="QR code that opens the self-service browse list"
+            className="size-40 rounded border border-gray-200"
+          />
+          <div className="flex min-w-0 flex-col gap-3">
+            <p className="break-all text-sm text-gray-700">{browseUrl}</p>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={browseQr}
+                download="self-service-list-qr.png"
+                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Download QR code
+              </a>
+              <Form method="post">
+                <input type="hidden" name="intent" value="rotate-link" />
+                <Button type="submit" variant="secondary" disabled={disabled}>
+                  Replace link
+                </Button>
+              </Form>
+            </div>
+            <p className="text-sm text-gray-600">
+              Replacing the link stops the old one and every printed copy.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <Form method="post">
+          <input type="hidden" name="intent" value="rotate-link" />
+          <Button type="submit" disabled={disabled}>
+            Create link
+          </Button>
+        </Form>
+      )}
+    </section>
   );
 }

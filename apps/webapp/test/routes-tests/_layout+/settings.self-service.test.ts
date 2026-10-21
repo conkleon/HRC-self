@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
- * Settings > Self-service: who may open it, and how the switch and the PIN
- * are saved. The permission mock answers from the real matrix for the role
+ * Settings > Self-service: who may open it, and how the switch, the PIN and
+ * the browse list's tag and link are saved. The permission mock answers from the real matrix for the role
  * under test; the settings service runs for real on a stubbed database.
  *
  * @see {@link file://../../../app/routes/_layout+/settings.self-service.tsx}
@@ -23,7 +23,10 @@ vi.mock("~/utils/roles.server", () => ({ requirePermission: vi.fn() }));
 
 // why: unit tests run without a database; these are the only Prisma calls made
 vi.mock("~/database/db.server", () => ({
-  db: { organization: { findUnique: vi.fn(), update: vi.fn() } },
+  db: {
+    organization: { findUnique: vi.fn(), update: vi.fn() },
+    tag: { findMany: vi.fn() },
+  },
 }));
 
 // why: the success toast goes through the server-sent event emitter
@@ -33,6 +36,7 @@ vi.mock("~/utils/emitter/send-notification.server", () => ({
 
 const findUnique = vi.mocked(db.organization.findUnique);
 const update = vi.mocked(db.organization.update);
+const findTags = vi.mocked(db.tag.findMany);
 
 const context = {
   getSession: () => ({ userId: "user-1" }),
@@ -84,7 +88,10 @@ beforeEach(() => {
     selfCustodyEnabled: false,
     selfCustodyPinHash: null,
     selfCustodyPinUpdatedAt: null,
+    selfCustodyTagId: null,
+    selfCustodyBrowseToken: null,
   } as never);
+  findTags.mockResolvedValue([]);
 });
 
 describe("Settings > Self-service", () => {
@@ -124,10 +131,14 @@ describe("Settings > Self-service", () => {
 
   it("stores a hash, never the PIN", async () => {
     await action(post({ intent: "set-pin", pin: "4821", confirmPin: "4821" }));
-    const payload = JSON.stringify(update.mock.calls[0][0]);
-    expect(payload).not.toContain('"pin"');
-    expect(payload).not.toContain("4821");
-    expect(payload).toContain("scrypt$");
+    // The hash is random hex, so it may contain the PIN's digits by chance;
+    // what must hold is that no stored field is the PIN itself.
+    const { data } = update.mock.calls[0][0] as {
+      data: Record<string, unknown>;
+    };
+    expect(Object.keys(data)).not.toContain("pin");
+    expect(Object.values(data)).not.toContain("4821");
+    expect(data.selfCustodyPinHash).toMatch(/^scrypt\$/);
   });
 
   it("rejects mismatched PIN confirmation", async () => {
@@ -154,5 +165,88 @@ describe("Settings > Self-service", () => {
       where: { id: "org-1" },
       data: { selfCustodyEnabled: false },
     });
+  });
+
+  it("shows the tags, and the browse link with its QR code once one exists", async () => {
+    findUnique.mockResolvedValue({
+      selfCustodyEnabled: true,
+      selfCustodyPinHash: "scrypt$aa$bb",
+      selfCustodyPinUpdatedAt: new Date("2026-10-01"),
+      selfCustodyTagId: "tag-ss",
+      selfCustodyBrowseToken: "tok-1",
+    } as never);
+    findTags.mockResolvedValue([
+      { id: "tag-v", name: "Vehicles" },
+      { id: "tag-ss", name: "Self-service" },
+    ] as never);
+
+    const result = (await loader(
+      createLoaderArgs({
+        request: new Request("http://localhost/settings/self-service"),
+        context,
+      })
+    )) as Record<string, any>;
+
+    expect(result.settings.tagId).toBe("tag-ss");
+    expect(result.tags).toEqual([
+      { id: "tag-ss", name: "Self-service" },
+      { id: "tag-v", name: "Vehicles" },
+    ]);
+    expect(result.browseUrl).toMatch(/\/self-service\/tok-1$/);
+    expect(result.browseQr).toMatch(/^data:image\/png;base64,/);
+  });
+
+  it("has no link or QR code until one is created", async () => {
+    const result = (await loader(
+      createLoaderArgs({
+        request: new Request("http://localhost/settings/self-service"),
+        context,
+      })
+    )) as Record<string, any>;
+    expect(result.browseUrl).toBeNull();
+    expect(result.browseQr).toBeNull();
+  });
+
+  it("saves a tag of this workspace and refuses one of another", async () => {
+    findTags.mockResolvedValue([{ id: "tag-ss" }] as never);
+    await action(post({ intent: "set-tag", tagId: "tag-ss" }));
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "org-1" },
+      data: { selfCustodyTagId: "tag-ss" },
+    });
+
+    update.mockClear();
+    findTags.mockResolvedValue([]);
+    await expect(
+      statusOf(() => action(post({ intent: "set-tag", tagId: "tag-other" })))
+    ).resolves.toBe(400);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("clears the tag with an empty choice", async () => {
+    await action(post({ intent: "set-tag", tagId: "" }));
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "org-1" },
+      data: { selfCustodyTagId: null },
+    });
+  });
+
+  it("creates or replaces the browse link", async () => {
+    await action(post({ intent: "rotate-link" }));
+    const { data } = update.mock.calls[0][0] as {
+      data: { selfCustodyBrowseToken: string };
+    };
+    expect(data.selfCustodyBrowseToken).toMatch(/^[A-Za-z0-9_-]{24}$/);
+  });
+
+  it("a Manager can neither choose the tag nor replace the link", async () => {
+    actAs(OrganizationRoles.MANAGER);
+    await expect(
+      statusOf(() => action(post({ intent: "set-tag", tagId: "tag-ss" })))
+    ).resolves.toBe(403);
+    await expect(
+      statusOf(() => action(post({ intent: "rotate-link" })))
+    ).resolves.toBe(403);
+    expect(update).not.toHaveBeenCalled();
   });
 });

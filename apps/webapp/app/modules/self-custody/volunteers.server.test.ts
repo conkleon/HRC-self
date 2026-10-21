@@ -11,6 +11,7 @@ import { db } from "~/database/db.server";
 import {
   VolunteerNameSchema,
   findOrCreateVolunteer,
+  getVolunteer,
   normalizeVolunteerName,
   searchVolunteers,
 } from "./volunteers.server";
@@ -77,6 +78,27 @@ describe("searchVolunteers", () => {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
       take: 10,
+    });
+  });
+});
+
+describe("getVolunteer", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("reads only a live NRM of the workspace, so a forged id reads as nobody", async () => {
+    findFirst.mockResolvedValue(null);
+
+    await expect(
+      getVolunteer({ organizationId: "org-1", teamMemberId: "tm-other" })
+    ).resolves.toBeNull();
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        organizationId: "org-1",
+        userId: null,
+        deletedAt: null,
+        id: "tm-other",
+      },
+      select: { id: true, name: true },
     });
   });
 });

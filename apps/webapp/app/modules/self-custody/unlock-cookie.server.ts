@@ -7,7 +7,11 @@
  * with (`Organization.selfCustodyPinUpdatedAt`). Changing the PIN changes the
  * version, so every phone is asked for the new PIN on its next action.
  *
+ * One cookie serves both public pages, the QR scan page under `/qr` and the
+ * browse page under `/self-service`, so its path is the site root.
+ *
  * @see {@link file://./../../routes/qr+/_public+/$qrId_.self-custody.tsx}
+ * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
 import { createCookie } from "react-router";
 
@@ -18,7 +22,7 @@ const UNLOCK_SECONDS = 12 * 60 * 60;
 
 const unlockCookie = createCookie("__selfCustodyUnlock", {
   httpOnly: true,
-  path: "/qr",
+  path: "/",
   sameSite: "lax",
   secrets: [SESSION_SECRET],
   secure: NODE_ENV === "production",

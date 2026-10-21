@@ -61,6 +61,30 @@ export async function searchVolunteers({
 }
 
 /**
+ * Reads one volunteer of a workspace, by id.
+ *
+ * The browse page carries the chosen volunteer in its URL, so the id is
+ * untrusted input: anything that is not a live NRM of this workspace (another
+ * workspace's member, a registered user, a deleted member) reads as nobody.
+ *
+ * @param args.organizationId - The workspace of the browse link (server-resolved)
+ * @param args.teamMemberId - The id from the URL
+ * @returns The volunteer, or null
+ */
+export async function getVolunteer({
+  organizationId,
+  teamMemberId,
+}: {
+  organizationId: string;
+  teamMemberId: string;
+}): Promise<Volunteer | null> {
+  return db.teamMember.findFirst({
+    where: { ...nrmsOf(organizationId), id: teamMemberId },
+    select: { id: true, name: true },
+  });
+}
+
+/**
  * Returns the NRM with this name, ignoring case and spacing, or adds one.
  *
  * @param args.organizationId - The workspace of the scanned QR (server-resolved)

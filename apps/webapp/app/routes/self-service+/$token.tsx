@@ -1,0 +1,431 @@
+/**
+ * Self-Service Browse Page (`/self-service/:token`)
+ *
+ * Public page where a volunteer picks equipment from a list instead of
+ * scanning its QR code, for items whose label is missing or out of reach. The
+ * link (usually a poster QR at the depot) names the workspace by a secret
+ * token that admins can replace from Settings > Self-service.
+ *
+ * Steps: enter the workspace PIN, say who you are (find your name among the
+ * workspace's NRMs, or add it), then take items tagged for self-service that
+ * are available, or return items you hold. Only the volunteer's own items can
+ * be returned here; returning someone else's still needs the item's QR code.
+ *
+ * Everything is decided on the server, per request: the workspace comes from
+ * the token (never from the form), self-service must still be on, the phone
+ * must hold a valid unlock cookie for the current PIN, the volunteer in
+ * `?member=` must be a live NRM of the workspace, and take and return
+ * re-check the tag and the holder inside their transactions.
+ *
+ * @see {@link file://./../../modules/self-custody/browse.server.ts}
+ * @see {@link file://./../../modules/self-custody/custody.server.ts}
+ * @see {@link file://./../../components/self-custody/browse-lists.tsx}
+ */
+import type { ReactNode } from "react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import {
+  Link,
+  data,
+  redirect,
+  useActionData,
+  useLoaderData,
+  useLocation,
+} from "react-router";
+import { z } from "zod";
+
+import { getClientIpFromRequest } from "@server/client-ip";
+import { ErrorContent } from "~/components/errors";
+import { ShelfFullLogo } from "~/components/marketing/logos";
+import {
+  MyItems,
+  OfferedItems,
+  VolunteerBar,
+} from "~/components/self-custody/browse-lists";
+import type {
+  BrowseItem,
+  BrowseItemsPage,
+} from "~/components/self-custody/browse-lists";
+import {
+  DoneNotice,
+  FormError,
+  PinForm,
+  VolunteerPicker,
+} from "~/components/self-custody/self-custody-steps";
+import {
+  getBrowseWorkspace,
+  listOfferedItems,
+  listVolunteerItems,
+} from "~/modules/self-custody/browse.server";
+import type { SelfCustodyBrowseOrganization } from "~/modules/self-custody/browse.server";
+import {
+  selfReturnCustody,
+  selfTakeCustody,
+} from "~/modules/self-custody/custody.server";
+import {
+  checkLockout,
+  clearFailedPins,
+  recordFailedPin,
+} from "~/modules/self-custody/lockout.server";
+import { verifyPin } from "~/modules/self-custody/pin.server";
+import { VolunteerNameSchema } from "~/modules/self-custody/schemas";
+import {
+  isUnlocked,
+  serializeUnlockCookie,
+} from "~/modules/self-custody/unlock-cookie.server";
+import {
+  findOrCreateVolunteer,
+  getVolunteer,
+  searchVolunteers,
+} from "~/modules/self-custody/volunteers.server";
+import type { Volunteer } from "~/modules/self-custody/volunteers.server";
+import { appendToMetaTitle } from "~/utils/append-to-meta-title";
+import { ShelfError, makeShelfError } from "~/utils/error";
+import type { AdditionalData } from "~/utils/error";
+import { getValidationErrors } from "~/utils/http";
+import type { DataOrErrorResponse } from "~/utils/http.server";
+import {
+  assertIsPost,
+  error,
+  getParams,
+  parseData,
+  payload,
+} from "~/utils/http.server";
+
+export const meta = () => [{ title: appendToMetaTitle("Self-service") }];
+
+const ParamsSchema = z.object({ token: z.string() });
+
+const IntentSchema = z.object({
+  intent: z.enum(["unlock", "search", "add-me", "take", "return"]),
+});
+
+const NewVolunteerSchema = z.object({ name: VolunteerNameSchema });
+
+const ItemActionSchema = z.object({
+  assetId: z.string().min(1),
+  teamMemberId: z.string().min(1),
+});
+
+/** Longest search the list accepts; anything longer is cut, not refused. */
+const MAX_QUERY_LENGTH = 100;
+
+/** What the page shows, decided by the loader. */
+type BrowseView =
+  | { view: "off" }
+  | { view: "locked" }
+  | { view: "no-items" }
+  | { view: "identify" }
+  | {
+      view: "lists";
+      volunteer: Volunteer;
+      myItems: BrowseItem[];
+      list: BrowseItemsPage;
+      query: string;
+    };
+
+/** A refusal with a fixed status and message, never sent to Sentry. */
+function refuse(
+  status: 400 | 401 | 403 | 429,
+  message: string,
+  additionalData: AdditionalData
+) {
+  return new ShelfError({
+    cause: null,
+    title: "Self-service",
+    message,
+    additionalData,
+    label: "Custody",
+    status,
+    shouldBeCaptured: false,
+  });
+}
+
+/** Decides what an unlocked phone sees, from the URL's member, q and page. */
+async function unlockedView(
+  organization: SelfCustodyBrowseOrganization,
+  url: URL
+): Promise<BrowseView> {
+  if (!organization.selfCustodyTagId) return { view: "no-items" };
+
+  const memberId = url.searchParams.get("member");
+  const volunteer = memberId
+    ? await getVolunteer({
+        organizationId: organization.id,
+        teamMemberId: memberId,
+      })
+    : null;
+  if (!volunteer) return { view: "identify" };
+
+  const query = (url.searchParams.get("q") ?? "")
+    .trim()
+    .slice(0, MAX_QUERY_LENGTH);
+  const page = Number(url.searchParams.get("page") ?? "1");
+
+  const [myItems, list] = await Promise.all([
+    listVolunteerItems({
+      organizationId: organization.id,
+      teamMemberId: volunteer.id,
+    }),
+    listOfferedItems({
+      organizationId: organization.id,
+      tagId: organization.selfCustodyTagId,
+      query,
+      page,
+    }),
+  ]);
+  return { view: "lists", volunteer, myItems, list, query };
+}
+
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const { token } = getParams(params, ParamsSchema);
+
+  try {
+    const organization = await getBrowseWorkspace(token);
+    const base = { workspaceName: organization.name };
+
+    if (!organization.selfCustodyEnabled) {
+      return data(payload<BrowseView & typeof base>({ ...base, view: "off" }));
+    }
+    if (!(await isUnlocked(request, organization))) {
+      return data(
+        payload<BrowseView & typeof base>({ ...base, view: "locked" })
+      );
+    }
+    const view = await unlockedView(organization, new URL(request.url));
+    return data(payload<BrowseView & typeof base>({ ...base, ...view }));
+  } catch (cause) {
+    // The token is a secret; it stays out of logs and Sentry.
+    const reason = makeShelfError(cause);
+    throw data(error(reason), { status: reason.status });
+  }
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { token } = getParams(params, ParamsSchema);
+
+  try {
+    assertIsPost(request);
+    const formData = await request.formData();
+    const { intent } = parseData(formData, IntentSchema);
+    const organization = await getBrowseWorkspace(token);
+    const context = { organizationId: organization.id, intent };
+
+    if (!organization.selfCustodyEnabled) {
+      throw refuse(
+        403,
+        "Self-service is turned off for this workspace.",
+        context
+      );
+    }
+
+    if (intent === "unlock") {
+      return await unlock(request, formData, organization);
+    }
+
+    if (!(await isUnlocked(request, organization))) {
+      throw refuse(401, "Please enter the workspace PIN first.", context);
+    }
+
+    if (intent === "search") {
+      const { q } = parseData(formData, z.object({ q: z.string() }));
+      return data(
+        payload({
+          volunteers: await searchVolunteers({
+            organizationId: organization.id,
+            query: q,
+          }),
+        })
+      );
+    }
+
+    if (intent === "add-me") {
+      const { name } = parseData(formData, NewVolunteerSchema, {
+        additionalData: context,
+        shouldBeCaptured: false,
+      });
+      const volunteer = await findOrCreateVolunteer({
+        organizationId: organization.id,
+        name,
+      });
+      const url = new URL(request.url);
+      return redirect(
+        `${url.pathname}?${new URLSearchParams({ member: volunteer.id })}`
+      );
+    }
+
+    const { assetId, teamMemberId } = parseData(formData, ItemActionSchema);
+    // The volunteer must be an NRM of this workspace, as on the loader.
+    const volunteer = await getVolunteer({
+      organizationId: organization.id,
+      teamMemberId,
+    });
+    if (!volunteer) {
+      throw refuse(400, "Please choose your name again.", context);
+    }
+
+    const target = {
+      organizationId: organization.id,
+      workspaceName: organization.name,
+      assetId,
+      source: "list" as const,
+    };
+
+    if (intent === "return") {
+      const result = await selfReturnCustody({
+        ...target,
+        holderTeamMemberId: volunteer.id,
+      });
+      return data(payload({ done: { kind: "returned" as const, ...result } }));
+    }
+
+    if (!organization.selfCustodyTagId) {
+      throw refuse(
+        400,
+        "No items are offered for self-service right now.",
+        context
+      );
+    }
+    const result = await selfTakeCustody({
+      ...target,
+      teamMemberId: volunteer.id,
+      requiredTagId: organization.selfCustodyTagId,
+    });
+    return data(payload({ done: { kind: "taken" as const, ...result } }));
+  } catch (cause) {
+    const reason = makeShelfError(cause);
+    return data(error(reason), { status: reason.status });
+  }
+}
+
+/**
+ * Checks the PIN under the lockout and, when right, sets the unlock cookie.
+ * Shares the lockout counters with the scan page: both guard the same PIN.
+ *
+ * @throws {ShelfError} 429 while locked out, 400 for a wrong PIN
+ */
+async function unlock(
+  request: Request,
+  formData: FormData,
+  organization: SelfCustodyBrowseOrganization
+) {
+  const lockKey = {
+    organizationId: organization.id,
+    ip: getClientIpFromRequest(request),
+  };
+  const context = { organizationId: organization.id };
+
+  const lock = checkLockout(lockKey);
+  if (lock.locked) {
+    const minutes = Math.max(1, Math.ceil(lock.retryAfterSeconds / 60));
+    throw refuse(
+      429,
+      `Too many wrong PINs. Try again in ${minutes} minute${
+        minutes === 1 ? "" : "s"
+      }.`,
+      context
+    );
+  }
+
+  const { pin } = parseData(formData, z.object({ pin: z.string() }));
+  if (!(await verifyPin(pin, organization.selfCustodyPinHash))) {
+    recordFailedPin(lockKey);
+    throw refuse(400, "Wrong PIN. Please try again.", context);
+  }
+
+  clearFailedPins(lockKey);
+  return redirect(new URL(request.url).pathname, {
+    headers: {
+      "Set-Cookie": await serializeUnlockCookie(organization, request),
+    },
+  });
+}
+
+export const ErrorBoundary = () => <ErrorContent />;
+
+/** Logo and a narrow column, matching the scan page's public layout. */
+function Shell({ children }: { children: ReactNode }) {
+  return (
+    <div className="container h-full min-h-screen px-4 py-12">
+      <div className="flex h-full flex-col justify-center text-center">
+        <Link
+          to="/"
+          title="Home"
+          className="logo mx-auto inline-block h-[32px]"
+          reloadDocument
+        >
+          <ShelfFullLogo className="h-full" />
+        </Link>
+        <div className="mx-auto w-full max-w-md py-8">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+export default function SelfServiceBrowsePage() {
+  const loaderData = useLoaderData<typeof loader>();
+  const { pathname } = useLocation();
+  const actionData = useActionData<
+    DataOrErrorResponse & {
+      done?: {
+        kind: "taken" | "returned";
+        assetTitle: string;
+        volunteerName: string;
+      };
+    }
+  >();
+
+  const errorMessage = actionData?.error?.message ?? null;
+  const nameError =
+    getValidationErrors<typeof NewVolunteerSchema>(actionData?.error)?.name
+      ?.message ?? null;
+
+  return (
+    <Shell>
+      <h1 className="mb-1 text-[24px] font-semibold">Take or return items</h1>
+      <p className="mb-6 text-gray-600">{loaderData.workspaceName}</p>
+
+      {loaderData.view === "off" ? (
+        <p className="text-gray-700">
+          Self-service is turned off for this workspace. Please ask a staff
+          member.
+        </p>
+      ) : loaderData.view === "locked" ? (
+        <PinForm error={errorMessage} />
+      ) : loaderData.view === "no-items" ? (
+        <p className="text-gray-700">
+          No items are offered for self-service yet. Please ask a staff member.
+        </p>
+      ) : loaderData.view === "identify" ? (
+        <>
+          <p className="mb-4 text-left text-gray-700">
+            First, tell us who you are.
+          </p>
+          <VolunteerPicker
+            error={nameError ? null : errorMessage}
+            nameError={nameError}
+          />
+        </>
+      ) : (
+        <>
+          <VolunteerBar name={loaderData.volunteer.name} switchTo={pathname} />
+          {actionData?.done ? (
+            <div className="mb-6">
+              <DoneNotice {...actionData.done} />
+            </div>
+          ) : (
+            <FormError error={errorMessage} />
+          )}
+          <MyItems
+            items={loaderData.myItems}
+            memberId={loaderData.volunteer.id}
+          />
+          <OfferedItems
+            list={loaderData.list}
+            query={loaderData.query}
+            memberId={loaderData.volunteer.id}
+          />
+        </>
+      )}
+    </Shell>
+  );
+}

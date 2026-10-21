@@ -581,6 +581,9 @@ model Tag {
 
   bookings Booking[]
 
+  // Workspaces whose self-service browse page lists the items with this tag
+  selfCustodyOrganizations Organization[] @relation("SelfCustodyTag")
+
   // Datetime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1094,6 +1097,9 @@ model Organization {
   selfCustodyEnabled      Boolean   @default(false) // If true, anonymous QR scans open the self-service page
   selfCustodyPinHash      String? // scrypt hash of the workspace PIN, never the PIN itself
   selfCustodyPinUpdatedAt DateTime? // Set on every PIN change; unlock cookies issued before it stop working
+  selfCustodyTagId        String? // Items with this tag are listed on the self-service browse page
+  selfCustodyTag          Tag?      @relation("SelfCustodyTag", fields: [selfCustodyTagId], references: [id], onDelete: SetNull)
+  selfCustodyBrowseToken  String?   @unique // Secret path segment of the browse page; replacing it retires old links
 
   // This is used to disable the workspace for the user. It is set to true when the user leaves the workspace
   workspaceDisabled Boolean @default(false) // If true, the workspace is disabled and the user cannot access it

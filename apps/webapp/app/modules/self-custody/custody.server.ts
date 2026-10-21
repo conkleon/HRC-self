@@ -2,7 +2,7 @@
  * Self-Service Custody
  *
  * What a volunteer's scan shows, and taking or returning an item without an
- * account. The volunteer is a team member of the workspace (normally an NRM),
+ * account, from a QR scan or from the workspace's browse list. The volunteer is a team member of the workspace (normally an NRM),
  * so custody, notes, activity events and reports look exactly like custody a
  * staff member assigned. Records carry no actor user; the activity event is
  * marked `meta.via = "self-service"` and names the volunteer through
@@ -15,6 +15,7 @@
  *
  * @see {@link file://./../../routes/_layout+/assets.$assetId.overview.assign-custody.tsx}
  * @see {@link file://./../../routes/qr+/_public+/$qrId_.self-custody.tsx}
+ * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
 import { AssetStatus, AssetType } from "@prisma/client";
 
@@ -202,25 +203,52 @@ function stateOf(qr: {
   return { kind: "available", asset: card };
 }
 
+/**
+ * Where the volunteer acted: by scanning the item's QR code, or from the
+ * workspace's browse list. Named in the note, the activity event and the
+ * manager email.
+ */
+type SelfCustodySource = "scan" | "list";
+
 /** Arguments shared by take and return. */
 type SelfCustodyActionArgs = {
-  /** The workspace of the scanned QR, resolved on the server. */
+  /** The workspace of the scanned QR or browse link, resolved on the server. */
   organizationId: string;
   /** Workspace name, for the manager email. */
   workspaceName: string;
   assetId: string;
+  /** Defaults to "scan". */
+  source?: SelfCustodySource;
 };
 
 /** Result of a take or return, for the confirmation screen. */
 type SelfCustodyResult = { assetTitle: string; volunteerName: string };
 
+/** How the note phrases the channel, after "took custody" / "returned the item". */
+const NOTE_CHANNEL: Record<SelfCustodySource, string> = {
+  scan: "via self-service scan",
+  list: "from the self-service list",
+};
+
+/**
+ * Activity event meta. Every self-service event carries `via`; list actions
+ * add `source` so reports can tell them from scans.
+ */
+const eventMeta = (source: SelfCustodySource) =>
+  source === "list"
+    ? { via: "self-service", source: "list" }
+    : { via: "self-service" };
+
 /**
  * Puts an available item into a volunteer's custody.
  *
- * @param args.organizationId - The workspace of the scanned QR (server-resolved)
+ * @param args.organizationId - The workspace of the QR or browse link (server-resolved)
  * @param args.workspaceName - For the manager email
- * @param args.assetId - The scanned item
+ * @param args.assetId - The item
  * @param args.teamMemberId - The volunteer, from search or "add me"
+ * @param args.requiredTagId - When set, only an item with this tag can be
+ *   claimed: the browse list offers tagged items only, and the claim enforces it
+ * @param args.source - Scan or browse list; defaults to scan
  * @returns The item's title and the volunteer's name
  * @throws {ShelfError} 400 for a team member of another workspace or an item
  *   staff must handle, 404 for an unknown item, 409 when someone took it first
@@ -230,8 +258,11 @@ export async function selfTakeCustody({
   workspaceName,
   assetId,
   teamMemberId,
+  requiredTagId,
+  source = "scan",
 }: SelfCustodyActionArgs & {
   teamMemberId: string;
+  requiredTagId?: string;
 }): Promise<SelfCustodyResult> {
   const result = await db.$transaction(async (tx) => {
     await assertTeamMemberBelongsToOrg({ teamMemberId, organizationId }, tx);
@@ -253,6 +284,7 @@ export async function selfTakeCustody({
         status: AssetStatus.AVAILABLE,
         archivedAt: null,
         type: AssetType.INDIVIDUAL,
+        ...(requiredTagId ? { tags: { some: { id: requiredTagId } } } : {}),
       },
       data: { status: AssetStatus.IN_CUSTODY },
     });
@@ -300,16 +332,16 @@ export async function selfTakeCustody({
         entityId: assetId,
         assetId,
         teamMemberId,
-        meta: { via: "self-service" },
+        meta: eventMeta(source),
       },
       tx
     );
 
     await tx.note.create({
       data: {
-        content: `**${stripMarkdocDelimiters(
-          volunteerName
-        )}** took custody via self-service scan.`,
+        content: `**${stripMarkdocDelimiters(volunteerName)}** took custody ${
+          NOTE_CHANNEL[source]
+        }.`,
         type: "UPDATE",
         asset: { connect: { id: assetId } },
       },
@@ -327,6 +359,7 @@ export async function selfTakeCustody({
     workspaceName,
     assetId,
     kind: "taken",
+    source,
     ...result,
   });
   return result;
@@ -335,18 +368,26 @@ export async function selfTakeCustody({
 /**
  * Releases a volunteer's custody of an item and makes it available again.
  *
- * @param args.organizationId - The workspace of the scanned QR (server-resolved)
+ * @param args.organizationId - The workspace of the QR or browse link (server-resolved)
  * @param args.workspaceName - For the manager email
- * @param args.assetId - The scanned item
+ * @param args.assetId - The item
+ * @param args.holderTeamMemberId - When set, only custody held by this team
+ *   member is released: the browse list returns the volunteer's own items only
+ * @param args.source - Scan or browse list; defaults to scan
  * @returns The item's title and the name of whoever held it
- * @throws {ShelfError} 400 for an item staff must handle, 404 for an unknown
- *   item, 409 when nobody holds it any more
+ * @throws {ShelfError} 400 for an item staff must handle, 403 for an item held
+ *   by someone other than `holderTeamMemberId`, 404 for an unknown item, 409
+ *   when nobody holds it any more
  */
 export async function selfReturnCustody({
   organizationId,
   workspaceName,
   assetId,
-}: SelfCustodyActionArgs): Promise<SelfCustodyResult> {
+  holderTeamMemberId,
+  source = "scan",
+}: SelfCustodyActionArgs & {
+  holderTeamMemberId?: string;
+}): Promise<SelfCustodyResult> {
   const result = await db.$transaction(async (tx) => {
     const asset = await tx.asset.findFirst({
       // eslint-disable-next-line local-rules/require-archived-at-check-on-asset-queries -- why: refuses archived items with a reason instead of a 404
@@ -374,7 +415,7 @@ export async function selfReturnCustody({
       },
     });
 
-    const refuse = (status: 400 | 409, message: string) =>
+    const refuse = (status: 400 | 403 | 409, message: string) =>
       new ShelfError({
         cause: null,
         title: "Item can't be returned here",
@@ -395,9 +436,19 @@ export async function selfReturnCustody({
 
     const hold = holds[0];
     if (!hold) throw refuse(409, "This item is not in anyone's custody.");
+    if (holderTeamMemberId && hold.teamMemberId !== holderTeamMemberId) {
+      throw refuse(403, "You can only return items in your own custody.");
+    }
 
+    // The holder in the predicate keeps the check atomic: custody that moved
+    // to someone else since the read above is not released.
     const released = await tx.custody.deleteMany({
-      where: { assetId, asset: { organizationId }, kitCustodyId: null },
+      where: {
+        assetId,
+        asset: { organizationId },
+        kitCustodyId: null,
+        ...(holderTeamMemberId ? { teamMemberId: holderTeamMemberId } : {}),
+      },
     });
     if (released.count === 0) {
       throw refuse(409, "Someone has just returned this item.");
@@ -418,7 +469,7 @@ export async function selfReturnCustody({
         entityId: assetId,
         assetId,
         teamMemberId: hold.teamMemberId,
-        meta: { via: "self-service" },
+        meta: eventMeta(source),
       },
       tx
     );
@@ -428,7 +479,7 @@ export async function selfReturnCustody({
       data: {
         content: `**${stripMarkdocDelimiters(
           volunteerName
-        )}** returned the item via self-service scan.`,
+        )}** returned the item ${NOTE_CHANNEL[source]}.`,
         type: "UPDATE",
         asset: { connect: { id: assetId } },
       },
@@ -442,6 +493,7 @@ export async function selfReturnCustody({
     workspaceName,
     assetId,
     kind: "returned",
+    source,
     ...result,
   });
   return result;

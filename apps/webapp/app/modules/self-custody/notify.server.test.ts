@@ -44,6 +44,7 @@ const alert = {
   assetId: "asset-1",
   assetTitle: "Radio #12",
   volunteerName: "Maria P.",
+  source: "scan" as const,
 };
 
 describe("sendSelfCustodyAlert", () => {
@@ -80,6 +81,26 @@ describe("sendSelfCustodyAlert", () => {
     expect(first.text).toContain("Hey Eleni,");
     expect(first.text).toContain("https://assets.example.org/assets/asset-1");
     expect(mockSendEmail.mock.calls[1][0].text).toContain("Hey Kostas M.,");
+  });
+
+  it("says the item was picked from the list when it was", async () => {
+    mockAudience.mockResolvedValue([
+      {
+        id: "u1",
+        email: "eleni@example.org",
+        firstName: "Eleni",
+        lastName: "K",
+        displayName: null,
+      },
+    ]);
+
+    await sendSelfCustodyAlert({ ...alert, source: "list" });
+
+    const { text } = mockSendEmail.mock.calls[0][0];
+    expect(text).toContain(
+      "Maria P. took Radio #12 into their custody from the self-service list."
+    );
+    expect(text).not.toContain("scanning");
   });
 
   it("sends nothing when the audience is empty", async () => {

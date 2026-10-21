@@ -292,7 +292,63 @@ describe("selfTakeCustody", () => {
       assetId: "asset-1",
       assetTitle: "Radio #12",
       volunteerName: "Maria P.",
+      source: "scan",
     });
+  });
+
+  it("from the list, claims only an item carrying the self-service tag", async () => {
+    await selfTakeCustody({
+      organizationId: ORG,
+      workspaceName: "Hellenic Red Cross",
+      assetId: "asset-1",
+      teamMemberId: "tm-1",
+      requiredTagId: "tag-ss",
+      source: "list",
+    });
+
+    expect(tx.asset.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "asset-1",
+        organizationId: ORG,
+        status: AssetStatus.AVAILABLE,
+        archivedAt: null,
+        type: AssetType.INDIVIDUAL,
+        tags: { some: { id: "tag-ss" } },
+      },
+      data: { status: AssetStatus.IN_CUSTODY },
+    });
+    expect(recordEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CUSTODY_ASSIGNED",
+        meta: { via: "self-service", source: "list" },
+      }),
+      tx
+    );
+    expect(tx.note.create.mock.calls[0][0].data.content).toBe(
+      "**Maria P.** took custody from the self-service list."
+    );
+    expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "taken", source: "list" })
+    );
+  });
+
+  it("refers an available item without the self-service tag to staff", async () => {
+    tx.asset.updateMany.mockResolvedValue({ count: 0 });
+    tx.asset.findFirst.mockResolvedValue({
+      title: "Radio #12",
+      status: AssetStatus.AVAILABLE,
+    });
+    await expect(
+      selfTakeCustody({
+        organizationId: ORG,
+        workspaceName: "Hellenic Red Cross",
+        assetId: "asset-1",
+        teamMemberId: "tm-1",
+        requiredTagId: "tag-ss",
+        source: "list",
+      })
+    ).rejects.toMatchObject({ status: 400 });
+    expect(tx.custody.create).not.toHaveBeenCalled();
   });
 
   it("refuses when the item was taken a moment earlier", async () => {
@@ -441,5 +497,48 @@ describe("selfReturnCustody", () => {
   it("refuses an item of another workspace", async () => {
     tx.asset.findFirst.mockResolvedValue(null);
     await expect(giveBack()).rejects.toMatchObject({ status: 404 });
+  });
+
+  const giveBackFromList = (holderTeamMemberId: string) =>
+    selfReturnCustody({
+      organizationId: ORG,
+      workspaceName: "Hellenic Red Cross",
+      assetId: "asset-1",
+      holderTeamMemberId,
+      source: "list",
+    });
+
+  it("from the list, releases only the volunteer's own custody", async () => {
+    await expect(giveBackFromList("tm-1")).resolves.toEqual({
+      assetTitle: "Radio #12",
+      volunteerName: "Maria P.",
+    });
+    expect(tx.custody.deleteMany).toHaveBeenCalledWith({
+      where: {
+        assetId: "asset-1",
+        asset: { organizationId: ORG },
+        kitCustodyId: null,
+        teamMemberId: "tm-1",
+      },
+    });
+    expect(recordEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "CUSTODY_RELEASED",
+        meta: { via: "self-service", source: "list" },
+      }),
+      tx
+    );
+    expect(tx.note.create.mock.calls[0][0].data.content).toBe(
+      "**Maria P.** returned the item from the self-service list."
+    );
+  });
+
+  it("from the list, refuses an item someone else holds", async () => {
+    await expect(giveBackFromList("tm-2")).rejects.toMatchObject({
+      status: 403,
+      message: "You can only return items in your own custody.",
+    });
+    expect(tx.custody.deleteMany).not.toHaveBeenCalled();
+    expect(sendSelfCustodyAlert).not.toHaveBeenCalled();
   });
 });

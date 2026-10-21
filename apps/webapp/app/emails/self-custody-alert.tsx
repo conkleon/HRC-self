@@ -2,8 +2,9 @@
  * Self-Service Custody Alert Email
  *
  * Sent to every member whose role has `notifications.selfCustodyAlerts`
- * (Owner, Administrator, Manager) when a volunteer takes or returns an item by
- * scanning its QR code on the public self-service page.
+ * (Owner, Administrator, Manager) when a volunteer takes or returns an item on
+ * a public self-service page: by scanning its QR code, or from the workspace's
+ * browse list.
  *
  * @see {@link file://./../modules/self-custody/notify.server.ts}
  */
@@ -31,6 +32,8 @@ export type SelfCustodyAlertProps = {
   /** The volunteer's NRM name. */
   volunteerName: string;
   workspaceName: string;
+  /** How the volunteer reached the item. Defaults to "scan". */
+  source?: "scan" | "list";
 };
 
 /**
@@ -58,10 +61,19 @@ function greeting(firstName: string | null) {
 }
 
 /** The one sentence that says what happened. */
-function summary({ kind, assetTitle, volunteerName }: SelfCustodyAlertProps) {
+function summary({
+  kind,
+  assetTitle,
+  volunteerName,
+  source = "scan",
+}: SelfCustodyAlertProps) {
+  const how =
+    source === "list"
+      ? "from the self-service list"
+      : "by scanning its QR code";
   return kind === "taken"
-    ? `${volunteerName} took ${assetTitle} into their custody by scanning its QR code.`
-    : `${volunteerName} returned ${assetTitle} by scanning its QR code.`;
+    ? `${volunteerName} took ${assetTitle} into their custody ${how}.`
+    : `${volunteerName} returned ${assetTitle} ${how}.`;
 }
 
 /**
