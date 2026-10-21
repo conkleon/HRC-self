@@ -23,6 +23,7 @@ describe("visibleSettingsTabs", () => {
         "custom-fields",
         "asset-models",
         "team",
+        "self-service",
       ]);
     }
   );
@@ -56,7 +57,12 @@ describe("visibleSettingsTabs", () => {
       "custom-fields",
       "asset-models",
       "team",
+      "self-service",
     ]);
+  });
+
+  it("a Manager does not see Self-service, which needs generalSettings update", () => {
+    expect(tabs(["MANAGER"])).not.toContain("self-service");
   });
 });
 

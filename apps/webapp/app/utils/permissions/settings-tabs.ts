@@ -81,6 +81,14 @@ export const SETTINGS_TABS: readonly SettingsTab[] = [
     ],
     teamWorkspaceOnly: false,
   },
+  {
+    // Volunteers take and return items by QR scan as NRMs, so the page is
+    // only offered where NRMs exist.
+    to: "self-service",
+    content: "Self-service",
+    gates: [gate(PermissionEntity.generalSettings, PermissionAction.update)],
+    teamWorkspaceOnly: true,
+  },
 ];
 
 /** `/settings/team/*` tabs, in display order. */

@@ -393,17 +393,15 @@ export function buildEffectiveAccessSnapshot(): Record<string, unknown> {
   // may grant. Role changes on existing members are B9:D-07:change-role-guard.
   snapshot["D-04:invite-guard"] = perCase(CALLER_ROLES, (caller) =>
     Object.fromEntries(
-      [...INVITABLE_ROLES]
-        .sort()
-        .map((role) => [
+      [...INVITABLE_ROLES].sort().map((role) => [
+        role,
+        canInviteRole({
+          actorOwnsWorkspace: isWorkspaceOwner([caller]),
           role,
-          canInviteRole({
-            actorOwnsWorkspace: isWorkspaceOwner([caller]),
-            role,
-          })
-            ? "allowed"
-            : "refused",
-        ])
+        })
+          ? "allowed"
+          : "refused",
+      ])
     )
   );
   snapshot["D-10:labels"] = Object.fromEntries(
@@ -1553,6 +1551,12 @@ export function buildEffectiveAccessSnapshot(): Record<string, unknown> {
     modelFiltersRecipients: holdsAny(
       roles,
       rolesWhere((p) => p.notifications.selectableAsRecipient)
+    ),
+    // modules/self-custody/notify.server.ts (getOrganizationNotificationAudience,
+    // audience `selfCustodyAlerts`): volunteer take/return emails.
+    selfCustodyAlerts: holdsAny(
+      roles,
+      rolesWhere((p) => p.notifications.selfCustodyAlerts)
     ),
   }));
 

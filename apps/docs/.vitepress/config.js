@@ -72,6 +72,7 @@ export default {
           { text: "Local Development", link: "/local-development" },
           { text: "Deployment", link: "/deployment" },
           { text: "Docker Setup", link: "/docker" },
+          { text: "Self-Hosted Stack", link: "/self-hosted-stack" },
         ],
       },
       {
@@ -84,6 +85,7 @@ export default {
             link: "/tracking-scripts",
           },
           { text: "URL Shortener", link: "/url-shortener" },
+          { text: "Self-Service Custody", link: "/self-service-custody" },
         ],
       },
       {

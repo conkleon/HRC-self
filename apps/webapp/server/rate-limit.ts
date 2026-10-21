@@ -219,6 +219,7 @@ const bucketKeys = {
     `app:${resolveAppLoaderIdentity(c).identity}:${c.req.path}`,
   calendarFeed: (c: Context) => `calendar:${c.req.path}`,
   sentryTunnel: (c: Context) => `sentry-tunnel:ip:${getClientIp(c)}`,
+  selfCustody: (c: Context) => `self-custody:ip:${getClientIp(c)}`,
 };
 
 /**
@@ -278,6 +279,40 @@ export const mobileIpRateLimit = () =>
             message: "Too many requests. Please try again later.",
           },
         },
+        429
+      );
+    },
+  });
+
+/**
+ * IP-based rate limit for the public self-service custody page
+ * (`/qr/:qrId/self-custody`), where anyone holding a QR sticker can search
+ * volunteer names, try the workspace PIN, and take or return an item. Capped
+ * per client IP across every QR, so a phone scanning many stickers shares one
+ * bucket. The wrong-PIN lockout (`~/modules/self-custody/lockout.server`) is a
+ * separate, stricter counter on top of this one.
+ *
+ * In-memory, per machine, like {@link mobileIpRateLimit}.
+ *
+ * @param limit - Max requests per IP per 60s window. Defaults to 30; exposed so
+ *   tests can drive a low threshold.
+ */
+export const selfCustodyRateLimit = (limit = 30) =>
+  rateLimiter({
+    windowMs: 60_000,
+    limit,
+    standardHeaders: "draft-7",
+    keyGenerator: bucketKeys.selfCustody,
+    handler: (c) => {
+      // Anonymous surface: no user id, and the path carries only the QR id.
+      logRateLimitHit({
+        scope: "self-custody-ip",
+        bucket: bucketKeys.selfCustody(c),
+        detail: c.req.path,
+      });
+
+      return c.text(
+        "Too many requests. Please wait a minute and try again.",
         429
       );
     },

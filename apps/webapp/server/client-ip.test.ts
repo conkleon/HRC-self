@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getClientIp } from "./client-ip";
+import { getClientIp, getClientIpFromRequest } from "./client-ip";
 
 // @vitest-environment node
 
@@ -64,5 +64,31 @@ describe("getClientIp", () => {
     vi.stubEnv("FLY_APP_NAME", "");
     const ip = await resolve({});
     expect(ip).toBe("unknown");
+  });
+});
+
+describe("getClientIpFromRequest", () => {
+  afterEach(() => {
+    // why: tests below mutate FLY_APP_NAME via stubEnv; restore between cases.
+    vi.unstubAllEnvs();
+  });
+
+  const request = (headers: Record<string, string>) =>
+    new Request("http://localhost/qr/abc/self-custody", { headers });
+
+  it("applies the same trust rules as getClientIp, for route actions", async () => {
+    vi.stubEnv("FLY_APP_NAME", "");
+    const headers = {
+      "Fly-Client-IP": "6.6.6.6",
+      "X-Forwarded-For": "9.9.9.9, 10.0.0.5",
+    };
+    expect(getClientIpFromRequest(request(headers))).toBe(
+      await resolve(headers)
+    );
+    expect(getClientIpFromRequest(request(headers))).toBe("9.9.9.9");
+
+    vi.stubEnv("FLY_APP_NAME", "shelf-webapp");
+    expect(getClientIpFromRequest(request(headers))).toBe("6.6.6.6");
+    expect(getClientIpFromRequest(request({}))).toBe("unknown");
   });
 });

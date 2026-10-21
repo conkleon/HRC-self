@@ -560,7 +560,10 @@ export async function getUserOrganizations({ userId }: { userId: string }) {
 }
 
 /** A workspace-wide notification audience, named after its policy field. */
-export type NotificationAudience = "orgBookingBroadcasts" | "inventoryAlerts";
+export type NotificationAudience =
+  | "orgBookingBroadcasts"
+  | "inventoryAlerts"
+  | "selfCustodyAlerts";
 
 /**
  * The users of an organization who receive one kind of workspace-wide

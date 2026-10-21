@@ -26401,189 +26401,216 @@
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "ADMIN": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "MANAGER": {
       "orgBookingBroadcasts": true,
       "lowStock": false,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "SELF_SERVICE": {
       "orgBookingBroadcasts": false,
       "lowStock": false,
       "bookingNotifyPicker": false,
       "reminderPicker": false,
-      "modelFiltersRecipients": false
+      "modelFiltersRecipients": false,
+      "selfCustodyAlerts": false
     },
     "BASE": {
       "orgBookingBroadcasts": false,
       "lowStock": false,
       "bookingNotifyPicker": false,
       "reminderPicker": false,
-      "modelFiltersRecipients": false
+      "modelFiltersRecipients": false,
+      "selfCustodyAlerts": false
     },
     "OWNER+ADMIN": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "OWNER+MANAGER": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "OWNER+SELF_SERVICE": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "OWNER+BASE": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "ADMIN+OWNER": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "ADMIN+MANAGER": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "ADMIN+SELF_SERVICE": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "ADMIN+BASE": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "MANAGER+OWNER": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "MANAGER+ADMIN": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "MANAGER+SELF_SERVICE": {
       "orgBookingBroadcasts": true,
       "lowStock": false,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "MANAGER+BASE": {
       "orgBookingBroadcasts": true,
       "lowStock": false,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "SELF_SERVICE+OWNER": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "SELF_SERVICE+ADMIN": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "SELF_SERVICE+MANAGER": {
       "orgBookingBroadcasts": true,
       "lowStock": false,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "SELF_SERVICE+BASE": {
       "orgBookingBroadcasts": false,
       "lowStock": false,
       "bookingNotifyPicker": false,
       "reminderPicker": false,
-      "modelFiltersRecipients": false
+      "modelFiltersRecipients": false,
+      "selfCustodyAlerts": false
     },
     "BASE+OWNER": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "BASE+ADMIN": {
       "orgBookingBroadcasts": true,
       "lowStock": true,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "BASE+MANAGER": {
       "orgBookingBroadcasts": true,
       "lowStock": false,
       "bookingNotifyPicker": true,
       "reminderPicker": true,
-      "modelFiltersRecipients": true
+      "modelFiltersRecipients": true,
+      "selfCustodyAlerts": true
     },
     "BASE+SELF_SERVICE": {
       "orgBookingBroadcasts": false,
       "lowStock": false,
       "bookingNotifyPicker": false,
       "reminderPicker": false,
-      "modelFiltersRecipients": false
+      "modelFiltersRecipients": false,
+      "selfCustodyAlerts": false
     },
     "(none)": {
       "orgBookingBroadcasts": false,
       "lowStock": false,
       "bookingNotifyPicker": false,
       "reminderPicker": false,
-      "modelFiltersRecipients": false
+      "modelFiltersRecipients": false,
+      "selfCustodyAlerts": false
     },
     "UNKNOWN_ROLE": {
       "orgBookingBroadcasts": false,
       "lowStock": false,
       "bookingNotifyPicker": false,
       "reminderPicker": false,
-      "modelFiltersRecipients": false
+      "modelFiltersRecipients": false,
+      "selfCustodyAlerts": false
     }
   },
   "B9:D-47:manage-recipients": {

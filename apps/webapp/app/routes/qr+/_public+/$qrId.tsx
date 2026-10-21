@@ -12,6 +12,7 @@ import {
   updateScan,
   updateScanGeolocation,
 } from "~/modules/scan/service.server";
+import { isSelfCustodyEnabled } from "~/modules/self-custody/settings.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { setCookie } from "~/utils/cookies.server";
 import { makeShelfError, ShelfError } from "~/utils/error";
@@ -79,6 +80,17 @@ export async function loader({ context, request, params }: LoaderFunctionArgs) {
      *  - If so, continue
      */
     if (!context.isAuthenticated) {
+      /**
+       * A workspace with self-service custody lets volunteers without an
+       * account take or return the item; that page links staff to log in.
+       */
+      if (
+        qr.organizationId &&
+        (qr.assetId || qr.kitId) &&
+        (await isSelfCustodyEnabled(qr.organizationId))
+      ) {
+        return redirect(withScanId("self-custody"));
+      }
       return redirect(withScanId("not-logged-in", { redirectTo: `/qr/${id}` }));
     }
 

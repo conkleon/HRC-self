@@ -29,15 +29,31 @@ import type { Context } from "hono";
  * lock — deliberately out of scope.
  */
 export function getClientIp(c: Context): string {
+  return clientIpFrom((name) => c.req.header(name));
+}
+
+/**
+ * {@link getClientIp} for code that holds a `Request` rather than a Hono
+ * `Context`, such as a route loader or action. Same trust rules.
+ *
+ * @param request - The incoming request
+ * @returns The client IP, or `"unknown"`
+ */
+export function getClientIpFromRequest(request: Request): string {
+  return clientIpFrom((name) => request.headers.get(name) ?? undefined);
+}
+
+/** The trust rules documented on {@link getClientIp}, over any header reader. */
+function clientIpFrom(header: (name: string) => string | undefined): string {
   // On Fly the edge sets (and sanitizes) `Fly-Client-IP`; it is the only trusted
   // source there, and a client-supplied `X-Forwarded-For` is ignored.
   const onFly = Boolean(process.env.FLY_APP_NAME);
   if (onFly) {
-    return c.req.header("fly-client-ip")?.trim() || "unknown";
+    return header("fly-client-ip")?.trim() || "unknown";
   }
 
   // Off Fly, `Fly-Client-IP` would be client-spoofable, so it is NOT consulted.
   // Trust only the proxy-set leftmost `X-Forwarded-For` (self-host/local dev).
-  const forwarded = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwarded = header("x-forwarded-for")?.split(",")[0]?.trim();
   return forwarded || "unknown";
 }

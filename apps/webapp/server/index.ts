@@ -28,6 +28,7 @@ import {
   appLoaderRateLimit,
   calendarFeedRateLimit,
   mobileIpRateLimit,
+  selfCustodyRateLimit,
   sentryTunnelRateLimit,
 } from "./rate-limit";
 import { runWithRequestCache } from "./request-cache.server";
@@ -161,6 +162,15 @@ export default createHonoServer<ServerEnv>({
     server.use("/api/calendar/feed/*", calendarFeedRateLimit());
 
     /**
+     * Self-service custody rate limit. The page is public (in publicPaths):
+     * anyone holding a QR sticker can reach it. One limiter instance, so the
+     * document request and its single-fetch `.data` twin share the bucket.
+     */
+    const selfCustodyLimiter = selfCustodyRateLimit();
+    server.use("/qr/:qrId/self-custody", selfCustodyLimiter);
+    server.use("/qr/:qrId/self-custody.data", selfCustodyLimiter);
+
+    /**
      * Sentry tunnel bounds. The tunnel is public (below), so it is an anonymous
      * POST relay into our own Sentry project, bounded two ways before the
      * handler runs and before `session()` so an over-limit caller never costs a
@@ -279,6 +289,7 @@ export default createHonoServer<ServerEnv>({
           "/qr/:qrId",
           "/qr/:qrId/not-logged-in",
           "/qr/:qrId/contact-owner",
+          "/qr/:qrId/self-custody", // Volunteer take/return; workspace PIN, not a session
           "/api/mobile/*path", // Mobile companion app API (JWT auth, not cookie)
           // why: auth-bypassed. The iCal feed authenticates via a secret URL
           // token (calendar clients can't send cookies). Scoped to the feed
