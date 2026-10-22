@@ -133,6 +133,20 @@ function read(result: unknown) {
   return { status: r.init?.status ?? 200, body: r.data };
 }
 
+/** The Set-Cookie header of a `data(...)` result or a Response, if any. */
+function setCookieOf(result: unknown): string | null {
+  if (result instanceof Response) return result.headers.get("Set-Cookie");
+  const init = (result as { init?: { headers?: HeadersInit } }).init;
+  return init?.headers ? new Headers(init.headers).get("Set-Cookie") : null;
+}
+
+/** Joins the name=value parts of several Set-Cookie headers into one Cookie header. */
+const cookies = (...setCookies: (string | null)[]) =>
+  setCookies
+    .filter((c): c is string => Boolean(c))
+    .map((c) => c.split(";")[0])
+    .join("; ");
+
 /** Unlocks with the right PIN and returns the cookie a browser would send back. */
 async function unlock() {
   const response = (await action(
@@ -271,6 +285,48 @@ describe("GET /self-service/:token", () => {
       organizationId: "org-1",
       teamMemberId: "tm-1",
     });
+  });
+
+  it("remembers the volunteer, so the bare link opens their lists next time", async () => {
+    const unlockCookie = await unlock();
+    const chosen = await loader(args(get("?member=tm-1", unlockCookie)));
+    const remembered = setCookieOf(chosen);
+    expect(remembered).toMatch(/^__selfCustodyVolunteer=.*Max-Age=34560000/);
+
+    mockGetVolunteer.mockClear();
+    const reopened = await loader(
+      args(get("", cookies(unlockCookie, remembered)))
+    );
+
+    expect(read(reopened).body).toMatchObject({
+      view: "lists",
+      volunteer: maria,
+    });
+    // Re-checked as a volunteer of this workspace, and the lifetime renewed.
+    expect(mockGetVolunteer).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      teamMemberId: "tm-1",
+    });
+    expect(setCookieOf(reopened)).toMatch(/^__selfCustodyVolunteer=/);
+  });
+
+  it("forgets a remembered volunteer who is no longer a volunteer here", async () => {
+    const unlockCookie = await unlock();
+    const remembered = setCookieOf(
+      await loader(args(get("?member=tm-1", unlockCookie)))
+    );
+    mockGetVolunteer.mockResolvedValue(null);
+
+    const reopened = await loader(
+      args(get("", cookies(unlockCookie, remembered)))
+    );
+    expect(read(reopened).body).toMatchObject({ view: "identify" });
+
+    mockGetVolunteer.mockResolvedValue(maria);
+    const afterwards = await loader(
+      args(get("", cookies(unlockCookie, setCookieOf(reopened))))
+    );
+    expect(read(afterwards).body).toMatchObject({ view: "identify" });
   });
 
   it("reads the kind, location and category filters and the tab from the URL", async () => {
@@ -544,6 +600,29 @@ describe("POST /self-service/:token", () => {
     );
   });
 
+  it("forgets the remembered volunteer on Not you?, without the PIN", async () => {
+    const unlockCookie = await unlock();
+    const remembered = setCookieOf(
+      await loader(args(get("?member=tm-1", unlockCookie)))
+    );
+
+    const response = (await action(
+      args(
+        post(
+          { intent: "forget" },
+          { cookie: cookies(unlockCookie, remembered) }
+        )
+      )
+    )) as Response;
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe("/self-service/tok-1");
+    const forgotten = response.headers.get("Set-Cookie");
+    expect(
+      read(await loader(args(get("", cookies(unlockCookie, forgotten))))).body
+    ).toMatchObject({ view: "identify" });
+  });
+
   it("add-me finds or creates the volunteer and continues as them", async () => {
     const cookie = await unlock();
     mockFindOrCreate.mockResolvedValue({ ...maria, created: true });
@@ -559,6 +638,9 @@ describe("POST /self-service/:token", () => {
     expect(response.status).toBe(302);
     expect(response.headers.get("Location")).toBe(
       "/self-service/tok-1?member=tm-1"
+    );
+    expect(response.headers.get("Set-Cookie")).toMatch(
+      /^__selfCustodyVolunteer=/
     );
   });
 

@@ -7,7 +7,8 @@
  * token that admins can replace from Settings > Self-service.
  *
  * Steps: enter the workspace PIN, say who you are (find your name among the
- * workspace's NRMs, or add it), then take items and kits offered for
+ * workspace's NRMs, or add it; the phone remembers the choice until "Not
+ * you?"), then take items and kits offered for
  * self-service, or return what you hold. The offered list searches as you
  * type and filters by kind, location and category, all carried in the URL.
  * Only the volunteer's own items and kits can be returned here; returning
@@ -24,6 +25,7 @@
  * @see {@link file://./../../modules/self-custody/kit-custody.server.ts}
  * @see {@link file://./../../components/self-custody/browse-lists.tsx}
  */
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
@@ -32,7 +34,6 @@ import {
   redirect,
   useActionData,
   useLoaderData,
-  useLocation,
 } from "react-router";
 import { z } from "zod";
 
@@ -87,6 +88,11 @@ import {
   serializeUnlockCookie,
 } from "~/modules/self-custody/unlock-cookie.server";
 import {
+  getRememberedVolunteerId,
+  serializeForgottenVolunteer,
+  serializeRememberedVolunteer,
+} from "~/modules/self-custody/volunteer-cookie.server";
+import {
   findOrCreateVolunteer,
   getVolunteer,
   searchVolunteers,
@@ -111,7 +117,7 @@ export const meta = () => [{ title: appendToMetaTitle("Self-service") }];
 const ParamsSchema = z.object({ token: z.string() });
 
 const IntentSchema = z.object({
-  intent: z.enum(["unlock", "search", "add-me", "take", "return"]),
+  intent: z.enum(["unlock", "search", "add-me", "forget", "take", "return"]),
 });
 
 const NewVolunteerSchema = z.object({ name: VolunteerNameSchema });
@@ -169,21 +175,47 @@ function refuse(
   });
 }
 
-/** Decides what an unlocked phone sees, from the URL's member, q and page. */
+/**
+ * Decides what an unlocked phone sees, from the URL's member, q and page, and
+ * how the remembered-volunteer cookie changes. The volunteer is `?member=`,
+ * or else the one this phone remembers; either way they must be a live NRM
+ * of the workspace. A valid volunteer is (re-)remembered, which renews the
+ * cookie's lifetime; a remembered one who no longer qualifies is forgotten.
+ */
 async function unlockedView(
   organization: SelfCustodyBrowseOrganization,
-  url: URL
-): Promise<BrowseView> {
-  if (!organization.selfCustodyTagId) return { view: "no-items" };
+  request: Request
+): Promise<{ view: BrowseView; setCookie: string | null }> {
+  if (!organization.selfCustodyTagId) {
+    return { view: { view: "no-items" }, setCookie: null };
+  }
 
-  const memberId = url.searchParams.get("member");
+  const url = new URL(request.url);
+  const remembered = await getRememberedVolunteerId(request, organization.id);
+  const memberId = url.searchParams.get("member") ?? remembered;
   const volunteer = memberId
     ? await getVolunteer({
         organizationId: organization.id,
         teamMemberId: memberId,
       })
     : null;
-  if (!volunteer) return { view: "identify" };
+  if (!volunteer) {
+    const stale = memberId !== null && memberId === remembered;
+    return {
+      view: { view: "identify" },
+      setCookie: stale
+        ? await serializeForgottenVolunteer({
+            request,
+            organizationId: organization.id,
+          })
+        : null,
+    };
+  }
+  const setCookie = await serializeRememberedVolunteer({
+    request,
+    organizationId: organization.id,
+    teamMemberId: volunteer.id,
+  });
 
   const tab: BrowseTab =
     url.searchParams.get("tab") === "mine" ? "mine" : "take";
@@ -204,13 +236,16 @@ async function unlockedView(
     listBrowseFilterOptions(scope),
   ]);
   return {
-    view: "lists",
-    volunteer,
-    tab,
-    myItems,
-    list,
-    filters,
-    filterOptions,
+    view: {
+      view: "lists",
+      volunteer,
+      tab,
+      myItems,
+      list,
+      filters,
+      filterOptions,
+    },
+    setCookie,
   };
 }
 
@@ -229,8 +264,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         payload<BrowseView & typeof base>({ ...base, view: "locked" })
       );
     }
-    const view = await unlockedView(organization, new URL(request.url));
-    return data(payload<BrowseView & typeof base>({ ...base, ...view }));
+    const { view, setCookie } = await unlockedView(organization, request);
+    return data(payload<BrowseView & typeof base>({ ...base, ...view }), {
+      headers: setCookie ? { "Set-Cookie": setCookie } : undefined,
+    });
   } catch (cause) {
     // The token is a secret; it stays out of logs and Sentry.
     const reason = makeShelfError(cause);
@@ -260,6 +297,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return await unlock(request, formData, organization);
     }
 
+    // "Not you?": forget who this phone acts for, back to choosing a name.
+    // Needs no unlock: it only clears this phone's own cookie.
+    if (intent === "forget") {
+      return redirect(new URL(request.url).pathname, {
+        headers: {
+          "Set-Cookie": await serializeForgottenVolunteer({
+            request,
+            organizationId: organization.id,
+          }),
+        },
+      });
+    }
+
     if (!(await isUnlocked(request, organization))) {
       throw refuse(401, "Please enter the workspace PIN first.", context);
     }
@@ -287,7 +337,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
       const url = new URL(request.url);
       return redirect(
-        `${url.pathname}?${new URLSearchParams({ member: volunteer.id })}`
+        `${url.pathname}?${new URLSearchParams({ member: volunteer.id })}`,
+        {
+          headers: {
+            "Set-Cookie": await serializeRememberedVolunteer({
+              request,
+              organizationId: organization.id,
+              teamMemberId: volunteer.id,
+            }),
+          },
+        }
       );
     }
 
@@ -402,31 +461,58 @@ export const ErrorBoundary = () => <ErrorContent />;
  * Logo and a centred column, matching the scan page's public layout. The
  * lists use a wider column that starts at the top, so a long list does not
  * open scrolled to its middle and a tablet uses its width.
+ *
+ * The root layout sets `overflow-hidden` on `<html>`, so the window never
+ * scrolls: the Shell is the page's scroll container (`h-dvh`, which follows
+ * the mobile browser bar). Because it is not the window, React Router's scroll
+ * restoration does not reach it, so it returns to the top itself whenever
+ * `scrollKey` or `resetOn` changes.
+ *
+ * @param props.wide - The wider, top-aligned column for the lists
+ * @param props.scrollKey - Which view is shown (tab, page); a new one starts at the top
+ * @param props.resetOn - The latest action result, whose notice sits at the top
  */
-function Shell({ children, wide }: { children: ReactNode; wide: boolean }) {
+function Shell({
+  children,
+  wide,
+  scrollKey,
+  resetOn,
+}: {
+  children: ReactNode;
+  wide: boolean;
+  scrollKey: string;
+  resetOn: unknown;
+}) {
+  const scroller = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+  }, [scrollKey, resetOn]);
+
   return (
-    <div className="container h-full min-h-screen px-4 py-6 sm:py-12">
-      <div
-        className={tw(
-          "flex h-full flex-col text-center",
-          wide ? "justify-start" : "justify-center"
-        )}
-      >
-        <Link
-          to="/"
-          title="Home"
-          className="logo mx-auto inline-block h-[32px]"
-          reloadDocument
-        >
-          <ShelfFullLogo className="h-full" />
-        </Link>
+    <div ref={scroller} className="h-dvh overflow-y-auto overscroll-contain">
+      <div className="container flex min-h-full flex-col px-4 py-6 sm:py-12">
         <div
           className={tw(
-            "mx-auto w-full py-6 sm:py-8",
-            wide ? "max-w-2xl" : "max-w-md"
+            "flex flex-1 flex-col text-center",
+            wide ? "justify-start" : "justify-center"
           )}
         >
-          {children}
+          <Link
+            to="/"
+            title="Home"
+            className="logo mx-auto inline-block h-[32px]"
+            reloadDocument
+          >
+            <ShelfFullLogo className="h-full" />
+          </Link>
+          <div
+            className={tw(
+              "mx-auto w-full py-6 sm:py-8",
+              wide ? "max-w-2xl" : "max-w-md"
+            )}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>
@@ -435,7 +521,6 @@ function Shell({ children, wide }: { children: ReactNode; wide: boolean }) {
 
 export default function SelfServiceBrowsePage() {
   const loaderData = useLoaderData<typeof loader>();
-  const { pathname } = useLocation();
   const actionData = useActionData<
     DataOrErrorResponse & {
       done?: {
@@ -452,7 +537,15 @@ export default function SelfServiceBrowsePage() {
       ?.message ?? null;
 
   return (
-    <Shell wide={loaderData.view === "lists"}>
+    <Shell
+      wide={loaderData.view === "lists"}
+      scrollKey={
+        loaderData.view === "lists"
+          ? `${loaderData.tab}-${loaderData.list.page}`
+          : loaderData.view
+      }
+      resetOn={actionData}
+    >
       <h1 className="mb-1 text-[24px] font-semibold">Take or return items</h1>
       <p className="mb-6 text-gray-600">{loaderData.workspaceName}</p>
 
@@ -479,7 +572,7 @@ export default function SelfServiceBrowsePage() {
         </>
       ) : (
         <>
-          <VolunteerBar name={loaderData.volunteer.name} switchTo={pathname} />
+          <VolunteerBar name={loaderData.volunteer.name} />
           {actionData?.done ? (
             <div className="mb-6">
               <DoneNotice {...actionData.done} />

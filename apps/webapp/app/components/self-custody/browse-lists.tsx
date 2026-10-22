@@ -117,26 +117,24 @@ function listSearch({
 }
 
 /**
- * Names the volunteer the page acts for, with a way to switch.
+ * Names the volunteer the page acts for. The phone remembers them; "Not you?"
+ * posts intent `forget`, which clears that and goes back to choosing a name.
  *
  * @param props.name - The chosen volunteer
- * @param props.switchTo - The page without a chosen volunteer
  */
-export function VolunteerBar({
-  name,
-  switchTo,
-}: {
-  name: string;
-  switchTo: string;
-}) {
+export function VolunteerBar({ name }: { name: string }) {
+  const disabled = useDisabled();
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-left">
       <p className="min-w-0 break-words text-gray-700">
         You are <strong>{name}</strong>
       </p>
-      <Button variant="link" to={switchTo}>
-        Not you?
-      </Button>
+      <Form method="post">
+        <input type="hidden" name="intent" value="forget" />
+        <Button type="submit" variant="link" disabled={disabled}>
+          Not you?
+        </Button>
+      </Form>
     </div>
   );
 }

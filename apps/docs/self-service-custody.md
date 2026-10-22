@@ -33,7 +33,13 @@ can pick items from a list instead of scanning.
    the depot.
 2. They enter the workspace PIN (the same unlock as the scan page: a phone
    unlocked on one is unlocked on the other).
-3. They say who they are: find their name, or add it.
+3. They say who they are: find their name, or add it. The phone remembers
+   them for this workspace, so opening the link again goes straight to their
+   lists until they press **Not you?**. The memory is a signed cookie renewed
+   on every visit (browsers cap a cookie at 400 days, so it lasts as long as
+   the phone uses the page at least once in that time), and the name is
+   re-checked against the workspace's NRMs on every request; a deleted NRM is
+   forgotten. The PIN unlock is separate and still lasts 12 hours.
 4. They see two tabs, each showing how many entries it holds:
    - **Available:** kits and items offered for self-service, kits first, 20
      per page. Each has **Take**. The list updates as they type in the search
