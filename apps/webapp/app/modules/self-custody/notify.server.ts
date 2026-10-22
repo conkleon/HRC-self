@@ -22,16 +22,18 @@ import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
 import { resolveUserGreetingName } from "~/utils/user";
 
-/** One self-service take or return to report. */
+/**
+ * One self-service take or return to report, of a single item (`assetId`) or
+ * a kit (`kitId`). `assetTitle` names whichever it was.
+ */
 type SelfCustodyAlert = {
   organizationId: string;
   workspaceName: string;
   kind: SelfCustodyAlertProps["kind"];
-  assetId: string;
   assetTitle: string;
   volunteerName: string;
   source: NonNullable<SelfCustodyAlertProps["source"]>;
-};
+} & ({ assetId: string; kitId?: never } | { kitId: string; assetId?: never });
 
 /**
  * Emails the workspace's self-service audience about a take or return.
@@ -48,7 +50,9 @@ export async function sendSelfCustodyAlert(
       audience: "selfCustodyAlerts",
     });
 
-    const assetUrl = `${SERVER_URL}/assets/${alert.assetId}`;
+    const assetUrl = alert.kitId
+      ? `${SERVER_URL}/kits/${alert.kitId}`
+      : `${SERVER_URL}/assets/${alert.assetId}`;
 
     for (const recipient of recipients) {
       const props: SelfCustodyAlertProps = {
@@ -76,6 +80,7 @@ export async function sendSelfCustodyAlert(
         additionalData: {
           organizationId: alert.organizationId,
           assetId: alert.assetId,
+          kitId: alert.kitId,
           kind: alert.kind,
         },
         label: "Custody",

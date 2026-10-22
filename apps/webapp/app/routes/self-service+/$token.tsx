@@ -7,9 +7,11 @@
  * token that admins can replace from Settings > Self-service.
  *
  * Steps: enter the workspace PIN, say who you are (find your name among the
- * workspace's NRMs, or add it), then take items tagged for self-service that
- * are available, or return items you hold. Only the volunteer's own items can
- * be returned here; returning someone else's still needs the item's QR code.
+ * workspace's NRMs, or add it), then take items and kits offered for
+ * self-service, or return what you hold. The offered list searches as you
+ * type and filters by kind, location and category, all carried in the URL.
+ * Only the volunteer's own items and kits can be returned here; returning
+ * someone else's still needs the item's QR code or a staff member.
  *
  * Everything is decided on the server, per request: the workspace comes from
  * the token (never from the form), self-service must still be on, the phone
@@ -19,6 +21,7 @@
  *
  * @see {@link file://./../../modules/self-custody/browse.server.ts}
  * @see {@link file://./../../modules/self-custody/custody.server.ts}
+ * @see {@link file://./../../modules/self-custody/kit-custody.server.ts}
  * @see {@link file://./../../components/self-custody/browse-lists.tsx}
  */
 import type { ReactNode } from "react";
@@ -37,13 +40,16 @@ import { getClientIpFromRequest } from "@server/client-ip";
 import { ErrorContent } from "~/components/errors";
 import { ShelfFullLogo } from "~/components/marketing/logos";
 import {
+  ListTabs,
   MyItems,
   OfferedItems,
   VolunteerBar,
 } from "~/components/self-custody/browse-lists";
 import type {
+  BrowseFilterOptions,
   BrowseItem,
   BrowseItemsPage,
+  BrowseTab,
 } from "~/components/self-custody/browse-lists";
 import {
   DoneNotice,
@@ -53,14 +59,22 @@ import {
 } from "~/components/self-custody/self-custody-steps";
 import {
   getBrowseWorkspace,
+  listBrowseFilterOptions,
   listOfferedItems,
   listVolunteerItems,
 } from "~/modules/self-custody/browse.server";
-import type { SelfCustodyBrowseOrganization } from "~/modules/self-custody/browse.server";
+import type {
+  BrowseFilters,
+  SelfCustodyBrowseOrganization,
+} from "~/modules/self-custody/browse.server";
 import {
   selfReturnCustody,
   selfTakeCustody,
 } from "~/modules/self-custody/custody.server";
+import {
+  selfReturnKitCustody,
+  selfTakeKitCustody,
+} from "~/modules/self-custody/kit-custody.server";
 import {
   checkLockout,
   clearFailedPins,
@@ -90,6 +104,7 @@ import {
   parseData,
   payload,
 } from "~/utils/http.server";
+import { tw } from "~/utils/tw";
 
 export const meta = () => [{ title: appendToMetaTitle("Self-service") }];
 
@@ -101,10 +116,11 @@ const IntentSchema = z.object({
 
 const NewVolunteerSchema = z.object({ name: VolunteerNameSchema });
 
-const ItemActionSchema = z.object({
-  assetId: z.string().min(1),
-  teamMemberId: z.string().min(1),
-});
+/** Take or return names one target: a kit, or else a single item. */
+const ItemActionSchema = z.union([
+  z.object({ kitId: z.string().min(1), teamMemberId: z.string().min(1) }),
+  z.object({ assetId: z.string().min(1), teamMemberId: z.string().min(1) }),
+]);
 
 /** Longest search the list accepts; anything longer is cut, not refused. */
 const MAX_QUERY_LENGTH = 100;
@@ -118,10 +134,23 @@ type BrowseView =
   | {
       view: "lists";
       volunteer: Volunteer;
+      tab: BrowseTab;
       myItems: BrowseItem[];
       list: BrowseItemsPage;
-      query: string;
+      filters: BrowseFilters;
+      filterOptions: BrowseFilterOptions;
     };
+
+/** Reads the list's filters from the URL; unknown values fall back to "any". */
+function filtersFrom(url: URL): BrowseFilters {
+  const kind = url.searchParams.get("kind");
+  return {
+    query: (url.searchParams.get("q") ?? "").trim().slice(0, MAX_QUERY_LENGTH),
+    kind: kind === "item" || kind === "kit" ? kind : "all",
+    locationId: url.searchParams.get("location") || null,
+    categoryId: url.searchParams.get("category") || null,
+  };
+}
 
 /** A refusal with a fixed status and message, never sent to Sentry. */
 function refuse(
@@ -156,24 +185,33 @@ async function unlockedView(
     : null;
   if (!volunteer) return { view: "identify" };
 
-  const query = (url.searchParams.get("q") ?? "")
-    .trim()
-    .slice(0, MAX_QUERY_LENGTH);
+  const tab: BrowseTab =
+    url.searchParams.get("tab") === "mine" ? "mine" : "take";
+  const filters = filtersFrom(url);
   const page = Number(url.searchParams.get("page") ?? "1");
+  const scope = {
+    organizationId: organization.id,
+    tagId: organization.selfCustodyTagId,
+  };
 
-  const [myItems, list] = await Promise.all([
+  // Both tabs show both counts, so both lists load whichever tab is open.
+  const [myItems, list, filterOptions] = await Promise.all([
     listVolunteerItems({
       organizationId: organization.id,
       teamMemberId: volunteer.id,
     }),
-    listOfferedItems({
-      organizationId: organization.id,
-      tagId: organization.selfCustodyTagId,
-      query,
-      page,
-    }),
+    listOfferedItems({ ...scope, filters, page }),
+    listBrowseFilterOptions(scope),
   ]);
-  return { view: "lists", volunteer, myItems, list, query };
+  return {
+    view: "lists",
+    volunteer,
+    tab,
+    myItems,
+    list,
+    filters,
+    filterOptions,
+  };
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -253,7 +291,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
       );
     }
 
-    const { assetId, teamMemberId } = parseData(formData, ItemActionSchema);
+    const target = parseData(formData, ItemActionSchema);
+    const { teamMemberId } = target;
     // The volunteer must be an NRM of this workspace, as on the loader.
     const volunteer = await getVolunteer({
       organizationId: organization.id,
@@ -263,18 +302,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
       throw refuse(400, "Please choose your name again.", context);
     }
 
-    const target = {
+    const workspace = {
       organizationId: organization.id,
       workspaceName: organization.name,
-      assetId,
-      source: "list" as const,
     };
 
     if (intent === "return") {
-      const result = await selfReturnCustody({
-        ...target,
-        holderTeamMemberId: volunteer.id,
-      });
+      const result =
+        "kitId" in target
+          ? await selfReturnKitCustody({
+              ...workspace,
+              kitId: target.kitId,
+              holderTeamMemberId: volunteer.id,
+            })
+          : await selfReturnCustody({
+              ...workspace,
+              assetId: target.assetId,
+              source: "list",
+              holderTeamMemberId: volunteer.id,
+            });
       return data(payload({ done: { kind: "returned" as const, ...result } }));
     }
 
@@ -285,11 +331,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
         context
       );
     }
-    const result = await selfTakeCustody({
-      ...target,
-      teamMemberId: volunteer.id,
-      requiredTagId: organization.selfCustodyTagId,
-    });
+    const result =
+      "kitId" in target
+        ? await selfTakeKitCustody({
+            ...workspace,
+            kitId: target.kitId,
+            teamMemberId: volunteer.id,
+            requiredTagId: organization.selfCustodyTagId,
+          })
+        : await selfTakeCustody({
+            ...workspace,
+            assetId: target.assetId,
+            source: "list",
+            teamMemberId: volunteer.id,
+            requiredTagId: organization.selfCustodyTagId,
+          });
     return data(payload({ done: { kind: "taken" as const, ...result } }));
   } catch (cause) {
     const reason = makeShelfError(cause);
@@ -342,11 +398,20 @@ async function unlock(
 
 export const ErrorBoundary = () => <ErrorContent />;
 
-/** Logo and a narrow column, matching the scan page's public layout. */
-function Shell({ children }: { children: ReactNode }) {
+/**
+ * Logo and a centred column, matching the scan page's public layout. The
+ * lists use a wider column that starts at the top, so a long list does not
+ * open scrolled to its middle and a tablet uses its width.
+ */
+function Shell({ children, wide }: { children: ReactNode; wide: boolean }) {
   return (
-    <div className="container h-full min-h-screen px-4 py-12">
-      <div className="flex h-full flex-col justify-center text-center">
+    <div className="container h-full min-h-screen px-4 py-6 sm:py-12">
+      <div
+        className={tw(
+          "flex h-full flex-col text-center",
+          wide ? "justify-start" : "justify-center"
+        )}
+      >
         <Link
           to="/"
           title="Home"
@@ -355,7 +420,14 @@ function Shell({ children }: { children: ReactNode }) {
         >
           <ShelfFullLogo className="h-full" />
         </Link>
-        <div className="mx-auto w-full max-w-md py-8">{children}</div>
+        <div
+          className={tw(
+            "mx-auto w-full py-6 sm:py-8",
+            wide ? "max-w-2xl" : "max-w-md"
+          )}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -380,7 +452,7 @@ export default function SelfServiceBrowsePage() {
       ?.message ?? null;
 
   return (
-    <Shell>
+    <Shell wide={loaderData.view === "lists"}>
       <h1 className="mb-1 text-[24px] font-semibold">Take or return items</h1>
       <p className="mb-6 text-gray-600">{loaderData.workspaceName}</p>
 
@@ -415,15 +487,26 @@ export default function SelfServiceBrowsePage() {
           ) : (
             <FormError error={errorMessage} />
           )}
-          <MyItems
-            items={loaderData.myItems}
+          <ListTabs
             memberId={loaderData.volunteer.id}
+            tab={loaderData.tab}
+            filters={loaderData.filters}
+            offeredCount={loaderData.list.totalCount}
+            mineCount={loaderData.myItems.length}
           />
-          <OfferedItems
-            list={loaderData.list}
-            query={loaderData.query}
-            memberId={loaderData.volunteer.id}
-          />
+          {loaderData.tab === "mine" ? (
+            <MyItems
+              items={loaderData.myItems}
+              memberId={loaderData.volunteer.id}
+            />
+          ) : (
+            <OfferedItems
+              list={loaderData.list}
+              filters={loaderData.filters}
+              options={loaderData.filterOptions}
+              memberId={loaderData.volunteer.id}
+            />
+          )}
         </>
       )}
     </Shell>

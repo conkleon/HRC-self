@@ -13,8 +13,11 @@ const {
   mockGetWorkspace,
   mockOffered,
   mockMine,
+  mockFilterOptions,
   mockTake,
   mockReturn,
+  mockTakeKit,
+  mockReturnKit,
   mockSearch,
   mockFindOrCreate,
   mockGetVolunteer,
@@ -22,8 +25,11 @@ const {
   mockGetWorkspace: vi.fn(),
   mockOffered: vi.fn(),
   mockMine: vi.fn(),
+  mockFilterOptions: vi.fn(),
   mockTake: vi.fn(),
   mockReturn: vi.fn(),
+  mockTakeKit: vi.fn(),
+  mockReturnKit: vi.fn(),
   mockSearch: vi.fn(),
   mockFindOrCreate: vi.fn(),
   mockGetVolunteer: vi.fn(),
@@ -34,12 +40,19 @@ vi.mock("~/modules/self-custody/browse.server", () => ({
   getBrowseWorkspace: mockGetWorkspace,
   listOfferedItems: mockOffered,
   listVolunteerItems: mockMine,
+  listBrowseFilterOptions: mockFilterOptions,
 }));
 
 // why: take and return write the database; covered by custody.server.test.ts
 vi.mock("~/modules/self-custody/custody.server", () => ({
   selfTakeCustody: mockTake,
   selfReturnCustody: mockReturn,
+}));
+
+// why: kit take and return write the database; covered by kit-custody.server.test.ts
+vi.mock("~/modules/self-custody/kit-custody.server", () => ({
+  selfTakeKitCustody: mockTakeKit,
+  selfReturnKitCustody: mockReturnKit,
 }));
 
 // why: lookups read the database; the name schema stays real
@@ -75,10 +88,16 @@ const organization = (overrides: Record<string, unknown> = {}) => ({
 
 const maria = { id: "tm-1", name: "Maria P." };
 const radio = {
+  kind: "item",
   id: "asset-1",
   title: "Radio #12",
-  thumbnailImage: null,
   locationName: "Warehouse A",
+  categoryName: null,
+  itemCount: null,
+};
+const filterOptions = {
+  locations: [{ id: "loc-1", name: "Warehouse A" }],
+  categories: [],
 };
 const offeredPage = { items: [radio], page: 1, totalPages: 1, totalCount: 1 };
 
@@ -131,6 +150,15 @@ beforeEach(async () => {
   mockGetVolunteer.mockResolvedValue(maria);
   mockOffered.mockResolvedValue(offeredPage);
   mockMine.mockResolvedValue([]);
+  mockFilterOptions.mockResolvedValue(filterOptions);
+  mockTakeKit.mockResolvedValue({
+    assetTitle: "Trauma kit",
+    volunteerName: "Maria P.",
+  });
+  mockReturnKit.mockResolvedValue({
+    assetTitle: "Trauma kit",
+    volunteerName: "Maria P.",
+  });
   mockTake.mockResolvedValue({
     assetTitle: "Radio #12",
     volunteerName: "Maria P.",
@@ -213,20 +241,73 @@ describe("GET /self-service/:token", () => {
     expect(body).toMatchObject({
       view: "lists",
       volunteer: maria,
-      query: "radio",
+      tab: "take",
+      filters: {
+        query: "radio",
+        kind: "all",
+        locationId: null,
+        categoryId: null,
+      },
       list: offeredPage,
+      filterOptions,
       myItems: [{ id: "asset-9", title: "Torch" }],
     });
     expect(mockOffered).toHaveBeenCalledWith({
       organizationId: "org-1",
       tagId: "tag-ss",
-      query: "radio",
+      filters: {
+        query: "radio",
+        kind: "all",
+        locationId: null,
+        categoryId: null,
+      },
       page: 2,
+    });
+    expect(mockFilterOptions).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      tagId: "tag-ss",
     });
     expect(mockMine).toHaveBeenCalledWith({
       organizationId: "org-1",
       teamMemberId: "tm-1",
     });
+  });
+
+  it("reads the kind, location and category filters and the tab from the URL", async () => {
+    const cookie = await unlock();
+
+    const { body } = read(
+      await loader(
+        args(
+          get(
+            "?member=tm-1&tab=mine&kind=kit&location=loc-1&category=cat-1",
+            cookie
+          )
+        )
+      )
+    );
+
+    expect(body).toMatchObject({ tab: "mine" });
+    expect(mockOffered).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: {
+          query: "",
+          kind: "kit",
+          locationId: "loc-1",
+          categoryId: "cat-1",
+        },
+      })
+    );
+  });
+
+  it("treats an unknown kind or tab as the default", async () => {
+    const cookie = await unlock();
+
+    const { body } = read(
+      await loader(args(get("?member=tm-1&tab=other&kind=boats", cookie)))
+    );
+
+    expect(body).toMatchObject({ tab: "take", filters: { kind: "all" } });
   });
 });
 
@@ -310,6 +391,70 @@ describe("POST /self-service/:token", () => {
       requiredTagId: "tag-ss",
       source: "list",
     });
+  });
+
+  it("takes an offered kit for the volunteer when the form names a kit", async () => {
+    const cookie = await unlock();
+    const { status, body } = read(
+      await action(
+        args(
+          post(
+            { intent: "take", kitId: "kit-1", teamMemberId: "tm-1" },
+            { cookie }
+          )
+        )
+      )
+    );
+
+    expect(status).toBe(200);
+    expect(body?.done).toEqual({
+      kind: "taken",
+      assetTitle: "Trauma kit",
+      volunteerName: "Maria P.",
+    });
+    expect(mockTakeKit).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      kitId: "kit-1",
+      teamMemberId: "tm-1",
+      requiredTagId: "tag-ss",
+    });
+    expect(mockTake).not.toHaveBeenCalled();
+  });
+
+  it("returns a kit only as the volunteer's own", async () => {
+    const cookie = await unlock();
+    const { body } = read(
+      await action(
+        args(
+          post(
+            { intent: "return", kitId: "kit-1", teamMemberId: "tm-1" },
+            { cookie }
+          )
+        )
+      )
+    );
+
+    expect(body?.done).toMatchObject({ kind: "returned" });
+    expect(mockReturnKit).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      kitId: "kit-1",
+      holderTeamMemberId: "tm-1",
+    });
+    expect(mockReturn).not.toHaveBeenCalled();
+  });
+
+  it("refuses a take that names neither an item nor a kit", async () => {
+    const cookie = await unlock();
+    const { status } = read(
+      await action(
+        args(post({ intent: "take", teamMemberId: "tm-1" }, { cookie }))
+      )
+    );
+    expect(status).toBe(400);
+    expect(mockTake).not.toHaveBeenCalled();
+    expect(mockTakeKit).not.toHaveBeenCalled();
   });
 
   it("refuses take for a team member who is not a volunteer of this workspace", async () => {

@@ -2,20 +2,22 @@
  * Self-Service Custody
  *
  * What a volunteer's scan shows, and taking or returning an item without an
- * account, from a QR scan or from the workspace's browse list. The volunteer is a team member of the workspace (normally an NRM),
- * so custody, notes, activity events and reports look exactly like custody a
+ * account, from a QR scan or from the workspace's browse list. The volunteer
+ * is a team member of the workspace (normally an NRM), so custody, notes, activity events and reports look exactly like custody a
  * staff member assigned. Records carry no actor user; the activity event is
  * marked `meta.via = "self-service"` and names the volunteer through
  * `teamMemberId`.
  *
- * Version 1 covers INDIVIDUAL assets only. Kits, kit members, kit-held custody,
+ * This module covers INDIVIDUAL assets. Kit members, kit-held custody,
  * quantity-tracked, archived and checked-out assets are referred to staff.
  * The same kit guards as the staff custody routes run inside the transaction,
- * so the two paths cannot disagree about what may be taken.
+ * so the two paths cannot disagree about what may be taken. Whole kits are
+ * taken and returned from the browse list through `kit-custody.server.ts`.
  *
  * @see {@link file://./../../routes/_layout+/assets.$assetId.overview.assign-custody.tsx}
  * @see {@link file://./../../routes/qr+/_public+/$qrId_.self-custody.tsx}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
+ * @see {@link file://./kit-custody.server.ts}
  */
 import { AssetStatus, AssetType } from "@prisma/client";
 
@@ -71,12 +73,14 @@ export type SelfCustodyOrganization = {
 
 const NAME_FIELDS = { firstName: true, lastName: true, displayName: true };
 
-const CUSTODIAN_SELECT = {
+/** The team member fields `resolveTeamMemberName` reads. */
+export const CUSTODIAN_SELECT = {
   name: true,
   user: { select: NAME_FIELDS },
 } as const;
 
-const STAFF_MESSAGE =
+/** The refusal for anything self-service cannot handle. */
+export const STAFF_MESSAGE =
   "This item can't be handled here. Please ask a staff member.";
 
 /**
@@ -222,10 +226,10 @@ type SelfCustodyActionArgs = {
 };
 
 /** Result of a take or return, for the confirmation screen. */
-type SelfCustodyResult = { assetTitle: string; volunteerName: string };
+export type SelfCustodyResult = { assetTitle: string; volunteerName: string };
 
 /** How the note phrases the channel, after "took custody" / "returned the item". */
-const NOTE_CHANNEL: Record<SelfCustodySource, string> = {
+export const NOTE_CHANNEL: Record<SelfCustodySource, string> = {
   scan: "via self-service scan",
   list: "from the self-service list",
 };
@@ -234,7 +238,7 @@ const NOTE_CHANNEL: Record<SelfCustodySource, string> = {
  * Activity event meta. Every self-service event carries `via`; list actions
  * add `source` so reports can tell them from scans.
  */
-const eventMeta = (source: SelfCustodySource) =>
+export const eventMeta = (source: SelfCustodySource) =>
   source === "list"
     ? { via: "self-service", source: "list" }
     : { via: "self-service" };

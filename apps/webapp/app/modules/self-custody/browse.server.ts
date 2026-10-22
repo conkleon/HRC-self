@@ -3,29 +3,30 @@
  *
  * Reads for the workspace's public browse page (`/self-service/:token`), where
  * a volunteer picks equipment from a list instead of scanning its QR code:
- * the workspace behind a browse link, the items offered for self-service, and
- * the items the volunteer already holds.
+ * the workspace behind a browse link, the items and kits offered for
+ * self-service, the filter choices for that list, and what the volunteer
+ * already holds.
  *
  * Offered items are the ones an admin marked with the workspace's
  * self-service tag that are free to take right now: available, active,
- * individual assets outside any kit. Taking re-checks all of this inside the
- * claim (`selfTakeCustody` with `requiredTagId`), so the list is a view, not
- * the gate.
+ * individual assets outside any kit. Kits cannot carry tags, so a kit is
+ * offered when every active item in it carries the tag, the kit is available
+ * and nobody holds it, and none of its individual items is out. Taking
+ * re-checks all of this inside the claim (`selfTakeCustody` with
+ * `requiredTagId`, `selfTakeKitCustody`), so the list is a view, not the gate.
  *
  * @see {@link file://./custody.server.ts}
+ * @see {@link file://./kit-custody.server.ts}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
 import type { Prisma } from "@prisma/client";
-import { AssetStatus, AssetType } from "@prisma/client";
+import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 
 import { db } from "~/database/db.server";
 import { ShelfError } from "~/utils/error";
-import type {
-  SelfCustodyAsset,
-  SelfCustodyOrganization,
-} from "./custody.server";
+import type { SelfCustodyOrganization } from "./custody.server";
 
-/** Items per page of the browse list. */
+/** Entries per page of the browse list. */
 export const BROWSE_PAGE_SIZE = 20;
 
 /** The workspace behind a browse link, with the tag that marks offered items. */
@@ -33,19 +34,47 @@ export type SelfCustodyBrowseOrganization = SelfCustodyOrganization & {
   selfCustodyTagId: string | null;
 };
 
-/** One page of offered items. */
+/** Which entries the list shows: both, single items only, or kits only. */
+type BrowseKind = "all" | "item" | "kit";
+
+/** The volunteer's narrowing of the offered list. */
+export type BrowseFilters = {
+  /** Name search, empty for all. */
+  query: string;
+  kind: BrowseKind;
+  /** Only entries stored at this location, or null for any. */
+  locationId: string | null;
+  /** Only entries in this category, or null for any. */
+  categoryId: string | null;
+};
+
+/** One row of either list: a single item or a kit. */
+type BrowseEntry = {
+  kind: "item" | "kit";
+  id: string;
+  title: string;
+  locationName: string | null;
+  categoryName: string | null;
+  /** Active items in the kit; null for a single item. */
+  itemCount: number | null;
+};
+
+/** One page of offered entries: kits first, then single items, each by name. */
 type BrowsePage = {
-  items: SelfCustodyAsset[];
+  items: BrowseEntry[];
   page: number;
   totalPages: number;
   totalCount: number;
 };
 
+/** A location or category the volunteer can filter by. */
+type FilterOption = { id: string; name: string };
+
 /** The asset fields an item row shows, shared by both lists. */
-const ITEM_SELECT = {
+const ASSET_ENTRY_SELECT = {
   id: true,
   title: true,
-  thumbnailImage: true,
+  category: { select: { name: true } },
   assetLocations: {
     where: { assetKitId: null },
     select: { location: { select: { name: true } } },
@@ -53,18 +82,49 @@ const ITEM_SELECT = {
   },
 } satisfies Prisma.AssetSelect;
 
+/** The kit fields a kit row shows, shared by both lists. */
+const KIT_ENTRY_SELECT = {
+  id: true,
+  name: true,
+  category: { select: { name: true } },
+  location: { select: { name: true } },
+  _count: {
+    select: { assetKits: { where: { asset: { archivedAt: null } } } },
+  },
+} satisfies Prisma.KitSelect;
+
 /** Maps a selected asset to the row the page renders. */
-function toItem(asset: {
+function assetEntry(asset: {
   id: string;
   title: string;
-  thumbnailImage: string | null;
+  category: { name: string } | null;
   assetLocations: { location: { name: string } }[];
-}): SelfCustodyAsset {
+}): BrowseEntry {
   return {
+    kind: "item",
     id: asset.id,
     title: asset.title,
-    thumbnailImage: asset.thumbnailImage,
     locationName: asset.assetLocations[0]?.location.name ?? null,
+    categoryName: asset.category?.name ?? null,
+    itemCount: null,
+  };
+}
+
+/** Maps a selected kit to the row the page renders. */
+function kitEntry(kit: {
+  id: string;
+  name: string;
+  category: { name: string } | null;
+  location: { name: string } | null;
+  _count: { assetKits: number };
+}): BrowseEntry {
+  return {
+    kind: "kit",
+    id: kit.id,
+    title: kit.name,
+    locationName: kit.location?.name ?? null,
+    categoryName: kit.category?.name ?? null,
+    itemCount: kit._count.assetKits,
   };
 }
 
@@ -108,16 +168,16 @@ export async function getBrowseWorkspace(
  * Where clause for items a volunteer may take from the list: tagged for
  * self-service, available, active, individual and not in a kit.
  */
-function offeredWhere({
+function offeredAssetWhere({
   organizationId,
   tagId,
-  query,
+  filters,
 }: {
   organizationId: string;
   tagId: string;
-  query: string;
+  filters?: Partial<BrowseFilters>;
 }): Prisma.AssetWhereInput {
-  const term = query.trim();
+  const term = filters?.query?.trim() ?? "";
   return {
     organizationId,
     archivedAt: null,
@@ -126,44 +186,153 @@ function offeredWhere({
     tags: { some: { id: tagId } },
     assetKits: { none: {} },
     ...(term ? { title: { contains: term, mode: "insensitive" } } : {}),
+    ...(filters?.locationId
+      ? {
+          assetLocations: {
+            some: { locationId: filters.locationId, assetKitId: null },
+          },
+        }
+      : {}),
+    ...(filters?.categoryId ? { categoryId: filters.categoryId } : {}),
   };
 }
 
 /**
- * One page of the items offered for self-service, in name order.
+ * Where clause for kits a volunteer may take from the list: available, held
+ * by nobody, with at least one active item, every active item tagged for
+ * self-service, and no active individual item out of the depot. Archived
+ * items are left out of kit custody, so they neither block nor qualify a kit.
+ *
+ * Also the eligibility check of `selfTakeKitCustody`, so the list and the
+ * claim cannot disagree about which kits may be taken.
+ */
+export function offeredKitWhere({
+  organizationId,
+  tagId,
+  filters,
+}: {
+  organizationId: string;
+  tagId: string;
+  filters?: Partial<BrowseFilters>;
+}): Prisma.KitWhereInput {
+  const term = filters?.query?.trim() ?? "";
+  return {
+    organizationId,
+    status: KitStatus.AVAILABLE,
+    custody: { is: null },
+    AND: [
+      { assetKits: { some: { asset: { archivedAt: null } } } },
+      {
+        assetKits: {
+          none: { asset: { archivedAt: null, tags: { none: { id: tagId } } } },
+        },
+      },
+      {
+        assetKits: {
+          none: {
+            asset: {
+              archivedAt: null,
+              type: AssetType.INDIVIDUAL,
+              status: { not: AssetStatus.AVAILABLE },
+            },
+          },
+        },
+      },
+    ],
+    ...(term ? { name: { contains: term, mode: "insensitive" } } : {}),
+    ...(filters?.locationId ? { locationId: filters.locationId } : {}),
+    ...(filters?.categoryId ? { categoryId: filters.categoryId } : {}),
+  };
+}
+
+/**
+ * The slice of one model that falls on a page of a list made of `before`
+ * rows of another model followed by this one.
+ */
+function sliceAfter({
+  before,
+  count,
+  start,
+  size,
+}: {
+  before: number;
+  count: number;
+  start: number;
+  size: number;
+}): { skip: number; take: number } {
+  const from = Math.max(0, start - before);
+  const to = Math.min(count, start + size - before);
+  return { skip: from, take: Math.max(0, to - from) };
+}
+
+/**
+ * One page of the kits and items offered for self-service. Kits come first,
+ * then single items, each in name order, so a page can hold the end of the
+ * kits and the start of the items.
  *
  * @param args.organizationId - The workspace of the browse link (server-resolved)
  * @param args.tagId - The workspace's self-service tag
- * @param args.query - Name filter, empty for all
+ * @param args.filters - Search, kind, location and category
  * @param args.page - 1-based page; out-of-range pages are clamped
- * @returns The items and the page position
+ * @returns The entries and the page position
  */
 export async function listOfferedItems({
   organizationId,
   tagId,
-  query,
+  filters,
   page,
 }: {
   organizationId: string;
   tagId: string;
-  query: string;
+  filters: BrowseFilters;
   page: number;
 }): Promise<BrowsePage> {
-  const where = offeredWhere({ organizationId, tagId, query });
-  const totalCount = await db.asset.count({ where });
+  const kitWhere = offeredKitWhere({ organizationId, tagId, filters });
+  const assetWhere = offeredAssetWhere({ organizationId, tagId, filters });
+
+  const [kitCount, assetCount] = await Promise.all([
+    filters.kind === "item" ? 0 : db.kit.count({ where: kitWhere }),
+    filters.kind === "kit" ? 0 : db.asset.count({ where: assetWhere }),
+  ]);
+  const totalCount = kitCount + assetCount;
   const totalPages = Math.max(1, Math.ceil(totalCount / BROWSE_PAGE_SIZE));
   const current = Math.min(Math.max(1, Math.floor(page) || 1), totalPages);
+  const start = (current - 1) * BROWSE_PAGE_SIZE;
 
-  const assets = await db.asset.findMany({
-    where,
-    select: ITEM_SELECT,
-    orderBy: { title: "asc" },
-    skip: (current - 1) * BROWSE_PAGE_SIZE,
-    take: BROWSE_PAGE_SIZE,
+  const kitSlice = sliceAfter({
+    before: 0,
+    count: kitCount,
+    start,
+    size: BROWSE_PAGE_SIZE,
+  });
+  const assetSlice = sliceAfter({
+    before: kitCount,
+    count: assetCount,
+    start,
+    size: BROWSE_PAGE_SIZE,
   });
 
+  const [kits, assets] = await Promise.all([
+    kitSlice.take > 0
+      ? db.kit.findMany({
+          where: kitWhere,
+          select: KIT_ENTRY_SELECT,
+          orderBy: { name: "asc" },
+          ...kitSlice,
+        })
+      : [],
+    assetSlice.take > 0
+      ? db.asset.findMany({
+          where: assetWhere,
+          select: ASSET_ENTRY_SELECT,
+          orderBy: { title: "asc" },
+          ...assetSlice,
+        })
+      : [],
+  ]);
+
   return {
-    items: assets.map(toItem),
+    items: [...kits.map(kitEntry), ...assets.map(assetEntry)],
     page: current,
     totalPages,
     totalCount,
@@ -171,12 +340,56 @@ export async function listOfferedItems({
 }
 
 /**
- * The items a volunteer holds that they can return themselves: their own
- * (not kit-held) custody of active, individual items, tagged or not.
+ * The locations and categories that hold at least one offered kit or item,
+ * for the list's filters. Only places and categories with something to take
+ * are listed, so no choice leads to an empty list on its own.
+ *
+ * @param args.organizationId - The workspace of the browse link (server-resolved)
+ * @param args.tagId - The workspace's self-service tag
+ * @returns Both lists, in name order
+ */
+export async function listBrowseFilterOptions({
+  organizationId,
+  tagId,
+}: {
+  organizationId: string;
+  tagId: string;
+}): Promise<{ locations: FilterOption[]; categories: FilterOption[] }> {
+  const asset = offeredAssetWhere({ organizationId, tagId });
+  const kit = offeredKitWhere({ organizationId, tagId });
+
+  const [locations, categories] = await Promise.all([
+    db.location.findMany({
+      where: {
+        organizationId,
+        OR: [
+          { assetLocations: { some: { assetKitId: null, asset } } },
+          { kits: { some: kit } },
+        ],
+      },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    db.category.findMany({
+      where: {
+        organizationId,
+        OR: [{ assets: { some: asset } }, { kits: { some: kit } }],
+      },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+  return { locations, categories };
+}
+
+/**
+ * What a volunteer holds and can return themselves: the kits in their
+ * custody, then their own (not kit-held) custody of active, individual items,
+ * tagged or not.
  *
  * @param args.organizationId - The workspace of the browse link (server-resolved)
  * @param args.teamMemberId - The volunteer, already proven to be an NRM of the workspace
- * @returns The items, in name order
+ * @returns Kits then items, each in name order
  */
 export async function listVolunteerItems({
   organizationId,
@@ -184,16 +397,23 @@ export async function listVolunteerItems({
 }: {
   organizationId: string;
   teamMemberId: string;
-}): Promise<SelfCustodyAsset[]> {
-  const assets = await db.asset.findMany({
-    where: {
-      organizationId,
-      archivedAt: null,
-      type: AssetType.INDIVIDUAL,
-      custody: { some: { teamMemberId, kitCustodyId: null } },
-    },
-    select: ITEM_SELECT,
-    orderBy: { title: "asc" },
-  });
-  return assets.map(toItem);
+}): Promise<BrowseEntry[]> {
+  const [kits, assets] = await Promise.all([
+    db.kit.findMany({
+      where: { organizationId, custody: { is: { custodianId: teamMemberId } } },
+      select: KIT_ENTRY_SELECT,
+      orderBy: { name: "asc" },
+    }),
+    db.asset.findMany({
+      where: {
+        organizationId,
+        archivedAt: null,
+        type: AssetType.INDIVIDUAL,
+        custody: { some: { teamMemberId, kitCustodyId: null } },
+      },
+      select: ASSET_ENTRY_SELECT,
+      orderBy: { title: "asc" },
+    }),
+  ]);
+  return [...kits.map(kitEntry), ...assets.map(assetEntry)];
 }

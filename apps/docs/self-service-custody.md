@@ -34,13 +34,21 @@ can pick items from a list instead of scanning.
 2. They enter the workspace PIN (the same unlock as the scan page: a phone
    unlocked on one is unlocked on the other).
 3. They say who they are: find their name, or add it.
-4. They see two lists:
-   - **Your items:** every individual item in their own custody, each with
-     **Return**. Items someone else holds never appear here and can't be
-     returned from the list; those still need the item's QR code.
-   - **Available to take:** items with the workspace's self-service tag that
-     are available right now, 20 per page, with a name search. Each has
-     **Take**.
+4. They see two tabs, each showing how many entries it holds:
+   - **Available:** kits and items offered for self-service, kits first, 20
+     per page. Each has **Take**. The list updates as they type in the search
+     box, and can be narrowed to **Items** or **Kits**, to one **Location** and
+     to one **Category** (only places and categories that hold something to
+     take are offered). Every choice is kept in the link, so the back button
+     and a shared link show the same list.
+   - **Your items:** the kits and individual items in their own custody, each
+     with **Return**. Things someone else holds never appear here and can't be
+     returned from the list; those still need the item's QR code or a staff
+     member.
+
+The page is laid out for phones: rows wrap long names, show what each entry
+is (kit with its item count, location, category), and the buttons are large
+enough to tap easily.
 
 ### Setting it up
 
@@ -49,13 +57,30 @@ In **Settings > Self-service > Browse list**:
 1. **Choose the tag.** Only available items with this tag are listed. Add the
    tag to items from the asset list, one by one or with the bulk tag action.
    With no tag chosen, the list offers nothing.
+
+   Kits can't carry tags, so **a kit is listed when every active item in it
+   carries the tag**, the kit is available and nobody holds it, and none of its
+   individual items is out. To offer a kit, tag everything in it; to withdraw
+   it, untag any one item.
+
 2. **Create the link.** The page shows the link and its QR code. Use
    **Download QR code** to print a poster.
 3. **Replace link** retires the old link and every printed copy of it at once,
    for example after a poster went missing. The PIN is unchanged.
 
-Removing the tag from an item takes it off the list straight away; a volunteer
-who still has the old list open is refused when they press **Take**.
+Removing the tag from an item takes it (and any kit it belongs to) off the list
+straight away; a volunteer who still has the old list open is refused when they
+press **Take**.
+
+### Kits from the list
+
+Taking a kit works exactly like staff assigning kit custody: the kit goes into
+the volunteer's custody and every active item in it follows, stock items with
+the kit's share of units. Returning it releases the kit and those items; an
+item that also has custody of its own stays with its holder. Each item gets a
+note ("**Maria P.** took custody via kit **Trauma kit** from the self-service
+list.") and an event with `viaKit: true`, and the manager email links to the
+kit.
 
 ## Turning it on
 
@@ -118,10 +143,12 @@ restarts and assume a single app container, which is how the
 
 ## Scope
 
-Self-service handles **individual** assets. The following are referred to staff:
+Self-service handles **individual** assets, and whole kits from the browse
+list. The following are referred to staff:
 
-- kits, and assets that belong to a kit;
-- items whose custody came with a kit;
+- kits scanned by their own QR code, and single assets that belong to a kit
+  (take the whole kit from the list instead);
+- a single item whose custody came with a kit (return the kit instead);
 - quantity-tracked (stock) items;
 - items checked out on a booking;
 - archived items.
@@ -137,6 +164,8 @@ Item photos are not shown on the page.
 | Redirect from an anonymous scan                             | `apps/webapp/app/routes/qr+/_public+/$qrId.tsx`                                                                                  |
 | Settings page                                               | `apps/webapp/app/routes/_layout+/settings.self-service.tsx`                                                                      |
 | Services (PIN, lockout, cookie, volunteers, custody, email) | `apps/webapp/app/modules/self-custody/`                                                                                          |
+| Kit take and return                                         | `apps/webapp/app/modules/self-custody/kit-custody.server.ts`                                                                     |
+| List screens (tabs, live search, filters)                   | `apps/webapp/app/components/self-custody/browse-lists.tsx`                                                                       |
 | Manager email                                               | `apps/webapp/app/emails/self-custody-alert.tsx`                                                                                  |
 | Email audience                                              | `notifications.selfCustodyAlerts` in `packages/permissions/src/policies.ts`                                                      |
 | Rate limit                                                  | `selfCustodyRateLimit` in `apps/webapp/server/rate-limit.ts`                                                                     |

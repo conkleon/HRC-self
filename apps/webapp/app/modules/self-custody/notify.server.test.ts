@@ -107,6 +107,32 @@ describe("sendSelfCustodyAlert", () => {
     expect(text).not.toContain("scanning");
   });
 
+  it("links a kit's alert to the kit page", async () => {
+    mockAudience.mockResolvedValue([
+      {
+        id: "u1",
+        email: "eleni@example.org",
+        firstName: "Eleni",
+        lastName: "K",
+        displayName: null,
+      },
+    ]);
+
+    await sendSelfCustodyAlert({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      kind: "taken",
+      kitId: "kit-1",
+      assetTitle: "Trauma kit",
+      volunteerName: "Maria P.",
+      source: "list",
+    });
+
+    const { text } = mockSendEmail.mock.calls[0][0];
+    expect(text).toContain("https://assets.example.org/kits/kit-1");
+    expect(text).toContain("Maria P. took Trauma kit into their custody");
+  });
+
   it("sends nothing when the audience is empty", async () => {
     mockAudience.mockResolvedValue([]);
     await sendSelfCustodyAlert(alert);

@@ -1,38 +1,71 @@
 // @vitest-environment node
 /**
- * Tests for the self-service browse list: resolving a browse link, the items
- * offered for self-service, and the items a volunteer holds.
+ * Tests for the self-service browse list: resolving a browse link, the kits
+ * and items offered for self-service, the filter choices, and what a
+ * volunteer holds.
  *
  * @see {@link file://./browse.server.ts}
  */
-import { AssetStatus, AssetType } from "@prisma/client";
+import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "~/database/db.server";
 import {
   BROWSE_PAGE_SIZE,
   getBrowseWorkspace,
+  listBrowseFilterOptions,
   listOfferedItems,
   listVolunteerItems,
+  offeredKitWhere,
 } from "./browse.server";
+import type { BrowseFilters } from "./browse.server";
 
 // why: unit tests run without a database; every query's where clause is asserted
 vi.mock("~/database/db.server", () => ({
   db: {
     organization: { findUnique: vi.fn() },
     asset: { count: vi.fn(), findMany: vi.fn() },
+    kit: { count: vi.fn(), findMany: vi.fn() },
+    location: { findMany: vi.fn() },
+    category: { findMany: vi.fn() },
   },
 }));
 
 const ORG = "org-1";
+const TAG = "tag-ss";
+
+/** No search and no filter. */
+const ALL: BrowseFilters = {
+  query: "",
+  kind: "all",
+  locationId: null,
+  categoryId: null,
+};
 
 /** An asset row as the browse queries select it. */
 const row = (id: string, title: string, location: string | null = null) => ({
   id,
   title,
-  thumbnailImage: null,
+  category: null,
   assetLocations: location ? [{ location: { name: location } }] : [],
 });
+
+/** A kit row as the browse queries select it. */
+const kitRow = (id: string, name: string, items = 3) => ({
+  id,
+  name,
+  category: { name: "First aid" },
+  location: { name: "Depot" },
+  _count: { assetKits: items },
+});
+
+/** Sets how many kits and items match; the row queries return nothing. */
+function counts(kits: number, assets: number) {
+  vi.mocked(db.kit.count).mockResolvedValue(kits);
+  vi.mocked(db.asset.count).mockResolvedValue(assets);
+  vi.mocked(db.kit.findMany).mockResolvedValue([]);
+  vi.mocked(db.asset.findMany).mockResolvedValue([]);
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -46,7 +79,7 @@ describe("getBrowseWorkspace", () => {
       selfCustodyEnabled: true,
       selfCustodyPinHash: "scrypt$aa$bb",
       selfCustodyPinUpdatedAt: new Date("2026-10-01"),
-      selfCustodyTagId: "tag-ss",
+      selfCustodyTagId: TAG,
     };
     vi.mocked(db.organization.findUnique).mockResolvedValue(
       organization as never
@@ -68,15 +101,15 @@ describe("getBrowseWorkspace", () => {
 
 describe("listOfferedItems", () => {
   it("offers only tagged, available, active, individual items outside kits", async () => {
-    vi.mocked(db.asset.count).mockResolvedValue(1);
+    counts(0, 1);
     vi.mocked(db.asset.findMany).mockResolvedValue([
       row("a1", "Radio #12", "Warehouse A"),
     ] as never);
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: "tag-ss",
-      query: "",
+      tagId: TAG,
+      filters: ALL,
       page: 1,
     });
 
@@ -85,7 +118,7 @@ describe("listOfferedItems", () => {
       archivedAt: null,
       status: AssetStatus.AVAILABLE,
       type: AssetType.INDIVIDUAL,
-      tags: { some: { id: "tag-ss" } },
+      tags: { some: { id: TAG } },
       assetKits: { none: {} },
     };
     expect(db.asset.count).toHaveBeenCalledWith({ where });
@@ -94,16 +127,18 @@ describe("listOfferedItems", () => {
         where,
         orderBy: { title: "asc" },
         skip: 0,
-        take: BROWSE_PAGE_SIZE,
+        take: 1,
       })
     );
     expect(page).toEqual({
       items: [
         {
+          kind: "item",
           id: "a1",
           title: "Radio #12",
-          thumbnailImage: null,
           locationName: "Warehouse A",
+          categoryName: null,
+          itemCount: null,
         },
       ],
       page: 1,
@@ -112,32 +147,152 @@ describe("listOfferedItems", () => {
     });
   });
 
-  it("filters by name, ignoring case and surrounding spaces", async () => {
-    vi.mocked(db.asset.count).mockResolvedValue(0);
-    vi.mocked(db.asset.findMany).mockResolvedValue([]);
+  it("lists kits first, then items, and counts both", async () => {
+    counts(1, 1);
+    vi.mocked(db.kit.findMany).mockResolvedValue([
+      kitRow("k1", "Trauma kit", 4),
+    ] as never);
+    vi.mocked(db.asset.findMany).mockResolvedValue([
+      row("a1", "Radio #12"),
+    ] as never);
+
+    const page = await listOfferedItems({
+      organizationId: ORG,
+      tagId: TAG,
+      filters: ALL,
+      page: 1,
+    });
+
+    expect(page.totalCount).toBe(2);
+    expect(page.items.map((entry) => [entry.kind, entry.id])).toEqual([
+      ["kit", "k1"],
+      ["item", "a1"],
+    ]);
+    expect(page.items[0]).toEqual({
+      kind: "kit",
+      id: "k1",
+      title: "Trauma kit",
+      locationName: "Depot",
+      categoryName: "First aid",
+      itemCount: 4,
+    });
+    expect(db.kit.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: offeredKitWhere({
+          organizationId: ORG,
+          tagId: TAG,
+          filters: ALL,
+        }),
+        orderBy: { name: "asc" },
+        skip: 0,
+        take: 1,
+      })
+    );
+    expect(db.asset.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 1 })
+    );
+  });
+
+  it("pages across the end of the kits into the items", async () => {
+    // 25 kits and 30 items: page 2 holds kits 21 to 25, then items 1 to 15.
+    counts(25, 30);
 
     await listOfferedItems({
       organizationId: ORG,
-      tagId: "tag-ss",
-      query: "  radio ",
+      tagId: TAG,
+      filters: ALL,
+      page: 2,
+    });
+
+    expect(db.kit.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 20, take: 5 })
+    );
+    expect(db.asset.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 15 })
+    );
+  });
+
+  it("skips the kit query once the page is past every kit", async () => {
+    // 5 kits and 30 items: page 2 holds items 16 to 30.
+    counts(5, 30);
+
+    await listOfferedItems({
+      organizationId: ORG,
+      tagId: TAG,
+      filters: ALL,
+      page: 2,
+    });
+
+    expect(db.kit.findMany).not.toHaveBeenCalled();
+    expect(db.asset.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 15, take: 15 })
+    );
+  });
+
+  it("shows only items when asked", async () => {
+    counts(3, 3);
+    await listOfferedItems({
+      organizationId: ORG,
+      tagId: TAG,
+      filters: { ...ALL, kind: "item" },
+      page: 1,
+    });
+    expect(db.kit.count).not.toHaveBeenCalled();
+    expect(db.kit.findMany).not.toHaveBeenCalled();
+    expect(db.asset.findMany).toHaveBeenCalled();
+  });
+
+  it("shows only kits when asked", async () => {
+    counts(3, 3);
+    await listOfferedItems({
+      organizationId: ORG,
+      tagId: TAG,
+      filters: { ...ALL, kind: "kit" },
+      page: 1,
+    });
+    expect(db.asset.count).not.toHaveBeenCalled();
+    expect(db.asset.findMany).not.toHaveBeenCalled();
+    expect(db.kit.findMany).toHaveBeenCalled();
+  });
+
+  it("filters both kits and items by name, location and category", async () => {
+    counts(0, 0);
+
+    await listOfferedItems({
+      organizationId: ORG,
+      tagId: TAG,
+      filters: {
+        query: "  radio ",
+        kind: "all",
+        locationId: "loc-1",
+        categoryId: "cat-1",
+      },
       page: 1,
     });
 
     expect(db.asset.count).toHaveBeenCalledWith({
       where: expect.objectContaining({
         title: { contains: "radio", mode: "insensitive" },
+        assetLocations: { some: { locationId: "loc-1", assetKitId: null } },
+        categoryId: "cat-1",
+      }),
+    });
+    expect(db.kit.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        name: { contains: "radio", mode: "insensitive" },
+        locationId: "loc-1",
+        categoryId: "cat-1",
       }),
     });
   });
 
   it("clamps a page past the end to the last page", async () => {
-    vi.mocked(db.asset.count).mockResolvedValue(BROWSE_PAGE_SIZE + 1);
-    vi.mocked(db.asset.findMany).mockResolvedValue([]);
+    counts(0, BROWSE_PAGE_SIZE + 1);
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: "tag-ss",
-      query: "",
+      tagId: TAG,
+      filters: ALL,
       page: 99,
     });
 
@@ -148,13 +303,12 @@ describe("listOfferedItems", () => {
   });
 
   it("treats a page that is not a number as the first", async () => {
-    vi.mocked(db.asset.count).mockResolvedValue(3);
-    vi.mocked(db.asset.findMany).mockResolvedValue([]);
+    counts(0, 3);
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: "tag-ss",
-      query: "",
+      tagId: TAG,
+      filters: ALL,
       page: Number("abc"),
     });
 
@@ -162,17 +316,111 @@ describe("listOfferedItems", () => {
   });
 });
 
+describe("offeredKitWhere", () => {
+  it("offers a kit only when it is free and every active item in it is tagged and in", () => {
+    expect(offeredKitWhere({ organizationId: ORG, tagId: TAG })).toEqual({
+      organizationId: ORG,
+      status: KitStatus.AVAILABLE,
+      custody: { is: null },
+      AND: [
+        // at least one active item
+        { assetKits: { some: { asset: { archivedAt: null } } } },
+        // no active item without the tag
+        {
+          assetKits: {
+            none: { asset: { archivedAt: null, tags: { none: { id: TAG } } } },
+          },
+        },
+        // no active single item out of the depot
+        {
+          assetKits: {
+            none: {
+              asset: {
+                archivedAt: null,
+                type: AssetType.INDIVIDUAL,
+                status: { not: AssetStatus.AVAILABLE },
+              },
+            },
+          },
+        },
+      ],
+    });
+  });
+});
+
+describe("listBrowseFilterOptions", () => {
+  it("offers only locations and categories that hold something to take", async () => {
+    vi.mocked(db.location.findMany).mockResolvedValue([
+      { id: "loc-1", name: "Depot" },
+    ] as never);
+    vi.mocked(db.category.findMany).mockResolvedValue([
+      { id: "cat-1", name: "Radios" },
+    ] as never);
+
+    await expect(
+      listBrowseFilterOptions({ organizationId: ORG, tagId: TAG })
+    ).resolves.toEqual({
+      locations: [{ id: "loc-1", name: "Depot" }],
+      categories: [{ id: "cat-1", name: "Radios" }],
+    });
+
+    const kit = offeredKitWhere({ organizationId: ORG, tagId: TAG });
+    const taggedAsset = expect.objectContaining({
+      archivedAt: null,
+      tags: { some: { id: TAG } },
+    });
+    expect(db.location.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          organizationId: ORG,
+          OR: [
+            {
+              assetLocations: {
+                some: { assetKitId: null, asset: taggedAsset },
+              },
+            },
+            { kits: { some: kit } },
+          ],
+        },
+      })
+    );
+    expect(db.category.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          organizationId: ORG,
+          OR: [{ assets: { some: taggedAsset } }, { kits: { some: kit } }],
+        },
+      })
+    );
+  });
+});
+
 describe("listVolunteerItems", () => {
-  it("lists the volunteer's own, not kit-held, custody of active individual items", async () => {
+  it("lists the volunteer's kits, then their own, not kit-held, custody of active individual items", async () => {
+    vi.mocked(db.kit.findMany).mockResolvedValue([
+      kitRow("k1", "Trauma kit"),
+    ] as never);
     vi.mocked(db.asset.findMany).mockResolvedValue([
       row("a2", "Torch"),
     ] as never);
 
-    await expect(
-      listVolunteerItems({ organizationId: ORG, teamMemberId: "tm-1" })
-    ).resolves.toEqual([
-      { id: "a2", title: "Torch", thumbnailImage: null, locationName: null },
+    const items = await listVolunteerItems({
+      organizationId: ORG,
+      teamMemberId: "tm-1",
+    });
+
+    expect(items.map((entry) => [entry.kind, entry.id])).toEqual([
+      ["kit", "k1"],
+      ["item", "a2"],
     ]);
+    expect(db.kit.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          organizationId: ORG,
+          custody: { is: { custodianId: "tm-1" } },
+        },
+      })
+    );
     expect(db.asset.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
