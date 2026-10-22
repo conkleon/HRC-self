@@ -37,7 +37,7 @@ keeps the range that is right for it. That is the part most likely to be got
 wrong by someone reaching for the helper for the first time.
 
 Enforced by the `local-rules/no-hand-coerced-numeric-transform` ESLint rule
-(error, so it blocks the pre-commit hook).
+(error, so `validate` and CI fail).
 
 ```ts
 // ❌ Bad, whitespace is truthy, so "   " is stored as a real valuation of 0

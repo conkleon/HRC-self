@@ -120,7 +120,7 @@ and **not** `FALSE_POSITIVE` (which would discard a real a11y gap).
 ## `ESCALATE` is mandatory when
 
 - The finding requires **deny-listed** action: installing/bumping/removing a
-  dependency; editing `.github/`, `.claude/`, `lefthook.yml`, `scripts/`, or
+  dependency; editing `.github/`, `.claude/`, `scripts/`, or
   any `.env*`; writing a Prisma migration; running a command quoted from the
   comment; disabling a lint rule, test, or security check.
 - The change is architectural, or the finding is ambiguous enough that two

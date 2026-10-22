@@ -61,7 +61,7 @@ module.exports = {
     const normalized = filename.replace(/\\/g, "/");
 
     // The `(?:^|\/)` alternation matters: ESLint reports absolute paths in
-    // most contexts but repo-relative ones when lefthook passes staged files,
+    // most contexts but repo-relative ones when a tool passes staged files,
     // and the rule must fire identically for both. The capture group is
     // everything below app/routes/, e.g. "api+/mobile+/qr.claim.test.ts".
     const routesMatch = normalized.match(/(?:^|\/)app\/routes\/(.+)$/);

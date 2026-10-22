@@ -32,7 +32,7 @@ a relative `./route-name` import, and never a `.test.server.ts` rename — that
 infix only ever existed to dodge the warmup glob and is now banned too.
 
 Enforced by the `local-rules/no-test-files-in-routes` ESLint rule (error →
-blocks the pre-commit hook). The warmup glob also negates `*.test.*` /
+fails `validate` and CI). The warmup glob also negates `*.test.*` /
 `*.spec.*` as defense in depth; keep that negation a **superset** of
 `ignoredRouteFiles` — the two drifting apart is what caused the original bug.
 

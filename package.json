@@ -10,7 +10,6 @@
     "test": "turbo run test",
     "test:tooling": "bash scripts/__tests__/pr-review.test.sh && node --test scripts/__tests__/pr-review-context.test.mjs scripts/__tests__/pr-review-files.test.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "prepare": "git config --unset core.hooksPath || echo ok && npx lefthook install || echo ok",
     "webapp:dev": "turbo run dev --filter=@shelf/webapp",
     "webapp:dev:staging": "pnpm --filter @shelf/webapp run staging:dev",
     "webapp:dev:production": "pnpm --filter @shelf/webapp run production:dev",
@@ -58,7 +57,6 @@
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
-    "@evilmartians/lefthook": "^2.1.5",
     "prettier": "3.0.3",
     "turbo": "^2.9.14"
   },

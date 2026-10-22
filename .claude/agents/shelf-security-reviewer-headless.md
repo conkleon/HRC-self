@@ -1,6 +1,6 @@
 ---
 name: shelf-security-reviewer-headless
-description: Headless variant of shelf-security-reviewer for the pre-commit hook. Receives the staged diff inline (the wrapper script pre-computes it). Tools restricted to Skill only — no Bash, no WebFetch, no Agent — so prompt injection in the diff cannot exfiltrate. Outputs a strict JSON envelope for safe parsing. Do NOT invoke this agent interactively; use shelf-security-reviewer instead.
+description: Headless variant of shelf-security-reviewer for the staged-diff script (scripts/security-review-staged.sh). Receives the staged diff inline (the wrapper script pre-computes it). Tools restricted to Skill only — no Bash, no WebFetch, no Agent — so prompt injection in the diff cannot exfiltrate. Outputs a strict JSON envelope for safe parsing. Do NOT invoke this agent interactively; use shelf-security-reviewer instead.
 tools: Skill
 model: opus
 ---

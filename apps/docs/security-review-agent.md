@@ -1,7 +1,14 @@
 # Security Review Agent
 
-Shelf ships with a Claude-powered security reviewer that runs automatically
-on `git commit` against security-sensitive diffs. It catches the regressions
+Shelf ships with a Claude-powered security reviewer for security-sensitive
+diffs. The repo installs no git hooks, so it runs only when you start it:
+
+```bash
+git add <files>
+./scripts/security-review-staged.sh $(git diff --cached --name-only)
+```
+
+Where this page says "the hook", read "the staged-diff script". It catches the regressions
 the team has hit most often — cross-org IDORs, missing `requirePermission`
 gates, open redirects, missing Zod validation, audit-trail gaps — before the
 code reaches review.
@@ -14,12 +21,11 @@ report, and (by default) lets the commit proceed. It does not edit code.
 There are **two** agent variants — the same Shelf-specific checklist, but
 different capability boundaries for different invocation contexts.
 
-| File                                                 | Role                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.claude/agents/shelf-security-reviewer.md`          | **Interactive** variant. Tools: `Read, Bash, Skill, Agent, WebFetch, WebSearch`. Used when a human runs `claude --agent shelf-security-reviewer ...` for PR / branch / commit-range review. Bash is needed so the agent can run `gh pr diff`, `git diff`, `grep`, etc. Permission prompts confirm each tool call.                                                                                                 |
-| `.claude/agents/shelf-security-reviewer-headless.md` | **Headless** variant — what the pre-commit hook invokes. Tools: `Skill` only — no Bash, no WebFetch, no Agent. Receives the staged diff inline between a unique per-invocation random marker rather than fetching it itself. Emits a strict JSON envelope. Designed for `bypassPermissions` use because there are no capabilities to bypass — a prompt-injection payload in the diff has no exfiltration channel. |
-| `scripts/security-review-staged.sh`                  | The pre-commit wrapper — filters staged files to security-sensitive paths, pre-computes the diff, invokes the headless agent, parses the JSON envelope, prints the report, optionally blocks the commit.                                                                                                                                                                                                          |
-| `lefthook.yml` → `pre-commit` → `security-review`    | Wires the script into the existing pre-commit chain at priority 5 (after typecheck). Inherits `skip: [merge, rebase]` from the rest of the pipeline.                                                                                                                                                                                                                                                              |
+| File                                                 | Role                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.claude/agents/shelf-security-reviewer.md`          | **Interactive** variant. Tools: `Read, Bash, Skill, Agent, WebFetch, WebSearch`. Used when a human runs `claude --agent shelf-security-reviewer ...` for PR / branch / commit-range review. Bash is needed so the agent can run `gh pr diff`, `git diff`, `grep`, etc. Permission prompts confirm each tool call.                                                                                                    |
+| `.claude/agents/shelf-security-reviewer-headless.md` | **Headless** variant — what the staged-diff script invokes. Tools: `Skill` only — no Bash, no WebFetch, no Agent. Receives the staged diff inline between a unique per-invocation random marker rather than fetching it itself. Emits a strict JSON envelope. Designed for `bypassPermissions` use because there are no capabilities to bypass — a prompt-injection payload in the diff has no exfiltration channel. |
+| `scripts/security-review-staged.sh`                  | The pre-commit wrapper — filters staged files to security-sensitive paths, pre-computes the diff, invokes the headless agent, parses the JSON envelope, prints the report, optionally blocks the commit.                                                                                                                                                                                                             |
 
 The interactive agent is also usable on demand — see [Manual invocation](#manual-invocation).
 
@@ -74,7 +80,7 @@ sensitive directory:
 - Lockfiles: `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`
 - Generated: `*.generated.{ts,tsx}`
 - Configs: `*.config.{ts,js,mjs,cjs}`, `tsconfig*.json`, `.eslintrc*`,
-  `.prettierrc*`, `turbo.json`, `pnpm-workspace.yaml`, `lefthook.yml`,
+  `.prettierrc*`, `turbo.json`, `pnpm-workspace.yaml`,
   `commitlint.config.*`
 - Dev-only server tooling: `apps/webapp/server/dev/**`
 - The docs site: `apps/docs/**`
@@ -211,13 +217,6 @@ To make blocking your personal default, export it in your shell rc:
 echo 'export SHELF_SEC_REVIEW_BLOCK=1' >> ~/.bashrc
 ```
 
-To bypass **all** pre-commit hooks (not just this one) in a genuine
-emergency:
-
-```bash
-git commit --no-verify -m "hotfix: prod is down"
-```
-
 ## Manual invocation
 
 The agent is also usable on demand from any Claude Code session — useful
@@ -338,8 +337,7 @@ interactive turn — well within typical daily quota on Max 5×.
 
 If you find pre-commit reviews are eating into interactive work:
 
-1. Switch from `pre-commit:` to a new `pre-push:` block in `lefthook.yml`.
-   Same coverage, runs ~10× less often.
+1. Run it once before pushing rather than before each commit.
 2. Tighten the allow-list in `scripts/security-review-staged.sh` —
    for example, drop `package.json` if Renovate noise is dominant.
 3. Use `SHELF_SEC_REVIEW=0` for the day during rapid iteration on
@@ -366,9 +364,9 @@ export async function updateAssetTagsUnsafe(params: {
 }
 EOF
 
-# Stage it and run the pre-commit pipeline without actually committing
+# Stage it and run the review without committing
 git add apps/webapp/app/modules/asset/_security-test-fixture.server.ts
-npx lefthook run pre-commit
+./scripts/security-review-staged.sh apps/webapp/app/modules/asset/_security-test-fixture.server.ts
 
 # Clean up
 git restore --staged apps/webapp/app/modules/asset/_security-test-fixture.server.ts

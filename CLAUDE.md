@@ -48,18 +48,19 @@ See `apps/companion/README.md` for full setup guide (LAN IPs, HTTP mode, device 
 - `pnpm turbo typecheck` - TypeScript type checking (all packages)
 - `pnpm run format` - Prettier code formatting (root-level)
 - `pnpm --filter @shelf/webapp validate` - Complete pre-commit validation
-- `pnpm webapp:doctor` - Run [react-doctor](https://www.react.doctor/) against the webapp (React health diagnostics: hook misuse, perf, a11y, architecture). Not part of `validate` or the pre-commit hook. It **does** run in CI: the `🩺 React Doctor` GitHub Action scans changed files on every PR (matrix over webapp + companion), posts a per-app sticky comment, and fails the check on newly-introduced errors (warnings stay advisory). See [companion:doctor](#companion-app-mobile) for the React Native equivalent.
+- `pnpm webapp:doctor` - Run [react-doctor](https://www.react.doctor/) against the webapp (React health diagnostics: hook misuse, perf, a11y, architecture). Not part of `validate`. It **does** run in CI: the `🩺 React Doctor` GitHub Action scans changed files on every PR (matrix over webapp + companion), posts a per-app sticky comment, and fails the check on newly-introduced errors (warnings stay advisory). See [companion:doctor](#companion-app-mobile) for the React Native equivalent.
 
-### Security Review Agent (pre-commit)
+### Security Review Agent
 
-A Claude-powered security reviewer runs automatically on `git commit` against security-sensitive diffs (routes, `*.server.ts`, prisma, Supabase wiring, server middleware, new dependencies). It catches the regressions hit most often — cross-org IDORs, missing `requirePermission` gates, open redirects, missing Zod validation, audit-trail gaps — before code reaches review.
+There are no git hooks in this repo: nothing runs on `git commit`. Run `pnpm webapp:validate` yourself before committing; CI runs the full checks on every PR.
+
+A Claude-powered security reviewer can be run by hand against security-sensitive staged diffs (routes, `*.server.ts`, prisma, Supabase wiring, server middleware, new dependencies). It catches the regressions hit most often — cross-org IDORs, missing `requirePermission` gates, open redirects, missing Zod validation, audit-trail gaps — before code reaches review.
 
 - Interactive subagent: `.claude/agents/shelf-security-reviewer.md` (full toolset — for manual `claude --agent shelf-security-reviewer ...` use with permission prompts).
-- Headless subagent: `.claude/agents/shelf-security-reviewer-headless.md` (`Skill`-only — what the pre-commit hook invokes; safe under `bypassPermissions` because there's no Bash/network channel to exfiltrate through).
-- Pre-commit wrapper: `scripts/security-review-staged.sh`
-- Wired into `lefthook.yml` at priority 5 (after typecheck)
+- Headless subagent: `.claude/agents/shelf-security-reviewer-headless.md` (`Skill`-only, what the staged-diff script invokes; safe under `bypassPermissions` because there's no Bash/network channel to exfiltrate through).
+- Staged-diff script: `scripts/security-review-staged.sh $(git diff --cached --name-only)`
 
-Advisory by default — findings print, the commit proceeds. Opt in to blocking with `SHELF_SEC_REVIEW_BLOCK=1`; skip with `SHELF_SEC_REVIEW=0`. Manual use: `claude --agent shelf-security-reviewer "review PR #N"`.
+Advisory: findings print and the script exits 0 unless `SHELF_SEC_REVIEW_BLOCK=1`. For a PR: `claude --agent shelf-security-reviewer "review PR #N"`.
 
 📖 Full documentation: [apps/docs/security-review-agent.md](./apps/docs/security-review-agent.md).
 
@@ -583,7 +584,7 @@ contract tests guarding those routes read them from disk, so `--changed` cannot 
 #### Organizing Mocks and Factories
 
 - **Test files**: Co-located with source files (e.g., `apps/webapp/app/modules/user/service.server.test.ts`)
-- **Route tests**: `apps/webapp/test/routes-tests/`, mirroring the route path — **never** inside `app/routes/`. Vite's dev-server warmup treats every file under `app/routes/` as a client module, so a co-located route test importing a `*.server` module breaks `pnpm webapp:dev` while `validate` and CI stay green. Import the route via `~/routes/...`, not a relative path. Enforced by the `local-rules/no-test-files-in-routes` ESLint rule (blocks the pre-commit hook).
+- **Route tests**: `apps/webapp/test/routes-tests/`, mirroring the route path — **never** inside `app/routes/`. Vite's dev-server warmup treats every file under `app/routes/` as a client module, so a co-located route test importing a `*.server` module breaks `pnpm webapp:dev` while `validate` and CI stay green. Import the route via `~/routes/...`, not a relative path. Enforced by the `local-rules/no-test-files-in-routes` ESLint rule (an error, so `validate` and CI fail).
 - **Shared mocks**: Place in `apps/webapp/test/mocks/` directory, organized by domain (remix.tsx, database.ts)
 - **Factories**: Place in `apps/webapp/test/factories/` directory for generating test data
 - **MSW handlers**: Keep in `apps/webapp/mocks/` directory for API mocking
@@ -696,7 +697,7 @@ multi-file features, or anything genuinely needing an independent review.
 - use descriptive commit messages that capture the full scope of the changes
 - **IMPORTANT: Each line in the commit message body must be ≤ 100 characters**
   - Wrap long lines to stay within the limit
-  - This is enforced by commitlint pre-commit hook
+  - This is checked by commitlint (`npx commitlint --edit`); no hook runs it on commit
   - Subject line can be longer, only body lines are restricted
 - dont add 🤖 Generated with [Claude Code](https://claude.ai code) & Co-Authored-By: Claude <noreply@anthropic.com>" because it clutters the commits
 - Include test readability and mock discipline in PR reviews. Overly mocked or verbose tests should be refactored before merge.

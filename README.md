@@ -164,7 +164,7 @@ For developer onboarding and codebase conventions, see [`CLAUDE.md`](./CLAUDE.md
 
 We welcome contributions. Check the [contribution guidelines](./CONTRIBUTING.md) and look for issues labeled [**"Open for contributions"**](https://github.com/Shelf-nu/shelf.nu/issues?q=is%3Aissue+is%3Aopen+label%3A%22Open+for+contributions%22).
 
-The project uses [conventional commits](https://www.conventionalcommits.org/), enforced by commitlint. Pre-commit hooks run ESLint, Prettier, and TypeScript checking via Lefthook.
+The project uses [conventional commits](https://www.conventionalcommits.org/), checked by commitlint. There are no git hooks: run `pnpm webapp:validate` (ESLint, Prettier, TypeScript, affected tests) before committing.
 
 Join the [Discord](https://discord.gg/8he9W7aTJu) if you have questions or want to discuss your contribution.
 

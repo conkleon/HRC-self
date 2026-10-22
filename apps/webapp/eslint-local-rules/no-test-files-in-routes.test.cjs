@@ -87,7 +87,7 @@ ruleTester.run("no-test-files-in-routes", rule, {
       filename: "/repo/apps/webapp/app/routes/_layout+/bookings.spec.tsx",
       errors: [{ messageId: "testFileInRoutes" }],
     },
-    // Repo-relative paths (how ESLint reports staged files under lefthook).
+    // Repo-relative paths (how ESLint reports files passed from the repo root).
     {
       code: CODE,
       filename: "app/routes/api+/audits.start.test.ts",

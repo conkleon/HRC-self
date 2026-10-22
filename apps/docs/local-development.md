@@ -191,33 +191,19 @@ pnpm companion:doctor  # React Native health scan (react-doctor) — companion a
 > Both `*:doctor` scans run in CI on every PR (the 🩺 React Doctor action). Warnings
 > are advisory; newly-introduced errors fail the check.
 
-### Git Hooks (Lefthook)
+### Before committing
 
-We use [Lefthook](https://github.com/evilmartians/lefthook) to run automated checks on every commit. Hooks are configured in `lefthook.yml` at the monorepo root.
+The repo installs no git hooks, so nothing runs on `git commit`. Run the checks
+yourself:
 
-#### Pre-commit hooks (piped, run in order)
+```bash
+pnpm webapp:validate   # Prisma generate, ESLint --fix, Prettier, TypeScript, affected tests
+```
 
-| Command            | Priority | Triggers on                              | What it does                                   |
-| ------------------ | -------- | ---------------------------------------- | ---------------------------------------------- |
-| `prisma-generate`  | 1        | `packages/database/prisma/schema.prisma` | Regenerates Prisma client after schema changes |
-| `eslint`           | 2        | `apps/webapp/**/*.{js,jsx,ts,tsx}`       | Lints staged webapp files with `--fix`         |
-| `eslint-companion` | 2        | `apps/companion/**/*.{js,jsx,ts,tsx}`    | Lints companion app via `expo lint`            |
-| `prettier`         | 3        | `**/*.{ts,tsx,js,jsx,json,md,css,yaml}`  | Formats staged files with Prettier             |
-| `typecheck`        | 4        | `apps/webapp/**/*.{ts,tsx}`              | Runs TypeScript type checking on the webapp    |
-
-#### Commit-msg hook
-
-| Command      | What it does                                                                |
-| ------------ | --------------------------------------------------------------------------- |
-| `commitlint` | Enforces [Conventional Commits](https://www.conventionalcommits.org) format |
-
-#### Key details
-
-- Hooks are **piped** — they run in priority order and stop on first failure.
-- All pre-commit hooks are **skipped during merge and rebase** to avoid blocking conflict resolution.
-- The webapp ESLint runs on **staged files only** (fast). The companion ESLint runs on the full app when companion files are staged (Expo's lint wrapper doesn't support individual file paths).
-- Prettier auto-fixes and re-stages formatted files.
-- To override hooks locally (not recommended), create a `lefthook-local.yml` — it's gitignored.
+After changing `packages/database/prisma/schema.prisma`, run `pnpm db:generate`.
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org);
+check one with `npx commitlint --edit` if unsure. CI runs the full suite on
+every PR.
 
 ### Testing
 

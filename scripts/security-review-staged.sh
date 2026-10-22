@@ -3,8 +3,9 @@
 # Pre-commit security review via the `shelf-security-reviewer-headless`
 # Claude subagent.
 #
-# Triggered by lefthook on `pre-commit`. ADVISORY by default — prints findings
-# but never fails the commit unless SHELF_SEC_REVIEW_BLOCK=1.
+# Run by hand on the staged files: `./scripts/security-review-staged.sh
+# $(git diff --cached --name-only)`. ADVISORY by default: prints findings and
+# exits 0 unless SHELF_SEC_REVIEW_BLOCK=1.
 #
 # Security model
 # --------------
@@ -137,7 +138,7 @@ is_denied() {
     # Build / config / tooling
     *.config.ts | *.config.js | *.config.mjs | *.config.cjs) return 0 ;;
     tsconfig*.json | .eslintrc* | .prettierrc* | .prettierignore | .gitignore) return 0 ;;
-    turbo.json | pnpm-workspace.yaml | lefthook.yml | commitlint.config.*) return 0 ;;
+    turbo.json | pnpm-workspace.yaml | commitlint.config.*) return 0 ;;
     # Lottie animation JSON
     *.json) [[ "$f" == */lottie/* ]] && return 0 ;;
   esac
