@@ -47,11 +47,14 @@ services:
       SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
       SUPABASE_ANON_PUBLIC: ${ANON_KEY}
       SUPABASE_SERVICE_ROLE: ${SERVICE_ROLE_KEY}
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?connection_limit=${DB_CONNECTION_LIMIT:-10}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?connection_limit=${DB_CONNECTION_LIMIT:-25}
       DIRECT_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
       SMTP_FROM: ${SMTP_SENDER_NAME} <${SMTP_SENDER_EMAIL}>
       # Branding images (icon.*, favicon.ico, login-bg.*) from deploy/branding.
       BRANDING_DIR: /branding
+      # Scales every Shelf request rate limit. Volunteers often share one
+      # public IP (station Wi-Fi, carrier NAT), so this stack runs at 10x.
+      RATE_LIMIT_MULTIPLIER: ${RATE_LIMIT_MULTIPLIER:-10}
     volumes:
       - ./branding:/branding:ro
     # Shelf calls Supabase server-side through the public SUPABASE_PUBLIC_URL
@@ -177,6 +180,11 @@ services:
       GOTRUE_MAILER_OTP_LENGTH: 6
       GOTRUE_MAILER_OTP_EXP: ${AUTH_OTP_EXPIRY:-3600}
       GOTRUE_RATE_LIMIT_EMAIL_SENT: ${AUTH_RATE_LIMIT_EMAIL_SENT:-100}
+      # Shelf verifies login codes and refreshes sessions from its own server,
+      # so Auth sees most users behind one address. Per 5 minutes; the upstream
+      # defaults (150 and 30) would cap the whole instance.
+      GOTRUE_RATE_LIMIT_TOKEN_REFRESH: ${AUTH_RATE_LIMIT_TOKEN_REFRESH:-3000}
+      GOTRUE_RATE_LIMIT_VERIFY: ${AUTH_RATE_LIMIT_VERIFY:-600}
 
       GOTRUE_SMTP_HOST: ${SMTP_HOST}
       GOTRUE_SMTP_PORT: ${SMTP_PORT}

@@ -187,6 +187,26 @@ To update Supabase, change the image tags in `docker-compose.yml` (compare with
 the [upstream compose file](https://github.com/supabase/supabase/blob/master/docker/docker-compose.yml))
 and run `docker compose up -d`. Back up first.
 
+### Rate limits
+
+Shelf caps how many requests a user or IP address may send per minute, and
+Supabase Auth caps login-code checks and session refreshes. This stack raises
+both, because volunteers often share one public IP (a station's Wi-Fi, a mobile
+carrier) and Shelf calls Supabase Auth from its own server for everyone.
+
+| Variable                        | Default here | Controls                                                         |
+| ------------------------------- | ------------ | ---------------------------------------------------------------- |
+| `RATE_LIMIT_MULTIPLIER`         | `10`         | Every Shelf limiter (page data, Companion app, self-service)     |
+| `AUTH_RATE_LIMIT_VERIFY`        | `600`        | Login-code checks per 5 minutes, instance-wide                   |
+| `AUTH_RATE_LIMIT_TOKEN_REFRESH` | `3000`       | Session refreshes per 5 minutes, instance-wide                   |
+| `AUTH_RATE_LIMIT_EMAIL_SENT`    | `100`        | Login emails per hour; keep within what your mail server accepts |
+| `DB_CONNECTION_LIMIT`           | `25`         | Shelf's database connection pool                                 |
+
+Set any of them in `.env` and run `docker compose up -d`. The wrong-PIN lockout
+on the self-service pages is a separate counter and is never relaxed. A blocked
+request answers `429 Too many requests`; `docker compose logs shelf | grep "Rate limit"`
+shows which limiter fired.
+
 ### Admin dashboard (Studio)
 
 Studio has no login of its own, so it is published on the server's loopback

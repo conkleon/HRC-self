@@ -86,6 +86,7 @@ declare global {
       APP_NAME: string;
       BRAND_PRIMARY_COLOR: string;
       BRANDING_DIR: string;
+      RATE_LIMIT_MULTIPLIER: string;
       MIN_COMPANION_VERSION: string;
       LATEST_COMPANION_VERSION: string;
     }
@@ -325,6 +326,15 @@ export const BRAND_PRIMARY_COLOR = getEnv("BRAND_PRIMARY_COLOR", {
  * @see {@link file://./../modules/branding/instance-branding.server.ts}
  */
 export const BRANDING_DIR = getEnv("BRANDING_DIR", {
+  isSecret: true,
+  isRequired: false,
+});
+
+/**
+ * Server-only. Scales every request rate limit (e.g. `10` allows ten times the
+ * stock rate). Parsed and validated in `~/utils/rate-limit-multiplier.server`.
+ */
+export const RATE_LIMIT_MULTIPLIER = getEnv("RATE_LIMIT_MULTIPLIER", {
   isSecret: true,
   isRequired: false,
 });

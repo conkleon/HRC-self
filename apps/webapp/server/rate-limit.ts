@@ -3,6 +3,7 @@ import { rateLimiter } from "hono-rate-limiter";
 import { getSession } from "remix-hono/session";
 import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
+import { scaleRateLimit } from "~/utils/rate-limit-multiplier.server";
 import { getClientIp } from "./client-ip";
 import { authSessionKey } from "./session";
 import type { FlashData, SessionData } from "./session";
@@ -253,15 +254,18 @@ function resolveAppLoaderIdentity(c: Context) {
  * quota. This middleware caps that surface per client IP before the route
  * handler runs.
  *
+ * The ceiling is 30 requests per minute times `RATE_LIMIT_MULTIPLIER`
+ * (`~/utils/rate-limit-multiplier.server`).
+ *
  * Backed by an in-memory MemoryStore. Per-machine counters are acceptable on
  * Fly: even with N machines a 30/min limit stays at ~30N/min worst-case,
  * which still defeats the threat. If we later need cross-machine accuracy,
- * swap the store — the interface is stable.
+ * swap the store; the interface is stable.
  */
 export const mobileIpRateLimit = () =>
   rateLimiter({
     windowMs: 60_000,
-    limit: 30,
+    limit: scaleRateLimit(30),
     standardHeaders: "draft-7",
     keyGenerator: bucketKeys.mobileIp,
     handler: (c) => {
@@ -302,10 +306,10 @@ export const redactSelfCustodyPath = (path: string) =>
  *
  * In-memory, per machine, like {@link mobileIpRateLimit}.
  *
- * @param limit - Max requests per IP per 60s window. Defaults to 30; exposed so
- *   tests can drive a low threshold.
+ * @param limit - Max requests per IP per 60s window. Defaults to 30 times
+ *   `RATE_LIMIT_MULTIPLIER`; exposed so tests can drive a low threshold.
  */
-export const selfCustodyRateLimit = (limit = 30) =>
+export const selfCustodyRateLimit = (limit = scaleRateLimit(30)) =>
   rateLimiter({
     windowMs: 60_000,
     limit,
@@ -351,10 +355,11 @@ export const selfCustodyRateLimit = (limit = 30) =>
  * to clamp down harder.
  *
  * @param limit - Max `.data` requests per (user, path) per 60s window.
- *   Defaults to 60. Exposed primarily so tests can drive a low, deterministic
- *   threshold; production callers should rely on the default.
+ *   Defaults to 60 times `RATE_LIMIT_MULTIPLIER`. Exposed primarily so tests
+ *   can drive a low, deterministic threshold; production callers should rely
+ *   on the default.
  */
-export const appLoaderRateLimit = (limit = 60) =>
+export const appLoaderRateLimit = (limit = scaleRateLimit(60)) =>
   rateLimiter({
     windowMs: 60_000,
     limit,
@@ -433,11 +438,11 @@ export const appLoaderRateLimit = (limit = 60) =>
  * effective ceiling is this times the machine count, and a Cloudflare rule
  * remains the hard, cross-machine one.
  *
- * @param limit - Envelopes per bucket per 60s window. Defaults to 300. Exposed
- *   so tests can drive a low, deterministic threshold; production callers
- *   should rely on the default.
+ * @param limit - Envelopes per bucket per 60s window. Defaults to 300 times
+ *   `RATE_LIMIT_MULTIPLIER`. Exposed so tests can drive a low, deterministic
+ *   threshold; production callers should rely on the default.
  */
-export const sentryTunnelRateLimit = (limit = 300) =>
+export const sentryTunnelRateLimit = (limit = scaleRateLimit(300)) =>
   rateLimiter({
     windowMs: 60_000,
     limit,
@@ -467,7 +472,7 @@ export const sentryTunnelRateLimit = (limit = 300) =>
 export const calendarFeedRateLimit = () =>
   rateLimiter({
     windowMs: 60_000,
-    limit: 60,
+    limit: scaleRateLimit(60),
     standardHeaders: "draft-7",
     keyGenerator: bucketKeys.calendarFeed,
     handler: (c) => {

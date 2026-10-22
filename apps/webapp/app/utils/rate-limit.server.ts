@@ -1,4 +1,5 @@
 import { ShelfError } from "./error";
+import { scaleRateLimit } from "./rate-limit-multiplier.server";
 
 /**
  * Per-user rate limit for mobile API handlers. Used as a second tier on top
@@ -8,6 +9,9 @@ import { ShelfError } from "./error";
  * Backed by an in-process Map. Per-machine counters are acceptable here for
  * the same reason the IP gate is in-memory: this is a guardrail, not a
  * billing meter.
+ *
+ * Every bucket's limit below is multiplied by `RATE_LIMIT_MULTIPLIER`
+ * (`~/utils/rate-limit-multiplier.server`).
  */
 
 type Bucket = "read" | "write" | "bulk";
@@ -72,7 +76,11 @@ export async function enforceUserRateLimit(
 
   for (const config of configs) {
     const key = `mobile:user:${userId}:${bucket}:${config.windowMs}`;
-    const result = check(key, config, now);
+    const result = check(
+      key,
+      { ...config, limit: scaleRateLimit(config.limit) },
+      now
+    );
     if (!result.allowed) {
       throw new ShelfError({
         cause: null,
