@@ -224,6 +224,7 @@ describe("listOfferedItems", () => {
     const where = {
       organizationId: ORG,
       archivedAt: null,
+      availableToBook: true,
       AND: [{ OR: [{ tags: { some: { id: TAG } } }] }, kindRule()],
     };
     expect(db.asset.count).toHaveBeenCalledWith({ where });
@@ -500,6 +501,14 @@ describe("listOfferedItems", () => {
       page: 1,
     });
 
+    // Only stock items that are not marked unavailable are counted.
+    expect(db.asset.findMany).toHaveBeenNthCalledWith(1, {
+      where: expect.objectContaining({
+        type: AssetType.QUANTITY_TRACKED,
+        availableToBook: true,
+      }),
+      select: { id: true, quantity: true },
+    });
     // q2 has every unit in custody, so it is left out of the list.
     expect(db.asset.count).toHaveBeenCalledWith({
       where: expect.objectContaining({
@@ -709,6 +718,12 @@ describe("offeredKitWhere", () => {
                 status: { not: AssetStatus.AVAILABLE },
               },
             },
+          },
+        },
+        // no active item marked unavailable, such as one awaiting repair
+        {
+          assetKits: {
+            none: { asset: { archivedAt: null, availableToBook: false } },
           },
         },
       ],

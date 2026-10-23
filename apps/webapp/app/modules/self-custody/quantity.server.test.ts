@@ -136,6 +136,7 @@ describe("selfTakeQuantity", () => {
           id: "q1",
           organizationId: ORG,
           archivedAt: null,
+          availableToBook: true,
           type: AssetType.QUANTITY_TRACKED,
           AND: [{ OR: [{ tags: { some: { id: "tag-ss" } } }] }],
         },

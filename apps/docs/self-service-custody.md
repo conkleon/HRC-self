@@ -198,6 +198,9 @@ from the browse list. The following are referred to staff:
 - quantity-tracked (stock) items scanned by their QR code (take them from the
   list instead);
 - items checked out on a booking;
+- items marked unavailable (**Available for bookings** off, for example while
+  awaiting repair). They are left off the browse list, and so is a kit that
+  holds one. A volunteer who already holds one can still return it;
 - archived items.
 
 On the browse list, rows show a thumbnail: the item's picture (or its

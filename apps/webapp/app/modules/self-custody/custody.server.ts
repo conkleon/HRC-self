@@ -9,7 +9,10 @@
  * `teamMemberId`.
  *
  * This module covers INDIVIDUAL assets. Kit members, kit-held custody,
- * quantity-tracked, archived and checked-out assets are referred to staff.
+ * quantity-tracked, archived and checked-out assets are referred to staff,
+ * and so is an asset marked unavailable for bookings (`availableToBook`,
+ * e.g. awaiting repair) while nobody holds it. A volunteer who holds one can
+ * still return it.
  * The same kit guards as the staff custody routes run inside the transaction,
  * so the two paths cannot disagree about what may be taken. Whole kits are
  * taken and returned from the browse list through `kit-custody.server.ts`.
@@ -52,7 +55,8 @@ export type SelfCustodyUnsupportedReason =
   | "quantity-tracked"
   | "kit-member"
   | "kit-custody"
-  | "checked-out";
+  | "checked-out"
+  | "unavailable";
 
 /** What the self-service page offers for a scanned QR. */
 export type SelfCustodyState =
@@ -121,6 +125,7 @@ export async function getSelfCustodyState({ qrId }: { qrId: string }): Promise<{
           type: true,
           status: true,
           archivedAt: true,
+          availableToBook: true,
           assetLocations: {
             where: { assetKitId: null },
             select: { location: { select: { name: true } } },
@@ -163,6 +168,7 @@ function stateOf(qr: {
     type: AssetType;
     status: AssetStatus;
     archivedAt: Date | null;
+    availableToBook: boolean;
     assetLocations: { location: { name: string } }[];
     assetKits: { id: string }[];
     custody: {
@@ -206,6 +212,7 @@ function stateOf(qr: {
       holderName: resolveTeamMemberName(holder.custodian),
     };
   }
+  if (!asset.availableToBook) return refer("unavailable");
   return { kind: "available", asset: card };
 }
 
@@ -290,6 +297,7 @@ export async function selfTakeCustody({
         organizationId,
         status: AssetStatus.AVAILABLE,
         archivedAt: null,
+        availableToBook: true,
         type: AssetType.INDIVIDUAL,
         ...(requiredOffer ? { AND: [offeredAssetMatch(requiredOffer)] } : {}),
       },

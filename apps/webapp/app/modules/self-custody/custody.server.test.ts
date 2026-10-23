@@ -77,6 +77,7 @@ function assetRow(overrides: Record<string, unknown> = {}) {
     type: AssetType.INDIVIDUAL,
     status: AssetStatus.AVAILABLE,
     archivedAt: null,
+    availableToBook: true,
     assetLocations: [{ location: { name: "Warehouse A" } }],
     assetKits: [],
     custody: [],
@@ -198,10 +199,27 @@ describe("getSelfCustodyState", () => {
       },
     ],
     ["checked-out", { asset: assetRow({ status: AssetStatus.CHECKED_OUT }) }],
+    ["unavailable", { asset: assetRow({ availableToBook: false }) }],
   ])("refers %s items to staff", async (reason, overrides) => {
     findQr.mockResolvedValue(qrRow(overrides) as never);
     const { state } = await getSelfCustodyState({ qrId: "qr-1" });
     expect(state).toMatchObject({ kind: "unsupported", reason });
+  });
+
+  it("still lets the holder return an item marked unavailable, such as one that broke", async () => {
+    findQr.mockResolvedValue(
+      qrRow({
+        asset: assetRow({
+          availableToBook: false,
+          status: AssetStatus.IN_CUSTODY,
+          custody: [
+            { kitCustodyId: null, custodian: { name: "Maria P.", user: null } },
+          ],
+        }),
+      }) as never
+    );
+    const { state } = await getSelfCustodyState({ qrId: "qr-1" });
+    expect(state).toMatchObject({ kind: "in-custody", holderName: "Maria P." });
   });
 });
 
@@ -241,6 +259,7 @@ describe("selfTakeCustody", () => {
         organizationId: ORG,
         status: AssetStatus.AVAILABLE,
         archivedAt: null,
+        availableToBook: true,
         type: AssetType.INDIVIDUAL,
       },
       data: { status: AssetStatus.IN_CUSTODY },
@@ -312,6 +331,7 @@ describe("selfTakeCustody", () => {
         organizationId: ORG,
         status: AssetStatus.AVAILABLE,
         archivedAt: null,
+        availableToBook: true,
         type: AssetType.INDIVIDUAL,
         AND: [
           {

@@ -11,10 +11,12 @@
  * self-service tag or by location (see `offer.server.ts`), that are free to
  * take right now: active individual assets that are available and outside any
  * kit, and active quantity-tracked assets with at least one free unit (see
- * `getFreeUnitsByAsset`). A kit
+ * `getFreeUnitsByAsset`), never one marked unavailable for bookings
+ * (`availableToBook`, e.g. awaiting repair). A kit
  * is offered when it is offered itself (every active item tagged, or the kit
- * stored in an offered location), it is available and nobody holds it, and
- * none of its individual items is out. Taking re-checks all of this inside the
+ * stored in an offered location), it is available and nobody holds it, none
+ * of its individual items is out, and none of its items is marked
+ * unavailable. Taking re-checks all of this inside the
  * claim (`selfTakeCustody` with `requiredOffer`, `selfTakeQuantity`,
  * `selfTakeKitCustody`), so the list is a view, not the gate.
  *
@@ -373,6 +375,7 @@ async function offeredUnits({
     where: {
       organizationId,
       archivedAt: null,
+      availableToBook: true,
       type: AssetType.QUANTITY_TRACKED,
       AND: [offeredAssetMatch(offer)],
     },
@@ -408,6 +411,7 @@ function offeredAssetWhere({
   return {
     organizationId,
     archivedAt: null,
+    availableToBook: true,
     // Under AND so the offer's location rule never meets the volunteer's
     // own location filter below.
     AND: [
@@ -441,8 +445,8 @@ function offeredAssetWhere({
 /**
  * Where clause for kits a volunteer may take from the list: available, held
  * by nobody, with at least one active item, offered (every active item tagged,
- * or the kit stored in an offered location), and no active individual item
- * out of the depot. Archived items are left out of kit custody, so they
+ * or the kit stored in an offered location), no active individual item out
+ * of the depot, and no active item marked unavailable (awaiting repair, say). Archived items are left out of kit custody, so they
  * neither block nor qualify a kit.
  *
  * Also the eligibility check of `selfTakeKitCustody`, so the list and the
@@ -474,6 +478,11 @@ export function offeredKitWhere({
               status: { not: AssetStatus.AVAILABLE },
             },
           },
+        },
+      },
+      {
+        assetKits: {
+          none: { asset: { archivedAt: null, availableToBook: false } },
         },
       },
     ],

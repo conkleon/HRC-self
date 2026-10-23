@@ -307,6 +307,8 @@ const UNSUPPORTED_COPY: Record<string, string> = {
   "kit-custody":
     "This item went out as part of a kit. Please return the kit to staff.",
   "checked-out": "This item is booked out. Please return it to staff.",
+  unavailable:
+    "This item is not available right now, for example because it is being repaired.",
 };
 
 /**

@@ -181,6 +181,7 @@ export async function selfTakeQuantity({
       id: assetId,
       organizationId,
       archivedAt: null,
+      availableToBook: true,
       type: AssetType.QUANTITY_TRACKED,
       AND: [offeredAssetMatch(requiredOffer)],
     },
