@@ -15,6 +15,8 @@ import {
   ArchiveIcon,
   ArchiveRestoreIcon,
   ArrowUpDownIcon,
+  CalendarCheck2Icon,
+  CalendarX2Icon,
 } from "lucide-react";
 import { useFetcher, useLoaderData } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
@@ -128,6 +130,15 @@ const ConditionalActionsDropdown = () => {
   const archiveFetcher = useFetcher<{ error?: { message?: string } | null }>();
   const isArchiveSubmitting = useDisabled(archiveFetcher);
   const isArchived = Boolean(asset.archivedAt);
+
+  /**
+   * Mark as unavailable / available: the same `toggle` intent the overview's
+   * "Available for bookings" switch posts, so both stay one setting. An
+   * unavailable asset cannot be booked and is not offered for self-service.
+   */
+  const availabilityFetcher = useFetcher();
+  const isAvailabilitySubmitting = useDisabled(availabilityFetcher);
+  const isAvailableToBook = asset.availableToBook;
 
   /**
    * Archiving would leave a model reservation short (issue #382). The server
@@ -415,6 +426,45 @@ const ConditionalActionsDropdown = () => {
                     <span className="flex items-center gap-2">
                       <Icon icon="barcode" />
                       Relink QR Code
+                    </span>
+                  </Button>
+                </div>
+                <div className="border-b px-0 py-1 md:p-0">
+                  <Button
+                    type="button"
+                    role="button"
+                    variant="link"
+                    data-test-id="toggleAvailabilityButton"
+                    className="justify-start px-4 py-3 text-gray-700 hover:bg-slate-100 hover:text-gray-700"
+                    width="full"
+                    disabled={
+                      archivedActionDisabled || isAvailabilitySubmitting
+                    }
+                    onClick={() => {
+                      // Dispatched before the menu closes, as Archive does, so
+                      // unmounting the menu cannot cancel it. The switch's
+                      // schema reads a missing `availableToBook` as false.
+                      void availabilityFetcher.submit(
+                        isAvailableToBook
+                          ? { intent: "toggle" }
+                          : { intent: "toggle", availableToBook: "on" },
+                        {
+                          method: "post",
+                          action: `/assets/${asset.id}/overview`,
+                        }
+                      );
+                      handleMenuClose();
+                    }}
+                  >
+                    <span className="flex items-center gap-2">
+                      {isAvailableToBook ? (
+                        <CalendarX2Icon className="size-5" />
+                      ) : (
+                        <CalendarCheck2Icon className="size-5" />
+                      )}
+                      {isAvailableToBook
+                        ? "Mark as unavailable"
+                        : "Mark as available"}
                     </span>
                   </Button>
                 </div>

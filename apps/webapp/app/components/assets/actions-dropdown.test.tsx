@@ -13,12 +13,14 @@
  *   the request (`assertNotKitMembers`) and the menu says so before the click.
  *   A quantity-tracked asset in a kit keeps its quantity custody action,
  *   because the units outside every kit can still be handed over on their own.
+ * - "Mark as unavailable" / "Mark as available" posts the overview's `toggle`
+ *   intent with the opposite of the asset's current setting.
  *
  * @see {@link file://./actions-dropdown.tsx}
  * @see {@link file://./../../modules/asset/utils.ts} isIndividualKitMember
  */
 import { OrganizationRoles } from "@prisma/client";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ActionsDropdown from "./actions-dropdown";
@@ -28,6 +30,9 @@ const caller = vi.hoisted(() => ({
   roles: [] as string[],
   assign: "anyone" as "anyone" | "self" | "none",
 }));
+
+/** Every fetcher's `submit`, so a test can see what a menu item posted. */
+const mockSubmit = vi.hoisted(() => vi.fn());
 
 /** The asset the route loader returns for the current render. */
 let mockAsset: Record<string, unknown> = {};
@@ -47,7 +52,7 @@ vi.mock("react-router", async () => {
     }),
     // why: the Archive / Reinstate item posts through a fetcher, which needs a
     // data router; these tests never submit it, so an idle stub is enough.
-    useFetcher: () => ({ state: "idle", submit: vi.fn() }),
+    useFetcher: () => ({ state: "idle", submit: mockSubmit }),
     // why: `useDisabled` reads the navigation state alongside the fetcher's;
     // nothing is navigating in these tests.
     useNavigation: () => ({ state: "idle" }),
@@ -107,6 +112,8 @@ const baseAsset = {
   title: "Tripod",
   type: "INDIVIDUAL",
   status: "AVAILABLE",
+  availableToBook: true,
+  archivedAt: null as Date | null,
   quantity: null as number | null,
   unitOfMeasure: null,
   custody: [],
@@ -201,5 +208,43 @@ describe("ActionsDropdown: custody of kit members", () => {
     expect(item).toHaveAccessibleDescription(
       /location is managed by its parent kit/i
     );
+  });
+});
+
+describe("ActionsDropdown: availability for bookings", () => {
+  beforeEach(() => {
+    caller.roles = [OrganizationRoles.ADMIN];
+    caller.assign = "anyone";
+    mockSubmit.mockClear();
+  });
+
+  it("marks an available asset as unavailable", () => {
+    renderMenu();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /mark as unavailable/i })
+    );
+    expect(mockSubmit).toHaveBeenCalledWith(
+      { intent: "toggle" },
+      { method: "post", action: "/assets/asset-1/overview" }
+    );
+  });
+
+  it("marks an unavailable asset as available again", () => {
+    renderMenu({ availableToBook: false });
+
+    fireEvent.click(screen.getByRole("button", { name: /mark as available/i }));
+    expect(mockSubmit).toHaveBeenCalledWith(
+      { intent: "toggle", availableToBook: "on" },
+      { method: "post", action: "/assets/asset-1/overview" }
+    );
+  });
+
+  it("is disabled for an archived asset", () => {
+    renderMenu({ archivedAt: new Date("2026-10-01") });
+
+    expect(
+      screen.getByRole("button", { name: /mark as unavailable/i })
+    ).toHaveAttribute("aria-disabled", "true");
   });
 });
