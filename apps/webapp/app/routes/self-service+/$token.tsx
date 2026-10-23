@@ -18,7 +18,8 @@
  * the token (never from the form), self-service must still be on, the phone
  * must hold a valid unlock cookie for the current PIN, the volunteer in
  * `?member=` must be a live NRM of the workspace, and take and return
- * re-check the tag and the holder inside their transactions.
+ * re-check the offer (tag or location) and the holder inside their
+ * transactions.
  *
  * @see {@link file://./../../modules/self-custody/browse.server.ts}
  * @see {@link file://./../../modules/self-custody/custody.server.ts}
@@ -81,6 +82,10 @@ import {
   clearFailedPins,
   recordFailedPin,
 } from "~/modules/self-custody/lockout.server";
+import {
+  hasSelfCustodyOffer,
+  resolveSelfCustodyOffer,
+} from "~/modules/self-custody/offer.server";
 import { verifyPin } from "~/modules/self-custody/pin.server";
 import { VolunteerNameSchema } from "~/modules/self-custody/schemas";
 import {
@@ -175,6 +180,15 @@ function refuse(
   });
 }
 
+/** What the workspace offers: its tag and its locations, widened to sub-locations. */
+function offerOf(organization: SelfCustodyBrowseOrganization) {
+  return resolveSelfCustodyOffer({
+    organizationId: organization.id,
+    tagId: organization.selfCustodyTagId,
+    locationIds: organization.selfCustodyLocations.map(({ id }) => id),
+  });
+}
+
 /**
  * Decides what an unlocked phone sees, from the URL's member, q and page, and
  * how the remembered-volunteer cookie changes. The volunteer is `?member=`,
@@ -186,7 +200,8 @@ async function unlockedView(
   organization: SelfCustodyBrowseOrganization,
   request: Request
 ): Promise<{ view: BrowseView; setCookie: string | null }> {
-  if (!organization.selfCustodyTagId) {
+  const offer = await offerOf(organization);
+  if (!hasSelfCustodyOffer(offer)) {
     return { view: { view: "no-items" }, setCookie: null };
   }
 
@@ -221,10 +236,7 @@ async function unlockedView(
     url.searchParams.get("tab") === "mine" ? "mine" : "take";
   const filters = filtersFrom(url);
   const page = Number(url.searchParams.get("page") ?? "1");
-  const scope = {
-    organizationId: organization.id,
-    tagId: organization.selfCustodyTagId,
-  };
+  const scope = { organizationId: organization.id, offer };
 
   // Both tabs show both counts, so both lists load whichever tab is open.
   const [myItems, list, filterOptions] = await Promise.all([
@@ -383,7 +395,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return data(payload({ done: { kind: "returned" as const, ...result } }));
     }
 
-    if (!organization.selfCustodyTagId) {
+    const offer = await offerOf(organization);
+    if (!hasSelfCustodyOffer(offer)) {
       throw refuse(
         400,
         "No items are offered for self-service right now.",
@@ -396,14 +409,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
             ...workspace,
             kitId: target.kitId,
             teamMemberId: volunteer.id,
-            requiredTagId: organization.selfCustodyTagId,
+            requiredOffer: offer,
           })
         : await selfTakeCustody({
             ...workspace,
             assetId: target.assetId,
             source: "list",
             teamMemberId: volunteer.id,
-            requiredTagId: organization.selfCustodyTagId,
+            requiredOffer: offer,
           });
     return data(payload({ done: { kind: "taken" as const, ...result } }));
   } catch (cause) {

@@ -21,6 +21,7 @@ const {
   mockSearch,
   mockFindOrCreate,
   mockGetVolunteer,
+  mockFindLocations,
 } = vi.hoisted(() => ({
   mockGetWorkspace: vi.fn(),
   mockOffered: vi.fn(),
@@ -33,6 +34,7 @@ const {
   mockSearch: vi.fn(),
   mockFindOrCreate: vi.fn(),
   mockGetVolunteer: vi.fn(),
+  mockFindLocations: vi.fn(),
 }));
 
 // why: the browse reads query the database; covered by browse.server.test.ts
@@ -66,8 +68,11 @@ vi.mock("~/modules/self-custody/volunteers.server", async (importOriginal) => ({
 }));
 
 // why: importing the route pulls in `db.server`, whose initialization would
-// otherwise open a real PostgreSQL connection.
-vi.mock("~/database/db.server", () => ({ db: { $connect: vi.fn() } }));
+// otherwise open a real PostgreSQL connection. The location tree is the one
+// read the real offer module makes, to widen chosen locations.
+vi.mock("~/database/db.server", () => ({
+  db: { $connect: vi.fn(), location: { findMany: mockFindLocations } },
+}));
 
 import { resetLockoutsForTests } from "~/modules/self-custody/lockout.server";
 import { hashPin } from "~/modules/self-custody/pin.server";
@@ -83,8 +88,12 @@ const organization = (overrides: Record<string, unknown> = {}) => ({
   selfCustodyPinHash: pinHash,
   selfCustodyPinUpdatedAt: new Date("2026-10-01"),
   selfCustodyTagId: "tag-ss",
+  selfCustodyLocations: [],
   ...overrides,
 });
+
+/** What the default workspace offers: its tag and no location. */
+const TAG_OFFER = { tagId: "tag-ss", locationIds: [] };
 
 const maria = { id: "tm-1", name: "Maria P." };
 const radio = {
@@ -217,7 +226,7 @@ describe("GET /self-service/:token", () => {
     expect(mockGetVolunteer).not.toHaveBeenCalled();
   });
 
-  it("offers nothing while no self-service tag is chosen", async () => {
+  it("offers nothing while neither a tag nor a location is chosen", async () => {
     const cookie = await unlock();
     mockGetWorkspace.mockResolvedValue(
       organization({ selfCustodyTagId: null })
@@ -268,7 +277,7 @@ describe("GET /self-service/:token", () => {
     });
     expect(mockOffered).toHaveBeenCalledWith({
       organizationId: "org-1",
-      tagId: "tag-ss",
+      offer: TAG_OFFER,
       filters: {
         query: "radio",
         kind: "all",
@@ -279,12 +288,50 @@ describe("GET /self-service/:token", () => {
     });
     expect(mockFilterOptions).toHaveBeenCalledWith({
       organizationId: "org-1",
-      tagId: "tag-ss",
+      offer: TAG_OFFER,
     });
     expect(mockMine).toHaveBeenCalledWith({
       organizationId: "org-1",
       teamMemberId: "tm-1",
     });
+  });
+
+  it("offers by location alone, widened to the chosen location's sub-locations", async () => {
+    const cookie = await unlock();
+    mockGetWorkspace.mockResolvedValue(
+      organization({
+        selfCustodyTagId: null,
+        selfCustodyLocations: [{ id: "loc-depot" }],
+      })
+    );
+    mockFindLocations.mockResolvedValue([
+      { id: "loc-depot", parentId: null },
+      { id: "loc-shelf", parentId: "loc-depot" },
+      { id: "loc-van", parentId: null },
+    ]);
+
+    const { body } = read(await loader(args(get("?member=tm-1", cookie))));
+
+    expect(body).toMatchObject({ view: "lists" });
+    const offer = { tagId: null, locationIds: ["loc-depot", "loc-shelf"] };
+    expect(mockOffered).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: "org-1", offer })
+    );
+    expect(mockFindLocations).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { organizationId: "org-1" } })
+    );
+
+    await action(
+      args(
+        post(
+          { intent: "take", assetId: "asset-1", teamMemberId: "tm-1" },
+          { cookie }
+        )
+      )
+    );
+    expect(mockTake).toHaveBeenCalledWith(
+      expect.objectContaining({ requiredOffer: offer })
+    );
   });
 
   it("remembers the volunteer, so the bare link opens their lists next time", async () => {
@@ -444,7 +491,7 @@ describe("POST /self-service/:token", () => {
       workspaceName: "Hellenic Red Cross",
       assetId: "asset-1",
       teamMemberId: "tm-1",
-      requiredTagId: "tag-ss",
+      requiredOffer: TAG_OFFER,
       source: "list",
     });
   });
@@ -473,7 +520,7 @@ describe("POST /self-service/:token", () => {
       workspaceName: "Hellenic Red Cross",
       kitId: "kit-1",
       teamMemberId: "tm-1",
-      requiredTagId: "tag-ss",
+      requiredOffer: TAG_OFFER,
     });
     expect(mockTake).not.toHaveBeenCalled();
   });
@@ -530,7 +577,7 @@ describe("POST /self-service/:token", () => {
     expect(mockTake).not.toHaveBeenCalled();
   });
 
-  it("refuses take while no self-service tag is chosen", async () => {
+  it("refuses take while neither a tag nor a location is chosen", async () => {
     const cookie = await unlock();
     mockGetWorkspace.mockResolvedValue(
       organization({ selfCustodyTagId: null })

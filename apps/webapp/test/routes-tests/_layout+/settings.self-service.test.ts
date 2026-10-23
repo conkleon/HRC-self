@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
  * Settings > Self-service: who may open it, and how the switch, the PIN and
- * the browse list's tag and link are saved. The permission mock answers from the real matrix for the role
+ * the browse list's offer (tag and locations) and link are saved. The permission mock answers from the real matrix for the role
  * under test; the settings service runs for real on a stubbed database.
  *
  * @see {@link file://../../../app/routes/_layout+/settings.self-service.tsx}
@@ -26,6 +26,7 @@ vi.mock("~/database/db.server", () => ({
   db: {
     organization: { findUnique: vi.fn(), update: vi.fn() },
     tag: { findMany: vi.fn() },
+    location: { findMany: vi.fn() },
   },
 }));
 
@@ -37,6 +38,7 @@ vi.mock("~/utils/emitter/send-notification.server", () => ({
 const findUnique = vi.mocked(db.organization.findUnique);
 const update = vi.mocked(db.organization.update);
 const findTags = vi.mocked(db.tag.findMany);
+const findLocations = vi.mocked(db.location.findMany);
 
 const context = {
   getSession: () => ({ userId: "user-1" }),
@@ -60,7 +62,8 @@ function actAs(role: OrganizationRoles) {
   );
 }
 
-const post = (fields: Record<string, string>) =>
+/** A form post; pass pairs to repeat a field, as ticked checkboxes do. */
+const post = (fields: Record<string, string> | [string, string][]) =>
   createActionArgs({
     request: new Request("http://localhost/settings/self-service", {
       method: "POST",
@@ -89,9 +92,11 @@ beforeEach(() => {
     selfCustodyPinHash: null,
     selfCustodyPinUpdatedAt: null,
     selfCustodyTagId: null,
+    selfCustodyLocations: [],
     selfCustodyBrowseToken: null,
   } as never);
   findTags.mockResolvedValue([]);
+  findLocations.mockResolvedValue([]);
 });
 
 describe("Settings > Self-service", () => {
@@ -167,17 +172,22 @@ describe("Settings > Self-service", () => {
     });
   });
 
-  it("shows the tags, and the browse link with its QR code once one exists", async () => {
+  it("shows the tags, the locations, and the browse link with its QR code once one exists", async () => {
     findUnique.mockResolvedValue({
       selfCustodyEnabled: true,
       selfCustodyPinHash: "scrypt$aa$bb",
       selfCustodyPinUpdatedAt: new Date("2026-10-01"),
       selfCustodyTagId: "tag-ss",
+      selfCustodyLocations: [{ id: "loc-depot" }],
       selfCustodyBrowseToken: "tok-1",
     } as never);
     findTags.mockResolvedValue([
       { id: "tag-v", name: "Vehicles" },
       { id: "tag-ss", name: "Self-service" },
+    ] as never);
+    findLocations.mockResolvedValue([
+      { id: "loc-shelf", name: "Shelf A", parentId: "loc-depot" },
+      { id: "loc-depot", name: "Depot", parentId: null },
     ] as never);
 
     const result = (await loader(
@@ -188,6 +198,11 @@ describe("Settings > Self-service", () => {
     )) as Record<string, any>;
 
     expect(result.settings.tagId).toBe("tag-ss");
+    expect(result.settings.locationIds).toEqual(["loc-depot"]);
+    expect(result.locations).toEqual([
+      { id: "loc-depot", name: "Depot", depth: 0 },
+      { id: "loc-shelf", name: "Shelf A", depth: 1 },
+    ]);
     expect(result.tags).toEqual([
       { id: "tag-ss", name: "Self-service" },
       { id: "tag-v", name: "Vehicles" },
@@ -209,25 +224,67 @@ describe("Settings > Self-service", () => {
 
   it("saves a tag of this workspace and refuses one of another", async () => {
     findTags.mockResolvedValue([{ id: "tag-ss" }] as never);
-    await action(post({ intent: "set-tag", tagId: "tag-ss" }));
+    await action(post({ intent: "set-offer", tagId: "tag-ss" }));
     expect(update).toHaveBeenCalledWith({
       where: { id: "org-1" },
-      data: { selfCustodyTagId: "tag-ss" },
+      data: { selfCustodyTagId: "tag-ss", selfCustodyLocations: { set: [] } },
     });
 
     update.mockClear();
     findTags.mockResolvedValue([]);
     await expect(
-      statusOf(() => action(post({ intent: "set-tag", tagId: "tag-other" })))
+      statusOf(() => action(post({ intent: "set-offer", tagId: "tag-other" })))
     ).resolves.toBe(400);
     expect(update).not.toHaveBeenCalled();
   });
 
-  it("clears the tag with an empty choice", async () => {
-    await action(post({ intent: "set-tag", tagId: "" }));
+  it("saves every ticked location with the tag", async () => {
+    findTags.mockResolvedValue([{ id: "tag-ss" }] as never);
+    findLocations.mockResolvedValue([
+      { id: "loc-depot" },
+      { id: "loc-van" },
+    ] as never);
+
+    await action(
+      post([
+        ["intent", "set-offer"],
+        ["tagId", "tag-ss"],
+        ["locationIds", "loc-depot"],
+        ["locationIds", "loc-van"],
+      ])
+    );
+
     expect(update).toHaveBeenCalledWith({
       where: { id: "org-1" },
-      data: { selfCustodyTagId: null },
+      data: {
+        selfCustodyTagId: "tag-ss",
+        selfCustodyLocations: {
+          set: [{ id: "loc-depot" }, { id: "loc-van" }],
+        },
+      },
+    });
+  });
+
+  it("refuses a location of another workspace", async () => {
+    findLocations.mockResolvedValue([] as never);
+    await expect(
+      statusOf(() =>
+        action(
+          post([
+            ["intent", "set-offer"],
+            ["locationIds", "loc-other-org"],
+          ])
+        )
+      )
+    ).resolves.toBe(400);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("clears the tag and the locations with nothing chosen", async () => {
+    await action(post({ intent: "set-offer", tagId: "" }));
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "org-1" },
+      data: { selfCustodyTagId: null, selfCustodyLocations: { set: [] } },
     });
   });
 
@@ -239,10 +296,10 @@ describe("Settings > Self-service", () => {
     expect(data.selfCustodyBrowseToken).toMatch(/^[A-Za-z0-9_-]{24}$/);
   });
 
-  it("a Manager can neither choose the tag nor replace the link", async () => {
+  it("a Manager can neither choose the offer nor replace the link", async () => {
     actAs(OrganizationRoles.MANAGER);
     await expect(
-      statusOf(() => action(post({ intent: "set-tag", tagId: "tag-ss" })))
+      statusOf(() => action(post({ intent: "set-offer", tagId: "tag-ss" })))
     ).resolves.toBe(403);
     await expect(
       statusOf(() => action(post({ intent: "rotate-link" })))

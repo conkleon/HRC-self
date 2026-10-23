@@ -60,23 +60,33 @@ enough to tap easily.
 
 In **Settings > Self-service > Browse list**:
 
-1. **Choose the tag.** Only available items with this tag are listed. Add the
-   tag to items from the asset list, one by one or with the bulk tag action.
-   With no tag chosen, the list offers nothing.
+1. **Choose what the list offers.** An available item is listed when it
+   **has the tag or is stored in one of the chosen locations**. Either is
+   enough, and both are saved together with **Save**:
+
+   - **Tag:** add it to items from the asset list, one by one or with the
+     bulk tag action.
+   - **Locations:** tick them in the checklist. Choosing a location includes
+     every location below it, so ticking "Depot" also offers what is on
+     "Depot > Shelf A", and a shelf added later is covered without a change
+     here.
+
+   With no tag and no location, the list offers nothing.
 
    Kits can't carry tags, so **a kit is listed when every active item in it
-   carries the tag**, the kit is available and nobody holds it, and none of its
-   individual items is out. To offer a kit, tag everything in it; to withdraw
-   it, untag any one item.
+   carries the tag, or when the kit itself is stored in a chosen location**,
+   and in both cases the kit is available, nobody holds it, and none of its
+   individual items is out. To offer a kit by tag, tag everything in it; to
+   withdraw it, untag any one item (and keep it out of the chosen locations).
 
 2. **Create the link.** The page shows the link and its QR code. Use
    **Download QR code** to print a poster.
 3. **Replace link** retires the old link and every printed copy of it at once,
    for example after a poster went missing. The PIN is unchanged.
 
-Removing the tag from an item takes it (and any kit it belongs to) off the list
-straight away; a volunteer who still has the old list open is refused when they
-press **Take**.
+Removing the tag from an item, or moving it out of the chosen locations, takes
+it off the list straight away (unless the other rule still offers it); a
+volunteer who still has the old list open is refused when they press **Take**.
 
 ### Kits from the list
 
@@ -138,8 +148,8 @@ pages:
 Everything is checked on the server for every action: that self-service is
 still on, that the phone holds an unlock for the current PIN, and the item's
 current state. On the browse list, the volunteer is re-checked as an NRM of the
-workspace on every request, taking re-checks the self-service tag inside the
-same atomic claim, and returning releases custody only when that volunteer
+workspace on every request, taking re-checks the offer (tag or location) inside
+the same atomic claim, and returning releases custody only when that volunteer
 holds it. Two volunteers taking the same item at the same moment cannot
 both succeed: the second sees "Someone has just taken this item."
 
@@ -163,16 +173,17 @@ Item photos are not shown on the page.
 
 ## For developers
 
-| Piece                                                       | Path                                                                                                                             |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Public page (scan)                                          | `apps/webapp/app/routes/qr+/_public+/$qrId_.self-custody.tsx`                                                                    |
-| Public page (browse list)                                   | `apps/webapp/app/routes/self-service+/$token.tsx`                                                                                |
-| Redirect from an anonymous scan                             | `apps/webapp/app/routes/qr+/_public+/$qrId.tsx`                                                                                  |
-| Settings page                                               | `apps/webapp/app/routes/_layout+/settings.self-service.tsx`                                                                      |
-| Services (PIN, lockout, cookie, volunteers, custody, email) | `apps/webapp/app/modules/self-custody/`                                                                                          |
-| Kit take and return                                         | `apps/webapp/app/modules/self-custody/kit-custody.server.ts`                                                                     |
-| List screens (tabs, live search, filters)                   | `apps/webapp/app/components/self-custody/browse-lists.tsx`                                                                       |
-| Manager email                                               | `apps/webapp/app/emails/self-custody-alert.tsx`                                                                                  |
-| Email audience                                              | `notifications.selfCustodyAlerts` in `packages/permissions/src/policies.ts`                                                      |
-| Rate limit                                                  | `selfCustodyRateLimit` in `apps/webapp/server/rate-limit.ts`                                                                     |
-| Schema                                                      | `Organization.selfCustodyEnabled`, `selfCustodyPinHash`, `selfCustodyPinUpdatedAt`, `selfCustodyTagId`, `selfCustodyBrowseToken` |
+| Piece                                                       | Path                                                                                                                                                     |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public page (scan)                                          | `apps/webapp/app/routes/qr+/_public+/$qrId_.self-custody.tsx`                                                                                            |
+| Public page (browse list)                                   | `apps/webapp/app/routes/self-service+/$token.tsx`                                                                                                        |
+| Redirect from an anonymous scan                             | `apps/webapp/app/routes/qr+/_public+/$qrId.tsx`                                                                                                          |
+| Settings page                                               | `apps/webapp/app/routes/_layout+/settings.self-service.tsx`                                                                                              |
+| Services (PIN, lockout, cookie, volunteers, custody, email) | `apps/webapp/app/modules/self-custody/`                                                                                                                  |
+| Kit take and return                                         | `apps/webapp/app/modules/self-custody/kit-custody.server.ts`                                                                                             |
+| List screens (tabs, live search, filters)                   | `apps/webapp/app/components/self-custody/browse-lists.tsx`                                                                                               |
+| Manager email                                               | `apps/webapp/app/emails/self-custody-alert.tsx`                                                                                                          |
+| Email audience                                              | `notifications.selfCustodyAlerts` in `packages/permissions/src/policies.ts`                                                                              |
+| Rate limit                                                  | `selfCustodyRateLimit` in `apps/webapp/server/rate-limit.ts`                                                                                             |
+| What the list offers (tag or location)                      | `apps/webapp/app/modules/self-custody/offer.server.ts`                                                                                                   |
+| Schema                                                      | `Organization.selfCustodyEnabled`, `selfCustodyPinHash`, `selfCustodyPinUpdatedAt`, `selfCustodyTagId`, `selfCustodyLocations`, `selfCustodyBrowseToken` |

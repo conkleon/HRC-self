@@ -67,7 +67,8 @@ vi.mock("~/modules/activity-event/service.server", () => ({
 vi.mock("./notify.server", () => ({ sendSelfCustodyAlert: vi.fn() }));
 
 const ORG = "org-1";
-const TAG = "tag-ss";
+/** The workspace offers by tag and by one location. */
+const OFFER = { tagId: "tag-ss", locationIds: ["loc-depot"] };
 const workspace = { organizationId: ORG, workspaceName: "Hellenic Red Cross" };
 
 const radio = { id: "a1", type: AssetType.INDIVIDUAL, unitOfMeasure: null };
@@ -117,7 +118,7 @@ describe("selfTakeKitCustody", () => {
       ...workspace,
       kitId: "kit-1",
       teamMemberId: "tm-1",
-      requiredTagId: TAG,
+      requiredOffer: OFFER,
     });
 
   it("puts the kit and each of its items in the volunteer's custody", async () => {
@@ -139,7 +140,7 @@ describe("selfTakeKitCustody", () => {
     expect(tx.kit.findFirst).toHaveBeenCalledWith({
       where: {
         id: "kit-1",
-        ...offeredKitWhere({ organizationId: ORG, tagId: TAG }),
+        ...offeredKitWhere({ organizationId: ORG, offer: OFFER }),
       },
       select: { name: true },
     });

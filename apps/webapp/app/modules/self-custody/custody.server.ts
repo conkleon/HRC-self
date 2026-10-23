@@ -33,6 +33,8 @@ import { stripMarkdocDelimiters } from "~/utils/markdoc-sanitize";
 import { assertTeamMemberBelongsToOrg } from "~/utils/org-validation.server";
 import { resolveTeamMemberName } from "~/utils/user";
 import { sendSelfCustodyAlert } from "./notify.server";
+import { offeredAssetMatch } from "./offer.server";
+import type { SelfCustodyOffer } from "./offer.server";
 
 /** The item card on the self-service page. */
 export type SelfCustodyAsset = {
@@ -250,8 +252,9 @@ export const eventMeta = (source: SelfCustodySource) =>
  * @param args.workspaceName - For the manager email
  * @param args.assetId - The item
  * @param args.teamMemberId - The volunteer, from search or "add me"
- * @param args.requiredTagId - When set, only an item with this tag can be
- *   claimed: the browse list offers tagged items only, and the claim enforces it
+ * @param args.requiredOffer - When set, only an item this offer covers (by
+ *   tag or location) can be claimed: the browse list offers those items only,
+ *   and the claim enforces it
  * @param args.source - Scan or browse list; defaults to scan
  * @returns The item's title and the volunteer's name
  * @throws {ShelfError} 400 for a team member of another workspace or an item
@@ -262,11 +265,11 @@ export async function selfTakeCustody({
   workspaceName,
   assetId,
   teamMemberId,
-  requiredTagId,
+  requiredOffer,
   source = "scan",
 }: SelfCustodyActionArgs & {
   teamMemberId: string;
-  requiredTagId?: string;
+  requiredOffer?: SelfCustodyOffer;
 }): Promise<SelfCustodyResult> {
   const result = await db.$transaction(async (tx) => {
     await assertTeamMemberBelongsToOrg({ teamMemberId, organizationId }, tx);
@@ -288,7 +291,7 @@ export async function selfTakeCustody({
         status: AssetStatus.AVAILABLE,
         archivedAt: null,
         type: AssetType.INDIVIDUAL,
-        ...(requiredTagId ? { tags: { some: { id: requiredTagId } } } : {}),
+        ...(requiredOffer ? { AND: [offeredAssetMatch(requiredOffer)] } : {}),
       },
       data: { status: AssetStatus.IN_CUSTODY },
     });

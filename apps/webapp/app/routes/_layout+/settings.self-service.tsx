@@ -8,8 +8,9 @@
  * return.
  *
  * The same page sets up the browse list for items without a usable label:
- * the tag that marks the items it offers, and its secret link (shown as a QR
- * code for a poster), which can be replaced to retire old copies.
+ * what it offers (items with a tag, or stored in chosen locations and their
+ * sub-locations), and its secret link (shown as a QR code for a poster),
+ * which can be replaced to retire old copies.
  *
  * Gated like the General settings page (`generalSettings`: read to view,
  * update to change), and only offered in team workspaces, where NRMs exist.
@@ -39,11 +40,12 @@ import { PinSchema } from "~/modules/self-custody/schemas";
 import {
   browseLinkUrl,
   getSelfCustodySettings,
+  listSelfCustodyLocationChoices,
   renderBrowseLinkQr,
   rotateSelfCustodyBrowseToken,
   setSelfCustodyEnabled,
+  setSelfCustodyOffer,
   setSelfCustodyPin,
-  setSelfCustodyTag,
 } from "~/modules/self-custody/settings.server";
 import { getTagsForAssetTagsFilter } from "~/modules/tag/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
@@ -79,11 +81,13 @@ export const SetPinSchema = z
   });
 
 const IntentSchema = z.object({
-  intent: z.enum(["toggle", "set-pin", "set-tag", "rotate-link"]),
+  intent: z.enum(["toggle", "set-pin", "set-offer", "rotate-link"]),
 });
 const ToggleSchema = z.object({ enabled: z.string().optional() });
 /** An empty value clears the tag. */
 const TagSchema = z.object({ tagId: z.string().optional() });
+/** The ticked locations, one `locationIds` entry each; none clears them. */
+const LocationIdsSchema = z.array(z.string().min(1));
 
 /** Refuses personal workspaces: they have no NRMs to hand items to. */
 function assertTeamWorkspace(type: OrganizationType | undefined) {
@@ -112,9 +116,10 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     assertTeamWorkspace(currentOrganization.type);
 
     const header: HeaderData = { title: "Self-service" };
-    const [settings, { tags }] = await Promise.all([
+    const [settings, { tags }, locations] = await Promise.all([
       getSelfCustodySettings(organizationId),
       getTagsForAssetTagsFilter({ organizationId }),
+      listSelfCustodyLocationChoices(organizationId),
     ]);
     const browseUrl = settings.browseToken
       ? browseLinkUrl(settings.browseToken)
@@ -125,6 +130,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       tags: tags
         .map((tag) => ({ id: tag.id, name: tag.name }))
         .sort((a, b) => a.name.localeCompare(b.name)),
+      locations,
       browseUrl,
       browseQr: browseUrl ? await renderBrowseLinkQr(browseUrl) : null,
     });
@@ -163,14 +169,18 @@ export async function action({ context, request }: ActionFunctionArgs) {
       return data(payload({ success: true }));
     }
 
-    if (intent === "set-tag") {
+    if (intent === "set-offer") {
       const tagId = parseData(formData, TagSchema).tagId || null;
-      await setSelfCustodyTag({ organizationId, tagId });
+      const locationIds = LocationIdsSchema.parse(
+        formData.getAll("locationIds")
+      );
+      await setSelfCustodyOffer({ organizationId, tagId, locationIds });
       sendNotification({
         title: "Browse list updated",
-        message: tagId
-          ? "Volunteers see the available items with this tag."
-          : "The browse list offers no items until you choose a tag.",
+        message:
+          tagId || locationIds.length > 0
+            ? "Volunteers see the available items with the tag or in the chosen locations."
+            : "The browse list offers no items until you choose a tag or a location.",
         icon: { name: "success", variant: "success" },
         senderId: userId,
       });
@@ -217,7 +227,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 export const ErrorBoundary = () => <ErrorContent />;
 
 export default function SelfServiceSettings() {
-  const { settings, tags, browseUrl, browseQr } =
+  const { settings, tags, locations, browseUrl, browseQr } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<DataOrErrorResponse>();
   const zo = useZorm("SetPin", SetPinSchema);
@@ -325,6 +335,8 @@ export default function SelfServiceSettings() {
       <BrowseListSection
         tags={tags}
         tagId={settings.tagId}
+        locations={locations}
+        locationIds={settings.locationIds}
         browseUrl={browseUrl}
         browseQr={browseQr}
       />
@@ -333,37 +345,45 @@ export default function SelfServiceSettings() {
 }
 
 /**
- * Sets up the browse list: which tag marks its items, and its link and QR.
+ * Sets up the browse list: what it offers (a tag, locations) and its link
+ * and QR.
  *
  * @param props.tags - The workspace's asset tags, by name
  * @param props.tagId - The chosen tag, null for none
+ * @param props.locations - The workspace's locations, in tree order
+ * @param props.locationIds - The chosen locations
  * @param props.browseUrl - The current link, null until one is created
  * @param props.browseQr - The link as a PNG data URL, null without a link
  */
 function BrowseListSection({
   tags,
   tagId,
+  locations,
+  locationIds,
   browseUrl,
   browseQr,
 }: {
   tags: { id: string; name: string }[];
   tagId: string | null;
+  locations: { id: string; name: string; depth: number }[];
+  locationIds: string[];
   browseUrl: string | null;
   browseQr: string | null;
 }) {
   const disabled = useDisabled();
+  const chosenLocations = new Set(locationIds);
   return (
     <section className="rounded-md border border-gray-200 bg-white p-6">
       <h2 className="mb-1 text-lg font-semibold">Browse list</h2>
       <p className="mb-4 max-w-2xl text-gray-600">
         For items whose QR label is missing or hard to reach. Volunteers open
         the link below, enter the PIN and say who they are. They can take any
-        available item with the chosen tag, and return items they hold
-        themselves.
+        available item that has the chosen tag or is stored in one of the chosen
+        locations, and return items they hold themselves.
       </p>
 
       <Form method="post" className="mb-6 flex max-w-sm flex-col gap-2">
-        <input type="hidden" name="intent" value="set-tag" />
+        <input type="hidden" name="intent" value="set-offer" />
         <label htmlFor="self-service-tag" className="font-medium text-gray-700">
           Items with this tag are listed
         </label>
@@ -374,7 +394,7 @@ function BrowseListSection({
           aria-describedby="self-service-tag-hint"
           className="rounded-md border border-gray-300 px-3 py-2"
         >
-          <option value="">No tag (list offers nothing)</option>
+          <option value="">No tag</option>
           {tags.map((tag) => (
             <option key={tag.id} value={tag.id}>
               {tag.name}
@@ -384,9 +404,49 @@ function BrowseListSection({
         <p id="self-service-tag-hint" className="text-sm text-gray-600">
           Add the tag to items from the asset list, one by one or in bulk.
         </p>
+
+        <fieldset
+          className="mt-4 flex flex-col gap-2"
+          aria-describedby="self-service-locations-hint"
+        >
+          <legend className="mb-2 font-medium text-gray-700">
+            Items in these locations are listed
+          </legend>
+          {locations.length > 0 ? (
+            <div className="max-h-64 overflow-y-auto rounded-md border border-gray-300 px-3 py-2">
+              {locations.map((location) => (
+                <label
+                  key={location.id}
+                  className="flex items-center gap-2 py-1 text-gray-700"
+                  // why: indents each sub-location under its parent
+                  style={{ paddingLeft: `${location.depth * 20}px` }}
+                >
+                  <input
+                    type="checkbox"
+                    name="locationIds"
+                    value={location.id}
+                    defaultChecked={chosenLocations.has(location.id)}
+                    className="size-4 rounded border-gray-300"
+                  />
+                  {location.name}
+                </label>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">
+              This workspace has no locations yet.
+            </p>
+          )}
+          <p id="self-service-locations-hint" className="text-sm text-gray-600">
+            Choosing a location includes all its sub-locations. An item is
+            listed when it has the tag or is in one of these locations. With no
+            tag and no location, the list offers nothing.
+          </p>
+        </fieldset>
+
         <div>
           <Button type="submit" disabled={disabled}>
-            Save tag
+            Save
           </Button>
         </div>
       </Form>

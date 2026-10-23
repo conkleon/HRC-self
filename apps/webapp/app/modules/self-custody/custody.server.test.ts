@@ -296,13 +296,13 @@ describe("selfTakeCustody", () => {
     });
   });
 
-  it("from the list, claims only an item carrying the self-service tag", async () => {
+  it("from the list, claims only an item the offer covers, by tag or location", async () => {
     await selfTakeCustody({
       organizationId: ORG,
       workspaceName: "Hellenic Red Cross",
       assetId: "asset-1",
       teamMemberId: "tm-1",
-      requiredTagId: "tag-ss",
+      requiredOffer: { tagId: "tag-ss", locationIds: ["loc-depot"] },
       source: "list",
     });
 
@@ -313,7 +313,18 @@ describe("selfTakeCustody", () => {
         status: AssetStatus.AVAILABLE,
         archivedAt: null,
         type: AssetType.INDIVIDUAL,
-        tags: { some: { id: "tag-ss" } },
+        AND: [
+          {
+            OR: [
+              { tags: { some: { id: "tag-ss" } } },
+              {
+                assetLocations: {
+                  some: { locationId: { in: ["loc-depot"] }, assetKitId: null },
+                },
+              },
+            ],
+          },
+        ],
       },
       data: { status: AssetStatus.IN_CUSTODY },
     });
@@ -332,7 +343,7 @@ describe("selfTakeCustody", () => {
     );
   });
 
-  it("refers an available item without the self-service tag to staff", async () => {
+  it("refers an available item the offer does not cover to staff", async () => {
     tx.asset.updateMany.mockResolvedValue({ count: 0 });
     tx.asset.findFirst.mockResolvedValue({
       title: "Radio #12",
@@ -344,7 +355,7 @@ describe("selfTakeCustody", () => {
         workspaceName: "Hellenic Red Cross",
         assetId: "asset-1",
         teamMemberId: "tm-1",
-        requiredTagId: "tag-ss",
+        requiredOffer: { tagId: "tag-ss", locationIds: [] },
         source: "list",
       })
     ).rejects.toMatchObject({ status: 400 });

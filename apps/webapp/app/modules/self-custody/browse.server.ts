@@ -7,14 +7,16 @@
  * self-service, the filter choices for that list, and what the volunteer
  * already holds.
  *
- * Offered items are the ones an admin marked with the workspace's
- * self-service tag that are free to take right now: available, active,
- * individual assets outside any kit. Kits cannot carry tags, so a kit is
- * offered when every active item in it carries the tag, the kit is available
- * and nobody holds it, and none of its individual items is out. Taking
- * re-checks all of this inside the claim (`selfTakeCustody` with
- * `requiredTagId`, `selfTakeKitCustody`), so the list is a view, not the gate.
+ * Offered items are the ones an admin offered, by the workspace's
+ * self-service tag or by location (see `offer.server.ts`), that are free to
+ * take right now: available, active, individual assets outside any kit. A kit
+ * is offered when it is offered itself (every active item tagged, or the kit
+ * stored in an offered location), it is available and nobody holds it, and
+ * none of its individual items is out. Taking re-checks all of this inside the
+ * claim (`selfTakeCustody` with `requiredOffer`, `selfTakeKitCustody`), so the
+ * list is a view, not the gate.
  *
+ * @see {@link file://./offer.server.ts}
  * @see {@link file://./custody.server.ts}
  * @see {@link file://./kit-custody.server.ts}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
@@ -25,13 +27,20 @@ import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 import { db } from "~/database/db.server";
 import { ShelfError } from "~/utils/error";
 import type { SelfCustodyOrganization } from "./custody.server";
+import { offeredAssetMatch, offeredKitMatch } from "./offer.server";
+import type { SelfCustodyOffer } from "./offer.server";
 
 /** Entries per page of the browse list. */
 export const BROWSE_PAGE_SIZE = 20;
 
-/** The workspace behind a browse link, with the tag that marks offered items. */
+/**
+ * The workspace behind a browse link, with the tag and the locations that
+ * offer items. Turn them into a `SelfCustodyOffer` with
+ * `resolveSelfCustodyOffer` before listing or claiming.
+ */
 export type SelfCustodyBrowseOrganization = SelfCustodyOrganization & {
   selfCustodyTagId: string | null;
+  selfCustodyLocations: { id: string }[];
 };
 
 /** Which entries the list shows: both, single items only, or kits only. */
@@ -132,7 +141,7 @@ function kitEntry(kit: {
  * Resolves a browse link to its workspace.
  *
  * @param token - The secret path segment of the link
- * @returns The workspace, with its self-service settings and tag
+ * @returns The workspace, with its self-service settings, tag and locations
  * @throws {ShelfError} 404 when no workspace has this token
  */
 export async function getBrowseWorkspace(
@@ -147,6 +156,7 @@ export async function getBrowseWorkspace(
       selfCustodyPinHash: true,
       selfCustodyPinUpdatedAt: true,
       selfCustodyTagId: true,
+      selfCustodyLocations: { select: { id: true } },
     },
   });
 
@@ -165,16 +175,16 @@ export async function getBrowseWorkspace(
 }
 
 /**
- * Where clause for items a volunteer may take from the list: tagged for
- * self-service, available, active, individual and not in a kit.
+ * Where clause for items a volunteer may take from the list: offered (by tag
+ * or location), available, active, individual and not in a kit.
  */
 function offeredAssetWhere({
   organizationId,
-  tagId,
+  offer,
   filters,
 }: {
   organizationId: string;
-  tagId: string;
+  offer: SelfCustodyOffer;
   filters?: Partial<BrowseFilters>;
 }): Prisma.AssetWhereInput {
   const term = filters?.query?.trim() ?? "";
@@ -183,8 +193,10 @@ function offeredAssetWhere({
     archivedAt: null,
     status: AssetStatus.AVAILABLE,
     type: AssetType.INDIVIDUAL,
-    tags: { some: { id: tagId } },
     assetKits: { none: {} },
+    // Under AND so the offer's location rule never meets the volunteer's
+    // own location filter below.
+    AND: [offeredAssetMatch(offer)],
     ...(term ? { title: { contains: term, mode: "insensitive" } } : {}),
     ...(filters?.locationId
       ? {
@@ -199,20 +211,21 @@ function offeredAssetWhere({
 
 /**
  * Where clause for kits a volunteer may take from the list: available, held
- * by nobody, with at least one active item, every active item tagged for
- * self-service, and no active individual item out of the depot. Archived
- * items are left out of kit custody, so they neither block nor qualify a kit.
+ * by nobody, with at least one active item, offered (every active item tagged,
+ * or the kit stored in an offered location), and no active individual item
+ * out of the depot. Archived items are left out of kit custody, so they
+ * neither block nor qualify a kit.
  *
  * Also the eligibility check of `selfTakeKitCustody`, so the list and the
  * claim cannot disagree about which kits may be taken.
  */
 export function offeredKitWhere({
   organizationId,
-  tagId,
+  offer,
   filters,
 }: {
   organizationId: string;
-  tagId: string;
+  offer: SelfCustodyOffer;
   filters?: Partial<BrowseFilters>;
 }): Prisma.KitWhereInput {
   const term = filters?.query?.trim() ?? "";
@@ -222,11 +235,7 @@ export function offeredKitWhere({
     custody: { is: null },
     AND: [
       { assetKits: { some: { asset: { archivedAt: null } } } },
-      {
-        assetKits: {
-          none: { asset: { archivedAt: null, tags: { none: { id: tagId } } } },
-        },
-      },
+      offeredKitMatch(offer),
       {
         assetKits: {
           none: {
@@ -271,24 +280,24 @@ function sliceAfter({
  * kits and the start of the items.
  *
  * @param args.organizationId - The workspace of the browse link (server-resolved)
- * @param args.tagId - The workspace's self-service tag
+ * @param args.offer - What the workspace offers, from `resolveSelfCustodyOffer`
  * @param args.filters - Search, kind, location and category
  * @param args.page - 1-based page; out-of-range pages are clamped
  * @returns The entries and the page position
  */
 export async function listOfferedItems({
   organizationId,
-  tagId,
+  offer,
   filters,
   page,
 }: {
   organizationId: string;
-  tagId: string;
+  offer: SelfCustodyOffer;
   filters: BrowseFilters;
   page: number;
 }): Promise<BrowsePage> {
-  const kitWhere = offeredKitWhere({ organizationId, tagId, filters });
-  const assetWhere = offeredAssetWhere({ organizationId, tagId, filters });
+  const kitWhere = offeredKitWhere({ organizationId, offer, filters });
+  const assetWhere = offeredAssetWhere({ organizationId, offer, filters });
 
   const [kitCount, assetCount] = await Promise.all([
     filters.kind === "item" ? 0 : db.kit.count({ where: kitWhere }),
@@ -345,18 +354,18 @@ export async function listOfferedItems({
  * are listed, so no choice leads to an empty list on its own.
  *
  * @param args.organizationId - The workspace of the browse link (server-resolved)
- * @param args.tagId - The workspace's self-service tag
+ * @param args.offer - What the workspace offers, from `resolveSelfCustodyOffer`
  * @returns Both lists, in name order
  */
 export async function listBrowseFilterOptions({
   organizationId,
-  tagId,
+  offer,
 }: {
   organizationId: string;
-  tagId: string;
+  offer: SelfCustodyOffer;
 }): Promise<{ locations: FilterOption[]; categories: FilterOption[] }> {
-  const asset = offeredAssetWhere({ organizationId, tagId });
-  const kit = offeredKitWhere({ organizationId, tagId });
+  const asset = offeredAssetWhere({ organizationId, offer });
+  const kit = offeredKitWhere({ organizationId, offer });
 
   const [locations, categories] = await Promise.all([
     db.location.findMany({
@@ -385,7 +394,7 @@ export async function listBrowseFilterOptions({
 /**
  * What a volunteer holds and can return themselves: the kits in their
  * custody, then their own (not kit-held) custody of active, individual items,
- * tagged or not.
+ * offered or not.
  *
  * @param args.organizationId - The workspace of the browse link (server-resolved)
  * @param args.teamMemberId - The volunteer, already proven to be an NRM of the workspace

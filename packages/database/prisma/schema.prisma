@@ -927,6 +927,10 @@ model Location {
   custodies       Custody[]
   consumptionLogs ConsumptionLog[]
 
+  // Workspaces whose self-service browse page lists the items stored here
+  // (and in its sub-locations)
+  selfCustodyOrganizations Organization[] @relation("SelfCustodyLocations")
+
   // Self-relation for nested locations
   parentId String?
   parent   Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
@@ -1099,6 +1103,7 @@ model Organization {
   selfCustodyPinUpdatedAt DateTime? // Set on every PIN change; unlock cookies issued before it stop working
   selfCustodyTagId        String? // Items with this tag are listed on the self-service browse page
   selfCustodyTag          Tag?      @relation("SelfCustodyTag", fields: [selfCustodyTagId], references: [id], onDelete: SetNull)
+  selfCustodyLocations    Location[] @relation("SelfCustodyLocations") // Items stored here or in a sub-location are listed on the browse page too
   selfCustodyBrowseToken  String?   @unique // Secret path segment of the browse page; replacing it retires old links
 
   // This is used to disable the workspace for the user. It is set to true when the user leaves the workspace

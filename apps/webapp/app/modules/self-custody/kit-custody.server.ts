@@ -38,6 +38,7 @@ import {
 } from "./custody.server";
 import type { SelfCustodyResult } from "./custody.server";
 import { sendSelfCustodyAlert } from "./notify.server";
+import type { SelfCustodyOffer } from "./offer.server";
 
 /** Arguments shared by kit take and return. */
 type SelfKitCustodyArgs = {
@@ -71,10 +72,10 @@ function notePhrase(
  * @param args.workspaceName - For the manager email
  * @param args.kitId - The kit
  * @param args.teamMemberId - The volunteer, already proven to be an NRM of the workspace
- * @param args.requiredTagId - The workspace's self-service tag: every active
- *   item in the kit must carry it
+ * @param args.requiredOffer - What the workspace offers: the kit must be
+ *   offered by tag (every active item tagged) or by location
  * @returns The kit's name and the volunteer's name
- * @throws {ShelfError} 400 for a kit staff must handle (untagged items, an
+ * @throws {ShelfError} 400 for a kit staff must handle (not offered, an
  *   item out, a booking holding it), 404 for an unknown kit, 409 when someone
  *   took it first
  */
@@ -83,10 +84,10 @@ export async function selfTakeKitCustody({
   workspaceName,
   kitId,
   teamMemberId,
-  requiredTagId,
+  requiredOffer,
 }: SelfKitCustodyArgs & {
   teamMemberId: string;
-  requiredTagId: string;
+  requiredOffer: SelfCustodyOffer;
 }): Promise<SelfCustodyResult> {
   const result = await db.$transaction(async (tx) => {
     await assertTeamMemberBelongsToOrg({ teamMemberId, organizationId }, tx);
@@ -111,7 +112,7 @@ export async function selfTakeKitCustody({
     const offered = await tx.kit.findFirst({
       where: {
         id: kitId,
-        ...offeredKitWhere({ organizationId, tagId: requiredTagId }),
+        ...offeredKitWhere({ organizationId, offer: requiredOffer }),
       },
       select: { name: true },
     });

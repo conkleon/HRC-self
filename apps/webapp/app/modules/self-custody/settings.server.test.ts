@@ -12,11 +12,12 @@ import {
   browseLinkUrl,
   getSelfCustodySettings,
   isSelfCustodyEnabled,
+  listSelfCustodyLocationChoices,
   renderBrowseLinkQr,
   rotateSelfCustodyBrowseToken,
   setSelfCustodyEnabled,
+  setSelfCustodyOffer,
   setSelfCustodyPin,
-  setSelfCustodyTag,
 } from "./settings.server";
 
 // why: unit tests run without a database; these are the only Prisma calls made
@@ -24,6 +25,7 @@ vi.mock("~/database/db.server", () => ({
   db: {
     organization: { findUnique: vi.fn(), update: vi.fn() },
     tag: { findMany: vi.fn() },
+    location: { findMany: vi.fn() },
   },
 }));
 
@@ -33,6 +35,7 @@ vi.mock("~/utils/logger", () => ({ Logger: { error: vi.fn() } }));
 const findUnique = vi.mocked(db.organization.findUnique);
 const update = vi.mocked(db.organization.update);
 const findTags = vi.mocked(db.tag.findMany);
+const findLocations = vi.mocked(db.location.findMany);
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -58,6 +61,7 @@ describe("getSelfCustodySettings", () => {
       selfCustodyPinHash: "scrypt$aa$bb",
       selfCustodyPinUpdatedAt: changed,
       selfCustodyTagId: "tag-ss",
+      selfCustodyLocations: [{ id: "loc-depot" }],
       selfCustodyBrowseToken: "tok",
     } as never);
 
@@ -68,6 +72,7 @@ describe("getSelfCustodySettings", () => {
       hasPin: true,
       pinUpdatedAt: changed,
       tagId: "tag-ss",
+      locationIds: ["loc-depot"],
       browseToken: "tok",
     });
     expect(JSON.stringify(settings)).not.toContain("scrypt");
@@ -120,37 +125,95 @@ describe("setSelfCustodyPin", () => {
   });
 });
 
-describe("setSelfCustodyTag", () => {
-  it("stores a tag of this workspace", async () => {
+describe("setSelfCustodyOffer", () => {
+  it("stores a tag and locations of this workspace together", async () => {
     findTags.mockResolvedValue([{ id: "tag-ss" }] as never);
-    await setSelfCustodyTag({ organizationId: "org-1", tagId: "tag-ss" });
+    findLocations.mockResolvedValue([
+      { id: "loc-depot" },
+      { id: "loc-van" },
+    ] as never);
+
+    await setSelfCustodyOffer({
+      organizationId: "org-1",
+      tagId: "tag-ss",
+      locationIds: ["loc-depot", "loc-van", "loc-depot"],
+    });
 
     expect(findTags).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: { in: ["tag-ss"] }, organizationId: "org-1" },
       })
     );
+    expect(findLocations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: { in: ["loc-depot", "loc-van"] },
+          organizationId: "org-1",
+        },
+      })
+    );
     expect(update).toHaveBeenCalledWith({
       where: { id: "org-1" },
-      data: { selfCustodyTagId: "tag-ss" },
+      data: {
+        selfCustodyTagId: "tag-ss",
+        selfCustodyLocations: { set: [{ id: "loc-depot" }, { id: "loc-van" }] },
+      },
     });
   });
 
   it("refuses a tag of another workspace", async () => {
     findTags.mockResolvedValue([]);
     await expect(
-      setSelfCustodyTag({ organizationId: "org-1", tagId: "tag-other" })
+      setSelfCustodyOffer({
+        organizationId: "org-1",
+        tagId: "tag-other",
+        locationIds: [],
+      })
     ).rejects.toMatchObject({ status: 400 });
     expect(update).not.toHaveBeenCalled();
   });
 
-  it("clears the tag without a lookup", async () => {
-    await setSelfCustodyTag({ organizationId: "org-1", tagId: null });
+  it("refuses a location of another workspace", async () => {
+    findLocations.mockResolvedValue([{ id: "loc-depot" }] as never);
+    await expect(
+      setSelfCustodyOffer({
+        organizationId: "org-1",
+        tagId: null,
+        locationIds: ["loc-depot", "loc-other-org"],
+      })
+    ).rejects.toMatchObject({ status: 400 });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("clears both without a lookup", async () => {
+    await setSelfCustodyOffer({
+      organizationId: "org-1",
+      tagId: null,
+      locationIds: [],
+    });
     expect(findTags).not.toHaveBeenCalled();
+    expect(findLocations).not.toHaveBeenCalled();
     expect(update).toHaveBeenCalledWith({
       where: { id: "org-1" },
-      data: { selfCustodyTagId: null },
+      data: { selfCustodyTagId: null, selfCustodyLocations: { set: [] } },
     });
+  });
+});
+
+describe("listSelfCustodyLocationChoices", () => {
+  it("lists the workspace's locations in tree order", async () => {
+    findLocations.mockResolvedValue([
+      { id: "shelf", name: "Shelf A", parentId: "depot" },
+      { id: "depot", name: "Depot", parentId: null },
+    ] as never);
+
+    await expect(listSelfCustodyLocationChoices("org-1")).resolves.toEqual([
+      { id: "depot", name: "Depot", depth: 0 },
+      { id: "shelf", name: "Shelf A", depth: 1 },
+    ]);
+    expect(findLocations).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { organizationId: "org-1" } })
+    );
   });
 });
 

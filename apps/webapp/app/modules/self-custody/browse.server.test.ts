@@ -1,8 +1,8 @@
 // @vitest-environment node
 /**
  * Tests for the self-service browse list: resolving a browse link, the kits
- * and items offered for self-service, the filter choices, and what a
- * volunteer holds.
+ * and items offered for self-service (by tag, by location, or both), the
+ * filter choices, and what a volunteer holds.
  *
  * @see {@link file://./browse.server.ts}
  */
@@ -19,6 +19,7 @@ import {
   offeredKitWhere,
 } from "./browse.server";
 import type { BrowseFilters } from "./browse.server";
+import type { SelfCustodyOffer } from "./offer.server";
 
 // why: unit tests run without a database; every query's where clause is asserted
 vi.mock("~/database/db.server", () => ({
@@ -33,6 +34,15 @@ vi.mock("~/database/db.server", () => ({
 
 const ORG = "org-1";
 const TAG = "tag-ss";
+
+/** The workspace offers the items with its tag, and no location. */
+const BY_TAG: SelfCustodyOffer = { tagId: TAG, locationIds: [] };
+
+/** The workspace offers the items stored at two locations, and no tag. */
+const BY_LOCATION: SelfCustodyOffer = {
+  tagId: null,
+  locationIds: ["loc-depot", "loc-shelf-a"],
+};
 
 /** No search and no filter. */
 const ALL: BrowseFilters = {
@@ -80,6 +90,7 @@ describe("getBrowseWorkspace", () => {
       selfCustodyPinHash: "scrypt$aa$bb",
       selfCustodyPinUpdatedAt: new Date("2026-10-01"),
       selfCustodyTagId: TAG,
+      selfCustodyLocations: [{ id: "loc-depot" }],
     };
     vi.mocked(db.organization.findUnique).mockResolvedValue(
       organization as never
@@ -87,7 +98,13 @@ describe("getBrowseWorkspace", () => {
 
     await expect(getBrowseWorkspace("tok")).resolves.toEqual(organization);
     expect(db.organization.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { selfCustodyBrowseToken: "tok" } })
+      expect.objectContaining({
+        where: { selfCustodyBrowseToken: "tok" },
+        select: expect.objectContaining({
+          selfCustodyTagId: true,
+          selfCustodyLocations: { select: { id: true } },
+        }),
+      })
     );
   });
 
@@ -108,7 +125,7 @@ describe("listOfferedItems", () => {
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: ALL,
       page: 1,
     });
@@ -118,8 +135,8 @@ describe("listOfferedItems", () => {
       archivedAt: null,
       status: AssetStatus.AVAILABLE,
       type: AssetType.INDIVIDUAL,
-      tags: { some: { id: TAG } },
       assetKits: { none: {} },
+      AND: [{ OR: [{ tags: { some: { id: TAG } } }] }],
     };
     expect(db.asset.count).toHaveBeenCalledWith({ where });
     expect(db.asset.findMany).toHaveBeenCalledWith(
@@ -158,7 +175,7 @@ describe("listOfferedItems", () => {
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: ALL,
       page: 1,
     });
@@ -180,7 +197,7 @@ describe("listOfferedItems", () => {
       expect.objectContaining({
         where: offeredKitWhere({
           organizationId: ORG,
-          tagId: TAG,
+          offer: BY_TAG,
           filters: ALL,
         }),
         orderBy: { name: "asc" },
@@ -199,7 +216,7 @@ describe("listOfferedItems", () => {
 
     await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: ALL,
       page: 2,
     });
@@ -218,7 +235,7 @@ describe("listOfferedItems", () => {
 
     await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: ALL,
       page: 2,
     });
@@ -233,7 +250,7 @@ describe("listOfferedItems", () => {
     counts(3, 3);
     await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: { ...ALL, kind: "item" },
       page: 1,
     });
@@ -246,7 +263,7 @@ describe("listOfferedItems", () => {
     counts(3, 3);
     await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: { ...ALL, kind: "kit" },
       page: 1,
     });
@@ -260,7 +277,7 @@ describe("listOfferedItems", () => {
 
     await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: {
         query: "  radio ",
         kind: "all",
@@ -286,12 +303,91 @@ describe("listOfferedItems", () => {
     });
   });
 
+  it("offers the items stored at the chosen locations, tagged or not", async () => {
+    counts(0, 0);
+
+    await listOfferedItems({
+      organizationId: ORG,
+      offer: BY_LOCATION,
+      filters: ALL,
+      page: 1,
+    });
+
+    expect(db.asset.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        AND: [
+          {
+            OR: [
+              {
+                assetLocations: {
+                  some: {
+                    locationId: { in: ["loc-depot", "loc-shelf-a"] },
+                    assetKitId: null,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+    expect(db.asset.count).toHaveBeenCalledWith({
+      where: expect.not.objectContaining({ tags: expect.anything() }),
+    });
+  });
+
+  it("keeps the volunteer's location filter apart from the offered locations", async () => {
+    counts(0, 0);
+
+    await listOfferedItems({
+      organizationId: ORG,
+      offer: { tagId: TAG, locationIds: ["loc-depot"] },
+      filters: { ...ALL, locationId: "loc-shelf-a" },
+      page: 1,
+    });
+
+    expect(db.asset.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        // the volunteer's narrowing
+        assetLocations: {
+          some: { locationId: "loc-shelf-a", assetKitId: null },
+        },
+        // the workspace's offer: tag OR location
+        AND: [
+          {
+            OR: [
+              { tags: { some: { id: TAG } } },
+              {
+                assetLocations: {
+                  some: { locationId: { in: ["loc-depot"] }, assetKitId: null },
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+    expect(db.kit.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        locationId: "loc-shelf-a",
+        AND: expect.arrayContaining([
+          {
+            OR: [
+              expect.objectContaining({ assetKits: expect.anything() }),
+              { locationId: { in: ["loc-depot"] } },
+            ],
+          },
+        ]),
+      }),
+    });
+  });
+
   it("clamps a page past the end to the last page", async () => {
     counts(0, BROWSE_PAGE_SIZE + 1);
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: ALL,
       page: 99,
     });
@@ -307,7 +403,7 @@ describe("listOfferedItems", () => {
 
     const page = await listOfferedItems({
       organizationId: ORG,
-      tagId: TAG,
+      offer: BY_TAG,
       filters: ALL,
       page: Number("abc"),
     });
@@ -318,18 +414,24 @@ describe("listOfferedItems", () => {
 
 describe("offeredKitWhere", () => {
   it("offers a kit only when it is free and every active item in it is tagged and in", () => {
-    expect(offeredKitWhere({ organizationId: ORG, tagId: TAG })).toEqual({
+    expect(offeredKitWhere({ organizationId: ORG, offer: BY_TAG })).toEqual({
       organizationId: ORG,
       status: KitStatus.AVAILABLE,
       custody: { is: null },
       AND: [
         // at least one active item
         { assetKits: { some: { asset: { archivedAt: null } } } },
-        // no active item without the tag
+        // offered: no active item without the tag
         {
-          assetKits: {
-            none: { asset: { archivedAt: null, tags: { none: { id: TAG } } } },
-          },
+          OR: [
+            {
+              assetKits: {
+                none: {
+                  asset: { archivedAt: null, tags: { none: { id: TAG } } },
+                },
+              },
+            },
+          ],
         },
         // no active single item out of the depot
         {
@@ -348,6 +450,26 @@ describe("offeredKitWhere", () => {
   });
 });
 
+describe("offeredKitWhere by location", () => {
+  it("offers a kit stored at a chosen location, whatever its items' tags", () => {
+    const where = offeredKitWhere({ organizationId: ORG, offer: BY_LOCATION });
+
+    expect(where.AND).toContainEqual({
+      OR: [{ locationId: { in: ["loc-depot", "loc-shelf-a"] } }],
+    });
+    expect(JSON.stringify(where)).not.toContain("tags");
+  });
+
+  it("offers no kit when nothing is offered", () => {
+    const where = offeredKitWhere({
+      organizationId: ORG,
+      offer: { tagId: null, locationIds: [] },
+    });
+
+    expect(where.AND).toContainEqual({ OR: [] });
+  });
+});
+
 describe("listBrowseFilterOptions", () => {
   it("offers only locations and categories that hold something to take", async () => {
     vi.mocked(db.location.findMany).mockResolvedValue([
@@ -358,16 +480,16 @@ describe("listBrowseFilterOptions", () => {
     ] as never);
 
     await expect(
-      listBrowseFilterOptions({ organizationId: ORG, tagId: TAG })
+      listBrowseFilterOptions({ organizationId: ORG, offer: BY_TAG })
     ).resolves.toEqual({
       locations: [{ id: "loc-1", name: "Depot" }],
       categories: [{ id: "cat-1", name: "Radios" }],
     });
 
-    const kit = offeredKitWhere({ organizationId: ORG, tagId: TAG });
+    const kit = offeredKitWhere({ organizationId: ORG, offer: BY_TAG });
     const taggedAsset = expect.objectContaining({
       archivedAt: null,
-      tags: { some: { id: TAG } },
+      AND: [{ OR: [{ tags: { some: { id: TAG } } }] }],
     });
     expect(db.location.findMany).toHaveBeenCalledWith(
       expect.objectContaining({

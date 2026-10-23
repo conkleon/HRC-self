@@ -3,8 +3,9 @@
  *
  * Reads and writes the workspace's self-service switch and PIN
  * (`Organization.selfCustodyEnabled`, `selfCustodyPinHash`,
- * `selfCustodyPinUpdatedAt`), and the browse page's tag and link token
- * (`selfCustodyTagId`, `selfCustodyBrowseToken`). The plain PIN never reaches
+ * `selfCustodyPinUpdatedAt`), and the browse page's offer and link token
+ * (`selfCustodyTagId`, `selfCustodyLocations`, `selfCustodyBrowseToken`).
+ * The plain PIN never reaches
  * the database or leaves this module's callers: only its hash is stored.
  *
  * @see {@link file://./../../routes/_layout+/settings.self-service.tsx}
@@ -18,7 +19,12 @@ import { SERVER_URL } from "~/utils/env";
 import { ShelfError } from "~/utils/error";
 import { gifToPng } from "~/utils/gif-to-png";
 import { Logger } from "~/utils/logger";
-import { assertTagsBelongToOrg } from "~/utils/org-validation.server";
+import {
+  assertLocationsBelongToOrg,
+  assertTagsBelongToOrg,
+} from "~/utils/org-validation.server";
+import { orderLocationTree } from "./location-tree";
+import type { OrderedLocation } from "./location-tree";
 import { hashPin } from "./pin.server";
 
 /** What the settings page shows; the PIN hash never leaves the server. */
@@ -28,6 +34,8 @@ export type SelfCustodySettings = {
   pinUpdatedAt: Date | null;
   /** The tag that marks items for the browse list, null when none is chosen. */
   tagId: string | null;
+  /** Locations whose items (sub-locations included) the browse list offers. */
+  locationIds: string[];
   /** The browse link's secret path segment, null until one is created. */
   browseToken: string | null;
 };
@@ -48,6 +56,7 @@ export async function getSelfCustodySettings(
       selfCustodyPinHash: true,
       selfCustodyPinUpdatedAt: true,
       selfCustodyTagId: true,
+      selfCustodyLocations: { select: { id: true } },
       selfCustodyBrowseToken: true,
     },
   });
@@ -56,6 +65,7 @@ export async function getSelfCustodySettings(
     hasPin: Boolean(organization?.selfCustodyPinHash),
     pinUpdatedAt: organization?.selfCustodyPinUpdatedAt ?? null,
     tagId: organization?.selfCustodyTagId ?? null,
+    locationIds: organization?.selfCustodyLocations.map(({ id }) => id) ?? [],
     browseToken: organization?.selfCustodyBrowseToken ?? null,
   };
 }
@@ -154,26 +164,56 @@ export async function isSelfCustodyEnabled(
 }
 
 /**
- * Chooses the tag that marks items for the browse list, or clears it.
+ * Chooses what the browse list offers: items with the tag, or stored in one
+ * of the locations (sub-locations included). Either can be empty; with both
+ * empty the list offers nothing. Replaces the previous choice entirely.
  *
  * @param args.organizationId - The current workspace
  * @param args.tagId - A tag of this workspace, or null for none
- * @throws {ShelfError} 400 when the tag belongs to another workspace
+ * @param args.locationIds - Locations of this workspace, empty for none
+ * @throws {ShelfError} 400 when the tag or a location belongs to another workspace
  */
-export async function setSelfCustodyTag({
+export async function setSelfCustodyOffer({
   organizationId,
   tagId,
+  locationIds,
 }: {
   organizationId: string;
   tagId: string | null;
+  locationIds: string[];
 }): Promise<void> {
+  const uniqueLocationIds = [...new Set(locationIds)];
   if (tagId) {
     await assertTagsBelongToOrg({ tagIds: [tagId], organizationId });
   }
+  await assertLocationsBelongToOrg({
+    locationIds: uniqueLocationIds,
+    organizationId,
+  });
   await db.organization.update({
     where: { id: organizationId },
-    data: { selfCustodyTagId: tagId },
+    data: {
+      selfCustodyTagId: tagId,
+      selfCustodyLocations: { set: uniqueLocationIds.map((id) => ({ id })) },
+    },
   });
+}
+
+/**
+ * The workspace's locations for the browse list's location checklist, in
+ * tree order so each is followed by its sub-locations.
+ *
+ * @param organizationId - The current workspace
+ * @returns Every location, with its depth in the hierarchy
+ */
+export async function listSelfCustodyLocationChoices(
+  organizationId: string
+): Promise<OrderedLocation[]> {
+  const locations = await db.location.findMany({
+    where: { organizationId },
+    select: { id: true, name: true, parentId: true },
+  });
+  return orderLocationTree(locations);
 }
 
 /**
