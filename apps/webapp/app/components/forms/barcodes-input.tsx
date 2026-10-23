@@ -4,6 +4,8 @@ import {
   useImperativeHandle,
   useMemo,
   useEffect,
+  lazy,
+  Suspense,
 } from "react";
 import type { CSSProperties } from "react";
 import { BarcodeType } from "@prisma/client";
@@ -26,6 +28,8 @@ import { generateClientId } from "~/utils/id/client-id";
 import { handleActivationKeyPress } from "~/utils/keyboard";
 import { tw } from "~/utils/tw";
 import Input from "./input";
+import { placeScannedBarcode } from "./scanned-barcode";
+import type { BarcodeRow } from "./scanned-barcode";
 import { Button } from "../shared/button";
 import {
   Tooltip,
@@ -34,6 +38,16 @@ import {
   TooltipTrigger,
 } from "../shared/tooltip";
 import When from "../when/when";
+
+/**
+ * The camera scanner (zxing-wasm, react-webcam, lottie) loads only when the
+ * user opens it, so it stays out of every asset and kit form's bundle.
+ */
+const ScanBarcodeDialog = lazy(() =>
+  import("./scan-barcode-dialog").then((module) => ({
+    default: module.ScanBarcodeDialog,
+  }))
+);
 
 type BarcodeInput = {
   id?: string; // ID for existing barcodes
@@ -124,6 +138,7 @@ const BarcodesInput = forwardRef<BarcodesInputRef, BarcodesInputProps>(
     const [clearedServerErrors, setClearedServerErrors] = useState<Set<number>>(
       new Set()
     );
+    const [isScanDialogOpen, setIsScanDialogOpen] = useState(false);
     const { isMd } = useViewportHeight();
 
     // Get server-side validation errors from action data
@@ -373,25 +388,61 @@ const BarcodesInput = forwardRef<BarcodesInputRef, BarcodesInputProps>(
           );
         })}
 
-        <Button
-          icon="plus"
-          className="py-3"
-          variant="link"
-          type="button"
-          disabled={disabled}
-          onClick={() => {
-            setBarcodes((prev) => [
-              ...prev,
-              {
-                type: BarcodeType.Code128,
-                value: "",
-                clientKey: makeBarcodeKey(),
-              },
-            ]);
-          }}
-        >
-          {barcodes.length === 0 ? "Add barcode" : "Add another barcode"}
-        </Button>
+        <div className="flex flex-wrap items-center gap-x-6">
+          <Button
+            icon="plus"
+            className="py-3"
+            variant="link"
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              setBarcodes((prev) => [
+                ...prev,
+                {
+                  type: BarcodeType.Code128,
+                  value: "",
+                  clientKey: makeBarcodeKey(),
+                },
+              ]);
+            }}
+          >
+            {barcodes.length === 0 ? "Add barcode" : "Add another barcode"}
+          </Button>
+          <Button
+            icon="scan"
+            className="py-3"
+            variant="link"
+            type="button"
+            disabled={disabled}
+            onClick={() => setIsScanDialogOpen(true)}
+          >
+            Scan barcode
+          </Button>
+        </div>
+
+        {isScanDialogOpen ? (
+          <Suspense fallback={null}>
+            <ScanBarcodeDialog
+              open
+              onClose={() => setIsScanDialogOpen(false)}
+              existingBarcodes={barcodes}
+              onUse={(scanned: BarcodeRow) => {
+                const placed = placeScannedBarcode(
+                  barcodes,
+                  scanned,
+                  (row) => ({ ...row, clientKey: makeBarcodeKey() })
+                );
+                setBarcodes(placed.rows);
+                // Validate the scanned row straight away, and drop any server
+                // error left on that row by an earlier submission.
+                setTouchedFields((prev) => new Set(prev).add(placed.index));
+                setClearedServerErrors((prev) =>
+                  new Set(prev).add(placed.index)
+                );
+              }}
+            />
+          </Suspense>
+        ) : null}
       </div>
     );
   }
