@@ -36,7 +36,7 @@ import {
 } from "~/utils/permissions/permission.data";
 import { hasPermission } from "~/utils/permissions/permission.validator.server";
 import type { RoleAccess } from "~/utils/permissions/role-access";
-import { canImportAssets } from "~/utils/subscription.server";
+import { canImportAssets, canUseBarcodes } from "~/utils/subscription.server";
 import type { UserNameFields } from "~/utils/user";
 import { resolveUserDisplayName } from "~/utils/user";
 import {
@@ -880,7 +880,7 @@ export async function advancedModeLoader({
           filters,
           settings,
           getBookings: view === "availability",
-          canUseBarcodes: currentOrganization.barcodesEnabled ?? false,
+          canUseBarcodes: canUseBarcodes(currentOrganization),
           bookableScope: resolveBookableListScope({ access, userId }),
           preParsedFilters: parsedFilters,
           honorArchivedView,

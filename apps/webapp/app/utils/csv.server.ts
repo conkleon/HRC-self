@@ -68,6 +68,7 @@ import {
 import { ALL_SELECTED_KEY } from "./list";
 import { cleanMarkdownFormatting } from "./markdown-cleaner";
 import { sanitizeNoteContent } from "./note-sanitizer.server";
+import { canUseBarcodes } from "./subscription.server";
 import type { UserNameFields } from "./user";
 import { resolveTeamMemberName, resolveUserDisplayName } from "./user";
 
@@ -276,7 +277,7 @@ async function resolveExportAssets({
     settings,
     takeAll,
     assetIds: takeAll ? undefined : ids,
-    canUseBarcodes: currentOrganization.barcodesEnabled ?? false,
+    canUseBarcodes: canUseBarcodes(currentOrganization),
     timeZone,
     lastAuditDateAccess,
     includeHiddenColumns,
@@ -544,7 +545,7 @@ export async function exportAssetsForImportToCsv({
     assets,
     settingsColumns: settings.columns as Column[],
     activeCustomFields,
-    barcodesEnabled: currentOrganization.barcodesEnabled ?? false,
+    barcodesEnabled: canUseBarcodes(currentOrganization),
     columnScope: effectiveScope,
   });
 }

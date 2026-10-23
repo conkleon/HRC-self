@@ -1,5 +1,6 @@
 import { createCookie } from "react-router";
 import { getRequestCache } from "@server/request-cache.server";
+import { canUseBarcodes } from "~/utils/addon-entitlements.server";
 import {
   destroyCookie,
   parseCookie,
@@ -83,7 +84,13 @@ async function getSelectedOrganizationUncached({
    * In this case what we do is we set the current organization to the first one in the list
    */
   const userOrganizations = await getUserOrganizations({ userId });
-  const allOrganizations = userOrganizations.map((uo) => uo.organization);
+  // `barcodesEnabled` carries the EFFECTIVE entitlement (`canUseBarcodes`), not
+  // the raw column: with premium features off every workspace has barcodes.
+  // Every loader, `requirePermission` and the client read the flag from here.
+  const allOrganizations = userOrganizations.map((uo) => ({
+    ...uo.organization,
+    barcodesEnabled: canUseBarcodes(uo.organization),
+  }));
 
   // Resolved from the already-fetched memberships so the result is consistent
   // regardless of which loader populates the cache. A user with none still

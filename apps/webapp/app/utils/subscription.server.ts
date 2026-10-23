@@ -498,16 +498,5 @@ export async function assertUserCanInviteUsersToWorkspace({
 }
 /** End Team Features */
 
-/** Audit Add-on */
-export const canUseAudits = (org: { auditsEnabled: boolean }) => {
-  if (!premiumIsEnabled) return true;
-  return org.auditsEnabled;
-};
-/** End Audit Add-on */
-
-/** Barcode Add-on */
-export const canUseBarcodes = (org: { barcodesEnabled: boolean }) => {
-  if (!premiumIsEnabled) return true;
-  return org.barcodesEnabled;
-};
-/** End Barcode Add-on */
+/** Audit and Barcode Add-ons: defined in a config-only module, see there */
+export { canUseAudits, canUseBarcodes } from "./addon-entitlements.server";

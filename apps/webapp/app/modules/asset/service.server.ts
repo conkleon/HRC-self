@@ -188,6 +188,10 @@ import {
   parseFileFormData,
   uploadImageFromUrl,
 } from "~/utils/storage.server";
+import {
+  // Aliased: this module has many locals named `canUseBarcodes`
+  canUseBarcodes as hasBarcodeEntitlement,
+} from "~/utils/subscription.server";
 import { resolveTeamMemberName, resolveUserDisplayName } from "~/utils/user";
 import { lockAssetsForArchiveGuard } from "./archive-lock.server";
 import { formatModelShortfallMessage } from "./archive-shortfall";
@@ -2586,13 +2590,13 @@ export async function updateAsset({
       // (the override branch is gated by `barcodesEnabled` in display.ts),
       // so this check is belt-and-suspenders: it prevents the stale value
       // from being written in the first place rather than leaving silent
-      // drift in the DB. `null` overrides are always allowed — that's the
-      // "clear my override" intent and shouldn't require the addon.
+      // drift in the DB. `null` overrides are always allowed: that is the
+      // "clear my override" intent and does not require the addon.
       const orgEntitlement = await db.organization.findUniqueOrThrow({
         where: { id: organizationId },
         select: { barcodesEnabled: true },
       });
-      if (!orgEntitlement.barcodesEnabled) {
+      if (!hasBarcodeEntitlement(orgEntitlement)) {
         throw new ShelfError({
           cause: null,
           message:

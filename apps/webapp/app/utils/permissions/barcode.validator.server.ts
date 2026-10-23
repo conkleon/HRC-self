@@ -1,14 +1,17 @@
 import type { Organization } from "@prisma/client";
+import { canUseBarcodes } from "../addon-entitlements.server";
 import { ShelfError } from "../error";
 
 /**
- * Server-side utility to check if barcodes are enabled for an organization
+ * Server-side utility to check if barcodes are enabled for an organization.
+ * Defers to `canUseBarcodes`, so every workspace qualifies when premium
+ * features are off.
  */
 export function organizationHasBarcodesEnabled(
   organization: Pick<Organization, "barcodesEnabled"> | undefined | null
 ): boolean {
   if (!organization) return false;
-  return organization.barcodesEnabled;
+  return canUseBarcodes(organization);
 }
 
 /**

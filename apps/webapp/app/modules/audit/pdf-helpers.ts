@@ -19,6 +19,7 @@ import {
 import type { PdfCodeImage } from "~/modules/barcode/pdf-code-image";
 import { buildPdfCodeImageMap } from "~/modules/barcode/pdf-code-image.server";
 import { rethrowIfClientError, ShelfError } from "~/utils/error";
+import { canUseBarcodes } from "~/utils/subscription.server";
 import type { UserNameFields } from "~/utils/user";
 import { getPrimaryLocation } from "../asset/utils";
 
@@ -373,6 +374,13 @@ export async function fetchAllAuditPdfRelatedData(
       });
     }
 
+    // Codes resolve against the effective barcode entitlement, so a workspace
+    // without the add-on still gets barcodes when premium features are off.
+    const codeOrganization = {
+      ...organization,
+      barcodesEnabled: canUseBarcodes(organization),
+    };
+
     // Merge audit status data into each asset, dropping the fetch-only
     // relations as we go: the code relations feed the two maps below, off the
     // raw rows, and `assetLocations` is reduced to `location` here. None of
@@ -408,7 +416,7 @@ export async function fetchAllAuditPdfRelatedData(
           asset.id,
           resolveDisplayCode({
             entity: asset,
-            organization,
+            organization: codeOrganization,
             entityKind: "asset",
           }),
         ])

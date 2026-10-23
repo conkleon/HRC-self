@@ -39,6 +39,7 @@ import {
 } from "~/modules/barcode/display";
 import { canSeeBooking } from "~/utils/booking-authorization.server";
 import { makeShelfError } from "~/utils/error";
+import { canUseBarcodes } from "~/utils/subscription.server";
 
 /**
  * Page size this endpoint requests when the client doesn't specify one.
@@ -256,7 +257,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       const resolved = codeEntity
         ? resolveDisplayCode({
             entity: codeEntity,
-            organization: org,
+            organization: {
+              ...org,
+              barcodesEnabled: canUseBarcodes(org),
+            },
             entityKind: "asset",
           })
         : null;

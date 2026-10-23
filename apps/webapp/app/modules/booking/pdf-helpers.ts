@@ -21,6 +21,7 @@ import { calculateTotalValueOfAssets } from "~/utils/bookings";
 import { getClientHint } from "~/utils/client-hints";
 import { rethrowIfClientError, ShelfError } from "~/utils/error";
 import type { RoleAccess } from "~/utils/permissions/role-access";
+import { canUseBarcodes } from "~/utils/subscription.server";
 import type { PdfSnapshotKit } from "./helpers";
 import {
   buildPdfAssetRows,
@@ -309,6 +310,13 @@ export async function fetchAllPdfRelatedData(
       });
     }
 
+    // Codes resolve against the effective barcode entitlement, so a workspace
+    // without the add-on still gets barcodes when premium features are off.
+    const codeOrganization = {
+      ...organization,
+      barcodesEnabled: canUseBarcodes(organization),
+    };
+
     // Build the PER-SLICE render list: join each search-visible BookingAsset
     // slice to its full (deduped) asset data, resolving that slice's own kit
     // and carrying its own booked quantity + unique row key. A QT asset booked
@@ -346,7 +354,7 @@ export async function fetchAllPdfRelatedData(
           asset.id,
           resolveDisplayCode({
             entity: asset,
-            organization,
+            organization: codeOrganization,
             entityKind: "asset",
           }),
         ])

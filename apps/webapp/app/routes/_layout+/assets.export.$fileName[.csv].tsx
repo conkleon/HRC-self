@@ -17,7 +17,10 @@ import {
   PermissionEntity,
 } from "~/utils/permissions/permission.data";
 import { requirePermission } from "~/utils/roles.server";
-import { assertUserCanExportAssets } from "~/utils/subscription.server";
+import {
+  assertUserCanExportAssets,
+  canUseBarcodes,
+} from "~/utils/subscription.server";
 
 /** Exports the requested asset selection as a CSV download. */
 export const loader = async ({
@@ -45,7 +48,7 @@ export const loader = async ({
       getAssetIndexSettings({
         userId,
         organizationId,
-        canUseBarcodes: currentOrganization.barcodesEnabled ?? false,
+        canUseBarcodes: canUseBarcodes(currentOrganization),
         role,
       }),
     ]);
