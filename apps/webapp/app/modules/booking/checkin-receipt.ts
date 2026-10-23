@@ -100,7 +100,7 @@ export type CheckinReceiptSlice = {
    * has several slices an untagged log is split between them by a greedy pass
    * that carries no times, and choosing one would be a guess.
    */
-  returnRecords?: Array<{ at: Date; byId: string }>;
+  returnRecords?: Array<{ at: Date; byId: string | null }>;
 };
 
 /**

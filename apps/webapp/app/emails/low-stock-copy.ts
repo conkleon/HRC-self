@@ -73,7 +73,8 @@ export type StockMovementLog = {
   quantity: number;
   note: string | null;
   createdAt: Date;
-  userId: string;
+  /** Null for a volunteer's self-service take or return. */
+  userId: string | null;
   performedBy: UserNameFields | null;
   custodianId: string | null;
   custodian: TeamMemberNameFields | null;

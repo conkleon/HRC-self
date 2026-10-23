@@ -9,26 +9,35 @@
  *
  * Offered items are the ones an admin offered, by the workspace's
  * self-service tag or by location (see `offer.server.ts`), that are free to
- * take right now: available, active, individual assets outside any kit. A kit
+ * take right now: active individual assets that are available and outside any
+ * kit, and active quantity-tracked assets with at least one free unit (see
+ * `getFreeUnitsByAsset`). A kit
  * is offered when it is offered itself (every active item tagged, or the kit
  * stored in an offered location), it is available and nobody holds it, and
  * none of its individual items is out. Taking re-checks all of this inside the
- * claim (`selfTakeCustody` with `requiredOffer`, `selfTakeKitCustody`), so the
- * list is a view, not the gate.
+ * claim (`selfTakeCustody` with `requiredOffer`, `selfTakeQuantity`,
+ * `selfTakeKitCustody`), so the list is a view, not the gate.
  *
  * @see {@link file://./offer.server.ts}
  * @see {@link file://./custody.server.ts}
  * @see {@link file://./kit-custody.server.ts}
+ * @see {@link file://./quantity.server.ts}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
 import type { Prisma } from "@prisma/client";
-import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
+import {
+  AssetStatus,
+  AssetType,
+  ConsumptionType,
+  KitStatus,
+} from "@prisma/client";
 
 import { db } from "~/database/db.server";
 import { ShelfError } from "~/utils/error";
 import type { SelfCustodyOrganization } from "./custody.server";
 import { offeredAssetMatch, offeredKitMatch } from "./offer.server";
 import type { SelfCustodyOffer } from "./offer.server";
+import { getFreeUnitsByAsset } from "./quantity.server";
 
 /** Entries per page of the browse list. */
 export const BROWSE_PAGE_SIZE = 20;
@@ -66,7 +75,24 @@ type BrowseEntry = {
   categoryName: string | null;
   /** Active items in the kit; null for a single item. */
   itemCount: number | null;
+  /**
+   * For a quantity-tracked item: the free units on the offered list, the
+   * units the volunteer holds on their own list, and whether the item is
+   * consumable (one-way). Null for an individual item and for a kit.
+   */
+  units: BrowseUnits | null;
+  /** What a kit holds, its active items by name; null for a single item. */
+  contents: KitContent[] | null;
 };
+
+/**
+ * One active item of a kit. `quantity` is the kit's share of a
+ * quantity-tracked item (`AssetKit.quantity`), null for an individual item.
+ */
+type KitContent = { id: string; title: string; quantity: number | null };
+
+/** The unit count of a quantity-tracked row; see `BrowseEntry.units`. */
+type BrowseUnits = { count: number; oneWay: boolean };
 
 /** One page of offered entries: kits first, then single items, each by name. */
 type BrowsePage = {
@@ -83,6 +109,8 @@ type FilterOption = { id: string; name: string };
 const ASSET_ENTRY_SELECT = {
   id: true,
   title: true,
+  type: true,
+  consumptionType: true,
   category: { select: { name: true } },
   assetLocations: {
     where: { assetKitId: null },
@@ -97,18 +125,35 @@ const KIT_ENTRY_SELECT = {
   name: true,
   category: { select: { name: true } },
   location: { select: { name: true } },
-  _count: {
-    select: { assetKits: { where: { asset: { archivedAt: null } } } },
+  // Active items only, matching the item count: archived items are left out
+  // of kit custody.
+  assetKits: {
+    where: { asset: { archivedAt: null } },
+    select: {
+      quantity: true,
+      asset: { select: { id: true, title: true, type: true } },
+    },
+    orderBy: { asset: { title: "asc" } },
   },
 } satisfies Prisma.KitSelect;
 
-/** Maps a selected asset to the row the page renders. */
-function assetEntry(asset: {
-  id: string;
-  title: string;
-  category: { name: string } | null;
-  assetLocations: { location: { name: string } }[];
-}): BrowseEntry {
+/**
+ * Maps a selected asset to the row the page renders.
+ *
+ * @param unitCount - For a quantity-tracked asset, the units the row shows
+ *   (free or held, by list); ignored for an individual asset
+ */
+function assetEntry(
+  asset: {
+    id: string;
+    title: string;
+    type: AssetType;
+    consumptionType: ConsumptionType | null;
+    category: { name: string } | null;
+    assetLocations: { location: { name: string } }[];
+  },
+  unitCount: number
+): BrowseEntry {
   return {
     kind: "item",
     id: asset.id,
@@ -116,6 +161,14 @@ function assetEntry(asset: {
     locationName: asset.assetLocations[0]?.location.name ?? null,
     categoryName: asset.category?.name ?? null,
     itemCount: null,
+    units:
+      asset.type === AssetType.QUANTITY_TRACKED
+        ? {
+            count: unitCount,
+            oneWay: asset.consumptionType === ConsumptionType.ONE_WAY,
+          }
+        : null,
+    contents: null,
   };
 }
 
@@ -125,7 +178,10 @@ function kitEntry(kit: {
   name: string;
   category: { name: string } | null;
   location: { name: string } | null;
-  _count: { assetKits: number };
+  assetKits: {
+    quantity: number;
+    asset: { id: string; title: string; type: AssetType };
+  }[];
 }): BrowseEntry {
   return {
     kind: "kit",
@@ -133,7 +189,13 @@ function kitEntry(kit: {
     title: kit.name,
     locationName: kit.location?.name ?? null,
     categoryName: kit.category?.name ?? null,
-    itemCount: kit._count.assetKits,
+    itemCount: kit.assetKits.length,
+    units: null,
+    contents: kit.assetKits.map(({ quantity, asset }) => ({
+      id: asset.id,
+      title: asset.title,
+      quantity: asset.type === AssetType.QUANTITY_TRACKED ? quantity : null,
+    })),
   };
 }
 
@@ -175,28 +237,74 @@ export async function getBrowseWorkspace(
 }
 
 /**
+ * The offered quantity-tracked items and their free units. Read before the
+ * list is paged, so an item with nothing left is left out of the counts and
+ * the pages rather than shown greyed out.
+ */
+async function offeredUnits({
+  organizationId,
+  offer,
+}: {
+  organizationId: string;
+  offer: SelfCustodyOffer;
+}): Promise<Map<string, number>> {
+  const assets = await db.asset.findMany({
+    where: {
+      organizationId,
+      archivedAt: null,
+      type: AssetType.QUANTITY_TRACKED,
+      AND: [offeredAssetMatch(offer)],
+    },
+    select: { id: true, quantity: true },
+  });
+  return getFreeUnitsByAsset({ organizationId, assets });
+}
+
+/** The ids of the quantity-tracked items that have a free unit. */
+function withFreeUnits(freeUnits: Map<string, number>): string[] {
+  return [...freeUnits].filter(([, free]) => free > 0).map(([id]) => id);
+}
+
+/**
  * Where clause for items a volunteer may take from the list: offered (by tag
- * or location), available, active, individual and not in a kit.
+ * or location), active, and either an available individual item outside any
+ * kit or a quantity-tracked item in `quantityAssetIds` (those with a free
+ * unit). A quantity-tracked item can have units in kits, in custody or out on
+ * a booking and still have free units, so its status and kits do not count.
  */
 function offeredAssetWhere({
   organizationId,
   offer,
+  quantityAssetIds,
   filters,
 }: {
   organizationId: string;
   offer: SelfCustodyOffer;
+  quantityAssetIds: string[];
   filters?: Partial<BrowseFilters>;
 }): Prisma.AssetWhereInput {
   const term = filters?.query?.trim() ?? "";
   return {
     organizationId,
     archivedAt: null,
-    status: AssetStatus.AVAILABLE,
-    type: AssetType.INDIVIDUAL,
-    assetKits: { none: {} },
     // Under AND so the offer's location rule never meets the volunteer's
     // own location filter below.
-    AND: [offeredAssetMatch(offer)],
+    AND: [
+      offeredAssetMatch(offer),
+      {
+        OR: [
+          {
+            type: AssetType.INDIVIDUAL,
+            status: AssetStatus.AVAILABLE,
+            assetKits: { none: {} },
+          },
+          {
+            type: AssetType.QUANTITY_TRACKED,
+            id: { in: quantityAssetIds },
+          },
+        ],
+      },
+    ],
     ...(term ? { title: { contains: term, mode: "insensitive" } } : {}),
     ...(filters?.locationId
       ? {
@@ -296,8 +404,18 @@ export async function listOfferedItems({
   filters: BrowseFilters;
   page: number;
 }): Promise<BrowsePage> {
+  // A kits-only list has no single items, so no units to read.
+  const freeUnits =
+    filters.kind === "kit"
+      ? new Map<string, number>()
+      : await offeredUnits({ organizationId, offer });
   const kitWhere = offeredKitWhere({ organizationId, offer, filters });
-  const assetWhere = offeredAssetWhere({ organizationId, offer, filters });
+  const assetWhere = offeredAssetWhere({
+    organizationId,
+    offer,
+    quantityAssetIds: withFreeUnits(freeUnits),
+    filters,
+  });
 
   const [kitCount, assetCount] = await Promise.all([
     filters.kind === "item" ? 0 : db.kit.count({ where: kitWhere }),
@@ -341,7 +459,10 @@ export async function listOfferedItems({
   ]);
 
   return {
-    items: [...kits.map(kitEntry), ...assets.map(assetEntry)],
+    items: [
+      ...kits.map(kitEntry),
+      ...assets.map((asset) => assetEntry(asset, freeUnits.get(asset.id) ?? 0)),
+    ],
     page: current,
     totalPages,
     totalCount,
@@ -364,7 +485,12 @@ export async function listBrowseFilterOptions({
   organizationId: string;
   offer: SelfCustodyOffer;
 }): Promise<{ locations: FilterOption[]; categories: FilterOption[] }> {
-  const asset = offeredAssetWhere({ organizationId, offer });
+  const freeUnits = await offeredUnits({ organizationId, offer });
+  const asset = offeredAssetWhere({
+    organizationId,
+    offer,
+    quantityAssetIds: withFreeUnits(freeUnits),
+  });
   const kit = offeredKitWhere({ organizationId, offer });
 
   const [locations, categories] = await Promise.all([
@@ -393,8 +519,8 @@ export async function listBrowseFilterOptions({
 
 /**
  * What a volunteer holds and can return themselves: the kits in their
- * custody, then their own (not kit-held) custody of active, individual items,
- * offered or not.
+ * custody, then their own (not kit-held) custody of active items, offered or
+ * not. A quantity-tracked item shows the units they hold.
  *
  * @param args.organizationId - The workspace of the browse link (server-resolved)
  * @param args.teamMemberId - The volunteer, already proven to be an NRM of the workspace
@@ -417,12 +543,26 @@ export async function listVolunteerItems({
       where: {
         organizationId,
         archivedAt: null,
-        type: AssetType.INDIVIDUAL,
         custody: { some: { teamMemberId, kitCustodyId: null } },
       },
-      select: ASSET_ENTRY_SELECT,
+      select: {
+        ...ASSET_ENTRY_SELECT,
+        // Units held by this volunteer, from their own custody rows only.
+        custody: {
+          where: { teamMemberId, kitCustodyId: null },
+          select: { quantity: true },
+        },
+      },
       orderBy: { title: "asc" },
     }),
   ]);
-  return [...kits.map(kitEntry), ...assets.map(assetEntry)];
+  return [
+    ...kits.map(kitEntry),
+    ...assets.map((asset) =>
+      assetEntry(
+        asset,
+        asset.custody.reduce((sum, row) => sum + row.quantity, 0)
+      )
+    ),
+  ];
 }

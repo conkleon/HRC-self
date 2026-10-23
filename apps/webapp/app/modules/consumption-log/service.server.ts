@@ -75,8 +75,8 @@ type CreateConsumptionLogArgs = {
   category: Extract<ConsumptionCategory, "CHECKOUT" | "RETURN">;
   /** The number of units involved (must be > 0) */
   quantity: number;
-  /** The user performing the action */
-  userId: string;
+  /** The user performing the action; null for a self-service volunteer */
+  userId: string | null;
   /** Optional free-text note explaining the action */
   note?: string;
   /** Optional booking associated with this consumption */

@@ -1652,8 +1652,10 @@ model ConsumptionLog {
   quantity  Int // Always positive (Decision #9). The direction is the sign of `stockChange`.
   note      String?
 
-  performedBy User   @relation(fields: [userId], references: [id])
-  userId      String
+  // NULL when nobody with an account acted: a volunteer's self-service take
+  // or return, which names the volunteer as `custodian` instead.
+  performedBy User?   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId      String?
 
   booking   Booking? @relation(fields: [bookingId], references: [id])
   bookingId String?

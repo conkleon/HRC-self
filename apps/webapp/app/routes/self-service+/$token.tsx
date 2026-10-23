@@ -9,7 +9,9 @@
  * Steps: enter the workspace PIN, say who you are (find your name among the
  * workspace's NRMs, or add it; the phone remembers the choice until "Not
  * you?"), then take items and kits offered for
- * self-service, or return what you hold. The offered list searches as you
+ * self-service, or return what you hold. A quantity-tracked item is taken and
+ * returned by the unit: the row posts `units`, how many to take or how many
+ * came back. The offered list searches as you
  * type and filters by kind, location and category, all carried in the URL.
  * Only the volunteer's own items and kits can be returned here; returning
  * someone else's still needs the item's QR code or a staff member.
@@ -24,6 +26,7 @@
  * @see {@link file://./../../modules/self-custody/browse.server.ts}
  * @see {@link file://./../../modules/self-custody/custody.server.ts}
  * @see {@link file://./../../modules/self-custody/kit-custody.server.ts}
+ * @see {@link file://./../../modules/self-custody/quantity.server.ts}
  * @see {@link file://./../../components/self-custody/browse-lists.tsx}
  */
 import { useEffect, useRef } from "react";
@@ -87,6 +90,10 @@ import {
   resolveSelfCustodyOffer,
 } from "~/modules/self-custody/offer.server";
 import { verifyPin } from "~/modules/self-custody/pin.server";
+import {
+  selfReturnQuantity,
+  selfTakeQuantity,
+} from "~/modules/self-custody/quantity.server";
 import { VolunteerNameSchema } from "~/modules/self-custody/schemas";
 import {
   isUnlocked,
@@ -116,6 +123,7 @@ import {
   payload,
 } from "~/utils/http.server";
 import { tw } from "~/utils/tw";
+import { requiredNumberFromString } from "~/utils/zod-numeric";
 
 export const meta = () => [{ title: appendToMetaTitle("Self-service") }];
 
@@ -132,6 +140,16 @@ const ItemActionSchema = z.union([
   z.object({ kitId: z.string().min(1), teamMemberId: z.string().min(1) }),
   z.object({ assetId: z.string().min(1), teamMemberId: z.string().min(1) }),
 ]);
+
+/**
+ * The unit count a quantity-tracked row posts: how many to take, or how many
+ * came back. Its range depends on the item and is checked by the service.
+ */
+const UnitsSchema = z.object({
+  units: requiredNumberFromString({ fieldName: "Quantity" }).pipe(
+    z.number().int("Enter a whole number").nonnegative("Enter 0 or more")
+  ),
+});
 
 /** Longest search the list accepts; anything longer is cut, not refused. */
 const MAX_QUERY_LENGTH = 100;
@@ -378,6 +396,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
       workspaceName: organization.name,
     };
 
+    // Only a quantity-tracked row sends a unit count.
+    const units = formData.has("units")
+      ? parseData(formData, UnitsSchema, {
+          additionalData: context,
+          shouldBeCaptured: false,
+        }).units
+      : null;
+
     if (intent === "return") {
       const result =
         "kitId" in target
@@ -385,6 +411,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
               ...workspace,
               kitId: target.kitId,
               holderTeamMemberId: volunteer.id,
+            })
+          : units !== null
+          ? await selfReturnQuantity({
+              ...workspace,
+              assetId: target.assetId,
+              holderTeamMemberId: volunteer.id,
+              returned: units,
             })
           : await selfReturnCustody({
               ...workspace,
@@ -409,6 +442,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
             ...workspace,
             kitId: target.kitId,
             teamMemberId: volunteer.id,
+            requiredOffer: offer,
+          })
+        : units !== null
+        ? await selfTakeQuantity({
+            ...workspace,
+            assetId: target.assetId,
+            teamMemberId: volunteer.id,
+            quantity: units,
             requiredOffer: offer,
           })
         : await selfTakeCustody({

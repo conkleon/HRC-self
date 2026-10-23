@@ -6,7 +6,12 @@
  *
  * @see {@link file://./browse.server.ts}
  */
-import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
+import {
+  AssetStatus,
+  AssetType,
+  ConsumptionType,
+  KitStatus,
+} from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "~/database/db.server";
@@ -27,6 +32,9 @@ vi.mock("~/database/db.server", () => ({
     organization: { findUnique: vi.fn() },
     asset: { count: vi.fn(), findMany: vi.fn() },
     kit: { count: vi.fn(), findMany: vi.fn() },
+    custody: { groupBy: vi.fn() },
+    assetKit: { groupBy: vi.fn() },
+    bookingAsset: { groupBy: vi.fn() },
     location: { findMany: vi.fn() },
     category: { findMany: vi.fn() },
   },
@@ -56,20 +64,74 @@ const ALL: BrowseFilters = {
 const row = (id: string, title: string, location: string | null = null) => ({
   id,
   title,
+  type: AssetType.INDIVIDUAL,
+  consumptionType: null,
   category: null,
   assetLocations: location ? [{ location: { name: location } }] : [],
 });
 
-/** A kit row as the browse queries select it. */
+/** A quantity-tracked asset row as the browse queries select it. */
+const unitsRow = (id: string, title: string, oneWay = false) => ({
+  ...row(id, title),
+  type: AssetType.QUANTITY_TRACKED,
+  consumptionType: oneWay ? ConsumptionType.ONE_WAY : ConsumptionType.TWO_WAY,
+});
+
+/**
+ * The kind rule every offered-item query carries: an available individual
+ * item outside kits, or one of these quantity-tracked items with a free unit.
+ */
+const kindRule = (quantityAssetIds: string[] = []) => ({
+  OR: [
+    {
+      type: AssetType.INDIVIDUAL,
+      status: AssetStatus.AVAILABLE,
+      assetKits: { none: {} },
+    },
+    { type: AssetType.QUANTITY_TRACKED, id: { in: quantityAssetIds } },
+  ],
+});
+
+/**
+ * The offered quantity-tracked items the list reads first, with their stock,
+ * and how many units of each are in custody. No kits or bookings hold any.
+ */
+function quantityItems(
+  items: { id: string; quantity: number; inCustody: number }[]
+) {
+  vi.mocked(db.asset.findMany).mockResolvedValueOnce(
+    items.map(({ id, quantity }) => ({ id, quantity })) as never
+  );
+  vi.mocked(db.custody.groupBy).mockResolvedValue(
+    items.map(({ id, inCustody }) => ({
+      assetId: id,
+      _sum: { quantity: inCustody },
+    })) as never
+  );
+  vi.mocked(db.assetKit.groupBy).mockResolvedValue([] as never);
+  vi.mocked(db.bookingAsset.groupBy).mockResolvedValue([] as never);
+}
+
+/** A kit row as the browse queries select it, holding `items` radios. */
 const kitRow = (id: string, name: string, items = 3) => ({
   id,
   name,
   category: { name: "First aid" },
   location: { name: "Depot" },
-  _count: { assetKits: items },
+  assetKits: Array.from({ length: items }, (_, index) => ({
+    quantity: 1,
+    asset: {
+      id: `${id}-a${index + 1}`,
+      title: `Radio ${index + 1}`,
+      type: AssetType.INDIVIDUAL,
+    },
+  })),
 });
 
-/** Sets how many kits and items match; the row queries return nothing. */
+/**
+ * Sets how many kits and items match; the row queries return nothing, and no
+ * quantity-tracked item is offered.
+ */
 function counts(kits: number, assets: number) {
   vi.mocked(db.kit.count).mockResolvedValue(kits);
   vi.mocked(db.asset.count).mockResolvedValue(assets);
@@ -78,7 +140,9 @@ function counts(kits: number, assets: number) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
+  // No offered quantity-tracked item unless a test says otherwise.
+  vi.mocked(db.asset.findMany).mockResolvedValue([]);
 });
 
 describe("getBrowseWorkspace", () => {
@@ -117,9 +181,10 @@ describe("getBrowseWorkspace", () => {
 });
 
 describe("listOfferedItems", () => {
-  it("offers only tagged, available, active, individual items outside kits", async () => {
+  it("offers tagged, active items: available individual ones outside kits, and quantity-tracked ones with a free unit", async () => {
     counts(0, 1);
-    vi.mocked(db.asset.findMany).mockResolvedValue([
+    quantityItems([]);
+    vi.mocked(db.asset.findMany).mockResolvedValueOnce([
       row("a1", "Radio #12", "Warehouse A"),
     ] as never);
 
@@ -133,10 +198,7 @@ describe("listOfferedItems", () => {
     const where = {
       organizationId: ORG,
       archivedAt: null,
-      status: AssetStatus.AVAILABLE,
-      type: AssetType.INDIVIDUAL,
-      assetKits: { none: {} },
-      AND: [{ OR: [{ tags: { some: { id: TAG } } }] }],
+      AND: [{ OR: [{ tags: { some: { id: TAG } } }] }, kindRule()],
     };
     expect(db.asset.count).toHaveBeenCalledWith({ where });
     expect(db.asset.findMany).toHaveBeenCalledWith(
@@ -156,6 +218,8 @@ describe("listOfferedItems", () => {
           locationName: "Warehouse A",
           categoryName: null,
           itemCount: null,
+          units: null,
+          contents: null,
         },
       ],
       page: 1,
@@ -166,10 +230,27 @@ describe("listOfferedItems", () => {
 
   it("lists kits first, then items, and counts both", async () => {
     counts(1, 1);
+    quantityItems([]);
     vi.mocked(db.kit.findMany).mockResolvedValue([
-      kitRow("k1", "Trauma kit", 4),
+      {
+        ...kitRow("k1", "Trauma kit", 1),
+        assetKits: [
+          {
+            quantity: 20,
+            asset: {
+              id: "q1",
+              title: "Bandages",
+              type: AssetType.QUANTITY_TRACKED,
+            },
+          },
+          {
+            quantity: 1,
+            asset: { id: "a9", title: "Splint", type: AssetType.INDIVIDUAL },
+          },
+        ],
+      },
     ] as never);
-    vi.mocked(db.asset.findMany).mockResolvedValue([
+    vi.mocked(db.asset.findMany).mockResolvedValueOnce([
       row("a1", "Radio #12"),
     ] as never);
 
@@ -191,8 +272,23 @@ describe("listOfferedItems", () => {
       title: "Trauma kit",
       locationName: "Depot",
       categoryName: "First aid",
-      itemCount: 4,
+      itemCount: 2,
+      units: null,
+      // What is inside, with the kit's share of a quantity-tracked item.
+      contents: [
+        { id: "q1", title: "Bandages", quantity: 20 },
+        { id: "a9", title: "Splint", quantity: null },
+      ],
     });
+    expect(db.kit.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          assetKits: expect.objectContaining({
+            where: { asset: { archivedAt: null } },
+          }),
+        }),
+      })
+    );
     expect(db.kit.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: offeredKitWhere({
@@ -257,6 +353,47 @@ describe("listOfferedItems", () => {
     expect(db.kit.count).not.toHaveBeenCalled();
     expect(db.kit.findMany).not.toHaveBeenCalled();
     expect(db.asset.findMany).toHaveBeenCalled();
+  });
+
+  it("offers a quantity-tracked item while it has free units, and shows how many", async () => {
+    quantityItems([
+      { id: "q1", quantity: 10, inCustody: 3 },
+      { id: "q2", quantity: 5, inCustody: 5 },
+    ]);
+    vi.mocked(db.kit.count).mockResolvedValue(0);
+    vi.mocked(db.asset.count).mockResolvedValue(1);
+    vi.mocked(db.asset.findMany).mockResolvedValueOnce([
+      unitsRow("q1", "Bandages", true),
+    ] as never);
+
+    const page = await listOfferedItems({
+      organizationId: ORG,
+      offer: BY_TAG,
+      filters: { ...ALL, kind: "item" },
+      page: 1,
+    });
+
+    // q2 has every unit in custody, so it is left out of the list.
+    expect(db.asset.count).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        AND: [expect.anything(), kindRule(["q1"])],
+      }),
+    });
+    expect(page.items).toEqual([
+      expect.objectContaining({
+        id: "q1",
+        units: { count: 7, oneWay: true },
+      }),
+    ]);
+    expect(db.custody.groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          assetId: { in: ["q1", "q2"] },
+          kitCustodyId: null,
+          asset: { organizationId: ORG },
+        },
+      })
+    );
   });
 
   it("shows only kits when asked", async () => {
@@ -328,6 +465,7 @@ describe("listOfferedItems", () => {
               },
             ],
           },
+          kindRule(),
         ],
       }),
     });
@@ -364,6 +502,7 @@ describe("listOfferedItems", () => {
               },
             ],
           },
+          kindRule(),
         ],
       }),
     });
@@ -466,7 +605,7 @@ describe("offeredKitWhere by location", () => {
       offer: { tagId: null, locationIds: [] },
     });
 
-    expect(where.AND).toContainEqual({ OR: [] });
+    expect(where.AND).toContainEqual({ id: { in: [] } });
   });
 });
 
@@ -489,7 +628,7 @@ describe("listBrowseFilterOptions", () => {
     const kit = offeredKitWhere({ organizationId: ORG, offer: BY_TAG });
     const taggedAsset = expect.objectContaining({
       archivedAt: null,
-      AND: [{ OR: [{ tags: { some: { id: TAG } } }] }],
+      AND: [{ OR: [{ tags: { some: { id: TAG } } }] }, kindRule()],
     });
     expect(db.location.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -518,12 +657,16 @@ describe("listBrowseFilterOptions", () => {
 });
 
 describe("listVolunteerItems", () => {
-  it("lists the volunteer's kits, then their own, not kit-held, custody of active individual items", async () => {
+  it("lists the volunteer's kits, then their own, not kit-held, custody of active items with the units they hold", async () => {
     vi.mocked(db.kit.findMany).mockResolvedValue([
       kitRow("k1", "Trauma kit"),
     ] as never);
     vi.mocked(db.asset.findMany).mockResolvedValue([
-      row("a2", "Torch"),
+      {
+        ...unitsRow("q1", "Bandages"),
+        custody: [{ quantity: 2 }, { quantity: 3 }],
+      },
+      { ...row("a2", "Torch"), custody: [{ quantity: 1 }] },
     ] as never);
 
     const items = await listVolunteerItems({
@@ -531,9 +674,10 @@ describe("listVolunteerItems", () => {
       teamMemberId: "tm-1",
     });
 
-    expect(items.map((entry) => [entry.kind, entry.id])).toEqual([
-      ["kit", "k1"],
-      ["item", "a2"],
+    expect(items.map((entry) => [entry.kind, entry.id, entry.units])).toEqual([
+      ["kit", "k1", null],
+      ["item", "q1", { count: 5, oneWay: false }],
+      ["item", "a2", null],
     ]);
     expect(db.kit.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -548,9 +692,14 @@ describe("listVolunteerItems", () => {
         where: {
           organizationId: ORG,
           archivedAt: null,
-          type: AssetType.INDIVIDUAL,
           custody: { some: { teamMemberId: "tm-1", kitCustodyId: null } },
         },
+        select: expect.objectContaining({
+          custody: {
+            where: { teamMemberId: "tm-1", kitCustodyId: null },
+            select: { quantity: true },
+          },
+        }),
       })
     );
   });

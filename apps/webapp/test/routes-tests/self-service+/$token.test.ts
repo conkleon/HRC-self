@@ -18,6 +18,8 @@ const {
   mockReturn,
   mockTakeKit,
   mockReturnKit,
+  mockTakeUnits,
+  mockReturnUnits,
   mockSearch,
   mockFindOrCreate,
   mockGetVolunteer,
@@ -31,6 +33,8 @@ const {
   mockReturn: vi.fn(),
   mockTakeKit: vi.fn(),
   mockReturnKit: vi.fn(),
+  mockTakeUnits: vi.fn(),
+  mockReturnUnits: vi.fn(),
   mockSearch: vi.fn(),
   mockFindOrCreate: vi.fn(),
   mockGetVolunteer: vi.fn(),
@@ -55,6 +59,12 @@ vi.mock("~/modules/self-custody/custody.server", () => ({
 vi.mock("~/modules/self-custody/kit-custody.server", () => ({
   selfTakeKitCustody: mockTakeKit,
   selfReturnKitCustody: mockReturnKit,
+}));
+
+// why: unit take and return write the database; covered by quantity.server.test.ts
+vi.mock("~/modules/self-custody/quantity.server", () => ({
+  selfTakeQuantity: mockTakeUnits,
+  selfReturnQuantity: mockReturnUnits,
 }));
 
 // why: lookups read the database; the name schema stays real
@@ -188,6 +198,14 @@ beforeEach(async () => {
   });
   mockReturn.mockResolvedValue({
     assetTitle: "Radio #12",
+    volunteerName: "Maria P.",
+  });
+  mockTakeUnits.mockResolvedValue({
+    assetTitle: "3 × Bandages",
+    volunteerName: "Maria P.",
+  });
+  mockReturnUnits.mockResolvedValue({
+    assetTitle: "Bandages (2 back, 1 used)",
     volunteerName: "Maria P.",
   });
 });
@@ -494,6 +512,89 @@ describe("POST /self-service/:token", () => {
       requiredOffer: TAG_OFFER,
       source: "list",
     });
+  });
+
+  it("takes units of a quantity-tracked item when the row sends a count", async () => {
+    const cookie = await unlock();
+    const { status, body } = read(
+      await action(
+        args(
+          post(
+            {
+              intent: "take",
+              assetId: "asset-q",
+              teamMemberId: "tm-1",
+              units: "3",
+            },
+            { cookie }
+          )
+        )
+      )
+    );
+
+    expect(status).toBe(200);
+    expect(body?.done).toMatchObject({ assetTitle: "3 × Bandages" });
+    expect(mockTakeUnits).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      assetId: "asset-q",
+      teamMemberId: "tm-1",
+      quantity: 3,
+      requiredOffer: TAG_OFFER,
+    });
+    expect(mockTake).not.toHaveBeenCalled();
+  });
+
+  it("returns units of a quantity-tracked item as the volunteer's own", async () => {
+    const cookie = await unlock();
+    const { body } = read(
+      await action(
+        args(
+          post(
+            {
+              intent: "return",
+              assetId: "asset-q",
+              teamMemberId: "tm-1",
+              units: "2",
+            },
+            { cookie }
+          )
+        )
+      )
+    );
+
+    expect(body?.done).toMatchObject({ kind: "returned" });
+    expect(mockReturnUnits).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      assetId: "asset-q",
+      holderTeamMemberId: "tm-1",
+      returned: 2,
+    });
+    expect(mockReturn).not.toHaveBeenCalled();
+  });
+
+  it("refuses a unit count that is blank or not a whole number", async () => {
+    const cookie = await unlock();
+    for (const units of ["", "1.5", "abc"]) {
+      const { status } = read(
+        await action(
+          args(
+            post(
+              {
+                intent: "take",
+                assetId: "asset-q",
+                teamMemberId: "tm-1",
+                units,
+              },
+              { cookie }
+            )
+          )
+        )
+      );
+      expect(status).toBe(400);
+    }
+    expect(mockTakeUnits).not.toHaveBeenCalled();
   });
 
   it("takes an offered kit for the volunteer when the form names a kit", async () => {

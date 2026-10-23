@@ -9657,8 +9657,13 @@ type CheckOutQuantityArgs = {
   teamMemberId: string;
   /** Number of units to check out (must be positive integer) */
   quantity: number;
-  /** The user performing the checkout */
-  userId: string;
+  /**
+   * The user performing the checkout, or null for a volunteer acting through
+   * self-service, who has no account. With null, pass `custodyAssign:
+   * "anyone"`: the self-service caller has already fixed `teamMemberId` to
+   * the volunteer.
+   */
+  userId: string | null;
   /** The organization owning the asset (used for validation) */
   organizationId: string;
   /**
@@ -9671,6 +9676,11 @@ type CheckOutQuantityArgs = {
   custodyAssign: RoleAccess["custody"]["assign"];
   /** Optional note explaining the checkout */
   note?: string;
+  /**
+   * Extra activity-event meta, merged under the service's own keys. The
+   * self-service routes mark their events with `{ via: "self-service" }`.
+   */
+  eventMeta?: Record<string, string>;
   /**
    * Where the units come from. A location id names one of the asset's manual
    * placements; `null`, `""` or `"unplaced"` names the unplaced units (see
@@ -9734,6 +9744,7 @@ export async function checkOutQuantity({
   custodyAssign,
   note,
   locationId,
+  eventMeta,
 }: CheckOutQuantityArgs): Promise<{
   asset: Asset;
   source: CustodySourceOutcome;
@@ -10057,7 +10068,7 @@ export async function checkOutQuantity({
           teamMemberId,
           targetUserId: custodianTeamMember.user?.id ?? undefined,
           locationId: source.locationId ?? undefined,
-          meta: { quantity, viaQuantity: true },
+          meta: { ...eventMeta, quantity, viaQuantity: true },
         },
         tx
       );
@@ -10139,8 +10150,13 @@ type ReleaseQuantityArgs = {
    * it must equal the sum of the lines.
    */
   quantity: number;
-  /** The user performing the release */
-  userId: string;
+  /**
+   * The user performing the release, or null for a volunteer acting through
+   * self-service, who has no account. With null, pass `custodyAssign:
+   * "anyone"`: the self-service caller has already fixed `teamMemberId` to
+   * the volunteer.
+   */
+  userId: string | null;
   /** The organization owning the asset (used for validation) */
   organizationId: string;
   /**
@@ -10156,6 +10172,11 @@ type ReleaseQuantityArgs = {
   custodyAssign: RoleAccess["custody"]["assign"];
   /** Optional note explaining the release */
   note?: string;
+  /**
+   * Extra activity-event meta, merged under the service's own keys. The
+   * self-service routes mark their events with `{ via: "self-service" }`.
+   */
+  eventMeta?: Record<string, string>;
   /**
    * How many of the released units were used up rather than handed back.
    * Omit to let the server derive it from the asset's `consumptionType`
@@ -10234,6 +10255,7 @@ export async function releaseQuantity({
   consumed,
   locationId,
   sources: sourceLines,
+  eventMeta,
 }: ReleaseQuantityArgs) {
   try {
     if (quantity <= 0) {
@@ -10704,6 +10726,7 @@ export async function releaseQuantity({
             targetUserId: custodianTeamMember?.user?.id ?? undefined,
             locationId: line.locationId ?? undefined,
             meta: {
+              ...eventMeta,
               quantity: line.quantity,
               viaQuantity: true,
               consumed: line.consumed,

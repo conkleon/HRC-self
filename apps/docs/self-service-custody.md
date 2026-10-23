@@ -41,16 +41,20 @@ can pick items from a list instead of scanning.
    re-checked against the workspace's NRMs on every request; a deleted NRM is
    forgotten. The PIN unlock is separate and still lasts 12 hours.
 4. They see two tabs, each showing how many entries it holds:
+
    - **Available:** kits and items offered for self-service, kits first, 20
      per page. Each has **Take**. The list updates as they type in the search
      box, and can be narrowed to **Items** or **Kits**, to one **Location** and
      to one **Category** (only places and categories that hold something to
      take are offered). Every choice is kept in the link, so the back button
      and a shared link show the same list.
-   - **Your items:** the kits and individual items in their own custody, each
-     with **Return**. Things someone else holds never appear here and can't be
+   - **Your items:** the kits and items in their own custody, each with
+     **Return**. Things someone else holds never appear here and can't be
      returned from the list; those still need the item's QR code or a staff
      member.
+
+   Stock (quantity-tracked) items are handled by the unit, see
+   [Stock items from the list](#stock-items-from-the-list).
 
 The page is laid out for phones: rows wrap long names, show what each entry
 is (kit with its item count, location, category), and the buttons are large
@@ -60,8 +64,9 @@ enough to tap easily.
 
 In **Settings > Self-service > Browse list**:
 
-1. **Choose what the list offers.** An available item is listed when it
-   **has the tag or is stored in one of the chosen locations**. Either is
+1. **Choose what the list offers.** An available item (for a stock item:
+   one with at least one free unit) is listed when it **has the tag or is
+   stored in one of the chosen locations**. Either is
    enough, and both are saved together with **Save**:
 
    - **Tag:** add it to items from the asset list, one by one or with the
@@ -97,6 +102,31 @@ item that also has custody of its own stays with its holder. Each item gets a
 note ("**Maria P.** took custody via kit **Trauma kit** from the self-service
 list.") and an event with `viaKit: true`, and the manager email links to the
 kit.
+
+### Stock items from the list
+
+A stock item is listed while it has free units: its stock minus the units in
+custody, in kits and out on an active booking. The row shows how many are
+available and asks **How many** next to **Take** (1 to start with).
+
+On **Your items** the row shows how many the volunteer has and asks how many
+came **Back**, starting at everything held:
+
+- **Returnable (two-way) item:** that many go back to stock and the rest stay
+  with the volunteer.
+- **Consumable (one-way) item:** the whole hold ends. That many go back to
+  stock and the rest are recorded as used up, which lowers the stock. 0 means
+  everything was used.
+
+The units go through the same checks and records as a staff hand-over: the
+availability check under a lock, the stock ledger, the low-stock alert and a
+`CUSTODY_ASSIGNED` / `CUSTODY_RELEASED` event with `viaQuantity: true`. The
+ledger rows have no acting user (reports show them without one) and name the
+volunteer as the custodian. When an item is offered through a location, the
+units are recorded as taken from the offered placement with the most units
+left, if it can cover them. The note reads "**Maria P.** took **3** unit(s)
+from the self-service list." or "... returned **2** unit(s) and used **1**
+...".
 
 ## Turning it on
 
@@ -159,13 +189,14 @@ restarts and assume a single app container, which is how the
 
 ## Scope
 
-Self-service handles **individual** assets, and whole kits from the browse
-list. The following are referred to staff:
+Self-service handles **individual** assets, and whole kits and stock items
+from the browse list. The following are referred to staff:
 
 - kits scanned by their own QR code, and single assets that belong to a kit
   (take the whole kit from the list instead);
 - a single item whose custody came with a kit (return the kit instead);
-- quantity-tracked (stock) items;
+- quantity-tracked (stock) items scanned by their QR code (take them from the
+  list instead);
 - items checked out on a booking;
 - archived items.
 
@@ -181,6 +212,7 @@ Item photos are not shown on the page.
 | Settings page                                               | `apps/webapp/app/routes/_layout+/settings.self-service.tsx`                                                                                              |
 | Services (PIN, lockout, cookie, volunteers, custody, email) | `apps/webapp/app/modules/self-custody/`                                                                                                                  |
 | Kit take and return                                         | `apps/webapp/app/modules/self-custody/kit-custody.server.ts`                                                                                             |
+| Stock item take and return (by the unit)                    | `apps/webapp/app/modules/self-custody/quantity.server.ts`                                                                                                |
 | List screens (tabs, live search, filters)                   | `apps/webapp/app/components/self-custody/browse-lists.tsx`                                                                                               |
 | Manager email                                               | `apps/webapp/app/emails/self-custody-alert.tsx`                                                                                                          |
 | Email audience                                              | `notifications.selfCustodyAlerts` in `packages/permissions/src/policies.ts`                                                                              |

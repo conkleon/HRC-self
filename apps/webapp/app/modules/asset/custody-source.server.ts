@@ -576,6 +576,9 @@ export type CustodySourceNoteVerb =
  * Only called for pools placed at two or more locations, so a pool at one location
  * adds nothing new to its location's timeline. Best-effort: the stock
  * change has committed, so a failure is logged and swallowed.
+ *
+ * @param userId - Who acted; null for a volunteer acting through
+ *   self-service, named "Self-service" in the note
  */
 export async function createCustodySourceLocationNote({
   userId,
@@ -585,7 +588,7 @@ export async function createCustodySourceLocationNote({
   quantity,
   verb,
 }: {
-  userId: string;
+  userId: string | null;
   asset: {
     id: string;
     title: string;
@@ -598,16 +601,22 @@ export async function createCustodySourceLocationNote({
   verb: CustodySourceNoteVerb;
 }): Promise<void> {
   try {
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        displayName: true,
-      } satisfies Prisma.UserSelect,
-    });
-    const actor = user ? wrapUserLinkForNote(user) : "Someone";
+    const user = userId
+      ? await db.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            displayName: true,
+          } satisfies Prisma.UserSelect,
+        })
+      : null;
+    const actor = user
+      ? wrapUserLinkForNote(user)
+      : userId
+      ? "Someone"
+      : "Self-service";
     const units = wrapAssetWithCountForNote(asset, quantity);
     const location = wrapLinkForNote(
       `/locations/${locationId}`,
@@ -623,7 +632,11 @@ export async function createCustodySourceLocationNote({
       removed: `${actor} removed ${units} from ${location} (adjustment).`,
     }[verb];
 
-    await createSystemLocationNote({ locationId, content, userId });
+    await createSystemLocationNote({
+      locationId,
+      content,
+      userId: userId ?? undefined,
+    });
   } catch (cause) {
     Logger.error(
       new ShelfError({

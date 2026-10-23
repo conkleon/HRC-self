@@ -240,7 +240,7 @@ export const NOTE_CHANNEL: Record<SelfCustodySource, string> = {
  * Activity event meta. Every self-service event carries `via`; list actions
  * add `source` so reports can tell them from scans.
  */
-export const eventMeta = (source: SelfCustodySource) =>
+export const eventMeta = (source: SelfCustodySource): Record<string, string> =>
   source === "list"
     ? { via: "self-service", source: "list" }
     : { via: "self-service" };

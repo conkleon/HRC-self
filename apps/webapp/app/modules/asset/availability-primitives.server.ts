@@ -672,10 +672,34 @@ export async function computeCustodyAvailability(
     }),
   ]);
 
-  const inCustody = custodySum._sum.quantity ?? 0;
-  const inKits = kitSum._sum.quantity ?? 0;
-  const checkedOut = bookingCheckedOutSum._sum.quantity ?? 0;
+  return custodyAvailabilityFrom({
+    totalQuantity,
+    inCustody: custodySum._sum.quantity ?? 0,
+    inKits: kitSum._sum.quantity ?? 0,
+    checkedOut: bookingCheckedOutSum._sum.quantity ?? 0,
+  });
+}
 
+/**
+ * The arithmetic of {@link computeCustodyAvailability}, for a caller that
+ * read the same three sums itself (for many assets at once, say). The parts
+ * must be read with the same filters: operator custody only, every kit
+ * allocation, standalone slices of ONGOING or OVERDUE bookings only.
+ *
+ * @param parts - Workspace stock and the three sums
+ * @returns The parts and what is left to hand out
+ */
+export function custodyAvailabilityFrom({
+  totalQuantity,
+  inCustody,
+  inKits,
+  checkedOut,
+}: {
+  totalQuantity: number;
+  inCustody: number;
+  inKits: number;
+  checkedOut: number;
+}): CustodyAvailability {
   return {
     inCustody,
     inKits,

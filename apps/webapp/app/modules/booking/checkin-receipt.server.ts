@@ -407,7 +407,7 @@ export async function fetchCheckinReceiptData(
     // be a guess and the row stays blank.
     const returnRecordsBySlice = new Map<
       string,
-      Array<{ at: Date; byId: string }>
+      Array<{ at: Date; byId: string | null }>
     >();
     for (const log of dispositionLogs) {
       if (log.category !== "RETURN") continue;

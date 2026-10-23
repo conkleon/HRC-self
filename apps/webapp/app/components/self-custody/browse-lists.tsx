@@ -4,7 +4,9 @@
  * The browse page's screens once a volunteer has unlocked the phone and said
  * who they are: a bar naming them, two tabs ("Available" and "Your items"),
  * and in each tab a list of kits and single items with one big Take or Return
- * button per row. The Available tab searches as the volunteer types and
+ * button per row. A quantity-tracked item's row also asks how many: how many
+ * to take, or how many came back. Tapping a kit's name shows what is inside
+ * it. The Available tab searches as the volunteer types and
  * filters by kind, location and category; every choice lives in the URL, so
  * the server builds each list and the back button works.
  *
@@ -16,9 +18,9 @@
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  * @see {@link file://./self-custody-steps.tsx}
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent, MouseEvent } from "react";
-import { Package } from "lucide-react";
+import { ChevronDown, Package } from "lucide-react";
 import { Form, useLocation, useNavigation, useSubmit } from "react-router";
 
 import Input from "~/components/forms/input";
@@ -36,6 +38,16 @@ export type BrowseItem = {
   categoryName: string | null;
   /** Active items in the kit; null for a single item. */
   itemCount: number | null;
+  /**
+   * For a quantity-tracked item: free units on the Available tab, units held
+   * on "Your items", and whether it is consumable (one-way). Null otherwise.
+   */
+  units: { count: number; oneWay: boolean } | null;
+  /**
+   * What a kit holds: its active items by name, with the kit's share of
+   * units for a quantity-tracked one. Null for a single item.
+   */
+  contents: { id: string; title: string; quantity: number | null }[] | null;
 };
 
 /** One page of offered entries, as the loader sends it. */
@@ -224,8 +236,50 @@ function KindBadge({ kind }: { kind: BrowseItem["kind"] }) {
 }
 
 /**
+ * How many units a quantity-tracked row takes or returns, posted as `units`.
+ * Starts at 1 to take, and at everything held to return, so a quick tap never
+ * records units as used up.
+ */
+function UnitsField({
+  item,
+  units,
+  intent,
+  hintId,
+}: {
+  item: BrowseItem;
+  units: NonNullable<BrowseItem["units"]>;
+  intent: "take" | "return";
+  hintId: string | undefined;
+}) {
+  const id = `units-${intent}-${item.id}`;
+  // A consumable's whole hold ends on return, so nothing coming back is valid.
+  const min = intent === "return" && units.oneWay ? 0 : 1;
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-xs font-medium text-gray-700">
+        {intent === "take" ? "How many" : "Back"}
+      </label>
+      <input
+        id={id}
+        name="units"
+        type="number"
+        inputMode="numeric"
+        required
+        min={min}
+        max={units.count}
+        step={1}
+        defaultValue={intent === "take" ? 1 : units.count}
+        aria-describedby={hintId}
+        className="min-h-[44px] w-20 rounded-[4px] border border-gray-300 bg-white px-2 text-[16px] text-gray-900 shadow focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+      />
+    </div>
+  );
+}
+
+/**
  * One kit or item with its action button, which posts `intent`, the target
- * (`kitId` or `assetId`) and the volunteer.
+ * (`kitId` or `assetId`) and the volunteer. A quantity-tracked item also
+ * posts `units` (see {@link UnitsField}).
  */
 function ItemRow({
   item,
@@ -244,17 +298,53 @@ function ItemRow({
     item.kind === "kit"
       ? `Kit of ${item.itemCount} item${item.itemCount === 1 ? "" : "s"}`
       : null,
+    item.units
+      ? intent === "take"
+        ? `${item.units.count} available`
+        : `You have ${item.units.count}`
+      : null,
     item.locationName,
     item.categoryName,
   ].filter((detail): detail is string => Boolean(detail));
+  const usedHint =
+    item.units?.oneWay && intent === "return"
+      ? "Enter how many you are bringing back. The rest are recorded as used."
+      : null;
+  const hintId = usedHint ? `units-hint-${item.id}` : undefined;
+  // Only a kit with something in it can be opened.
+  const contents = item.contents?.length ? item.contents : null;
+  const [open, setOpen] = useState(false);
+  const contentsId = `kit-contents-${intent}-${item.id}`;
 
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left">
+    <li className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left">
       <KindBadge kind={item.kind} />
       <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 break-words font-medium text-gray-900">
-          {item.title}
-        </p>
+        {contents ? (
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-controls={open ? contentsId : undefined}
+            className="-mx-1 flex min-h-[44px] items-center gap-1 rounded px-1 text-left font-medium text-gray-900 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
+          >
+            <span className="line-clamp-2 break-words">{item.title}</span>
+            <ChevronDown
+              aria-hidden="true"
+              className={tw(
+                "size-4 shrink-0 text-gray-500 transition-transform",
+                open && "rotate-180"
+              )}
+            />
+            <span className="sr-only">
+              {open ? "Hide what is in this kit" : "Show what is in this kit"}
+            </span>
+          </button>
+        ) : (
+          <p className="line-clamp-2 break-words font-medium text-gray-900">
+            {item.title}
+          </p>
+        )}
         {details.length > 0 ? (
           <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-gray-600">
             {details.map((detail) => (
@@ -264,8 +354,13 @@ function ItemRow({
             ))}
           </p>
         ) : null}
+        {usedHint ? (
+          <p id={hintId} className="mt-1 text-sm text-gray-600">
+            {usedHint}
+          </p>
+        ) : null}
       </div>
-      <Form method="post" className="shrink-0">
+      <Form method="post" className="ml-auto flex shrink-0 items-end gap-2">
         <input type="hidden" name="intent" value={intent} />
         <input
           type="hidden"
@@ -273,6 +368,14 @@ function ItemRow({
           value={item.id}
         />
         <input type="hidden" name="teamMemberId" value={memberId} />
+        {item.units ? (
+          <UnitsField
+            item={item}
+            units={item.units}
+            intent={intent}
+            hintId={hintId}
+          />
+        ) : null}
         <Button
           type="submit"
           variant={intent === "take" ? "primary" : "secondary"}
@@ -283,6 +386,27 @@ function ItemRow({
           {label}
         </Button>
       </Form>
+      {contents && open ? (
+        <ul
+          id={contentsId}
+          aria-label={`In ${item.title}`}
+          className="w-full basis-full divide-y divide-gray-100 rounded-md border border-gray-100 bg-gray-50 px-3"
+        >
+          {contents.map((content) => (
+            <li
+              key={content.id}
+              className="flex items-start justify-between gap-3 py-2 text-sm text-gray-700"
+            >
+              <span className="min-w-0 break-words">{content.title}</span>
+              {content.quantity !== null ? (
+                <span className="shrink-0 tabular-nums text-gray-600">
+                  × {content.quantity}
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </li>
   );
 }

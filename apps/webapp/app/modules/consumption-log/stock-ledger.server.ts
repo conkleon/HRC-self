@@ -142,7 +142,7 @@ export type StockChangeInput = {
  *
  * @param tx - The transaction that made the change, still holding the locks
  * @param organizationId - The caller's organization
- * @param userId - Who made the change
+ * @param userId - Who made the change; null for a self-service volunteer
  * @param changes - One entry per asset
  */
 export async function recordStockChanges(
@@ -153,7 +153,7 @@ export async function recordStockChanges(
     changes,
   }: {
     organizationId: string;
-    userId: string;
+    userId: string | null;
     changes: StockChangeInput[];
   }
 ): Promise<void> {
@@ -254,7 +254,7 @@ function ledgerRow({
   stockChange,
 }: {
   assetId: string;
-  userId: string;
+  userId: string | null;
   category: ConsumptionCategory;
   locationId: string | null;
   stockChange: number;
