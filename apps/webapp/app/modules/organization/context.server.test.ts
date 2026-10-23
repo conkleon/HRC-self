@@ -6,8 +6,9 @@
  * needs to know the user is SSO even when they hold no membership to read the
  * flag from.
  *
- * Also pins that the resolved workspaces carry the EFFECTIVE barcode
- * entitlement, so every loader and the client agree with `canUseBarcodes`.
+ * Also pins that the resolved workspaces carry the EFFECTIVE add-on
+ * entitlements, so every loader and the client agree with `canUseBarcodes`
+ * and `canUseAudits`.
  *
  * @see {@link file://./context.server.ts}
  * @see {@link file://./service.server.ts} isSsoUser
@@ -71,12 +72,17 @@ describe("getSelectedOrganization — no memberships", () => {
   });
 });
 
-describe("getSelectedOrganization: barcode entitlement", () => {
-  /** A password user with one team workspace that has not bought the add-on. */
+describe("getSelectedOrganization: add-on entitlements", () => {
+  /** A password user with one team workspace that has bought no add-on. */
   const membership = {
     organizationId: "org-1",
     roles: [],
-    organization: { id: "org-1", type: "TEAM", barcodesEnabled: false },
+    organization: {
+      id: "org-1",
+      type: "TEAM",
+      barcodesEnabled: false,
+      auditsEnabled: false,
+    },
     user: { sso: false, lastSelectedOrganizationId: "org-1" },
   };
 
@@ -104,7 +110,7 @@ describe("getSelectedOrganization: barcode entitlement", () => {
     return context.getSelectedOrganization;
   }
 
-  it("grants barcodes to every workspace when premium features are off", async () => {
+  it("grants every add-on to every workspace when premium features are off", async () => {
     const getSelected = await loadGetSelectedOrganization(false);
 
     const { currentOrganization, organizations } = await getSelected({
@@ -113,10 +119,12 @@ describe("getSelectedOrganization: barcode entitlement", () => {
     });
 
     expect(currentOrganization.barcodesEnabled).toBe(true);
+    expect(currentOrganization.auditsEnabled).toBe(true);
     expect(organizations.every((org) => org.barcodesEnabled)).toBe(true);
+    expect(organizations.every((org) => org.auditsEnabled)).toBe(true);
   });
 
-  it("keeps the add-on flag when premium features are on", async () => {
+  it("keeps the add-on flags when premium features are on", async () => {
     const getSelected = await loadGetSelectedOrganization(true);
 
     const { currentOrganization } = await getSelected({
@@ -125,5 +133,6 @@ describe("getSelectedOrganization: barcode entitlement", () => {
     });
 
     expect(currentOrganization.barcodesEnabled).toBe(false);
+    expect(currentOrganization.auditsEnabled).toBe(false);
   });
 });

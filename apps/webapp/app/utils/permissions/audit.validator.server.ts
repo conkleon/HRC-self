@@ -1,14 +1,17 @@
 import type { Organization } from "@prisma/client";
+import { canUseAudits } from "../addon-entitlements.server";
 import { ShelfError } from "../error";
 
 /**
- * Server-side utility to check if audits are enabled for an organization
+ * Server-side utility to check if audits are enabled for an organization.
+ * Defers to `canUseAudits`, so every workspace qualifies when premium
+ * features are off.
  */
 export function organizationHasAuditsEnabled(
   organization: Pick<Organization, "auditsEnabled"> | undefined | null
 ): boolean {
   if (!organization) return false;
-  return organization.auditsEnabled;
+  return canUseAudits(organization);
 }
 
 /**

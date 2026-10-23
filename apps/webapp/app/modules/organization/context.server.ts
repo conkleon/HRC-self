@@ -1,6 +1,9 @@
 import { createCookie } from "react-router";
 import { getRequestCache } from "@server/request-cache.server";
-import { canUseBarcodes } from "~/utils/addon-entitlements.server";
+import {
+  canUseAudits,
+  canUseBarcodes,
+} from "~/utils/addon-entitlements.server";
 import {
   destroyCookie,
   parseCookie,
@@ -84,12 +87,14 @@ async function getSelectedOrganizationUncached({
    * In this case what we do is we set the current organization to the first one in the list
    */
   const userOrganizations = await getUserOrganizations({ userId });
-  // `barcodesEnabled` carries the EFFECTIVE entitlement (`canUseBarcodes`), not
-  // the raw column: with premium features off every workspace has barcodes.
-  // Every loader, `requirePermission` and the client read the flag from here.
+  // The add-on flags carry the EFFECTIVE entitlement (`canUseBarcodes`,
+  // `canUseAudits`), not the raw columns: with premium features off every
+  // workspace has every add-on. Every loader, `requirePermission` and the
+  // client read the flags from here.
   const allOrganizations = userOrganizations.map((uo) => ({
     ...uo.organization,
     barcodesEnabled: canUseBarcodes(uo.organization),
+    auditsEnabled: canUseAudits(uo.organization),
   }));
 
   // Resolved from the already-fetched memberships so the result is consistent

@@ -3,7 +3,10 @@ import { Roles } from "@prisma/client";
 import * as Sentry from "@sentry/react-router";
 import { db } from "~/database/db.server";
 import { getSelectedOrganization } from "~/modules/organization/context.server";
-import { canUseBarcodes as hasBarcodeEntitlement } from "./addon-entitlements.server";
+import {
+  canUseAudits as hasAuditEntitlement,
+  canUseBarcodes as hasBarcodeEntitlement,
+} from "./addon-entitlements.server";
 import { ShelfError } from "./error";
 import type {
   PermissionAction,
@@ -112,8 +115,8 @@ export async function requirePermission({
   // Barcode entitlement: the add-on, or every workspace when premium is off
   const canUseBarcodes = hasBarcodeEntitlement(currentOrganization);
 
-  // Determine if user can use audits based on organization settings
-  const canUseAudits = currentOrganization.auditsEnabled ?? false;
+  // Audit entitlement: the add-on, or every workspace when premium is off
+  const canUseAudits = hasAuditEntitlement(currentOrganization);
 
   return {
     organizations,
