@@ -2,7 +2,8 @@
  * Browse lists - unit tests
  *
  * Covers what a volunteer can open and enter on a row: a kit's contents,
- * shown on tap, and the unit count of a quantity-tracked item.
+ * shown on tap, and the unit count of a quantity-tracked item; and the row
+ * thumbnails, which fall back to an icon.
  *
  * @see {@link file://./browse-lists.tsx}
  */
@@ -22,9 +23,15 @@ const KIT: BrowseItem = {
   itemCount: 2,
   units: null,
   contents: [
-    { id: "q1", title: "Bandages", quantity: 20 },
-    { id: "a1", title: "Splint", quantity: null },
+    {
+      id: "q1",
+      title: "Bandages",
+      quantity: 20,
+      imageUrl: "https://storage/q1-thumb.jpg",
+    },
+    { id: "a1", title: "Splint", quantity: null, imageUrl: null },
   ],
+  imageUrl: null,
 };
 
 /** A consumable stock item the volunteer holds 5 of. */
@@ -37,6 +44,7 @@ const BANDAGES: BrowseItem = {
   itemCount: null,
   units: { count: 5, oneWay: true },
   contents: null,
+  imageUrl: "https://storage/q2-thumb.jpg",
 };
 
 /** Renders the volunteer's list inside a data router. */
@@ -83,5 +91,33 @@ describe("MyItems", () => {
       "Enter how many you are bringing back. The rest are recorded as used."
     );
     expect(screen.getByText("You have 5")).toBeInTheDocument();
+  });
+
+  it("shows a row's picture, and the icon instead when it fails to load", async () => {
+    await renderMine([BANDAGES]);
+    const picture = document.querySelector(
+      'img[src="https://storage/q2-thumb.jpg"]'
+    );
+
+    expect(picture).not.toBeNull();
+    expect(picture).toHaveAttribute("alt", "");
+    expect(picture).toHaveAttribute("loading", "lazy");
+
+    fireEvent.error(picture!);
+    expect(
+      document.querySelector('img[src="https://storage/q2-thumb.jpg"]')
+    ).toBeNull();
+  });
+
+  it("shows the pictures of a kit's items when it is opened", async () => {
+    await renderMine([KIT]);
+    fireEvent.click(screen.getByRole("button", { name: /^Trauma kit/ }));
+
+    const contents = document.getElementById("kit-contents-return-k1");
+    expect(
+      contents?.querySelector('img[src="https://storage/q1-thumb.jpg"]')
+    ).not.toBeNull();
+    // Splint has no picture, so it keeps the icon.
+    expect(contents?.querySelectorAll("img")).toHaveLength(1);
   });
 });

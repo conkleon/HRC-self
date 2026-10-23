@@ -18,6 +18,11 @@
  * claim (`selfTakeCustody` with `requiredOffer`, `selfTakeQuantity`,
  * `selfTakeKitCustody`), so the list is a view, not the gate.
  *
+ * Rows carry a thumbnail: the item's own picture or its model's cover, the
+ * kit's picture, and those of a kit's items. They are signed storage URLs, so
+ * every list re-signs the expired ones before the page is sent
+ * (`withFreshImages`); the phone never repairs one itself.
+ *
  * @see {@link file://./offer.server.ts}
  * @see {@link file://./custody.server.ts}
  * @see {@link file://./kit-custody.server.ts}
@@ -33,6 +38,14 @@ import {
 } from "@prisma/client";
 
 import { db } from "~/database/db.server";
+import { resolveAssetImage } from "~/modules/asset/image-resolution";
+import type { AssetWithResolvableImage } from "~/modules/asset/image-resolution";
+import { ASSET_MODEL_IMAGE_SELECT } from "~/modules/asset/image-select";
+import {
+  ASSET_IMAGE_RESIGN_LIMITS,
+  refreshExpiredAssetImages,
+} from "~/modules/asset/service.server";
+import { refreshExpiredKitImages } from "~/modules/kit/service.server";
 import { ShelfError } from "~/utils/error";
 import type { SelfCustodyOrganization } from "./custody.server";
 import { offeredAssetMatch, offeredKitMatch } from "./offer.server";
@@ -83,13 +96,35 @@ type BrowseEntry = {
   units: BrowseUnits | null;
   /** What a kit holds, its active items by name; null for a single item. */
   contents: KitContent[] | null;
+  /** Thumbnail to show, or null for none (the page shows an icon). */
+  imageUrl: string | null;
 };
 
 /**
  * One active item of a kit. `quantity` is the kit's share of a
  * quantity-tracked item (`AssetKit.quantity`), null for an individual item.
  */
-type KitContent = { id: string; title: string; quantity: number | null };
+type KitContent = {
+  id: string;
+  title: string;
+  quantity: number | null;
+  /** Thumbnail to show, or null for none. */
+  imageUrl: string | null;
+};
+
+/** The asset columns a thumbnail is resolved and re-signed from. */
+const ASSET_IMAGE_SELECT = {
+  mainImage: true,
+  mainImageExpiration: true,
+  thumbnailImage: true,
+  ...ASSET_MODEL_IMAGE_SELECT,
+} satisfies Prisma.AssetSelect;
+
+/** An asset's thumbnail URL, or null when only the placeholder would show. */
+function thumbnailOf(asset: AssetWithResolvableImage): string | null {
+  const resolved = resolveAssetImage(asset);
+  return resolved.source === "placeholder" ? null : resolved.thumbnailUrl;
+}
 
 /** The unit count of a quantity-tracked row; see `BrowseEntry.units`. */
 type BrowseUnits = { count: number; oneWay: boolean };
@@ -111,6 +146,7 @@ const ASSET_ENTRY_SELECT = {
   title: true,
   type: true,
   consumptionType: true,
+  ...ASSET_IMAGE_SELECT,
   category: { select: { name: true } },
   assetLocations: {
     where: { assetKitId: null },
@@ -122,7 +158,10 @@ const ASSET_ENTRY_SELECT = {
 /** The kit fields a kit row shows, shared by both lists. */
 const KIT_ENTRY_SELECT = {
   id: true,
+  organizationId: true,
   name: true,
+  image: true,
+  imageExpiration: true,
   category: { select: { name: true } },
   location: { select: { name: true } },
   // Active items only, matching the item count: archived items are left out
@@ -131,7 +170,9 @@ const KIT_ENTRY_SELECT = {
     where: { asset: { archivedAt: null } },
     select: {
       quantity: true,
-      asset: { select: { id: true, title: true, type: true } },
+      asset: {
+        select: { id: true, title: true, type: true, ...ASSET_IMAGE_SELECT },
+      },
     },
     orderBy: { asset: { title: "asc" } },
   },
@@ -151,7 +192,7 @@ function assetEntry(
     consumptionType: ConsumptionType | null;
     category: { name: string } | null;
     assetLocations: { location: { name: string } }[];
-  },
+  } & AssetWithResolvableImage,
   unitCount: number
 ): BrowseEntry {
   return {
@@ -169,6 +210,7 @@ function assetEntry(
           }
         : null,
     contents: null,
+    imageUrl: thumbnailOf(asset),
   };
 }
 
@@ -176,11 +218,16 @@ function assetEntry(
 function kitEntry(kit: {
   id: string;
   name: string;
+  image: string | null;
   category: { name: string } | null;
   location: { name: string } | null;
   assetKits: {
     quantity: number;
-    asset: { id: string; title: string; type: AssetType };
+    asset: {
+      id: string;
+      title: string;
+      type: AssetType;
+    } & AssetWithResolvableImage;
   }[];
 }): BrowseEntry {
   return {
@@ -195,7 +242,81 @@ function kitEntry(kit: {
       id: asset.id,
       title: asset.title,
       quantity: asset.type === AssetType.QUANTITY_TRACKED ? quantity : null,
+      imageUrl: thumbnailOf(asset),
     })),
+    imageUrl: kit.image,
+  };
+}
+
+/** The image columns of a kit row and its items, as the lists select them. */
+type KitImageRow = {
+  id: string;
+  organizationId: string;
+  image: string | null;
+  imageExpiration: Date | null;
+  assetKits: {
+    asset: {
+      id: string;
+      mainImage: string | null;
+      mainImageExpiration: Date | null;
+      thumbnailImage: string | null;
+    };
+  }[];
+};
+
+/** The image columns of an item row, as the lists select them. */
+type AssetImageRow = {
+  id: string;
+  mainImage: string | null;
+  mainImageExpiration: Date | null;
+  thumbnailImage: string | null;
+};
+
+/**
+ * Re-signs the expired picture URLs of one page of rows: the items, the kits
+ * and the kits' items, in one bounded pass per model. A picture that cannot
+ * be re-signed keeps its stale URL, and the page falls back to an icon.
+ *
+ * @returns The same rows, in the same order, with fresh URLs merged in
+ */
+async function withFreshImages<K extends KitImageRow, A extends AssetImageRow>({
+  organizationId,
+  kits,
+  assets,
+}: {
+  organizationId: string;
+  kits: K[];
+  assets: A[];
+}): Promise<{ kits: K[]; assets: A[] }> {
+  const kitItems = kits.flatMap((kit) => kit.assetKits.map((ak) => ak.asset));
+  const [freshKits, freshAssets] = await Promise.all([
+    refreshExpiredKitImages(kits),
+    refreshExpiredAssetImages([...assets, ...kitItems], {
+      organizationId,
+      ...ASSET_IMAGE_RESIGN_LIMITS,
+    }),
+  ]);
+
+  const byId = new Map(freshAssets.map((asset) => [asset.id, asset]));
+  /** An asset row with whatever was re-signed for its id. */
+  const fresh = <T extends AssetImageRow>(asset: T): T => {
+    const signed = byId.get(asset.id);
+    return signed
+      ? {
+          ...asset,
+          mainImage: signed.mainImage,
+          mainImageExpiration: signed.mainImageExpiration,
+          thumbnailImage: signed.thumbnailImage ?? asset.thumbnailImage,
+        }
+      : asset;
+  };
+
+  return {
+    kits: freshKits.map((kit) => ({
+      ...kit,
+      assetKits: kit.assetKits.map((ak) => ({ ...ak, asset: fresh(ak.asset) })),
+    })),
+    assets: assets.map(fresh),
   };
 }
 
@@ -458,10 +579,13 @@ export async function listOfferedItems({
       : [],
   ]);
 
+  const fresh = await withFreshImages({ organizationId, kits, assets });
   return {
     items: [
-      ...kits.map(kitEntry),
-      ...assets.map((asset) => assetEntry(asset, freeUnits.get(asset.id) ?? 0)),
+      ...fresh.kits.map(kitEntry),
+      ...fresh.assets.map((asset) =>
+        assetEntry(asset, freeUnits.get(asset.id) ?? 0)
+      ),
     ],
     page: current,
     totalPages,
@@ -556,9 +680,10 @@ export async function listVolunteerItems({
       orderBy: { title: "asc" },
     }),
   ]);
+  const fresh = await withFreshImages({ organizationId, kits, assets });
   return [
-    ...kits.map(kitEntry),
-    ...assets.map((asset) =>
+    ...fresh.kits.map(kitEntry),
+    ...fresh.assets.map((asset) =>
       assetEntry(
         asset,
         asset.custody.reduce((sum, row) => sum + row.quantity, 0)

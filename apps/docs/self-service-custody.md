@@ -200,7 +200,13 @@ from the browse list. The following are referred to staff:
 - items checked out on a booking;
 - archived items.
 
-Item photos are not shown on the page.
+On the browse list, rows show a thumbnail: the item's picture (or its
+model's cover), the kit's picture, and those of a kit's items when it is
+opened. Rows without a picture, or whose picture fails to load, show an icon.
+Expired picture links are renewed when the list loads, as on staff pages.
+The pictures are signed storage links: whoever has one can open that picture
+until the link expires (up to 72 hours), as with staff pages. The scan page
+shows no photo.
 
 ## For developers
 

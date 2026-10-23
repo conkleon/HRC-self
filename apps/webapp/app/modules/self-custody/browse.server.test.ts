@@ -15,6 +15,8 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "~/database/db.server";
+import { refreshExpiredAssetImages } from "~/modules/asset/service.server";
+import { refreshExpiredKitImages } from "~/modules/kit/service.server";
 import {
   BROWSE_PAGE_SIZE,
   getBrowseWorkspace,
@@ -38,6 +40,20 @@ vi.mock("~/database/db.server", () => ({
     location: { findMany: vi.fn() },
     category: { findMany: vi.fn() },
   },
+}));
+
+// why: re-signing an expired picture calls Supabase storage; by default
+// nothing is re-signed, and one test hands back a fresh URL
+vi.mock("~/modules/asset/service.server", () => ({
+  ASSET_IMAGE_RESIGN_LIMITS: { maxRefreshes: 100, timeBudgetMs: 2_500 },
+  refreshExpiredAssetImages: vi.fn(),
+  checkOutQuantity: vi.fn(),
+  releaseQuantity: vi.fn(),
+}));
+
+// why: same as above, for kit pictures
+vi.mock("~/modules/kit/service.server", () => ({
+  refreshExpiredKitImages: vi.fn(),
 }));
 
 const ORG = "org-1";
@@ -66,6 +82,10 @@ const row = (id: string, title: string, location: string | null = null) => ({
   title,
   type: AssetType.INDIVIDUAL,
   consumptionType: null,
+  mainImage: null,
+  mainImageExpiration: null,
+  thumbnailImage: null,
+  assetModel: null,
   category: null,
   assetLocations: location ? [{ location: { name: location } }] : [],
 });
@@ -115,16 +135,15 @@ function quantityItems(
 /** A kit row as the browse queries select it, holding `items` radios. */
 const kitRow = (id: string, name: string, items = 3) => ({
   id,
+  organizationId: ORG,
   name,
+  image: null,
+  imageExpiration: null,
   category: { name: "First aid" },
   location: { name: "Depot" },
   assetKits: Array.from({ length: items }, (_, index) => ({
     quantity: 1,
-    asset: {
-      id: `${id}-a${index + 1}`,
-      title: `Radio ${index + 1}`,
-      type: AssetType.INDIVIDUAL,
-    },
+    asset: row(`${id}-a${index + 1}`, `Radio ${index + 1}`),
   })),
 });
 
@@ -143,6 +162,13 @@ beforeEach(() => {
   vi.resetAllMocks();
   // No offered quantity-tracked item unless a test says otherwise.
   vi.mocked(db.asset.findMany).mockResolvedValue([]);
+  // Nothing has expired: the rows come back as they went in.
+  vi.mocked(refreshExpiredAssetImages).mockImplementation(
+    (assets) => Promise.resolve(assets) as never
+  );
+  vi.mocked(refreshExpiredKitImages).mockImplementation(
+    (kits) => Promise.resolve(kits) as never
+  );
 });
 
 describe("getBrowseWorkspace", () => {
@@ -220,6 +246,7 @@ describe("listOfferedItems", () => {
           itemCount: null,
           units: null,
           contents: null,
+          imageUrl: null,
         },
       ],
       page: 1,
@@ -235,18 +262,8 @@ describe("listOfferedItems", () => {
       {
         ...kitRow("k1", "Trauma kit", 1),
         assetKits: [
-          {
-            quantity: 20,
-            asset: {
-              id: "q1",
-              title: "Bandages",
-              type: AssetType.QUANTITY_TRACKED,
-            },
-          },
-          {
-            quantity: 1,
-            asset: { id: "a9", title: "Splint", type: AssetType.INDIVIDUAL },
-          },
+          { quantity: 20, asset: unitsRow("q1", "Bandages") },
+          { quantity: 1, asset: row("a9", "Splint") },
         ],
       },
     ] as never);
@@ -276,9 +293,10 @@ describe("listOfferedItems", () => {
       units: null,
       // What is inside, with the kit's share of a quantity-tracked item.
       contents: [
-        { id: "q1", title: "Bandages", quantity: 20 },
-        { id: "a9", title: "Splint", quantity: null },
+        { id: "q1", title: "Bandages", quantity: 20, imageUrl: null },
+        { id: "a9", title: "Splint", quantity: null, imageUrl: null },
       ],
+      imageUrl: null,
     });
     expect(db.kit.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -303,6 +321,115 @@ describe("listOfferedItems", () => {
     );
     expect(db.asset.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ skip: 0, take: 1 })
+    );
+  });
+
+  it("shows each row's picture: the item's thumbnail, its model's cover, or the kit's", async () => {
+    counts(1, 2);
+    quantityItems([]);
+    vi.mocked(db.kit.findMany).mockResolvedValue([
+      {
+        ...kitRow("k1", "Trauma kit", 0),
+        image: "https://storage/kits/k1.jpg",
+        assetKits: [
+          {
+            quantity: 1,
+            asset: {
+              ...row("a9", "Splint"),
+              mainImage: "https://storage/a9.jpg",
+              thumbnailImage: "https://storage/a9-thumb.jpg",
+            },
+          },
+        ],
+      },
+    ] as never);
+    vi.mocked(db.asset.findMany).mockResolvedValueOnce([
+      {
+        ...row("a1", "Radio #12"),
+        mainImage: "https://storage/a1.jpg",
+        thumbnailImage: "https://storage/a1-thumb.jpg",
+      },
+      {
+        ...row("a2", "Torch"),
+        assetModel: {
+          image: "https://storage/models/torch.jpg",
+          thumbnailImage: "https://storage/models/torch-thumb.jpg",
+        },
+      },
+    ] as never);
+
+    const page = await listOfferedItems({
+      organizationId: ORG,
+      offer: BY_TAG,
+      filters: ALL,
+      page: 1,
+    });
+
+    expect(page.items.map((entry) => entry.imageUrl)).toEqual([
+      "https://storage/kits/k1.jpg",
+      "https://storage/a1-thumb.jpg",
+      "https://storage/models/torch-thumb.jpg",
+    ]);
+    expect(page.items[0].contents).toEqual([
+      expect.objectContaining({ imageUrl: "https://storage/a9-thumb.jpg" }),
+    ]);
+  });
+
+  it("re-signs expired pictures of the items and the kits' items in one pass", async () => {
+    counts(1, 1);
+    quantityItems([]);
+    const expired = new Date("2026-01-01");
+    vi.mocked(db.kit.findMany).mockResolvedValue([
+      {
+        ...kitRow("k1", "Trauma kit", 0),
+        assetKits: [
+          {
+            quantity: 1,
+            asset: {
+              ...row("a9", "Splint"),
+              mainImage: "https://storage/old-a9.jpg",
+              mainImageExpiration: expired,
+            },
+          },
+        ],
+      },
+    ] as never);
+    vi.mocked(db.asset.findMany).mockResolvedValueOnce([
+      {
+        ...row("a1", "Radio #12"),
+        mainImage: "https://storage/old-a1.jpg",
+        mainImageExpiration: expired,
+      },
+    ] as never);
+    vi.mocked(refreshExpiredAssetImages).mockImplementation(
+      (assets) =>
+        Promise.resolve(
+          assets.map((asset) => ({
+            ...asset,
+            mainImage: `https://storage/new-${asset.id}.jpg`,
+            mainImageExpiration: new Date("2026-12-01"),
+          }))
+        ) as never
+    );
+
+    const page = await listOfferedItems({
+      organizationId: ORG,
+      offer: BY_TAG,
+      filters: ALL,
+      page: 1,
+    });
+
+    expect(refreshExpiredAssetImages).toHaveBeenCalledTimes(1);
+    expect(refreshExpiredAssetImages).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({ id: "a1" }),
+        expect.objectContaining({ id: "a9" }),
+      ],
+      expect.objectContaining({ organizationId: ORG, maxRefreshes: 100 })
+    );
+    expect(page.items[1].imageUrl).toBe("https://storage/new-a1.jpg");
+    expect(page.items[0].contents?.[0].imageUrl).toBe(
+      "https://storage/new-a9.jpg"
     );
   });
 

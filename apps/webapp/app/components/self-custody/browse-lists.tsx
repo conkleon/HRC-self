@@ -6,7 +6,8 @@
  * and in each tab a list of kits and single items with one big Take or Return
  * button per row. A quantity-tracked item's row also asks how many: how many
  * to take, or how many came back. Tapping a kit's name shows what is inside
- * it. The Available tab searches as the volunteer types and
+ * it. Rows show a thumbnail when the item or kit has a picture, and an icon
+ * otherwise. The Available tab searches as the volunteer types and
  * filters by kind, location and category; every choice lives in the URL, so
  * the server builds each list and the back button works.
  *
@@ -47,7 +48,16 @@ export type BrowseItem = {
    * What a kit holds: its active items by name, with the kit's share of
    * units for a quantity-tracked one. Null for a single item.
    */
-  contents: { id: string; title: string; quantity: number | null }[] | null;
+  contents:
+    | {
+        id: string;
+        title: string;
+        quantity: number | null;
+        imageUrl: string | null;
+      }[]
+    | null;
+  /** Thumbnail to show, or null for none (an icon shows instead). */
+  imageUrl: string | null;
 };
 
 /** One page of offered entries, as the loader sends it. */
@@ -214,22 +224,53 @@ export function ListTabs({
   );
 }
 
-/** The small square in front of a row that tells a kit from a single item. */
-function KindBadge({ kind }: { kind: BrowseItem["kind"] }) {
+/**
+ * The square in front of a row: the picture when there is one, otherwise an
+ * icon that tells a kit from a single item. A picture that fails to load (an
+ * expired or removed file) falls back to the icon. Decorative: the row's
+ * title names the item.
+ *
+ * @param props.size - "row" for a list row, "small" for a kit's contents
+ */
+function Thumbnail({
+  kind,
+  imageUrl,
+  size = "row",
+}: {
+  kind: BrowseItem["kind"];
+  imageUrl: string | null;
+  size?: "row" | "small";
+}) {
+  const [failed, setFailed] = useState(false);
+  const box = size === "row" ? "size-10" : "size-8";
+
+  if (imageUrl && !failed) {
+    return (
+      <img
+        src={imageUrl}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        className={tw(box, "shrink-0 rounded-md bg-gray-100 object-cover")}
+      />
+    );
+  }
   return (
     <span
       aria-hidden="true"
       className={tw(
-        "flex size-10 shrink-0 items-center justify-center rounded-md",
+        box,
+        "flex shrink-0 items-center justify-center rounded-md",
         kind === "kit"
           ? "bg-primary-50 text-primary-700"
           : "bg-gray-100 text-gray-600"
       )}
     >
       {kind === "kit" ? (
-        <Package className="size-5" />
+        <Package className={size === "row" ? "size-5" : "size-4"} />
       ) : (
-        <AssetsIcon className="size-5" />
+        <AssetsIcon className={size === "row" ? "size-5" : "size-4"} />
       )}
     </span>
   );
@@ -318,7 +359,7 @@ function ItemRow({
 
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left">
-      <KindBadge kind={item.kind} />
+      <Thumbnail kind={item.kind} imageUrl={item.imageUrl} />
       <div className="min-w-0 flex-1">
         {contents ? (
           <button
@@ -395,9 +436,12 @@ function ItemRow({
           {contents.map((content) => (
             <li
               key={content.id}
-              className="flex items-start justify-between gap-3 py-2 text-sm text-gray-700"
+              className="flex items-center gap-3 py-2 text-sm text-gray-700"
             >
-              <span className="min-w-0 break-words">{content.title}</span>
+              <Thumbnail kind="item" imageUrl={content.imageUrl} size="small" />
+              <span className="min-w-0 flex-1 break-words">
+                {content.title}
+              </span>
               {content.quantity !== null ? (
                 <span className="shrink-0 tabular-nums text-gray-600">
                   × {content.quantity}
