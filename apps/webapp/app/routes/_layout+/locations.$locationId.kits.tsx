@@ -396,6 +396,7 @@ const Row = ({
           };
         };
       };
+      _count: { select: { assetKits: true } };
     };
   }>;
   extraProps: { canReadCustody: boolean; userRoleCanManageKits: boolean };
@@ -444,7 +445,12 @@ const Row = ({
                   {item.name}
                 </Button>
               </span>
-              <KitStatusBadge status={item.status} availableToBook />
+              {/* `_count.assetKits` counts the active members marked
+                  unavailable (see `getLocationKits`). */}
+              <KitStatusBadge
+                status={item.status}
+                availableToBook={item._count.assetKits === 0}
+              />
               {displayCode ? <AssetCodeBadge {...displayCode} /> : null}
             </div>
           </div>

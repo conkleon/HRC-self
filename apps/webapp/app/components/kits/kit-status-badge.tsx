@@ -6,12 +6,17 @@
  * lists, and beside a booking's kit rows — where it sits directly above the
  * member assets' own status badges.
  *
+ * A kit holding an item marked unavailable for bookings cannot be booked, so
+ * it never reads "Available": that label becomes a grey "Unavailable", like
+ * the asset badge. Any other status (in custody, checked out) is still shown,
+ * with the unavailable icon beside it.
+ *
  * @see {@link file://./../assets/asset-status-badge/status-labels.ts} — the
  *   asset-side pair of the same two mappings
  */
 
 import { KitStatus } from "@prisma/client";
-import { KIT_STATUS_LABELS } from "@shelf/labels";
+import { ASSET_UNAVAILABLE_LABEL, KIT_STATUS_LABELS } from "@shelf/labels";
 import { BADGE_COLORS, type BadgeColorScheme } from "~/utils/badge-colors";
 import type { ExtendedKitStatus } from "~/utils/booking-assets";
 import { Badge } from "../shared/badge";
@@ -75,15 +80,25 @@ export function KitStatusBadge({
   status: ExtendedKitStatus;
   availableToBook: boolean;
 }) {
+  const title =
+    "This kit is not available for bookings because some of its assets are marked as unavailable";
+  if (!availableToBook && status === KitStatus.AVAILABLE) {
+    return (
+      <div className="flex items-center gap-[6px]" title={title}>
+        <Badge color={BADGE_COLORS.gray.bg} textColor={BADGE_COLORS.gray.text}>
+          {ASSET_UNAVAILABLE_LABEL}
+        </Badge>
+      </div>
+    );
+  }
+
   const colors = kitStatusColorMap(status);
   return (
     <div className="flex items-center gap-[6px]">
       <Badge color={colors.bg} textColor={colors.text}>
         {userFriendlyKitStatus(status)}
       </Badge>
-      {!availableToBook && (
-        <UnavailableBadge title="This kit is not available for Bookings because some of its assets are marked as unavailable" />
-      )}
+      {!availableToBook && <UnavailableBadge title={title} />}
     </div>
   );
 }

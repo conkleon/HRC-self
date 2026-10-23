@@ -8,6 +8,9 @@ export declare const ASSET_STATUS_LABELS: {
   readonly CHECKED_OUT: "Checked out";
 };
 
+/** Shown in place of "Available" for an asset marked unavailable for bookings. */
+export declare const ASSET_UNAVAILABLE_LABEL: "Unavailable";
+
 export declare const ASSET_QTY_STATUS_LABELS: {
   readonly AVAILABLE: "Available";
   readonly IN_CUSTODY: "In custody";

@@ -7,6 +7,11 @@
  * with a hover-card breakdown (standalone / via-kit slices, per
  * booking, custody, availability).
  *
+ * An asset marked unavailable for bookings (`availableToBook: false`, e.g.
+ * awaiting repair) never reads "Available": that label becomes a grey
+ * "Unavailable". Any other status (in custody, checked out) is still shown,
+ * since it says where the asset is, with the unavailable icon beside it.
+ *
  * **Performance:** the qty-aware breakdown is lazy-fetched on the
  * first cursor enter via `/api/assets/:id/quantity-breakdown` so an
  * index of 100 rows pays zero per-row cost up-front. When the asset
@@ -21,8 +26,13 @@
 import { useMemo, useState } from "react";
 import type { Booking } from "@prisma/client";
 import { AssetStatus } from "@prisma/client";
+import {
+  ASSET_QTY_STATUS_LABELS,
+  ASSET_UNAVAILABLE_LABEL,
+} from "@shelf/labels";
 import useApiQuery from "~/hooks/use-api-query";
 import { isQuantityTracked } from "~/modules/asset/utils";
+import { BADGE_COLORS } from "~/utils/badge-colors";
 import type { ExtendedAssetStatus } from "~/utils/booking-assets";
 import {
   getQuantityBadgeLabelAndColor,
@@ -41,6 +51,23 @@ import {
 import { UnavailableBadge } from "../../shared/unavailable-badge";
 import When from "../../when/when";
 import { ArchivedBadge } from "../archived-badge";
+
+/** Tooltip of the unavailable icon and the "Unavailable" badge. */
+const UNAVAILABLE_TITLE = "This asset is marked as unavailable for bookings";
+
+/**
+ * The badge for an asset marked unavailable that would otherwise read
+ * "Available". Grey, like the unavailable icon it replaces.
+ */
+function UnavailableStatusBadge() {
+  return (
+    <span title={UNAVAILABLE_TITLE}>
+      <Badge color={BADGE_COLORS.gray.bg} textColor={BADGE_COLORS.gray.text}>
+        {ASSET_UNAVAILABLE_LABEL}
+      </Badge>
+    </span>
+  );
+}
 
 export function AssetStatusBadge({
   id,
@@ -195,6 +222,14 @@ export function AssetStatusBadge({
         }
       : getQuantityBadgeLabelAndColor(quantityData);
 
+    // Every unit free, but the asset is marked unavailable.
+    const readsAvailable = useCallerStatus
+      ? status === AssetStatus.AVAILABLE
+      : label === ASSET_QTY_STATUS_LABELS.AVAILABLE;
+    if (!availableToBook && readsAvailable) {
+      return <UnavailableStatusBadge />;
+    }
+
     return (
       <span
         className="flex items-center gap-1.5"
@@ -226,15 +261,17 @@ export function AssetStatusBadge({
             </HoverCardContent>
           )}
         </HoverCard>
-        {!availableToBook && (
-          <UnavailableBadge title="This asset is marked as unavailable for bookings" />
-        )}
+        {!availableToBook && <UnavailableBadge title={UNAVAILABLE_TITLE} />}
       </span>
     );
   }
 
-  // If the asset is not available to book, it is unavailable
-  // We handle this on front-end as syncing status with the flag is very complex on backend and error prone so this is the lesser evil
+  // `availableToBook` is a separate flag, not an AssetStatus, so the badge
+  // folds the two together here rather than the status column carrying it.
+  if (!availableToBook && status === AssetStatus.AVAILABLE) {
+    return <UnavailableStatusBadge />;
+  }
+
   const colors = assetStatusColorMap(status);
   return (
     <HoverCard openDelay={0}>
@@ -243,9 +280,7 @@ export function AssetStatusBadge({
           <Badge color={colors.bg} textColor={colors.text}>
             {userFriendlyAssetStatus(status)}
           </Badge>
-          {!availableToBook && (
-            <UnavailableBadge title="This asset is marked as unavailable for bookings" />
-          )}
+          {!availableToBook && <UnavailableBadge title={UNAVAILABLE_TITLE} />}
         </span>
       </HoverCardTrigger>
 

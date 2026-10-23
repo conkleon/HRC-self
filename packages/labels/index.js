@@ -24,6 +24,11 @@ export const ASSET_STATUS_LABELS = Object.freeze({
   CHECKED_OUT: "Checked out",
 });
 
+// Shown in place of "Available" for an asset marked unavailable for bookings
+// (`availableToBook: false`), such as one awaiting repair. Not an AssetStatus:
+// an unavailable asset that is in custody or checked out keeps that status.
+export const ASSET_UNAVAILABLE_LABEL = "Unavailable";
+
 // Quantity-aware asset status labels. A QUANTITY_TRACKED asset whose units are
 // split across states derives its badge from the quantity breakdown, not the
 // raw enum. These are the labels that helper can emit (web canonical: the

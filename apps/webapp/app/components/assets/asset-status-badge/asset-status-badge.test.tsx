@@ -222,4 +222,57 @@ describe("AssetStatusBadge", () => {
       expect(screen.getByText("Available")).toBeInTheDocument();
     });
   });
+
+  describe("an asset marked unavailable for bookings", () => {
+    it("reads 'Unavailable', never 'Available'", () => {
+      render(
+        <AssetStatusBadge id="a1" status="AVAILABLE" availableToBook={false} />
+      );
+
+      expect(screen.getByText("Unavailable")).toBeInTheDocument();
+      expect(screen.queryByText("Available")).not.toBeInTheDocument();
+    });
+
+    it("keeps a status that says where it is, with the unavailable icon", () => {
+      render(
+        <AssetStatusBadge id="a1" status="IN_CUSTODY" availableToBook={false} />
+      );
+
+      expect(screen.getByText("In custody")).toBeInTheDocument();
+      expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    });
+
+    it("reads 'Unavailable' for a quantity-tracked asset with every unit free", () => {
+      render(
+        <AssetStatusBadge
+          id="q1"
+          status="AVAILABLE"
+          availableToBook={false}
+          asset={{
+            type: "QUANTITY_TRACKED",
+            quantity: 5,
+            custody: [],
+            bookingAssets: [],
+            assetKits: [],
+          }}
+        />
+      );
+
+      expect(screen.getByText("Unavailable")).toBeInTheDocument();
+      expect(screen.queryByText("Available")).not.toBeInTheDocument();
+    });
+
+    it("keeps 'Partial custody' for a quantity-tracked asset with units held", () => {
+      render(
+        <AssetStatusBadge
+          id="q1"
+          status="AVAILABLE"
+          availableToBook={false}
+          asset={makeQtAssetWithCustodyElsewhere()}
+        />
+      );
+
+      expect(screen.getByText("Partial custody")).toBeInTheDocument();
+    });
+  });
 });

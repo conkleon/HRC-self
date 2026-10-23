@@ -1724,6 +1724,15 @@ export async function getLocationKits(
               },
             },
           },
+          // Active members marked unavailable; any one makes the kit
+          // unavailable for bookings.
+          _count: {
+            select: {
+              assetKits: {
+                where: { asset: { archivedAt: null, availableToBook: false } },
+              },
+            },
+          },
         },
         skip,
         take,
