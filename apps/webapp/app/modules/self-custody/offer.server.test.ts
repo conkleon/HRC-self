@@ -100,10 +100,10 @@ describe("offeredAssetMatch", () => {
     });
   });
 
-  it("matches nothing for an empty offer", () => {
-    // Prisma reads an empty OR as "no row matches".
+  it("matches nothing for an empty offer, even nested under AND", () => {
+    // An empty OR would match every row once nested under AND.
     expect(offeredAssetMatch({ tagId: null, locationIds: [] })).toEqual({
-      OR: [],
+      id: { in: [] },
     });
   });
 });
@@ -128,7 +128,7 @@ describe("offeredKitMatch", () => {
 
   it("matches no kit for an empty offer", () => {
     expect(offeredKitMatch({ tagId: null, locationIds: [] })).toEqual({
-      OR: [],
+      id: { in: [] },
     });
   });
 });

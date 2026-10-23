@@ -74,11 +74,18 @@ export function hasSelfCustodyOffer(offer: SelfCustodyOffer): boolean {
 }
 
 /**
+ * Matches nothing, wherever it is nested. An empty `OR` is not a safe
+ * stand-in: Prisma reads it as "matches nothing" at the top of a where
+ * clause, but as "matches everything" inside `AND`, which is where the offer
+ * rules go.
+ */
+const NO_MATCH = { id: { in: [] } };
+
+/**
  * Matches an item offered by tag or by location. Combine it with the
  * availability conditions under `AND`, so its `OR` never meets another one.
- *
- * With neither a tag nor a location the `OR` is empty, which Prisma reads as
- * "matches nothing": an empty offer offers nothing.
+ * With neither a tag nor a location it matches nothing: an empty offer
+ * offers nothing.
  *
  * @param offer - The resolved offer
  * @returns An asset where clause
@@ -86,6 +93,7 @@ export function hasSelfCustodyOffer(offer: SelfCustodyOffer): boolean {
 export function offeredAssetMatch(
   offer: SelfCustodyOffer
 ): Prisma.AssetWhereInput {
+  if (!hasSelfCustodyOffer(offer)) return NO_MATCH;
   return {
     OR: [
       ...(offer.tagId ? [{ tags: { some: { id: offer.tagId } } }] : []),
@@ -114,6 +122,7 @@ export function offeredAssetMatch(
  * @returns A kit where clause
  */
 export function offeredKitMatch(offer: SelfCustodyOffer): Prisma.KitWhereInput {
+  if (!hasSelfCustodyOffer(offer)) return NO_MATCH;
   return {
     OR: [
       ...(offer.tagId
