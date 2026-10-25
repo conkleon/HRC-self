@@ -53,6 +53,38 @@ describe("EAN-13 barcode validation", () => {
   });
 });
 
+describe("ITF barcode validation", () => {
+  it.each(["1234", "12345678", "00012345600012", "1".repeat(40)])(
+    "accepts %s",
+    (value) => {
+      expect(validateBarcodeValue(BarcodeType.ITF, value)).toBeNull();
+    }
+  );
+
+  it("rejects an odd number of digits", () => {
+    expect(validateBarcodeValue(BarcodeType.ITF, "12345")).toContain(
+      "even number of digits"
+    );
+  });
+
+  it("rejects letters", () => {
+    expect(validateBarcodeValue(BarcodeType.ITF, "12AB")).toContain(
+      "only numeric digits"
+    );
+  });
+
+  it("rejects values shorter than 4 or longer than 40 digits", () => {
+    expect(validateBarcodeValue(BarcodeType.ITF, "12")).toContain("at least 4");
+    expect(validateBarcodeValue(BarcodeType.ITF, "1".repeat(42))).toContain(
+      "too long"
+    );
+  });
+
+  it("rejects an empty value", () => {
+    expect(validateBarcodeValue(BarcodeType.ITF, "")).toContain("required");
+  });
+});
+
 describe("getExternalQrValueWarning", () => {
   it.each([
     "example.com/abc",

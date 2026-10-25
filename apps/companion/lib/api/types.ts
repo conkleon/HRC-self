@@ -272,7 +272,8 @@ export type BarcodeSymbology =
   | "Code39"
   | "DataMatrix"
   | "ExternalQR"
-  | "EAN13";
+  | "EAN13"
+  | "ITF";
 
 /**
  * What a resolved display code turned out to be. Adds the two non-barcode

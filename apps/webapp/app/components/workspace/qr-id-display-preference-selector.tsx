@@ -20,7 +20,7 @@ type QrIdDisplayPreferenceSelectorProps = {
   name?: string;
   /**
    * When true, barcode-type options (Code128, Code39, DataMatrix, ExternalQR,
-   * EAN13) are appended to the list. Reflects `Organization.barcodesEnabled`.
+   * EAN13, ITF) are appended to the list. Reflects `Organization.barcodesEnabled`.
    */
   canUseBarcodes?: boolean;
 };
@@ -87,6 +87,13 @@ const BARCODE_OPTIONS: Option[] = [
     label: "EAN-13",
     description: "Retail barcodes, exactly 13 digits (e.g., 9780201379624)",
     exampleValue: "9780201379624",
+  },
+  {
+    value: "ITF",
+    label: "ITF",
+    description:
+      "Interleaved 2 of 5, an even number of digits (e.g., 12345678)",
+    exampleValue: "12345678",
   },
 ];
 

@@ -31,7 +31,8 @@ export type BarcodeSymbology =
   | "Code39"
   | "DataMatrix"
   | "ExternalQR"
-  | "EAN13";
+  | "EAN13"
+  | "ITF";
 
 /** The server-resolved code, narrowed to the fields this selection reads. */
 export type DisplayCodeInput = {

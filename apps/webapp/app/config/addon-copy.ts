@@ -10,7 +10,7 @@
  * included before what the add-on adds.
  */
 const BARCODE_ADDON_DESCRIPTION =
-  "Use barcodes other than Shelf QR codes: Code128, Code39, EAN-13, DataMatrix, or QR codes from another system already on your gear. Shelf QR codes are included in every plan.";
+  "Use barcodes other than Shelf QR codes: Code128, Code39, EAN-13, ITF, DataMatrix, or QR codes from another system already on your gear. Shelf QR codes are included in every plan.";
 
 export const BARCODE_ADDON = {
   label: "Alternative Barcodes",
@@ -27,7 +27,7 @@ export const BARCODE_ADDON = {
 
   /** Bullet-point features for modals and emails */
   features: [
-    "Add Code128, Code39, EAN-13 and DataMatrix barcodes to assets and kits",
+    "Add Code128, Code39, EAN-13, ITF and DataMatrix barcodes to assets and kits",
     "Keep the barcodes already on your gear, including QR codes from another system",
     "Print labels for these barcodes",
     "Scan these barcodes to look up assets",

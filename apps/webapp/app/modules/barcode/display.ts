@@ -152,6 +152,8 @@ export function labelForPreference(pref: QrIdDisplayPreference): string {
       return "External QR";
     case "EAN13":
       return "EAN-13";
+    case "ITF":
+      return "ITF";
   }
 }
 
@@ -263,7 +265,7 @@ export function resolveDisplayCode({
           }
         : qrFallback(true);
 
-    // All BarcodeType-derived values: Code128, Code39, DataMatrix, ExternalQR, EAN13
+    // All BarcodeType-derived values: Code128, Code39, DataMatrix, ExternalQR, EAN13, ITF
     default: {
       // Addon-entitlement gate: if the org has lost the alternative-barcodes
       // add-on but their workspace preference is still a barcode type (from

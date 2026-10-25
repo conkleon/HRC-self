@@ -139,10 +139,14 @@ describe("getAssetIndexSettings with a column set saved before the unit column",
     // Everything else keeps its order and its visibility.
     const savedOrder = inOrder(saved);
     const quantityIndex = savedOrder.indexOf("quantity");
+    // barcode_ITF is newer than this saved set too, so it joins the group.
+    const withNewBarcode = savedOrder.flatMap((name) =>
+      name === "barcode_EAN13" ? [name, "barcode_ITF"] : [name]
+    );
     expect(inOrder(columns)).toEqual([
-      ...savedOrder.slice(0, quantityIndex + 1),
+      ...withNewBarcode.slice(0, quantityIndex + 1),
       "unitOfMeasure",
-      ...savedOrder.slice(quantityIndex + 1),
+      ...withNewBarcode.slice(quantityIndex + 1),
     ]);
     for (const col of saved) {
       expect(columns.find((c) => c.name === col.name)?.visible).toBe(
@@ -152,6 +156,25 @@ describe("getAssetIndexSettings with a column set saved before the unit column",
 
     // Positions stay unique, so the order is unambiguous.
     const positions = columns.map((col) => col.position);
+    expect(new Set(positions).size).toBe(positions.length);
+  });
+
+  it("adds a newly supported barcode column right after the saved barcode columns", async () => {
+    const saved = [...SAVED_DEFAULTS, ...SAVED_BARCODES, SAVED_CUSTOM_FIELD];
+
+    const settings = await loadSavedColumns(saved, true);
+    const order = inOrder(settings.columns as Column[]);
+
+    expect(order.slice(order.indexOf("barcode_Code128"))).toEqual([
+      "barcode_Code128",
+      "barcode_Code39",
+      "barcode_DataMatrix",
+      "barcode_ExternalQR",
+      "barcode_EAN13",
+      "barcode_ITF",
+      "cf_Supplier",
+    ]);
+    const positions = (settings.columns as Column[]).map((col) => col.position);
     expect(new Set(positions).size).toBe(positions.length);
   });
 

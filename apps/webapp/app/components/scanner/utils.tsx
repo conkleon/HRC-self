@@ -23,6 +23,8 @@ const ZXING_FORMAT_TO_BARCODE_TYPE: Record<string, BarcodeType> = {
   Code39Ext: BarcodeType.Code39,
   Code32: BarcodeType.Code39,
   PZN: BarcodeType.Code39,
+  // ITF variants: ITF-14 is the fixed 14-digit carton code
+  ITF14: BarcodeType.ITF,
 };
 
 /** Normalizes a zxing-wasm format string to our BarcodeType enum value. */
@@ -155,6 +157,10 @@ function detectBarcodeType(value: string): BarcodeType | null {
     BarcodeType.Code39, // 4-43 characters, alphanumeric only
     BarcodeType.DataMatrix, // 4-100 characters
     BarcodeType.Code128, // 4-40 characters, most permissive (check last)
+    // Every ITF value is also a valid Code 128, so a typed or keyboard-wedge
+    // value never lands here. The camera path reads the symbology from zxing
+    // ("ITF") and classifies ITF labels directly.
+    BarcodeType.ITF,
   ];
 
   for (const type of orderedTypes) {

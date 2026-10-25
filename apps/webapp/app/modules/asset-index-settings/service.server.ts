@@ -460,8 +460,14 @@ async function validateColumns({
       );
 
       if (missingBarcodeFields.length > 0) {
-        // Insert barcode columns right after default fields
-        const barcodeStartPosition = defaultFields.length;
+        // A workspace that already shows barcode columns gets the missing
+        // ones right after its last barcode column, so a newly supported type
+        // joins the group without colliding with a saved position. Otherwise
+        // the group starts right after the default fields.
+        const barcodeStartPosition =
+          existingBarcodeColumns.length > 0
+            ? Math.max(...existingBarcodeColumns.map((col) => col.position)) + 1
+            : defaultFields.length;
 
         // Create new barcode columns at their intended positions
         const newBarcodeColumns = missingBarcodeFields.map((field, index) => ({
@@ -470,12 +476,9 @@ async function validateColumns({
           position: barcodeStartPosition + index,
         }));
 
-        // Shift existing columns that come after barcode positions
+        // Shift every saved column at or after the insertion point
         const adjustedColumns = updatedColumns.map((col) => {
-          if (
-            col.position >= barcodeStartPosition &&
-            !col.name.startsWith("barcode_")
-          ) {
+          if (col.position >= barcodeStartPosition) {
             return {
               ...col,
               position: col.position + missingBarcodeFields.length,

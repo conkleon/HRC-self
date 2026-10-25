@@ -1004,6 +1004,7 @@ export const ASSET_CSV_HEADERS = [
   "barcode_DataMatrix",
   "barcode_ExternalQR",
   "barcode_EAN13",
+  "barcode_ITF",
   // AssetModel reference by name (case-insensitive). Resolved /
   // upserted via createAssetModelsIfNotExists during import.
   "assetModel",

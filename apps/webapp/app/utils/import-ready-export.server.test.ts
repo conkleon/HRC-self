@@ -61,6 +61,7 @@ describe("buildImportReadyColumns", () => {
       "barcode_DataMatrix",
       "barcode_ExternalQR",
       "barcode_EAN13",
+      "barcode_ITF",
       "cf:Brand,type:OPTION",
     ]);
   });
@@ -620,6 +621,7 @@ describe("export -> update-importer round trip (final review fix)", () => {
       "barcode_DataMatrix",
       "barcode_ExternalQR",
       "barcode_EAN13",
+      "barcode_ITF",
     ]);
   });
 });

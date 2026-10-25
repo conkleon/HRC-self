@@ -27,6 +27,7 @@ export const BWIP_FORMAT: Record<BarcodeType, string> = {
   DataMatrix: "datamatrix",
   ExternalQR: "qrcode",
   EAN13: "ean13",
+  ITF: "interleaved2of5",
 };
 
 /** Codes that are 2D, and so take no bar height and print square. */
@@ -36,6 +37,7 @@ export const IS_TWO_DIMENSIONAL: Record<BarcodeType, boolean> = {
   DataMatrix: true,
   ExternalQR: true,
   EAN13: false,
+  ITF: false,
 };
 
 /**
@@ -43,7 +45,7 @@ export const IS_TWO_DIMENSIONAL: Record<BarcodeType, boolean> = {
  * Shelf QR id or a SAM ID.
  *
  * @param type - The `type` of a resolved display code
- * @returns `true` for the five `BarcodeType` values
+ * @returns `true` for every `BarcodeType` value
  */
 export function isBarcodeType(
   type: QrIdDisplayPreference | undefined

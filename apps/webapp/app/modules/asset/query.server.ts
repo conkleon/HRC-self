@@ -2213,7 +2213,14 @@ export const assetQueryFragment = (options: AssetQueryOptions = {}) => {
       WHERE b."assetId" = a.id AND b.type = 'EAN13'
       ORDER BY b."createdAt" ASC, b.id ASC
       LIMIT 1
-    ) AS barcode_EAN13`
+    ) AS barcode_EAN13,
+    (
+      SELECT b.value
+      FROM public."Barcode" b
+      WHERE b."assetId" = a.id AND b.type = 'ITF'
+      ORDER BY b."createdAt" ASC, b.id ASC
+      LIMIT 1
+    ) AS barcode_ITF`
     : Prisma.sql``;
 
   return Prisma.sql`
@@ -2638,7 +2645,7 @@ const QR_ID_SUBQUERY = Prisma.sql`(
       )`;
 
 /**
- * The five per-type barcode scalar subqueries, aliased as the identifiers the
+ * The per-type barcode scalar subqueries, aliased as the identifiers the
  * `barcode_<Type>` sort terms reference. Injected into the cheap phase only
  * when a barcode sort is active. Never part of the output (sort-only).
  */
@@ -2661,7 +2668,11 @@ const BARCODE_SORT_KEY_SELECTS = Prisma.sql`(
       (
         SELECT b.value FROM public."Barcode" b
         WHERE b."assetId" = a.id AND b.type = 'EAN13' ORDER BY b."createdAt" ASC, b.id ASC LIMIT 1
-      ) AS barcode_EAN13`;
+      ) AS barcode_EAN13,
+      (
+        SELECT b.value FROM public."Barcode" b
+        WHERE b."assetId" = a.id AND b.type = 'ITF' ORDER BY b."createdAt" ASC, b.id ASC LIMIT 1
+      ) AS barcode_ITF`;
 
 /**
  * The custody CASE expression (direct custody wins; booking-derived synthetic

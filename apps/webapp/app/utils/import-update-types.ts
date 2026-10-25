@@ -82,6 +82,7 @@ export const EXPORT_HEADER_TO_FIELD_MAP: Record<string, string> = {
   barcode_DataMatrix: "barcode_DataMatrix",
   barcode_ExternalQR: "barcode_ExternalQR",
   barcode_EAN13: "barcode_EAN13",
+  barcode_ITF: "barcode_ITF",
 };
 
 /**

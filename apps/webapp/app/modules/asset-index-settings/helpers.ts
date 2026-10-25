@@ -113,6 +113,7 @@ export const barcodeFields = [
   "barcode_DataMatrix",
   "barcode_ExternalQR",
   "barcode_EAN13",
+  "barcode_ITF",
 ] as const;
 
 export type BarcodeField = (typeof barcodeFields)[number];
@@ -171,6 +172,7 @@ export const columnsLabelsMap: { [key in ColumnLabelKey]: string } = {
   barcode_DataMatrix: "DataMatrix",
   barcode_ExternalQR: "External QR",
   barcode_EAN13: "EAN-13",
+  barcode_ITF: "ITF",
   quantity: "Quantity",
   unitOfMeasure: "Unit of measure",
   minQuantity: "Min quantity",

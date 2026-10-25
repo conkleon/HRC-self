@@ -30,4 +30,10 @@ export const BARCODE_TYPE_OPTIONS = [
     description:
       "Exactly 13 numeric digits. For retail barcodes (13-digit product identification codes)",
   },
+  {
+    value: BarcodeType.ITF,
+    label: "ITF",
+    description:
+      "Interleaved 2 of 5: 4-40 digits, an even number (e.g., 12345678). Common on cartons and warehouse labels",
+  },
 ];

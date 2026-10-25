@@ -751,7 +751,7 @@ export type DuplicateBarcode = {
 };
 
 /**
- * The five barcode CSV columns and the {@link BarcodeType} each maps to.
+ * The barcode CSV columns and the {@link BarcodeType} each maps to.
  *
  * Single source of truth for both the import entitlement guard (in
  * `createAssetsFromContentImport`) and {@link parseBarcodesFromImportData}.
@@ -766,6 +766,7 @@ export const BARCODE_IMPORT_COLUMNS: { column: string; type: BarcodeType }[] = [
   { column: "barcode_DataMatrix", type: "DataMatrix" },
   { column: "barcode_ExternalQR", type: "ExternalQR" },
   { column: "barcode_EAN13", type: "EAN13" },
+  { column: "barcode_ITF", type: "ITF" },
 ];
 
 /**

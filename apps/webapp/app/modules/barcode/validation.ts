@@ -13,6 +13,8 @@ export const BARCODE_LENGTHS = {
   EXTERNAL_QR_MIN: 1,
   EXTERNAL_QR_MAX: 2048,
   EAN13_LENGTH: 13,
+  ITF_MIN: 4,
+  ITF_MAX: 40,
 } as const;
 
 /**
@@ -147,6 +149,35 @@ const validateEAN13 = (value: string) => {
 };
 
 /**
+ * Validation rules for ITF (Interleaved 2 of 5) barcodes.
+ * Digits only, encoded in pairs, so the count must be even. No check digit is
+ * required: ITF labels in the wild are printed both with and without one.
+ */
+const validateITF = (value: string) => {
+  if (!value || value.length === 0) {
+    return "ITF barcode value is required";
+  }
+
+  if (!/^[0-9]*$/.test(value)) {
+    return "ITF barcode must contain only numeric digits (0-9)";
+  }
+
+  if (value.length < BARCODE_LENGTHS.ITF_MIN) {
+    return `ITF barcode must be at least ${BARCODE_LENGTHS.ITF_MIN} digits`;
+  }
+
+  if (value.length > BARCODE_LENGTHS.ITF_MAX) {
+    return `ITF barcode too long (max ${BARCODE_LENGTHS.ITF_MAX} digits)`;
+  }
+
+  if (value.length % 2 !== 0) {
+    return "ITF barcode must have an even number of digits (add a leading 0 if needed)";
+  }
+
+  return null;
+};
+
+/**
  * Calculate EAN-13 check digit using the standard algorithm
  */
 function calculateEAN13CheckDigit(first12Digits: string): number {
@@ -180,6 +211,7 @@ export function normalizeBarcodeValue(
     case BarcodeType.Code39:
     case BarcodeType.DataMatrix:
     case BarcodeType.EAN13:
+    case BarcodeType.ITF:
       return value.toUpperCase(); // Convert to uppercase for consistency
     default:
       return value.toUpperCase(); // Default to uppercase
@@ -250,6 +282,8 @@ export function validateBarcodeValue(
       return validateExternalQR(value);
     case BarcodeType.EAN13:
       return validateEAN13(value);
+    case BarcodeType.ITF:
+      return validateITF(value);
     default:
       return "Unknown barcode type";
   }

@@ -288,6 +288,10 @@ function ImportContentBody({
                 <li>
                   <b>barcode_EAN13</b> - 13-digit product identification codes
                 </li>
+                <li>
+                  <b>barcode_ITF</b> - Interleaved 2 of 5, 4-40 digits (an even
+                  number)
+                </li>
               </ul>
               <p className="mt-1 text-[14px] text-gray-600">
                 <b>Rules:</b> Use comma separation for multiple barcodes of the

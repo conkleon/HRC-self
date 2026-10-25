@@ -132,4 +132,12 @@ describe("handleDetection with a structured barcode", () => {
       barcodeType: BarcodeType.Code128,
     });
   });
+
+  it("keeps an ITF the camera read as ITF", async () => {
+    expect(await detect("00012345600012", BarcodeType.ITF)).toEqual({
+      value: "00012345600012",
+      type: "barcode",
+      barcodeType: BarcodeType.ITF,
+    });
+  });
 });

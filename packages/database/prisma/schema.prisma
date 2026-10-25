@@ -750,6 +750,7 @@ enum BarcodeType {
   DataMatrix
   ExternalQR
   EAN13
+  ITF
 }
 
 model PrintBatch {
@@ -1205,6 +1206,7 @@ enum QrIdDisplayPreference {
   DataMatrix
   ExternalQR
   EAN13
+  ITF
 }
 
 // User date-format preference — controls day/month/year ordering in rendered

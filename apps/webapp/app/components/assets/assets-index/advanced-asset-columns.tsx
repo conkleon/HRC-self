@@ -336,6 +336,7 @@ export function AdvancedIndexColumn({
     case "barcode_DataMatrix":
     case "barcode_ExternalQR":
     case "barcode_EAN13":
+    case "barcode_ITF":
       return (
         <BarcodeCell
           column={column}

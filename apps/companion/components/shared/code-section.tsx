@@ -55,6 +55,7 @@ const BWIP_FORMAT: Record<BarcodeSymbology, string> = {
   DataMatrix: "datamatrix",
   ExternalQR: "qrcode",
   EAN13: "ean13",
+  ITF: "interleaved2of5",
 };
 
 /** Codes that are 2D, and so take no bar height. */
@@ -64,6 +65,7 @@ const IS_TWO_DIMENSIONAL: Record<BarcodeSymbology, boolean> = {
   DataMatrix: true,
   ExternalQR: true,
   EAN13: false,
+  ITF: false,
 };
 
 const CODE_SIZE = 180;

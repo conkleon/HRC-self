@@ -3047,7 +3047,7 @@ function ScannerContent() {
           facing="back"
           enableTorch={torchEnabled}
           barcodeScannerSettings={{
-            barcodeTypes: ["qr", "code128", "code39", "datamatrix", "ean13"],
+            barcodeTypes: ["qr", "code128", "code39", "datamatrix", "ean13", "itf14"],
           }}
           onBarcodeScanned={
             isProcessing || (scanResult && action === "view" && !isBookingMode)
