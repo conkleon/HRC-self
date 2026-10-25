@@ -35,6 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/shared/modal";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import { useDisabled } from "~/hooks/use-disabled";
 import { useFetcherOutcomeSinceOpen } from "~/hooks/use-fetcher-error-since-open";
 import type { CustodySourceSummary } from "~/modules/asset/custody-source";
@@ -261,6 +262,12 @@ export function QuantityCustodyDialog({
                   ...item,
                   id: item.id,
                 })}
+                extraContent={({ onItemCreated, closePopover }) => (
+                  <InlineTeamMemberCreation
+                    onItemCreated={onItemCreated}
+                    closePopover={closePopover}
+                  />
+                )}
                 renderItem={(item) => resolveTeamMemberName(item, true)}
                 onChange={(value) => {
                   /** Extract the team member ID from the selection */

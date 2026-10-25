@@ -6,14 +6,17 @@ import { Form } from "~/components/custom-form";
 import Input from "~/components/forms/input";
 import { UserIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
-import { db } from "~/database/db.server";
+import { NrmEmailInput } from "~/components/team-member/nrm-email-input";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
+import { NewOrEditMemberSchema } from "~/modules/team-member/schemas";
+import { createTeamMember } from "~/modules/team-member/service.server";
 import styles from "~/styles/layout/custom-modal.css?url";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 
 import { sendNotification } from "~/utils/emitter/send-notification.server";
 import { makeShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
+import { getValidationErrors } from "~/utils/http";
 import { payload, error, parseData } from "~/utils/http.server";
 import {
   PermissionAction,
@@ -48,17 +51,23 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   }
 }
 
-/** Form schema for a non-registered team member's name. */
-export const NewOrEditMemberSchema = z.object({
-  // Trim BEFORE the length check: `" "` is one character, so it satisfies
-  // `min(1)` and is then stored as the empty string.
-  name: z.string().trim().min(1, "Name is required"),
+/**
+ * The add-member form, plus the flag the inline picker form sends to get the
+ * created member back instead of a redirect.
+ */
+const AddMemberSchema = NewOrEditMemberSchema.extend({
+  preventRedirect: z.string().optional(),
 });
 
 /**
  * Creates a non-registered team member in the caller's organization.
  *
- * @returns A redirect to the non-registered members list, or the failure with its status
+ * Serves two forms: this route's modal, which redirects to the NRM list, and
+ * the inline "create team member" form inside the custodian pickers
+ * (`preventRedirect=true`), which gets the new member back to select it.
+ *
+ * @returns A redirect to the non-registered members list, the created member
+ *   for the inline form, or the failure with its status
  */
 export async function action({ context, request }: ActionFunctionArgs) {
   const authSession = context.getSession();
@@ -72,16 +81,26 @@ export async function action({ context, request }: ActionFunctionArgs) {
       action: PermissionAction.create,
     });
 
-    const payload = parseData(await request.formData(), NewOrEditMemberSchema);
+    const { name, email, preventRedirect } = parseData(
+      await request.formData(),
+      AddMemberSchema
+    );
 
-    const { name } = payload;
+    const teamMember = await createTeamMember({ name, email, organizationId });
 
-    await db.teamMember.create({
-      data: {
-        name: name.trim(),
-        organizationId,
-      },
-    });
+    if (preventRedirect === "true") {
+      return data(
+        payload({
+          success: true,
+          teamMember: {
+            id: teamMember.id,
+            name: teamMember.name,
+            email: teamMember.email,
+            userId: teamMember.userId,
+          },
+        })
+      );
+    }
 
     sendNotification({
       title: "Successfully added a new team member",
@@ -108,6 +127,11 @@ export default function AddMember() {
   const navigation = useNavigation();
   const disabled = isFormProcessing(navigation.state);
 
+  /** Server-side validation errors, shown when client-side validation is bypassed */
+  const validationErrors = getValidationErrors<typeof NewOrEditMemberSchema>(
+    actionData?.error
+  );
+
   /** Focus the name field when the modal route mounts (replaces autoFocus). */
   const nameInputRef = useAutoFocus<HTMLInputElement>();
 
@@ -130,10 +154,18 @@ export default function AddMember() {
             name={zo.fields.name()}
             type="text"
             label="Name"
-            className="mb-8"
+            className="mb-4"
             placeholder="Enter team member’s name"
             required
-            error={zo.errors.name()?.message}
+            error={validationErrors?.name?.message || zo.errors.name()?.message}
+            disabled={disabled}
+          />
+          <NrmEmailInput
+            name={zo.fields.email()}
+            className="mb-8"
+            error={
+              validationErrors?.email?.message || zo.errors.email()?.message
+            }
             disabled={disabled}
           />
           <Button

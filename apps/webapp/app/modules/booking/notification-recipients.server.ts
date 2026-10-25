@@ -27,6 +27,7 @@ import { getBookingNotificationSettingsForOrg } from "~/modules/booking-settings
 import { getOrganizationNotificationAudience } from "~/modules/organization/service.server";
 import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
+import { getNrmCustodianEmail } from "./notification-recipient-helpers";
 
 /**
  * Discriminated set of booking lifecycle events that trigger notifications.
@@ -60,7 +61,9 @@ export type BookingEventType =
  * @property email - Recipient's email address
  * @property firstName - Recipient's first name (nullable for team-member-only users)
  * @property lastName - Recipient's last name (nullable for team-member-only users)
- * @property userId - The user's database ID, used for editor exclusion matching
+ * @property userId - The user's database ID, used for editor exclusion matching.
+ *   `null` for a non-registered member reached at `TeamMember.email`: they have
+ *   no account, so their emails carry no links into the app
  * @property dateFormat - Raw (nullable) date-format preference, carried so the
  *   send loop resolves this recipient's prefs from the already-loaded row via
  *   `resolveFormatPrefs` — avoids a per-recipient DB fetch (N+1)
@@ -74,7 +77,7 @@ export type NotificationRecipient = {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  userId: string;
+  userId: string | null;
   // Raw (nullable) format prefs, carried so the send loop can resolve prefs
   // from this already-loaded row via resolveFormatPrefs — avoids an N+1.
   dateFormat: DateFormatPreference | null;
@@ -139,8 +142,10 @@ export async function getBookingNotificationRecipients({
   try {
     const recipients = new Map<string, NotificationRecipient>();
 
-    // 1. Custodian is always notified — added first so they get the
+    // 1. Custodian is always notified, added first so they get the
     //    "custodian" reason label even if they're also an admin or creator.
+    //    A non-registered custodian is reached at their own optional email.
+    const nrmCustodianEmail = getNrmCustodianEmail(booking);
     if (booking.custodianUser?.email) {
       recipients.set(booking.custodianUser.email, {
         email: booking.custodianUser.email,
@@ -151,6 +156,20 @@ export async function getBookingNotificationRecipients({
         timeFormat: booking.custodianUser.timeFormat,
         weekStart: booking.custodianUser.weekStart,
         timeZone: booking.custodianUser.timeZone,
+        reason: "custodian",
+      });
+    } else if (nrmCustodianEmail) {
+      // No account means no saved preferences: the send loop formats dates
+      // with the acting user's hints instead.
+      recipients.set(nrmCustodianEmail, {
+        email: nrmCustodianEmail,
+        firstName: null,
+        lastName: null,
+        userId: null,
+        dateFormat: null,
+        timeFormat: null,
+        weekStart: null,
+        timeZone: null,
         reason: "custodian",
       });
     }

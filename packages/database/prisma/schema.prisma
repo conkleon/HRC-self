@@ -965,6 +965,11 @@ model TeamMember {
   id   String @id @default(cuid())
   name String
 
+  /// Contact address for a non-registered member (no `user`), where booking
+  /// notifications go. A registered member's address is `user.email`, so this
+  /// is ignored while `userId` is set.
+  email String?
+
   organization    Organization @relation(fields: [organizationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   organizationId  String
   custodies       Custody[]

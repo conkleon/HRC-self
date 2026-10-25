@@ -13,20 +13,22 @@ import { Form } from "~/components/custom-form";
 import Input from "~/components/forms/input";
 import { UserIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
+import { NrmEmailInput } from "~/components/team-member/nrm-email-input";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
-import { getNrmForEdit, renameNrm } from "~/modules/team-member/service.server";
+import { NewOrEditMemberSchema } from "~/modules/team-member/schemas";
+import { getNrmForEdit, updateNrm } from "~/modules/team-member/service.server";
 import styles from "~/styles/layout/custom-modal.css?url";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { sendNotification } from "~/utils/emitter/send-notification.server";
 import { makeShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
+import { getValidationErrors } from "~/utils/http";
 import { payload, error, getParams, parseData } from "~/utils/http.server";
 import {
   PermissionAction,
   PermissionEntity,
 } from "~/utils/permissions/permission.data";
 import { requirePermission } from "~/utils/roles.server";
-import { NewOrEditMemberSchema } from "./settings.team.nrm.add-member";
 
 /**
  * Loads a non-registered member for the edit modal.
@@ -61,10 +63,10 @@ export async function loader({ context, request, params }: LoaderFunctionArgs) {
 export const meta = () => [{ title: appendToMetaTitle("Edit team member") }];
 
 /**
- * Renames a non-registered member.
+ * Updates a non-registered member's name and optional email.
  *
  * Carries its own `nonRegisteredMember:update` gate (a direct POST never runs
- * the loader) and writes through the scoped rename.
+ * the loader) and writes through the scoped update.
  */
 export async function action({ context, request, params }: ActionFunctionArgs) {
   const authSession = context.getSession();
@@ -82,17 +84,20 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
       action: PermissionAction.update,
     });
 
-    const { name } = parseData(await request.formData(), NewOrEditMemberSchema);
+    const { name, email } = parseData(
+      await request.formData(),
+      NewOrEditMemberSchema
+    );
 
     // The scope is part of the write: only a row the NRM index lists can be
-    // renamed, never a registered member's stored display name.
-    await renameNrm({ nrmId, organizationId, name: name.trim() });
+    // changed, never a registered member's stored display name.
+    await updateNrm({ nrmId, organizationId, name, email });
 
     sendNotification({
       title: "Success",
       icon: { name: "success", variant: "success" },
       senderId: userId,
-      message: "Name of team member is edited successfully",
+      message: "Team member updated successfully",
     });
 
     return redirect("/settings/team/nrm");
@@ -114,6 +119,11 @@ export default function EditNrm() {
   const navigation = useNavigation();
   const disabled = isFormProcessing(navigation.state);
 
+  /** Server-side validation errors, shown when client-side validation is bypassed */
+  const validationErrors = getValidationErrors<typeof NewOrEditMemberSchema>(
+    actionData?.error
+  );
+
   /** Focus the name field when the modal route mounts (replaces autoFocus). */
   const nameInputRef = useAutoFocus<HTMLInputElement>();
 
@@ -132,10 +142,17 @@ export default function EditNrm() {
           name={zo.fields.name()}
           type="text"
           label="Name"
-          className="mb-8"
+          className="mb-4"
           placeholder="Enter team member’s name"
           required
-          error={zo.errors.name()?.message}
+          error={validationErrors?.name?.message || zo.errors.name()?.message}
+          disabled={disabled}
+        />
+        <NrmEmailInput
+          name={zo.fields.email()}
+          defaultValue={teamMember.email}
+          className="mb-8"
+          error={validationErrors?.email?.message || zo.errors.email()?.message}
           disabled={disabled}
         />
         <Button

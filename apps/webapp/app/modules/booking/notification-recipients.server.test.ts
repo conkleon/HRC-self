@@ -7,6 +7,10 @@ import type { BookingForEmail } from "~/emails/types";
 import { getBookingNotificationSettingsForOrg } from "~/modules/booking-settings/service.server";
 import { getOrganizationNotificationAudience } from "~/modules/organization/service.server";
 
+import {
+  getNrmCustodianEmail,
+  recipientCanOpenBooking,
+} from "./notification-recipient-helpers";
 import { getBookingNotificationRecipients } from "./notification-recipients.server";
 
 /**
@@ -47,6 +51,7 @@ const mockedGetAdmins = vitest.mocked(getOrganizationNotificationAudience);
 function buildMockBooking(
   overrides: Partial<{
     custodianUser: BookingForEmail["custodianUser"];
+    custodianTeamMember: BookingForEmail["custodianTeamMember"];
     creator: BookingForEmail["creator"];
     notificationRecipients: BookingForEmail["notificationRecipients"];
   }> = {}
@@ -58,21 +63,25 @@ function buildMockBooking(
     to: new Date("2026-04-02T10:00:00Z"),
     status: "RESERVED",
     organizationId: "org-1",
-    custodianUser: overrides.custodianUser ?? {
-      id: "custodian-user-1",
-      email: "custodian@example.com",
-      firstName: "Alice",
-      lastName: "Custodian",
-      displayName: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      username: "alice",
-      profilePicture: null,
-      onboarded: true,
-      sso: false,
-      tierId: null,
-    },
-    custodianTeamMember: null,
+    // `in`, not `??`: a test passes `custodianUser: null` for an NRM custodian
+    custodianUser:
+      "custodianUser" in overrides
+        ? overrides.custodianUser
+        : {
+            id: "custodian-user-1",
+            email: "custodian@example.com",
+            firstName: "Alice",
+            lastName: "Custodian",
+            displayName: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            username: "alice",
+            profilePicture: null,
+            onboarded: true,
+            sso: false,
+            tierId: null,
+          },
+    custodianTeamMember: overrides.custodianTeamMember ?? null,
     creator: overrides.creator ?? {
       id: "creator-user-1",
       email: "creator@example.com",
@@ -143,6 +152,73 @@ describe("getBookingNotificationRecipients", () => {
     expect(recipients[0]).toMatchObject({
       email: "custodian@example.com",
       reason: "custodian",
+    });
+  });
+
+  describe("non-registered custodian", () => {
+    /** A team member with no user account, as the booking stores it. */
+    function nrm(email: string | null) {
+      return {
+        id: "tm-nrm",
+        name: "Eleni",
+        email,
+        userId: null,
+        organizationId: "org-1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      } as unknown as BookingForEmail["custodianTeamMember"];
+    }
+
+    it("is notified at their own email, with no account to link to", async () => {
+      const booking = buildMockBooking({
+        custodianUser: null,
+        custodianTeamMember: nrm("eleni@example.com"),
+      });
+
+      const recipients = await getBookingNotificationRecipients({
+        booking,
+        eventType: "RESERVATION",
+        organizationId: "org-1",
+        editorUserId: "creator-user-1",
+      });
+
+      expect(recipients).toEqual([
+        expect.objectContaining({
+          email: "eleni@example.com",
+          reason: "custodian",
+          userId: null,
+        }),
+      ]);
+      expect(recipientCanOpenBooking(recipients[0])).toBe(false);
+    });
+
+    it("without an email is not notified", async () => {
+      const booking = buildMockBooking({
+        custodianUser: null,
+        custodianTeamMember: nrm(null),
+      });
+
+      const recipients = await getBookingNotificationRecipients({
+        booking,
+        eventType: "RESERVATION",
+        organizationId: "org-1",
+      });
+
+      expect(recipients).toEqual([]);
+    });
+
+    it("a registered custodian is still reached at their account email", async () => {
+      const booking = buildMockBooking();
+
+      const [custodian] = await getBookingNotificationRecipients({
+        booking,
+        eventType: "CHECKIN",
+        organizationId: "org-1",
+      });
+
+      expect(custodian.email).toBe("custodian@example.com");
+      expect(recipientCanOpenBooking(custodian)).toBe(true);
     });
   });
 
@@ -583,5 +659,41 @@ describe("getBookingNotificationRecipients", () => {
 
       expect(recipients.map((r) => r.email)).toContain("jane@university.edu");
     });
+  });
+});
+
+describe("getNrmCustodianEmail", () => {
+  it("returns a non-registered custodian's email", () => {
+    expect(
+      getNrmCustodianEmail({
+        custodianUser: null,
+        custodianTeamMember: { userId: null, email: "eleni@example.com" },
+      })
+    ).toBe("eleni@example.com");
+  });
+
+  it("ignores the stored email of a team member linked to an account", () => {
+    expect(
+      getNrmCustodianEmail({
+        custodianUser: null,
+        custodianTeamMember: { userId: "user-1", email: "stale@example.com" },
+      })
+    ).toBeNull();
+    expect(
+      getNrmCustodianEmail({
+        custodianUser: { id: "user-1" },
+        custodianTeamMember: { userId: null, email: "stale@example.com" },
+      })
+    ).toBeNull();
+  });
+
+  it("returns null when there is no email or no custodian", () => {
+    expect(
+      getNrmCustodianEmail({
+        custodianUser: null,
+        custodianTeamMember: { userId: null, email: null },
+      })
+    ).toBeNull();
+    expect(getNrmCustodianEmail({ custodianTeamMember: null })).toBeNull();
   });
 });

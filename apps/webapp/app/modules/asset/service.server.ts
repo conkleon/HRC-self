@@ -96,6 +96,7 @@ import {
   createCategoriesIfNotExists,
   getCategory,
 } from "~/modules/category/service.server";
+import { notifyCustodians } from "~/modules/custody/notify.server";
 import {
   assertNoKitDerivedCustody,
   assertNotKitMembers,
@@ -415,6 +416,8 @@ export async function setKitCustodyAfterAssetImport({
       // here anyway: the kit ids are explicit (never ALL_SELECTED_KEY) and no
       // `currentSearchParams` is passed, so no custodian filter is ever built.
       allowedTeamMemberIds: "all",
+      // An import sets custody from a file; it does not hand items over.
+      notifyCustodian: false,
     });
   }
 }
@@ -7656,6 +7659,17 @@ export async function bulkCheckOutAssets({
       );
     });
 
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind: "assigned",
+      changes: assets.map((asset) => ({
+        teamMemberId: custodianId,
+        assetId: asset.id,
+        title: asset.title,
+      })),
+    });
+
     return { success: true, skippedQuantityTracked };
   } catch (cause) {
     const message =
@@ -7920,6 +7934,19 @@ export async function bulkCheckInAssets({
         }),
         tx
       );
+    });
+
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind: "released",
+      changes: assets.flatMap((asset) =>
+        (asset.custody ?? []).map((custody) => ({
+          teamMemberId: custody.custodian.id,
+          assetId: asset.id,
+          title: asset.title,
+        }))
+      ),
     });
 
     return { success: true, skippedQuantityTracked };

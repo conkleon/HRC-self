@@ -21,6 +21,7 @@ import {
   overdueBookingEmailContent,
   sendCheckinReminder,
 } from "./email-helpers";
+import { recipientCanOpenBooking } from "./notification-recipient-helpers";
 import { getBookingNotificationRecipients } from "./notification-recipients.server";
 import {
   createStatusTransitionNote,
@@ -71,8 +72,10 @@ const checkoutReminder = async ({ data }: PgBoss.Job<SchedulerData>) => {
         // Pure resolve from the loaded recipient row; hints as null-field
         // fallback only. No per-recipient DB fetch (avoids an N+1).
         const recipientPrefs = resolveFormatPrefs(recipient, data.hints);
+        const canOpenBooking = recipientCanOpenBooking(recipient);
 
         const text = checkoutReminderEmailContent({
+          showBookingLink: canOpenBooking,
           bookingName: booking.name,
           assetsCount: booking._count.bookingAssets,
           custodian,
@@ -93,6 +96,7 @@ const checkoutReminder = async ({ data }: PgBoss.Job<SchedulerData>) => {
           prefs: recipientPrefs,
           recipientReason: recipient.reason,
           recipientEmail: recipient.email,
+          hideViewButton: !canOpenBooking,
         });
 
         sendEmail({
@@ -212,8 +216,10 @@ const overdueHandler = async ({ data }: PgBoss.Job<SchedulerData>) => {
       // Pure resolve from the loaded recipient row; hints as null-field
       // fallback only. No per-recipient DB fetch (avoids an N+1).
       const recipientPrefs = resolveFormatPrefs(recipient, data.hints);
+      const canOpenBooking = recipientCanOpenBooking(recipient);
 
       const text = overdueBookingEmailContent({
+        showBookingLink: canOpenBooking,
         bookingName: booking.name,
         assetsCount: booking._count.bookingAssets,
         custodian,
@@ -231,6 +237,7 @@ const overdueHandler = async ({ data }: PgBoss.Job<SchedulerData>) => {
         prefs: recipientPrefs,
         recipientReason: recipient.reason,
         recipientEmail: recipient.email,
+        hideViewButton: !canOpenBooking,
       });
 
       sendEmail({

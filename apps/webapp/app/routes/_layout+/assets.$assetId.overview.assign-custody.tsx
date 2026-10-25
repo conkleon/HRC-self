@@ -16,11 +16,14 @@ import DynamicSelect from "~/components/dynamic-select/dynamic-select";
 import { UserIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
 import { WarningBox } from "~/components/shared/warning-box";
+import { toCustodyAssignmentItem } from "~/components/team-member/custody-assignment-item";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import { db } from "~/database/db.server";
 import { useRoleAccess } from "~/hooks/use-role-access";
 import { recordEvent } from "~/modules/activity-event/service.server";
 import { getAsset } from "~/modules/asset/service.server";
 import { isQuantityTracked } from "~/modules/asset/utils";
+import { notifyCustodians } from "~/modules/custody/notify.server";
 import { AssignCustodySchema } from "~/modules/custody/schema";
 import {
   assertNoKitDerivedCustody,
@@ -524,6 +527,15 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
       organizationId,
     });
 
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind: "assigned",
+      changes: [
+        { teamMemberId: custodianId, assetId: asset.id, title: asset.title },
+      ],
+    });
+
     sendNotification({
       title: `‘${asset.title}’ is now in custody of ${custodianDisplayName}`,
       message:
@@ -596,14 +608,14 @@ export default function Custody() {
               allowClear
               closeOnSelect
               showSearch={!assignsSelfOnly}
-              transformItem={(item) => ({
-                ...item,
-                id: JSON.stringify({
-                  id: item.id,
-                  //If there is a user, we use its name, otherwise we use the name of the team member
-                  name: resolveTeamMemberName(item),
-                }),
-              })}
+              transformItem={toCustodyAssignmentItem}
+              extraContent={({ onItemCreated, closePopover }) => (
+                <InlineTeamMemberCreation
+                  onItemCreated={onItemCreated}
+                  closePopover={closePopover}
+                  transformItem={toCustodyAssignmentItem}
+                />
+              )}
               renderItem={(item) => resolveTeamMemberName(item, true)}
             />
           </div>

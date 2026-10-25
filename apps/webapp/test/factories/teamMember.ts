@@ -10,6 +10,7 @@ export function createTeamMember(
     id: "team-member-123",
     userId: "user-456",
     name: "John Doe",
+    email: null,
     organizationId: "org-789" as Organization["id"],
     deletedAt: null,
     createdAt: new Date("2023-01-01"),

@@ -130,6 +130,7 @@ export function TeamMembersActionsDropdown({
       {canInvite ? (
         <InviteUserDialog
           teamMemberId={teamMember.id}
+          defaultEmail={teamMember.email}
           open={isInviteOpen}
           onClose={() => {
             setIsInviteOpen(false);

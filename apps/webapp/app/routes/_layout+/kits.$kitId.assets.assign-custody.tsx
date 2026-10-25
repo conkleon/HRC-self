@@ -22,6 +22,8 @@ import DynamicSelect from "~/components/dynamic-select/dynamic-select";
 import { UserIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
 import { WarningBox } from "~/components/shared/warning-box";
+import { toCustodyAssignmentItem } from "~/components/team-member/custody-assignment-item";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import { db } from "~/database/db.server";
 import { useRoleAccess } from "~/hooks/use-role-access";
 import { recordEvents } from "~/modules/activity-event/service.server";
@@ -30,6 +32,7 @@ import {
   assertKitsCustodyAssignable,
   assertKitsHaveActiveAssets,
 } from "~/modules/booking/kit-holds.server";
+import { notifyCustodians } from "~/modules/custody/notify.server";
 import { AssignCustodySchema } from "~/modules/custody/schema";
 import {
   buildKitCustodyInheritData,
@@ -333,7 +336,13 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
             where: { asset: { archivedAt: null } },
             select: {
               asset: {
-                select: { id: true, type: true, unitOfMeasure: true },
+                // `title` names each member in the custodian's email
+                select: {
+                  id: true,
+                  title: true,
+                  type: true,
+                  unitOfMeasure: true,
+                },
               },
             },
           },
@@ -458,6 +467,20 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
       );
     }
 
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind: "assigned",
+      changes: [
+        {
+          teamMemberId: custodianId,
+          kitId: kit.id,
+          title: kit.name,
+          contents: kit.assetKits.map((ak) => ak.asset.title),
+        },
+      ],
+    });
+
     sendNotification({
       title: `‘${kit.name}’ is now in custody of ${custodianName}`,
       message:
@@ -535,13 +558,14 @@ export default function GiveKitCustody() {
             countKey="totalTeamMembers"
             placeholder="Select a team member"
             closeOnSelect
-            transformItem={(item) => ({
-              ...item,
-              id: JSON.stringify({
-                id: item.id,
-                name: resolveTeamMemberName(item),
-              }),
-            })}
+            transformItem={toCustodyAssignmentItem}
+            extraContent={({ onItemCreated, closePopover }) => (
+              <InlineTeamMemberCreation
+                onItemCreated={onItemCreated}
+                closePopover={closePopover}
+                transformItem={toCustodyAssignmentItem}
+              />
+            )}
             renderItem={(item) => resolveTeamMemberName(item, true)}
           />
         </div>

@@ -39,6 +39,7 @@ import {
   assertKitsHaveActiveAssets,
 } from "~/modules/booking/kit-holds.server";
 import { resolveSliceKitIds } from "~/modules/booking/slice-kit-attribution";
+import { notifyCustodians } from "~/modules/custody/notify.server";
 import { lockAssetsForKitMembership } from "~/modules/custody/service.server";
 import { assetQtyMeta, formatUnitCount } from "~/utils/asset-quantity";
 import { getClientHint } from "~/utils/client-hints";
@@ -3610,6 +3611,23 @@ export async function releaseCustody({
       await db.note.createMany({ data: releaseNoteData });
     }
 
+    const holderId = kit.custody?.custodian?.id;
+    if (holderId) {
+      notifyCustodians({
+        organizationId,
+        actorUserId: userId,
+        kind: "released",
+        changes: [
+          {
+            teamMemberId: holderId,
+            kitId: kit.id,
+            title: kit.name,
+            contents: kit.assets.map((asset) => asset.title),
+          },
+        ],
+      });
+    }
+
     return kit;
   } catch (cause) {
     throw new ShelfError({
@@ -4103,6 +4121,7 @@ export async function bulkAssignKitCustody({
   userId,
   currentSearchParams,
   allowedTeamMemberIds,
+  notifyCustodian = true,
 }: {
   kitIds: Kit["id"][];
   organizationId: Kit["organizationId"];
@@ -4110,6 +4129,12 @@ export async function bulkAssignKitCustody({
   custodianName: TeamMember["name"];
   userId: User["id"];
   currentSearchParams?: string | null;
+  /**
+   * Whether to email the custodian the kits they now hold. `false` for asset
+   * import, which sets custody in bulk from a file rather than handing items
+   * to someone.
+   */
+  notifyCustodian?: boolean;
   /**
    * Custodian ids the caller may filter a "select all" by.
    *
@@ -4247,7 +4272,7 @@ export async function bulkAssignKitCustody({
      * 1. Create custodies for kit
      * 2. Update status of all kits to IN_CUSTODY
      */
-    return await db.$transaction(async (tx) => {
+    const result = await db.$transaction(async (tx) => {
       // SECURITY (cross-org IDOR): custodianId comes from request input. The
       // org-scoped lookup above is only used for the note text — the writes
       // below connect the raw id, so prove it belongs to this org first or an
@@ -4429,6 +4454,22 @@ export async function bulkAssignKitCustody({
         tx
       );
     }, LONG_TRANSACTION_OPTIONS);
+
+    if (notifyCustodian) {
+      notifyCustodians({
+        organizationId,
+        actorUserId: userId,
+        kind: "assigned",
+        changes: kits.map((kit) => ({
+          teamMemberId: custodianId,
+          kitId: kit.id,
+          title: kit.name,
+          contents: (kit.assetKits ?? []).map((ak) => ak.asset.title),
+        })),
+      });
+    }
+
+    return result;
   } catch (cause) {
     const message =
       cause instanceof ShelfError
@@ -4610,7 +4651,7 @@ export async function bulkReleaseKitCustody({
 
     const allAssetsOfAllKits = kits.flatMap((kit) => kit.assets);
 
-    return await db.$transaction(async (tx) => {
+    const result = await db.$transaction(async (tx) => {
       /**
        * Capture the kit-allocated Custody rows BEFORE the cascade fires so we
        * can emit one `CUSTODY_RELEASED` event per row. Filtering by the
@@ -4756,6 +4797,26 @@ export async function bulkReleaseKitCustody({
         }),
       });
     });
+
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind: "released",
+      changes: kits.flatMap((kit) =>
+        kit.custody?.custodian
+          ? [
+              {
+                teamMemberId: kit.custody.custodian.id,
+                kitId: kit.id,
+                title: kit.name,
+                contents: kit.assets.map((asset) => asset.title),
+              },
+            ]
+          : []
+      ),
+    });
+
+    return result;
   } catch (cause) {
     const message =
       cause instanceof ShelfError

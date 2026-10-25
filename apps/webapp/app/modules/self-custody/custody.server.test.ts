@@ -311,6 +311,7 @@ describe("selfTakeCustody", () => {
       assetId: "asset-1",
       assetTitle: "Radio #12",
       volunteerName: "Maria P.",
+      volunteerTeamMemberId: "tm-1",
       source: "scan",
     });
   });
@@ -477,8 +478,13 @@ describe("selfReturnCustody", () => {
     expect(tx.note.create.mock.calls[0][0].data.content).toBe(
       "**Maria P.** returned the item via self-service scan."
     );
+    // The holder gets the receipt, whoever pressed Return on the scan page
     expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: "returned", volunteerName: "Maria P." })
+      expect.objectContaining({
+        kind: "returned",
+        volunteerName: "Maria P.",
+        volunteerTeamMemberId: "tm-1",
+      })
     );
   });
 

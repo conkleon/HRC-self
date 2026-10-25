@@ -191,6 +191,8 @@ async function assignKitCustody(
         // The import is gated on `asset: import`, and the kit ids are explicit
         // (never ALL_SELECTED_KEY), so no custodian filter is ever built.
         allowedTeamMemberIds: "all",
+        // An import sets custody from a file; it does not hand items over.
+        notifyCustodian: false,
       });
 
     try {

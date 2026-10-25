@@ -47,6 +47,8 @@ import When from "../when/when";
 type InviteUserDialogProps = {
   className?: string;
   teamMemberId?: string;
+  /** Prefills the email field: a non-registered member's stored email */
+  defaultEmail?: string | null;
   trigger?: ReactElement<{ onClick: () => void }>;
   open?: boolean;
   onClose?: () => void;
@@ -80,6 +82,7 @@ export default function InviteUserDialog({
   className,
   trigger,
   teamMemberId,
+  defaultEmail,
   open = false,
   onClose,
 }: InviteUserDialogProps) {
@@ -253,6 +256,7 @@ export default function InviteUserDialog({
                   name={zo.fields.email()}
                   type="email"
                   autoComplete="email"
+                  defaultValue={defaultEmail ?? undefined}
                   disabled={disabled}
                   error={
                     validationErrors?.email?.message ||

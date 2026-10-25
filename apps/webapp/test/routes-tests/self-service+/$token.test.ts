@@ -792,6 +792,44 @@ describe("POST /self-service/:token", () => {
     );
   });
 
+  it("add-me passes a new volunteer's optional email through", async () => {
+    const cookie = await unlock();
+    mockFindOrCreate.mockResolvedValue({ ...maria, created: true });
+
+    await action(
+      args(
+        post(
+          { intent: "add-me", name: "Maria P.", email: " Maria@Example.com " },
+          { cookie }
+        )
+      )
+    );
+
+    expect(mockFindOrCreate).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      name: "Maria P.",
+      email: "maria@example.com",
+    });
+  });
+
+  it("add-me refuses an invalid email with 400 and creates no one", async () => {
+    const cookie = await unlock();
+
+    const result = read(
+      await action(
+        args(
+          post(
+            { intent: "add-me", name: "Maria P.", email: "maria@" },
+            { cookie }
+          )
+        )
+      )
+    );
+
+    expect(result.status).toBe(400);
+    expect(mockFindOrCreate).not.toHaveBeenCalled();
+  });
+
   it("searches volunteers of the link's workspace once unlocked", async () => {
     const cookie = await unlock();
     mockSearch.mockResolvedValue([maria]);

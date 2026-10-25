@@ -375,6 +375,7 @@ export async function selfTakeCustody({
     assetId,
     kind: "taken",
     source,
+    volunteerTeamMemberId: teamMemberId,
     ...result,
   });
   return result;
@@ -500,7 +501,12 @@ export async function selfReturnCustody({
       },
     });
 
-    return { assetTitle: asset.title, volunteerName };
+    // The holder goes to the emails only: the page shows title and name.
+    return {
+      assetTitle: asset.title,
+      volunteerName,
+      holderId: hold.teamMemberId,
+    };
   });
 
   alertManagers({
@@ -509,13 +515,15 @@ export async function selfReturnCustody({
     assetId,
     kind: "returned",
     source,
-    ...result,
+    assetTitle: result.assetTitle,
+    volunteerName: result.volunteerName,
+    volunteerTeamMemberId: result.holderId,
   });
-  return result;
+  return { assetTitle: result.assetTitle, volunteerName: result.volunteerName };
 }
 
 /**
- * Emails managers after the transaction committed, without waiting, so the
+ * Emails managers and the volunteer after the transaction committed, without waiting, so the
  * volunteer's confirmation never depends on SMTP. `sendSelfCustodyAlert`
  * logs its own failures and never rejects.
  */

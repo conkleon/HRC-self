@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "~/database/db.server";
 import {
+  NewVolunteerSchema,
   VolunteerNameSchema,
   findOrCreateVolunteer,
   getVolunteer,
@@ -16,10 +17,17 @@ import {
   searchVolunteers,
 } from "./volunteers.server";
 
-// why: unit tests run without a database; these are the only Prisma calls made
+// why: unit tests run without a database; these are the only Prisma calls the
+// volunteer lookups may make (`update` is listed so a test can prove it never runs)
 vi.mock("~/database/db.server", () => ({
   db: {
-    teamMember: { findMany: vi.fn(), findFirst: vi.fn(), create: vi.fn() },
+    teamMember: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+    },
   },
 }));
 
@@ -145,5 +153,62 @@ describe("findOrCreateVolunteer", () => {
         }),
       })
     );
+  });
+
+  it("stores the email on a volunteer it creates", async () => {
+    findFirst.mockResolvedValue(null);
+    create.mockResolvedValue({ id: "tm-3", name: "Eleni" } as never);
+
+    await findOrCreateVolunteer({
+      organizationId: "org-1",
+      name: "Eleni",
+      email: "eleni@example.com",
+    });
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ email: "eleni@example.com" }),
+      })
+    );
+  });
+
+  it("never writes a typed email onto an existing volunteer", async () => {
+    findFirst.mockResolvedValue({ id: "tm-1", name: "Maria P." } as never);
+
+    const result = await findOrCreateVolunteer({
+      organizationId: "org-1",
+      name: "Maria P.",
+      email: "someone-else@example.com",
+    });
+
+    expect(result).toEqual({ id: "tm-1", name: "Maria P.", created: false });
+    expect(create).not.toHaveBeenCalled();
+    expect(db.teamMember.update).not.toHaveBeenCalled();
+    expect(db.teamMember.updateMany).not.toHaveBeenCalled();
+  });
+});
+
+describe("NewVolunteerSchema", () => {
+  it("treats a blank email as no email", () => {
+    expect(NewVolunteerSchema.parse({ name: "Eleni", email: "  " })).toEqual({
+      name: "Eleni",
+      email: undefined,
+    });
+    expect(NewVolunteerSchema.parse({ name: "Eleni" }).email).toBeUndefined();
+  });
+
+  it("trims and lowercases a typed email", () => {
+    expect(
+      NewVolunteerSchema.parse({ name: "Eleni", email: " Eleni@Example.COM " })
+        .email
+    ).toBe("eleni@example.com");
+  });
+
+  it("rejects an invalid email", () => {
+    const result = NewVolunteerSchema.safeParse({
+      name: "Eleni",
+      email: "eleni@",
+    });
+    expect(result.success).toBe(false);
   });
 });

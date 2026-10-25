@@ -9,7 +9,7 @@
  * @see {@link file://./../../routes/qr+/_public+/$qrId_.self-custody.tsx}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
-import { useReducer, useRef } from "react";
+import { useId, useReducer, useRef } from "react";
 import { Form, useFetcher } from "react-router";
 
 import Input from "~/components/forms/input";
@@ -118,25 +118,29 @@ function pickerReducer(state: PickerState, action: PickerAction): PickerState {
  * @param props.itemTitle - The item to take, shown on the confirm button
  * @param props.error - Message from a failed take or add
  * @param props.nameError - Validation message for a new name
+ * @param props.emailError - Validation message for a new volunteer's optional email
  */
 export function VolunteerPicker({
   itemTitle,
   error,
   nameError,
+  emailError,
 }: {
   itemTitle?: string;
   error?: string | null;
   nameError?: string | null;
+  emailError?: string | null;
 }) {
   const search = useFetcher<{ volunteers?: Volunteer[] }>();
   const [state, dispatch] = useReducer(pickerReducer, {
     query: "",
     selected: null,
-    // A name error means the "add me" form was just submitted.
-    addingNew: Boolean(nameError),
+    // A field error means the "add me" form was just submitted.
+    addingNew: Boolean(nameError || emailError),
   });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const disabled = useDisabled();
+  const emailHintId = useId();
 
   const onType = (query: string) => {
     dispatch({ type: "typed", query });
@@ -167,6 +171,17 @@ export function VolunteerPicker({
           error={nameError ?? undefined}
           className="mb-4"
         />
+        <Input
+          label="Your email (optional)"
+          name="email"
+          type="email"
+          autoComplete="email"
+          error={emailError ?? undefined}
+          aria-describedby={emailHintId}
+        />
+        <p id={emailHintId} className="mb-4 mt-1 text-sm text-gray-600">
+          Add it to get your booking details by email. You can leave it empty.
+        </p>
         <Button
           type="submit"
           disabled={disabled}

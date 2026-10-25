@@ -116,6 +116,27 @@ describe("plain-text actor line", () => {
   });
 });
 
+describe("plain-text booking link", () => {
+  it("ends with the link to the booking by default", () => {
+    const text = completedBookingEmailContent(baseArgs);
+
+    expect(text).toContain("To view the booking, follow the link below:");
+    expect(text).toContain("/bookings/booking-1");
+  });
+
+  it("leaves the link out for a recipient with no account", () => {
+    const text = completedBookingEmailContent({
+      ...baseArgs,
+      showBookingLink: false,
+    });
+
+    expect(text).not.toContain("To view the booking");
+    expect(text).not.toContain("/bookings/booking-1");
+    // The booking summary itself is still there
+    expect(text).toContain("Custodian: Casey Custodian");
+  });
+});
+
 describe("resolveBookingEmailActor", () => {
   it("names the acting user by display name, stamped with the current time", async () => {
     // @ts-expect-error partial user row for the selected fields
@@ -258,5 +279,44 @@ describe("sendBookingUpdatedEmail", () => {
       "Updated by: Jo Display on 09/30/2026, 10:15 AM"
     );
     expect(toOld.html).toContain("Jo Display on 09/30/2026, 10:15 AM");
+  });
+
+  it("sends a non-registered member no links into the app", async () => {
+    mockedRecipients.mockResolvedValue([
+      {
+        email: "eleni@example.com",
+        firstName: null,
+        lastName: null,
+        userId: null,
+        dateFormat: null,
+        timeFormat: null,
+        weekStart: null,
+        timeZone: null,
+        reason: "custodian",
+      },
+    ]);
+    // The old custodian has no account either: a replaced NRM
+    mockedFindUser.mockImplementation(
+      // @ts-expect-error partial user rows for the selected fields
+      ({ where }: { where: { id?: string; email?: string } }) =>
+        Promise.resolve(where.id === "editor-1" ? actingUser : null)
+    );
+
+    await sendBookingUpdatedEmail({
+      bookingId: "booking-1",
+      organizationId: "org-1",
+      userId: "editor-1",
+      changes: ["Custodian changed from Giorgos to Eleni"],
+      hints: { timeZone: "UTC", locale: "en-US" },
+      oldCustodianEmail: "giorgos@example.com",
+    });
+
+    expect(mockedSendEmail).toHaveBeenCalledTimes(2);
+    for (const [payload] of mockedSendEmail.mock.calls) {
+      expect(payload.text).not.toContain("/bookings/booking-1");
+      expect(payload.html).not.toContain("/bookings/booking-1");
+      // The booking details still reach them
+      expect(payload.text).toContain("Field kit");
+    }
   });
 });

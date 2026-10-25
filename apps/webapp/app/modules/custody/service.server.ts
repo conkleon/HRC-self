@@ -8,6 +8,7 @@ import { db } from "~/database/db.server";
 import { recordEvent } from "~/modules/activity-event/service.server";
 import { ShelfError } from "~/utils/error";
 import type { RoleAccess } from "~/utils/permissions/role-access";
+import { notifyCustodians } from "./notify.server";
 import { releaseAssetsToAvailableUnlessCheckedOut } from "../asset/custody-status.server";
 
 /**
@@ -295,114 +296,130 @@ export async function releaseCustody({
     // `delete`) so QUANTITY_TRACKED assets release ALL custodians
     // at once — Phase 2 changed `Asset.custody` from `Custody?` to
     // `Custody[]`, so `delete: true` no longer compiles.
-    return await db.$transaction(async (tx) => {
-      /**
-       * A caller whose scope is `self` may only release custody assigned to
-       * them.
-       *
-       * Read INSIDE the transaction: a check before it is a TOCTOU gap in the
-       * authorization itself. Custody reassigned between the read and the
-       * delete would let a `self`-scoped caller release a custodian that is no
-       * longer theirs. Same reasoning as the status guard below, applied to
-       * the permission rather than the column.
-       *
-       * The catch at the bottom rethrows `ShelfError` untouched, so this 403
-       * still reaches the user as itself rather than as the generic message.
-       */
-      if (custodyAssign === "self") {
-        const current = await tx.custody.findFirst({
-          where: { assetId, asset: { organizationId } },
-          select: { custodian: { select: { userId: true } } },
+    const { asset: releasedAsset, holderIds } = await db.$transaction(
+      async (tx) => {
+        /**
+         * A caller whose scope is `self` may only release custody assigned to
+         * them.
+         *
+         * Read INSIDE the transaction: a check before it is a TOCTOU gap in the
+         * authorization itself. Custody reassigned between the read and the
+         * delete would let a `self`-scoped caller release a custodian that is no
+         * longer theirs. Same reasoning as the status guard below, applied to
+         * the permission rather than the column.
+         *
+         * The catch at the bottom rethrows `ShelfError` untouched, so this 403
+         * still reaches the user as itself rather than as the generic message.
+         */
+        if (custodyAssign === "self") {
+          const current = await tx.custody.findFirst({
+            where: { assetId, asset: { organizationId } },
+            select: { custodian: { select: { userId: true } } },
+          });
+
+          if (current?.custodian?.userId !== userId) {
+            throw new ShelfError({
+              cause: null,
+              title: "Action not allowed",
+              message:
+                "Self service user can only release custody of assets assigned to their user.",
+              additionalData: { userId, assetId },
+              label: "Custody",
+              status: 403,
+              shouldBeCaptured: false,
+            });
+          }
+        }
+
+        /**
+         * Delete, then a guarded status write, then a re-read.
+         *
+         * A single `asset.update` with a nested `custody: { deleteMany: {} }`
+         * cannot express "set AVAILABLE unless CHECKED_OUT": `update` has no
+         * conditional `where` beyond identity. An asset still out on a booking
+         * must stay CHECKED_OUT when its last custody row is released, or a
+         * physically absent asset reads as free.
+         *
+         * @see {@link file://./../asset/custody-status.server.ts}
+         */
+        // `asset: { organizationId }`: `assetId` is request input, so the delete
+        // proves org ownership itself rather than relying on a later read to
+        // throw for a cross-org id.
+        // @see .claude/rules/org-scope-user-supplied-ids.md
+        // `kitCustodyId: null`: this release owns only operator-assigned rows.
+        // Kit-derived rows are the kit's to remove, so they are scoped out of
+        // the delete and left for the assert below to reject.
+        // @see {@link assertNoKitDerivedCustody} for what that ordering does and
+        // does not guarantee.
+        // Who held it, read before the delete, so they can be told after commit
+        const holders = await tx.custody.findMany({
+          where: { assetId, asset: { organizationId }, kitCustodyId: null },
+          select: { teamMemberId: true },
         });
 
-        if (current?.custodian?.userId !== userId) {
-          throw new ShelfError({
-            cause: null,
-            title: "Action not allowed",
-            message:
-              "Self service user can only release custody of assets assigned to their user.",
-            additionalData: { userId, assetId },
-            label: "Custody",
-            status: 403,
-            shouldBeCaptured: false,
-          });
-        }
-      }
+        await tx.custody.deleteMany({
+          where: { assetId, asset: { organizationId }, kitCustodyId: null },
+        });
 
-      /**
-       * Split into delete → guarded status write → re-read.
-       *
-       * A single `asset.update` with a nested `custody: { deleteMany: {} }`
-       * cannot express "set AVAILABLE unless CHECKED_OUT" — `update` has no
-       * conditional `where` beyond identity. Releasing the last custody row on
-       * an asset still out on a booking therefore advertised a physically
-       * absent asset as free, which is the more dangerous half of the
-       * precedence this PR restores. Assets already in that state predate the
-       * fix, so the assign-side 400 does not cover them.
-       *
-       * @see {@link file://./../asset/custody-status.server.ts}
-       */
-      // `asset: { organizationId }` — `assetId` is request input, so the delete
-      // must prove org ownership itself. Splitting the old org-scoped
-      // `asset.update` (which carried the nested delete) left this statement
-      // unscoped: a cross-org id would delete another tenant's custody rows and
-      // only be undone by the `findUniqueOrThrow` below happening to throw. That
-      // is incidental ordering, not a guard.
-      // @see .claude/rules/org-scope-user-supplied-ids.md
-      // `kitCustodyId: null` — this release owns only operator-assigned rows.
-      // Kit-derived rows are the kit's to remove, so they are scoped out of
-      // the delete and left for the assert below to reject.
-      // @see {@link assertNoKitDerivedCustody} for what that ordering does and
-      // does not guarantee.
-      await tx.custody.deleteMany({
-        where: { assetId, asset: { organizationId }, kitCustodyId: null },
-      });
+        await assertNoKitDerivedCustody(tx, [assetId], organizationId);
 
-      await assertNoKitDerivedCustody(tx, [assetId], organizationId);
-
-      await releaseAssetsToAvailableUnlessCheckedOut(
-        tx,
-        [assetId],
-        organizationId
-      );
-
-      // Re-read so callers keep the shape they build the activity note from.
-      // `findUniqueOrThrow` rather than the update's return value: the status
-      // write above is conditional, so only the row itself is authoritative.
-      const asset = await tx.asset.findUniqueOrThrow({
-        // eslint-disable-next-line local-rules/require-archived-at-check-on-asset-queries -- why: re-read of the asset whose custody was just released, by id
-        where: { id: assetId, organizationId },
-        include: {
-          user: {
-            select: {
-              firstName: true,
-              lastName: true,
-              displayName: true,
-            },
-          },
-          custody: true,
-        },
-      });
-
-      // Record activity event if actor data is provided
-      if (activityEvent) {
-        await recordEvent(
-          {
-            organizationId,
-            actorUserId: activityEvent.actorUserId,
-            action: "CUSTODY_RELEASED",
-            entityType: "ASSET",
-            entityId: assetId,
-            assetId,
-            teamMemberId: activityEvent.teamMemberId,
-            targetUserId: activityEvent.targetUserId,
-          },
-          tx
+        await releaseAssetsToAvailableUnlessCheckedOut(
+          tx,
+          [assetId],
+          organizationId
         );
-      }
 
-      return asset;
+        // Re-read so callers keep the shape they build the activity note from.
+        // `findUniqueOrThrow` rather than the update's return value: the status
+        // write above is conditional, so only the row itself is authoritative.
+        const asset = await tx.asset.findUniqueOrThrow({
+          // eslint-disable-next-line local-rules/require-archived-at-check-on-asset-queries -- why: re-read of the asset whose custody was just released, by id
+          where: { id: assetId, organizationId },
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                displayName: true,
+              },
+            },
+            custody: true,
+          },
+        });
+
+        // Record activity event if actor data is provided
+        if (activityEvent) {
+          await recordEvent(
+            {
+              organizationId,
+              actorUserId: activityEvent.actorUserId,
+              action: "CUSTODY_RELEASED",
+              entityType: "ASSET",
+              entityId: assetId,
+              assetId,
+              teamMemberId: activityEvent.teamMemberId,
+              targetUserId: activityEvent.targetUserId,
+            },
+            tx
+          );
+        }
+
+        return { asset, holderIds: holders.map((h) => h.teamMemberId) };
+      }
+    );
+
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind: "released",
+      changes: holderIds.map((teamMemberId) => ({
+        teamMemberId,
+        assetId,
+        title: releasedAsset.title,
+      })),
     });
+
+    return releasedAsset;
   } catch (cause) {
     // Deliberate, user-facing failures (the SELF_SERVICE 403 above) must
     // survive this wrapper. `ShelfError` inherits `title` and `status` from its

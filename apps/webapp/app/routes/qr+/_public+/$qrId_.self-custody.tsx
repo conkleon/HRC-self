@@ -44,7 +44,7 @@ import {
   recordFailedPin,
 } from "~/modules/self-custody/lockout.server";
 import { verifyPin } from "~/modules/self-custody/pin.server";
-import { VolunteerNameSchema } from "~/modules/self-custody/schemas";
+import { NewVolunteerSchema } from "~/modules/self-custody/schemas";
 import {
   isUnlocked,
   serializeUnlockCookie,
@@ -73,8 +73,6 @@ const ParamsSchema = z.object({ qrId: z.string() });
 const IntentSchema = z.object({
   intent: z.enum(["unlock", "search", "take", "take-new", "return"]),
 });
-
-const NewVolunteerSchema = z.object({ name: VolunteerNameSchema });
 
 /** A refusal with a fixed status and message, never sent to Sentry. */
 function refuse(
@@ -195,10 +193,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
         ? (
             await findOrCreateVolunteer({
               organizationId: organization.id,
-              name: parseData(formData, NewVolunteerSchema, {
+              ...parseData(formData, NewVolunteerSchema, {
                 additionalData: context,
                 shouldBeCaptured: false,
-              }).name,
+              }),
             })
           ).id
         : parseData(formData, z.object({ teamMemberId: z.string().min(1) }))
@@ -272,9 +270,11 @@ export default function SelfCustodyPage() {
   >();
 
   const errorMessage = actionData?.error?.message ?? null;
-  const nameError =
-    getValidationErrors<typeof NewVolunteerSchema>(actionData?.error)?.name
-      ?.message ?? null;
+  const newVolunteerErrors = getValidationErrors<typeof NewVolunteerSchema>(
+    actionData?.error
+  );
+  const nameError = newVolunteerErrors?.name?.message ?? null;
+  const emailError = newVolunteerErrors?.email?.message ?? null;
 
   return (
     <div className="mx-auto w-full max-w-md py-8">
@@ -290,8 +290,9 @@ export default function SelfCustodyPage() {
       ) : state.kind === "available" ? (
         <VolunteerPicker
           itemTitle={state.asset.title}
-          error={nameError ? null : errorMessage}
+          error={nameError || emailError ? null : errorMessage}
           nameError={nameError}
+          emailError={emailError}
         />
       ) : state.kind === "in-custody" ? (
         <ReturnPanel holderName={state.holderName} error={errorMessage} />

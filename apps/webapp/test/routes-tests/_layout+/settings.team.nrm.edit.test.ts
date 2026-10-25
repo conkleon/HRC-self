@@ -3,13 +3,13 @@
  * scoped service for both the read and the write.
  *
  * @see {@link file://../../../app/routes/_layout+/settings.team.nrm.$nrmId.edit.tsx}
- * @see {@link file://../../../app/modules/team-member/rename-nrm.test.ts} the scope itself
+ * @see {@link file://../../../app/modules/team-member/update-nrm.test.ts} the scope itself
  */
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { assertIsDataWithResponseInit } from "@helpers/assertions";
 import { createActionArgs, createLoaderArgs } from "@mocks/remix";
-import { getNrmForEdit, renameNrm } from "~/modules/team-member/service.server";
+import { getNrmForEdit, updateNrm } from "~/modules/team-member/service.server";
 import { ShelfError } from "~/utils/error";
 import {
   PermissionAction,
@@ -26,7 +26,7 @@ vi.mock("~/utils/roles.server", () => ({
 // are the boundary the route must delegate to
 vi.mock("~/modules/team-member/service.server", () => ({
   getNrmForEdit: vi.fn(async () => ({ id: "nrm-1", name: "Old" })),
-  renameNrm: vi.fn(async () => undefined),
+  updateNrm: vi.fn(async () => undefined),
 }));
 
 // why: importing the route reaches the Prisma client, which connects at import
@@ -55,19 +55,19 @@ function notFound() {
 }
 
 /**
- * Posts a rename.
+ * Posts an edit.
  *
  * why: a `URLSearchParams` body rather than `FormData`, which happy-dom can
  * alter on the `Request` round-trip.
  */
-function submitRename(nrmId: string, name: string) {
+function submitEdit(nrmId: string, name: string, email = "") {
   return action(
     createActionArgs({
       params: { nrmId },
       context: ctx,
       request: new Request(`http://localhost/settings/team/nrm/${nrmId}/edit`, {
         method: "POST",
-        body: new URLSearchParams({ name }),
+        body: new URLSearchParams({ name, email }),
       }),
     })
   );
@@ -106,7 +106,7 @@ describe("NRM edit", () => {
   });
 
   it("action: gates on nonRegisteredMember:update", async () => {
-    await submitRename("nrm-1", "New");
+    await submitEdit("nrm-1", "New");
 
     expect(requirePermission).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -116,20 +116,37 @@ describe("NRM edit", () => {
     );
   });
 
-  it("action: writes through the scoped rename with the session's organization", async () => {
-    await submitRename("nrm-1", "  New  ");
+  it("action: writes through the scoped update with the session's organization", async () => {
+    await submitEdit("nrm-1", "  New  ", " Sam@Example.com ");
 
-    expect(renameNrm).toHaveBeenCalledWith({
+    expect(updateNrm).toHaveBeenCalledWith({
       nrmId: "nrm-1",
       organizationId: "org-1",
       name: "New",
+      email: "sam@example.com",
     });
   });
 
-  it("action: an id outside the NRM scope is a 404", async () => {
-    vi.mocked(renameNrm).mockRejectedValueOnce(notFound());
+  it("action: a blank email clears it", async () => {
+    await submitEdit("nrm-1", "New", "   ");
 
-    const res = await submitRename("registered", "New");
+    expect(updateNrm).toHaveBeenCalledWith(
+      expect.objectContaining({ email: undefined })
+    );
+  });
+
+  it("action: refuses an invalid email with 400 and writes nothing", async () => {
+    const res = await submitEdit("nrm-1", "New", "not-an-email");
+
+    assertIsDataWithResponseInit(res);
+    expect(res.init?.status).toBe(400);
+    expect(updateNrm).not.toHaveBeenCalled();
+  });
+
+  it("action: an id outside the NRM scope is a 404", async () => {
+    vi.mocked(updateNrm).mockRejectedValueOnce(notFound());
+
+    const res = await submitEdit("registered", "New");
 
     assertIsDataWithResponseInit(res);
     expect(res.init?.status).toBe(404);

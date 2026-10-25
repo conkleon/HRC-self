@@ -94,7 +94,7 @@ import {
   selfReturnQuantity,
   selfTakeQuantity,
 } from "~/modules/self-custody/quantity.server";
-import { VolunteerNameSchema } from "~/modules/self-custody/schemas";
+import { NewVolunteerSchema } from "~/modules/self-custody/schemas";
 import {
   isUnlocked,
   serializeUnlockCookie,
@@ -132,8 +132,6 @@ const ParamsSchema = z.object({ token: z.string() });
 const IntentSchema = z.object({
   intent: z.enum(["unlock", "search", "add-me", "forget", "take", "return"]),
 });
-
-const NewVolunteerSchema = z.object({ name: VolunteerNameSchema });
 
 /** Take or return names one target: a kit, or else a single item. */
 const ItemActionSchema = z.union([
@@ -357,13 +355,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     if (intent === "add-me") {
-      const { name } = parseData(formData, NewVolunteerSchema, {
+      const { name, email } = parseData(formData, NewVolunteerSchema, {
         additionalData: context,
         shouldBeCaptured: false,
       });
       const volunteer = await findOrCreateVolunteer({
         organizationId: organization.id,
         name,
+        email,
       });
       const url = new URL(request.url);
       return redirect(
@@ -586,9 +585,11 @@ export default function SelfServiceBrowsePage() {
   >();
 
   const errorMessage = actionData?.error?.message ?? null;
-  const nameError =
-    getValidationErrors<typeof NewVolunteerSchema>(actionData?.error)?.name
-      ?.message ?? null;
+  const newVolunteerErrors = getValidationErrors<typeof NewVolunteerSchema>(
+    actionData?.error
+  );
+  const nameError = newVolunteerErrors?.name?.message ?? null;
+  const emailError = newVolunteerErrors?.email?.message ?? null;
 
   return (
     <Shell
@@ -620,8 +621,9 @@ export default function SelfServiceBrowsePage() {
             First, tell us who you are.
           </p>
           <VolunteerPicker
-            error={nameError ? null : errorMessage}
+            error={nameError || emailError ? null : errorMessage}
             nameError={nameError}
+            emailError={emailError}
           />
         </>
       ) : (

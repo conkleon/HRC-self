@@ -60,6 +60,7 @@ import {
   wrapUserLinkForNote,
 } from "~/utils/markdoc-wrappers";
 import type { RoleAccess } from "~/utils/permissions/role-access";
+import { notifyCustodians } from "./notify.server";
 
 /** Whose custody the caller may change: their own only ("self"), or anyone's. */
 type CustodyAssign = RoleAccess["custody"]["assign"];
@@ -501,6 +502,15 @@ export async function assignQuantityToCustodian({
   });
 
   await runLowStockCheck({ assetId, userId, organizationId });
+
+  await notifyQuantityCustodian({
+    assetId,
+    organizationId,
+    userId,
+    custodianId: custodian.id,
+    kind: "assigned",
+    label: (title) => `${quantity} × ${title}`,
+  });
 }
 
 /**
@@ -579,7 +589,70 @@ export async function releaseQuantityFromCustodian({
 
   await runLowStockCheck({ assetId, userId, organizationId });
 
+  await notifyQuantityCustodian({
+    assetId,
+    organizationId,
+    userId,
+    custodianId: custodian.id,
+    kind: "released",
+    label: (title) =>
+      consumedUnits > 0
+        ? `${title} (${returnedUnits} back, ${consumedUnits} used)`
+        : `${returnedUnits} × ${title}`,
+  });
+
   return { consumed: consumedUnits, returned: returnedUnits };
+}
+
+/**
+ * Emails the custodian about units given to them or released from them.
+ * Best-effort, like the note: the change has already committed, so a failed
+ * title lookup is logged and never surfaces.
+ *
+ * @param args.label - Builds the item line from the asset's title, e.g.
+ *   "3 × Bandages"
+ */
+async function notifyQuantityCustodian({
+  assetId,
+  organizationId,
+  userId,
+  custodianId,
+  kind,
+  label,
+}: {
+  assetId: string;
+  organizationId: string;
+  userId: string;
+  custodianId: string;
+  kind: "assigned" | "released";
+  label: (title: string) => string;
+}): Promise<void> {
+  try {
+    const asset = await db.asset.findFirst({
+      // eslint-disable-next-line local-rules/require-archived-at-check-on-asset-queries -- why: names the asset whose custody just changed, whatever its archive state
+      where: { id: assetId, organizationId },
+      select: { title: true },
+    });
+    if (!asset) return;
+
+    notifyCustodians({
+      organizationId,
+      actorUserId: userId,
+      kind,
+      changes: [
+        { teamMemberId: custodianId, assetId, title: label(asset.title) },
+      ],
+    });
+  } catch (cause) {
+    Logger.error(
+      new ShelfError({
+        cause,
+        message: "Failed to email the custodian about a unit custody change",
+        additionalData: { assetId, organizationId, kind },
+        label: "Custody",
+      })
+    );
+  }
 }
 
 /** A per-unit write that was refused after the checks passed. */

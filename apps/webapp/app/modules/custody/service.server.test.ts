@@ -3,6 +3,7 @@ import { AssetType } from "@prisma/client";
 import { describe, expect, it, vitest, beforeEach } from "vitest";
 import { db } from "~/database/db.server";
 import { ShelfError } from "~/utils/error";
+import { notifyCustodians } from "./notify.server";
 import { assertNotKitMembers, releaseCustody } from "./service.server";
 
 // why: isolate the custody service from the database so we can exercise the
@@ -14,6 +15,8 @@ vitest.mock("~/database/db.server", () => ({
       .mockImplementation((callback: (tx: unknown) => unknown) => callback(db)),
     custody: {
       findFirst: vitest.fn().mockResolvedValue(null),
+      // why: the release reads who held the asset, to email them afterwards
+      findMany: vitest.fn().mockResolvedValue([{ teamMemberId: "tm-1" }]),
       deleteMany: vitest.fn().mockResolvedValue({ count: 1 }),
     },
     // why: `assertNotKitMembers` reads kit membership through this delegate;
@@ -42,6 +45,9 @@ vitest.mock("~/database/db.server", () => ({
 vitest.mock("~/modules/activity-event/service.server", () => ({
   recordEvent: vitest.fn().mockResolvedValue(undefined),
 }));
+
+// why: custody notices send email; their own suite covers them
+vitest.mock("./notify.server", () => ({ notifyCustodians: vitest.fn() }));
 
 describe("releaseCustody SELF_SERVICE self-restriction", () => {
   beforeEach(() => {
@@ -393,5 +399,43 @@ describe("assertNotKitMembers", () => {
     expect(lock.invocationCallOrder[0]).toBeLessThan(
       vitest.mocked(db.assetKit.findMany).mock.invocationCallOrder[0]
     );
+  });
+});
+
+describe("releaseCustody custody notice", () => {
+  beforeEach(() => {
+    vitest.clearAllMocks();
+  });
+
+  it("tells whoever held the asset, after the release", async () => {
+    vitest.mocked(db.asset.findUniqueOrThrow).mockResolvedValue({
+      id: "asset-1",
+      title: "Radio #12",
+      custody: [],
+    } as never);
+
+    await releaseCustody({
+      assetId: "asset-1",
+      organizationId: "org-1",
+      userId: "admin-1",
+      custodyAssign: "anyone",
+    });
+
+    expect(db.custody.findMany).toHaveBeenCalledWith({
+      where: {
+        assetId: "asset-1",
+        asset: { organizationId: "org-1" },
+        kitCustodyId: null,
+      },
+      select: { teamMemberId: true },
+    });
+    expect(notifyCustodians).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      actorUserId: "admin-1",
+      kind: "released",
+      changes: [
+        { teamMemberId: "tm-1", assetId: "asset-1", title: "Radio #12" },
+      ],
+    });
   });
 });

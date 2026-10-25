@@ -255,6 +255,32 @@ describe("POST /qr/:qrId/self-custody", () => {
     );
   });
 
+  it("take-new passes a new volunteer's optional email through", async () => {
+    const cookie = await unlock();
+    mockFindOrCreate.mockResolvedValue({
+      id: "tm-9",
+      name: "Giorgos K.",
+      created: true,
+    });
+    mockTake.mockResolvedValue({
+      assetTitle: "Radio #12",
+      volunteerName: "Giorgos K.",
+    });
+    await action(
+      args(
+        post(
+          { intent: "take-new", name: "Giorgos K.", email: "g@example.com" },
+          { cookie }
+        )
+      )
+    );
+    expect(mockFindOrCreate).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      name: "Giorgos K.",
+      email: "g@example.com",
+    });
+  });
+
   it("shows a name error for a 1-character name", async () => {
     const cookie = await unlock();
     const result = read(

@@ -46,19 +46,33 @@ type TeamMemberWithInclude<T extends Prisma.TeamMemberInclude | undefined> =
     ? Prisma.TeamMemberGetPayload<{ include: T }>
     : TeamMember;
 
+/**
+ * Creates a team member in a workspace.
+ *
+ * @param args.name - The member's name
+ * @param args.organizationId - The workspace the member belongs to
+ * @param args.userId - Links a registered user; omitted for an NRM
+ * @param args.email - An NRM's optional contact address, already validated
+ *   with `OptionalEmailSchema`; booking notifications reach the NRM there
+ * @returns The created team member
+ * @throws {ShelfError} When the write fails
+ */
 export async function createTeamMember({
   name,
   organizationId,
   userId,
+  email,
 }: {
   name: TeamMember["name"];
   organizationId: Organization["id"];
   userId?: TeamMember["userId"];
+  email?: TeamMember["email"];
 }) {
   try {
     return await db.teamMember.create({
       data: {
         name,
+        email: email || null,
         organization: {
           connect: {
             id: organizationId,
@@ -1040,7 +1054,7 @@ function nrmNotFoundError({
  *
  * @param args.nrmId - The member id from the URL
  * @param args.organizationId - The caller's workspace
- * @returns The member's id and name
+ * @returns The member's id, name and optional email
  * @throws {ShelfError} 404 when the id is not an NRM of the workspace, 500 if
  *   the read fails
  */
@@ -1050,11 +1064,11 @@ export async function getNrmForEdit({
 }: {
   nrmId: TeamMember["id"];
   organizationId: TeamMember["organizationId"];
-}): Promise<{ id: string; name: string }> {
+}): Promise<{ id: string; name: string; email: string | null }> {
   try {
     const nrm = await db.teamMember.findFirst({
       where: { ...getNrmIndexWhere({ organizationId }), id: nrmId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, email: true },
     });
 
     if (!nrm) {
@@ -1077,31 +1091,34 @@ export async function getNrmForEdit({
 }
 
 /**
- * Renames a non-registered member.
+ * Updates a non-registered member's name and email.
  *
  * The NRM index scope is part of the write, so a row that became registered
- * or invited after the form was loaded can never be renamed through this
+ * or invited after the form was loaded can never be changed through this
  * path: a registered member's `TeamMember.name` is their stored display name.
  *
  * @param args.nrmId - The member id from the URL
  * @param args.organizationId - The caller's workspace
  * @param args.name - The new name, already trimmed
+ * @param args.email - The new email, or `undefined` to clear it
  * @throws {ShelfError} 404 when the id is not an NRM of the workspace, 500 if
  *   the write fails
  */
-export async function renameNrm({
+export async function updateNrm({
   nrmId,
   organizationId,
   name,
+  email,
 }: {
   nrmId: TeamMember["id"];
   organizationId: TeamMember["organizationId"];
   name: TeamMember["name"];
+  email?: TeamMember["email"];
 }): Promise<void> {
   try {
     const { count } = await db.teamMember.updateMany({
       where: { ...getNrmIndexWhere({ organizationId }), id: nrmId },
-      data: { name },
+      data: { name, email: email || null },
     });
 
     if (count === 0) {
@@ -1114,7 +1131,7 @@ export async function renameNrm({
 
     throw new ShelfError({
       cause,
-      message: "Something went wrong while renaming the team member.",
+      message: "Something went wrong while updating the team member.",
       additionalData: { nrmId, organizationId },
       label,
     });

@@ -222,6 +222,7 @@ describe("selfTakeKitCustody", () => {
       source: "list",
       assetTitle: "Trauma kit",
       volunteerName: "Maria P.",
+      volunteerTeamMemberId: "tm-1",
     });
   });
 
@@ -340,7 +341,11 @@ describe("selfReturnKitCustody", () => {
       "**Maria P.** returned their custody of 5 packs via kit **Trauma kit** from the self-service list."
     );
     expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ kitId: "kit-1", kind: "returned" })
+      expect.objectContaining({
+        kitId: "kit-1",
+        kind: "returned",
+        volunteerTeamMemberId: "tm-1",
+      })
     );
   });
 

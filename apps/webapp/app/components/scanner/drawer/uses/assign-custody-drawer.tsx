@@ -40,6 +40,8 @@ import {
   AlertDialogTitle,
 } from "~/components/shared/modal";
 import { Spinner } from "~/components/shared/spinner";
+import { toCustodyAssignmentItem } from "~/components/team-member/custody-assignment-item";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import { useDisabled } from "~/hooks/use-disabled";
 import { useRoleAccess } from "~/hooks/use-role-access";
 import { isQuantityTracked } from "~/modules/asset/utils";
@@ -380,17 +382,14 @@ function CustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
               placeholder="Select a team member"
               allowClear
               closeOnSelect
-              transformItem={(item) => ({
-                ...item,
-                id: JSON.stringify({
-                  id: item.id,
-                  /**
-                   * This is parsed on the server, because we need the name to create the note.
-                   * @TODO This should be refactored to send the name as some metadata, instaed of like this
-                   */
-                  name: resolveTeamMemberName(item),
-                }),
-              })}
+              transformItem={toCustodyAssignmentItem}
+              extraContent={({ onItemCreated, closePopover }) => (
+                <InlineTeamMemberCreation
+                  onItemCreated={onItemCreated}
+                  closePopover={closePopover}
+                  transformItem={toCustodyAssignmentItem}
+                />
+              )}
               renderItem={(item) => resolveTeamMemberName(item, true)}
             />
             {zo.errors.custodian()?.message ? (

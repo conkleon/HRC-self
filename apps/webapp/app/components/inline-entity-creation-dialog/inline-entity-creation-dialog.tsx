@@ -5,6 +5,8 @@ import NewCategoryForm from "../category/new-category-form";
 import { Dialog, DialogPortal } from "../layout/dialog";
 import { LocationForm } from "../location/form";
 import { Button } from "../shared/button";
+import type { CreatedTeamMember } from "../team-member/new-team-member-form";
+import { NewTeamMemberForm } from "../team-member/new-team-member-form";
 import When from "../when/when";
 
 /**
@@ -15,8 +17,8 @@ type InlineEntityCreationDialogProps = {
   title: string;
   /** Label for the button that opens the dialog */
   buttonLabel: string;
-  /** Type of entity to create (location, category, or assetModel) */
-  type: "location" | "category" | "assetModel";
+  /** Type of entity to create (location, category, assetModel, or a non-registered teamMember) */
+  type: "location" | "category" | "assetModel" | "teamMember";
   /** Callback invoked when an entity is successfully created */
   onCreated?: (
     entity:
@@ -39,12 +41,14 @@ type InlineEntityCreationDialogProps = {
             description?: string | null;
           };
         }
+      | { type: "teamMember"; entity: CreatedTeamMember }
   ) => void;
 };
 
 /**
- * InlineEntityCreationDialog provides a modal interface for creating locations or categories
- * directly from within dropdown/select components without navigating away.
+ * InlineEntityCreationDialog provides a modal interface for creating locations,
+ * categories, asset models or non-registered team members directly from within
+ * dropdown/select components without navigating away.
  *
  * The dialog uses a z-index of 9999 because it's rendered inside a popover (z-index ~9998)
  * within the DynamicSelect component. This ensures the dialog appears above the select
@@ -152,6 +156,17 @@ export default function InlineEntityCreationDialog({
                 }}
                 onCancel={() => setOpen(false)}
                 apiUrl="/settings/asset-models/new"
+              />
+            </When>
+
+            {/* Non-registered team member creation form */}
+            <When truthy={type === "teamMember"}>
+              <NewTeamMemberForm
+                onCancel={handleClose}
+                onSuccess={(teamMember) => {
+                  onCreated?.({ type: "teamMember", entity: teamMember });
+                  handleClose();
+                }}
               />
             </When>
 

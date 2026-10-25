@@ -14,8 +14,8 @@ any custody a staff member assigned.
    taking several items asks for it only once.
 3. They see the item's name and location, and then one of the following:
    - **Available:** they type at least 3 letters of their name and pick it from
-     the list, or tap **I'm not on the list, add me** and type their full name.
-     Then they confirm **Take [item] as [name]**.
+     the list, or tap **I'm not on the list, add me** and type their full name
+     and, optionally, their email. Then they confirm **Take [item] as [name]**.
    - **Held by someone:** the page shows who has it, and **Return this item**
      gives it back.
    - **Ask a staff member:** the item can't be handled here (see
@@ -159,6 +159,18 @@ item** button. Each change also writes:
 
 The email says which of the two pages was used.
 
+## What the volunteer receives
+
+A volunteer whose NRM has an email gets a receipt for each of their own takes
+and returns, for example "You took Radio #12" or "You returned 3 × Bandages".
+It covers single items, stock units and kits, from either page. The receipt has
+no links, since the volunteer has no account, and asks them to tell a staff
+member if it wasn't them.
+
+On a scan return, the receipt goes to the person who held the item, whoever
+pressed **Return this item**. A volunteer without an email gets nothing, and a
+failed receipt never blocks the take or return, nor the managers' email.
+
 ## Protection
 
 Both pages are public: anyone holding a sticker, a photo of it or the browse
@@ -174,6 +186,13 @@ pages:
 | Requests to the pages per IP address                | 30 per minute                                                                                   |
 | Name search                                         | nothing listed under 3 letters, at most 10 names, NRMs only (registered users are never listed) |
 | New names                                           | 2 to 60 characters; the same name in different case or spacing reuses the existing NRM          |
+| New volunteer's email                               | optional; saved only on a newly created NRM, never on an existing one (see below)               |
+
+The email a volunteer types is where their booking notifications go. Because
+the page is public and anyone can type anyone's name, an email is stored only
+when the page creates a new NRM. Typing an email next to a name that already
+exists never changes that NRM's email; staff set or change it in **Settings >
+Team > Non-registered members**.
 
 Everything is checked on the server for every action: that self-service is
 still on, that the phone holds an unlock for the current PIN, and the item's
@@ -224,6 +243,7 @@ shows no photo.
 | Stock item take and return (by the unit)                    | `apps/webapp/app/modules/self-custody/quantity.server.ts`                                                                                                |
 | List screens (tabs, live search, filters)                   | `apps/webapp/app/components/self-custody/browse-lists.tsx`                                                                                               |
 | Manager email                                               | `apps/webapp/app/emails/self-custody-alert.tsx`                                                                                                          |
+| Volunteer receipt                                           | `apps/webapp/app/emails/self-custody-receipt.tsx`                                                                                                        |
 | Email audience                                              | `notifications.selfCustodyAlerts` in `packages/permissions/src/policies.ts`                                                                              |
 | Rate limit                                                  | `selfCustodyRateLimit` in `apps/webapp/server/rate-limit.ts`                                                                                             |
 | What the list offers (tag or location)                      | `apps/webapp/app/modules/self-custody/offer.server.ts`                                                                                                   |

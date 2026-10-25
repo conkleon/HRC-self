@@ -14,7 +14,11 @@ import { db } from "~/database/db.server";
 import { createTeamMember } from "~/modules/team-member/service.server";
 import { normalizeVolunteerName } from "./schemas";
 
-export { VolunteerNameSchema, normalizeVolunteerName } from "./schemas";
+export {
+  NewVolunteerSchema,
+  VolunteerNameSchema,
+  normalizeVolunteerName,
+} from "./schemas";
 
 /** Characters a search needs before any name is returned. */
 const MIN_SEARCH_LENGTH = 3;
@@ -87,17 +91,26 @@ export async function getVolunteer({
 /**
  * Returns the NRM with this name, ignoring case and spacing, or adds one.
  *
+ * The email is stored only on a volunteer this call creates. An existing
+ * volunteer's email is never set or changed here: the page is public, so
+ * anyone can type anyone's name, and an email written onto a found name would
+ * redirect that person's booking notifications to whoever typed it. Staff set
+ * or change an existing member's email in Settings.
+ *
  * @param args.organizationId - The workspace of the scanned QR (server-resolved)
  * @param args.name - The volunteer's name, already validated with {@link VolunteerNameSchema}
+ * @param args.email - Optional contact address, already validated with `NewVolunteerSchema`
  * @returns The volunteer, and whether it was just created
  * @throws {ShelfError} When creating the team member fails
  */
 export async function findOrCreateVolunteer({
   organizationId,
   name,
+  email,
 }: {
   organizationId: string;
   name: string;
+  email?: string;
 }): Promise<Volunteer & { created: boolean }> {
   const normalized = normalizeVolunteerName(name);
 
@@ -110,6 +123,10 @@ export async function findOrCreateVolunteer({
   });
   if (existing) return { ...existing, created: false };
 
-  const created = await createTeamMember({ name: normalized, organizationId });
+  const created = await createTeamMember({
+    name: normalized,
+    organizationId,
+    email,
+  });
   return { id: created.id, name: created.name, created: true };
 }

@@ -19,6 +19,7 @@ import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
 import { resolveUserDisplayName } from "~/utils/user";
 import { BOOKING_INCLUDE_FOR_EMAIL } from "./constants";
+import { recipientCanOpenBooking } from "./notification-recipient-helpers";
 import { getBookingNotificationRecipients } from "./notification-recipients.server";
 import { USER_NAME_SELECT } from "../user/fields";
 
@@ -34,12 +35,19 @@ type BasicEmailContentArgs = {
   customEmailFooter?: string | null;
   /** Who performed the action and when. Leave out for scheduled emails. */
   actor?: BookingEmailActor;
+  /**
+   * Whether the body ends with the link to the booking page. `false` for a
+   * recipient with no account (a non-registered member), who cannot open it.
+   * Defaults to `true`.
+   */
+  showBookingLink?: boolean;
 };
 
 /**
  * The plain-text body shared by every booking email: the event sentence, the
  * actor line (when there is an actor) on the line right after it, any
- * event-specific details, then the booking summary and link.
+ * event-specific details, then the booking summary and, for a recipient who
+ * can sign in, the link to the booking.
  *
  * @param emailContent - The event sentence, e.g. `Your booking has been cancelled: "X".`
  * @param emailDetails - Blocks that follow the actor line, e.g. a cancellation reason
@@ -56,6 +64,7 @@ export const baseBookingTextEmailContent = ({
   prefs,
   customEmailFooter,
   actor,
+  showBookingLink = true,
 }: BasicEmailContentArgs & { emailContent: string; emailDetails?: string }) => {
   const fromDate = formatDate(from, prefs, { includeTime: true });
   const toDate = formatDate(to, prefs, { includeTime: true });
@@ -63,6 +72,9 @@ export const baseBookingTextEmailContent = ({
     ? `\n${actor.label}: ${formatBookingEmailActorDetail(actor, prefs)}`
     : "";
   const details = emailDetails ? `\n\n${emailDetails}` : "";
+  const bookingLink = showBookingLink
+    ? `\nTo view the booking, follow the link below:\n${SERVER_URL}/bookings/${bookingId}\n`
+    : "";
   return `Howdy,
 
 ${emailContent}${actorLine}${details}
@@ -72,10 +84,7 @@ ${bookingName} | ${assetsCount} assets
 Custodian: ${custodian}
 From: ${fromDate}
 To: ${toDate}
-
-To view the booking, follow the link below:
-${SERVER_URL}/bookings/${bookingId}
-${customEmailFooter ? `\n---\n${customEmailFooter}` : ""}
+${bookingLink}${customEmailFooter ? `\n---\n${customEmailFooter}` : ""}
 Thanks,
 The ${getAppName()} Team
 `;
@@ -228,9 +237,11 @@ export async function sendCheckinReminder(
     // NotificationRecipient); hints is the null-field fallback only. Pure —
     // no per-recipient DB fetch (avoids an N+1 in the fan-out).
     const recipientPrefs = resolveFormatPrefs(recipient, hints);
+    const canOpenBooking = recipientCanOpenBooking(recipient);
 
     const text = checkinReminderEmailContent({
       prefs: recipientPrefs,
+      showBookingLink: canOpenBooking,
       bookingName: booking.name,
       assetsCount: assetCount,
       custodian,
@@ -250,6 +261,7 @@ export async function sendCheckinReminder(
       prefs: recipientPrefs,
       recipientReason: recipient.reason,
       recipientEmail: recipient.email,
+      hideViewButton: !canOpenBooking,
     });
 
     sendEmail({
@@ -447,12 +459,14 @@ export async function sendBookingUpdatedEmail({
       // Pure resolve from the loaded recipient row; hints as null-field
       // fallback only. No per-recipient DB fetch (avoids an N+1).
       const recipientPrefs = resolveFormatPrefs(recipient, hints);
+      const canOpenBooking = recipientCanOpenBooking(recipient);
 
       const text = bookingUpdatedEmailContent({
         ...emailArgs,
         prefs: recipientPrefs,
         changes,
         actor,
+        showBookingLink: canOpenBooking,
       });
 
       const html = await bookingUpdatesTemplateString({
@@ -464,6 +478,7 @@ export async function sendBookingUpdatedEmail({
         changes,
         recipientReason: recipient.reason,
         recipientEmail: recipient.email,
+        hideViewButton: !canOpenBooking,
       });
 
       sendEmail({
@@ -498,12 +513,16 @@ export async function sendBookingUpdatedEmail({
           // Resolve the old custodian's prefs from the row just fetched (or
           // hints/defaults when they have no user account).
           const oldCustodianPrefs = resolveFormatPrefs(oldCustodianUser, hints);
+          // An old custodian with no account is a non-registered member
+          // reached at their own email: they cannot open the booking.
+          const canOpenBooking = Boolean(oldCustodianUser);
 
           const text = bookingUpdatedEmailContent({
             ...emailArgs,
             prefs: oldCustodianPrefs,
             changes,
             actor,
+            showBookingLink: canOpenBooking,
           });
 
           const html = await bookingUpdatesTemplateString({
@@ -515,6 +534,7 @@ export async function sendBookingUpdatedEmail({
             changes,
             recipientReason: "custodian",
             recipientEmail: oldCustodianEmail,
+            hideViewButton: !canOpenBooking,
           });
 
           sendEmail({

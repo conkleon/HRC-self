@@ -15,6 +15,7 @@ import {
   checkOutQuantity,
   releaseQuantity,
 } from "~/modules/asset/service.server";
+import { sendSelfCustodyAlert } from "./notify.server";
 import {
   getFreeUnitsByAsset,
   selfReturnQuantity,
@@ -162,6 +163,13 @@ describe("selfTakeQuantity", () => {
         type: "UPDATE",
       }),
     });
+    expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "taken",
+        assetTitle: "3 × Bandages",
+        volunteerTeamMemberId: "tm-1",
+      })
+    );
   });
 
   it("takes the units from the offered location with the most left, when it can cover them", async () => {
@@ -261,6 +269,12 @@ describe("selfReturnQuantity", () => {
       eventMeta: { via: "self-service", source: "list" },
     });
     expect(result.assetTitle).toBe("2 × Bandages");
+    expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "returned",
+        volunteerTeamMemberId: "tm-1",
+      })
+    );
   });
 
   it("ends the whole hold of a consumable and records the rest as used", async () => {

@@ -1,6 +1,8 @@
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
+import { toCustodyAssignmentItem } from "~/components/team-member/custody-assignment-item";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import { useRoleAccess } from "~/hooks/use-role-access";
 import { createCustodianSchema } from "~/modules/custody/schema";
 import type { KitIndexLoaderData } from "~/routes/_layout+/kits._index";
@@ -63,13 +65,14 @@ export default function BulkAssignCustodyDialog() {
                 countKey="totalTeamMembers"
                 placeholder="Select a team member"
                 closeOnSelect
-                transformItem={(item) => ({
-                  ...item,
-                  id: JSON.stringify({
-                    id: item.id,
-                    name: resolveTeamMemberName(item),
-                  }),
-                })}
+                transformItem={toCustodyAssignmentItem}
+                extraContent={({ onItemCreated, closePopover }) => (
+                  <InlineTeamMemberCreation
+                    onItemCreated={onItemCreated}
+                    closePopover={closePopover}
+                    transformItem={toCustodyAssignmentItem}
+                  />
+                )}
                 renderItem={(item) => resolveTeamMemberName(item, true)}
               />
             )}

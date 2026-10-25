@@ -251,6 +251,10 @@ import {
   type ConflictingKit,
 } from "./kit-conflicts.server";
 import { assertScannedUnitsAreNotKitMembers } from "./kit-member-scan-guard.server";
+import {
+  getNrmCustodianEmail,
+  recipientCanOpenBooking,
+} from "./notification-recipient-helpers";
 import { getBookingNotificationRecipients } from "./notification-recipients.server";
 import type { NotificationRecipient } from "./notification-recipients.server";
 import { resolveSliceKitIds } from "./slice-kit-attribution";
@@ -339,6 +343,8 @@ async function sendBookingEmailToAllRecipients({
   buildText: (textArgs: {
     prefs: ResolvedFormatPrefs;
     actor: BookingEmailActor | undefined;
+    /** `false` for a recipient with no account; see `recipientCanOpenBooking` */
+    showBookingLink: boolean;
   }) => string;
   /** Built per recipient with their resolved prefs. */
   buildHeading: (prefs: ResolvedFormatPrefs) => string;
@@ -357,6 +363,7 @@ async function sendBookingEmailToAllRecipients({
     // NotificationRecipient); hints is the null-field fallback only. Pure —
     // no per-recipient DB fetch (avoids an N+1 in the fan-out).
     const recipientPrefs = resolveFormatPrefs(recipient, hints);
+    const canOpenBooking = recipientCanOpenBooking(recipient);
 
     const html = await bookingUpdatesTemplateString({
       booking,
@@ -367,12 +374,17 @@ async function sendBookingEmailToAllRecipients({
       recipientReason: recipient.reason,
       recipientEmail: recipient.email,
       ...templateProps,
+      hideViewButton: Boolean(templateProps?.hideViewButton) || !canOpenBooking,
     });
 
     sendEmail({
       to: recipient.email,
       subject,
-      text: buildText({ prefs: recipientPrefs, actor }),
+      text: buildText({
+        prefs: recipientPrefs,
+        actor,
+        showBookingLink: canOpenBooking,
+      }),
       html,
     });
   }
@@ -1632,6 +1644,9 @@ export async function updateBasicBooking({
             select: {
               id: true,
               name: true,
+              // A non-registered custodian is emailed here, see below
+              userId: true,
+              email: true,
               user: {
                 select: {
                   id: true,
@@ -1670,8 +1685,10 @@ export async function updateBasicBooking({
       });
 
     // Capture old custodian email before the update
-    // (for custodian change scenarios)
-    const oldCustodianEmail = booking.custodianUser?.email;
+    // (for custodian change scenarios). A non-registered custodian is reached
+    // at their own optional email.
+    const oldCustodianEmail =
+      booking.custodianUser?.email ?? getNrmCustodianEmail(booking);
 
     // SECURITY (cross-org IDOR): tags come from form input and are connected
     // unconditionally below. Prove they belong to this organization before

@@ -1,6 +1,7 @@
 import type { useLoaderData } from "react-router";
 import DynamicSelect from "~/components/dynamic-select/dynamic-select";
 import FormRow from "~/components/forms/form-row";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import type { ModelFilterItem } from "~/hooks/use-model-filters";
 import type { NewBookingLoaderReturnType } from "~/routes/_layout+/bookings.new";
 import { resolveTeamMemberName } from "~/utils/user";
@@ -9,6 +10,22 @@ import { resolveTeamMemberName } from "~/utils/user";
 export type TeamMemberType = ReturnType<
   typeof useLoaderData<NewBookingLoaderReturnType>
 >["teamMembers"][number];
+
+/**
+ * Encodes a team member as the custodian field's value: the booking action
+ * reads the id, display name and linked user from one JSON string.
+ */
+function toCustodianItem(item: ModelFilterItem & { userId?: string | null }) {
+  return {
+    ...item,
+    id: JSON.stringify({
+      id: item.id,
+      //If there is a user, we use its name, otherwise we use the name of the team member
+      name: resolveTeamMemberName(item),
+      userId: item?.userId,
+    }),
+  };
+}
 
 export function CustodianField({
   defaultTeamMember,
@@ -63,15 +80,14 @@ export function CustodianField({
         placeholder="Select a team member"
         allowClear
         closeOnSelect
-        transformItem={(item: ModelFilterItem & { userId?: string }) => ({
-          ...item,
-          id: JSON.stringify({
-            id: item.id,
-            //If there is a user, we use its name, otherwise we use the name of the team member
-            name: resolveTeamMemberName(item),
-            userId: item?.userId,
-          }),
-        })}
+        transformItem={toCustodianItem}
+        extraContent={({ onItemCreated, closePopover }) => (
+          <InlineTeamMemberCreation
+            onItemCreated={onItemCreated}
+            closePopover={closePopover}
+            transformItem={toCustodianItem}
+          />
+        )}
         renderItem={(item) =>
           userCanSeeCustodian || isNewBooking
             ? resolveTeamMemberName(item, true)

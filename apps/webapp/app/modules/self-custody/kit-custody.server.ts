@@ -215,6 +215,7 @@ export async function selfTakeKitCustody({
     kitId,
     kind: "taken",
     source: "list",
+    volunteerTeamMemberId: teamMemberId,
     ...result,
   });
   return result;
@@ -368,6 +369,7 @@ export async function selfReturnKitCustody({
     kitId,
     kind: "returned",
     source: "list",
+    volunteerTeamMemberId: holderTeamMemberId,
     ...result,
   });
   return result;

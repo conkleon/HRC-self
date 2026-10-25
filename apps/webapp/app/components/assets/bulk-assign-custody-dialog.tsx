@@ -3,6 +3,8 @@ import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import { selectedBulkItemsAtom } from "~/atoms/list";
+import { toCustodyAssignmentItem } from "~/components/team-member/custody-assignment-item";
+import { InlineTeamMemberCreation } from "~/components/team-member/inline-team-member-creation";
 import { useRoleAccess } from "~/hooks/use-role-access";
 import { isQuantityTracked } from "~/modules/asset/utils";
 import { createCustodianSchema } from "~/modules/custody/schema";
@@ -99,17 +101,14 @@ export default function BulkAssignCustodyDialog() {
                 placeholder="Select a team member"
                 allowClear
                 closeOnSelect
-                transformItem={(item) => ({
-                  ...item,
-                  id: JSON.stringify({
-                    id: item.id,
-                    /**
-                     * This is parsed on the server, because we need the name to create the note.
-                     * @TODO This should be refactored to send the name as some metadata, instaed of like this
-                     */
-                    name: resolveTeamMemberName(item),
-                  }),
-                })}
+                transformItem={toCustodyAssignmentItem}
+                extraContent={({ onItemCreated, closePopover }) => (
+                  <InlineTeamMemberCreation
+                    onItemCreated={onItemCreated}
+                    closePopover={closePopover}
+                    transformItem={toCustodyAssignmentItem}
+                  />
+                )}
                 renderItem={(item) => resolveTeamMemberName(item, true)}
               />
             )}

@@ -231,6 +231,7 @@ export async function selfTakeQuantity({
     workspaceName,
     assetId,
     kind: "taken",
+    volunteerTeamMemberId: teamMemberId,
     ...result,
   });
   return result;
@@ -336,6 +337,7 @@ export async function selfReturnQuantity({
     workspaceName,
     assetId,
     kind: "returned",
+    volunteerTeamMemberId: holderTeamMemberId,
     ...result,
   });
   return result;
@@ -428,8 +430,8 @@ async function afterUnitsMoved({
 }
 
 /**
- * Emails managers without waiting, so the volunteer's confirmation never
- * depends on SMTP. `sendSelfCustodyAlert` never rejects.
+ * Emails managers and the volunteer without waiting, so the page's
+ * confirmation never depends on SMTP. `sendSelfCustodyAlert` never rejects.
  */
 function alertManagers(alert: {
   organizationId: string;
@@ -438,6 +440,7 @@ function alertManagers(alert: {
   kind: "taken" | "returned";
   assetTitle: string;
   volunteerName: string;
+  volunteerTeamMemberId: string;
 }) {
   void sendSelfCustodyAlert({ ...alert, source: "list" });
 }
