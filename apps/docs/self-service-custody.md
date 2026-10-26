@@ -1,23 +1,26 @@
 # Self-Service Custody
 
 Self-service custody lets people without a Shelf account, such as volunteers,
-take an item into their custody and return it on their own phone: by scanning
-the item's QR code, or by picking it from the workspace's
-[browse list](#the-browse-list) when the label is missing or out of reach. They are recorded as **non-registered members** (NRMs), so their
+take an item or a whole kit into their custody and return it on their own
+phone: by scanning its QR code, or from the workspace's
+[browse list](#the-browse-list), where they can also
+[scan codes with the camera](#scanning-from-the-browse-list) or pick from the
+list when the label is missing or out of reach. They are recorded as **non-registered members** (NRMs), so their
 custody shows up in item history, the team pages and the custody reports like
 any custody a staff member assigned.
 
 ## How it works for a volunteer
 
-1. They scan the item's QR sticker with their phone camera.
+1. They scan the item's or kit's QR sticker with their phone camera.
 2. They enter the **workspace PIN**. The phone stays unlocked for 12 hours, so
    taking several items asks for it only once.
-3. They see the item's name and location, and then one of the following:
+3. They see the item's name and location (for a kit, also how many items it
+   holds), and then one of the following:
    - **Available:** they type at least 3 letters of their name and pick it from
      the list, or tap **I'm not on the list, add me** and type their full name
      and, optionally, their email. Then they confirm **Take [item] as [name]**.
    - **Held by someone:** the page shows who has it, and **Return this item**
-     gives it back.
+     (or **Return this kit**) gives it back.
    - **Ask a staff member:** the item can't be handled here (see
      [Scope](#scope)).
 
@@ -93,15 +96,42 @@ Removing the tag from an item, or moving it out of the chosen locations, takes
 it off the list straight away (unless the other rule still offers it); a
 volunteer who still has the old list open is refused when they press **Take**.
 
-### Kits from the list
+### Scanning from the browse list
 
-Taking a kit works exactly like staff assigning kit custody: the kit goes into
+Once a volunteer has said who they are, **Scan a code** at the top of their
+lists opens the phone camera. It reads the QR code or barcode of an item or a
+kit (or an item's sequential id, such as `SAM-0012`) and shows what it is, with
+one button:
+
+- **Take this item** / **Take this kit** when it is free;
+- **Return this item** / **Return this kit** when the volunteer holds it;
+- who holds it, when someone else does (they return it themselves, or a staff
+  member does);
+- the reason it needs a staff member otherwise (see [Scope](#scope)).
+
+A scan works like scanning the QR sticker with the camera app: what the list
+offers (tag or location) does not matter, so anything with a label that
+self-service can handle may be taken this way. A code of another workspace, or
+one linked to nothing, shows "This code is not linked to any item or kit in
+this workspace." The take or return sends the scanned code back, never an item
+or kit id, and the server resolves it again within the link's workspace. The
+note and event read as a scan ("via self-service scan", no `source: list`).
+
+### Kits
+
+Taking a kit, from the list or by scanning its code, works exactly like staff
+assigning kit custody: the kit goes into
 the volunteer's custody and every active item in it follows, stock items with
 the kit's share of units. Returning it releases the kit and those items; an
 item that also has custody of its own stays with its holder. Each item gets a
 note ("**Maria P.** took custody via kit **Trauma kit** from the self-service
-list.") and an event with `viaKit: true`, and the manager email links to the
-kit.
+list.", or "... via self-service scan.") and an event with `viaKit: true`, and
+the manager email links to the kit.
+
+A kit can be taken while it is available, nobody holds it, it has at least one
+active item, and none of its individual items is out or marked unavailable. A
+stock item with units out elsewhere does not block it. Scanning one item of a
+kit points the volunteer to the kit's own code instead.
 
 ### Stock items from the list
 
@@ -208,12 +238,14 @@ restarts and assume a single app container, which is how the
 
 ## Scope
 
-Self-service handles **individual** assets, and whole kits and stock items
+Self-service handles **individual** assets and whole kits, and stock items
 from the browse list. The following are referred to staff:
 
-- kits scanned by their own QR code, and single assets that belong to a kit
-  (take the whole kit from the list instead);
+- single assets that belong to a kit (scan the kit's code, or take the whole
+  kit from the list instead);
 - a single item whose custody came with a kit (return the kit instead);
+- kits that are booked out, empty, or hold an item that is out or marked
+  unavailable;
 - quantity-tracked (stock) items scanned by their QR code (take them from the
   list instead);
 - items checked out on a booking;
@@ -242,6 +274,8 @@ shows no photo.
 | Kit take and return                                         | `apps/webapp/app/modules/self-custody/kit-custody.server.ts`                                                                                             |
 | Stock item take and return (by the unit)                    | `apps/webapp/app/modules/self-custody/quantity.server.ts`                                                                                                |
 | List screens (tabs, live search, filters)                   | `apps/webapp/app/components/self-custody/browse-lists.tsx`                                                                                               |
+| Scan button (camera) and scanned item panel                 | `apps/webapp/app/components/self-custody/scan-code.tsx`, `scanned-item.tsx`                                                                              |
+| What a scanned code is (QR, barcode, sequential id)         | `getSelfCustodyState`, `getScannedCodeState` in `apps/webapp/app/modules/self-custody/custody.server.ts`                                                 |
 | Manager email                                               | `apps/webapp/app/emails/self-custody-alert.tsx`                                                                                                          |
 | Volunteer receipt                                           | `apps/webapp/app/emails/self-custody-receipt.tsx`                                                                                                        |
 | Email audience                                              | `notifications.selfCustodyAlerts` in `packages/permissions/src/policies.ts`                                                                              |

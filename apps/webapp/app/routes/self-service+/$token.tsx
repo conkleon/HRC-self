@@ -16,6 +16,13 @@
  * Only the volunteer's own items and kits can be returned here; returning
  * someone else's still needs the item's QR code or a staff member.
  *
+ * "Scan a code" reads an item's or a kit's QR code or barcode with the phone
+ * camera. The code rides the URL (`?scan=&scanType=`), the loader resolves it
+ * to an item or kit of this workspace, and take and return post the code, not
+ * an id, so the action resolves it again. Like scanning the item's QR code
+ * with the camera app, a scan needs no offer: anything with a label that
+ * self-service can handle may be taken.
+ *
  * Everything is decided on the server, per request: the workspace comes from
  * the token (never from the form), self-service must still be on, the phone
  * must hold a valid unlock cookie for the current PIN, the volunteer in
@@ -28,6 +35,8 @@
  * @see {@link file://./../../modules/self-custody/kit-custody.server.ts}
  * @see {@link file://./../../modules/self-custody/quantity.server.ts}
  * @see {@link file://./../../components/self-custody/browse-lists.tsx}
+ * @see {@link file://./../../components/self-custody/scan-code.tsx}
+ * @see {@link file://./../../components/self-custody/scanned-item.tsx}
  */
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
@@ -61,6 +70,13 @@ import type {
   BrowseItemsPage,
   BrowseTab,
 } from "~/components/self-custody/browse-lists";
+import { ScanCodeButton } from "~/components/self-custody/scan-code";
+import {
+  SCAN_PARAM,
+  SCAN_TYPE_PARAM,
+  ScannedItemPanel,
+} from "~/components/self-custody/scanned-item";
+import type { ScannedResult } from "~/components/self-custody/scanned-item";
 import {
   DoneNotice,
   FormError,
@@ -78,9 +94,11 @@ import type {
   SelfCustodyBrowseOrganization,
 } from "~/modules/self-custody/browse.server";
 import {
+  getScannedCodeState,
   selfReturnCustody,
   selfTakeCustody,
 } from "~/modules/self-custody/custody.server";
+import type { SelfCustodyState } from "~/modules/self-custody/custody.server";
 import {
   selfReturnKitCustody,
   selfTakeKitCustody,
@@ -158,7 +176,25 @@ export const handle: ManifestHandle = {
 const ParamsSchema = z.object({ token: z.string() });
 
 const IntentSchema = z.object({
-  intent: z.enum(["unlock", "search", "add-me", "forget", "take", "return"]),
+  intent: z.enum([
+    "unlock",
+    "search",
+    "add-me",
+    "forget",
+    "take",
+    "return",
+    "scan-take",
+    "scan-return",
+  ]),
+});
+
+/** Longest code a scan may carry; real QR ids and barcodes are far shorter. */
+const MAX_CODE_LENGTH = 200;
+
+/** A scanned code, from the URL or a scan take or return. */
+const ScannedCodeSchema = z.object({
+  code: z.string().trim().min(1).max(MAX_CODE_LENGTH),
+  codeType: z.enum(["qr", "barcode", "samId"]),
 });
 
 /** Take or return names one target: a kit, or else a single item. */
@@ -194,6 +230,8 @@ type BrowseView =
       list: BrowseItemsPage;
       filters: BrowseFilters;
       filterOptions: BrowseFilterOptions;
+      /** The code in `?scan=`, resolved; null when nothing was scanned. */
+      scanned: ScannedResult | null;
     };
 
 /** Reads the list's filters from the URL; unknown values fall back to "any". */
@@ -281,16 +319,27 @@ async function unlockedView(
   const filters = filtersFrom(url);
   const page = Number(url.searchParams.get("page") ?? "1");
   const scope = { organizationId: organization.id, offer };
+  const scannedCode = scannedCodeFrom(url);
 
   // Both tabs show both counts, so both lists load whichever tab is open.
-  const [myItems, list, filterOptions] = await Promise.all([
+  const [myItems, list, filterOptions, scannedState] = await Promise.all([
     listVolunteerItems({
       organizationId: organization.id,
       teamMemberId: volunteer.id,
     }),
     listOfferedItems({ ...scope, filters, page }),
     listBrowseFilterOptions(scope),
+    scannedCode
+      ? getScannedCodeState({ organizationId: organization.id, ...scannedCode })
+      : null,
   ]);
+  const scanned: ScannedResult | null = scannedCode
+    ? {
+        ...scannedCode,
+        state: scannedState,
+        heldByYou: isHeldBy(scannedState, myItems),
+      }
+    : null;
   return {
     view: {
       view: "lists",
@@ -300,9 +349,28 @@ async function unlockedView(
       list,
       filters,
       filterOptions,
+      scanned,
     },
     setCookie,
   };
+}
+
+/** The scanned code in the URL, or null when there is none or it is malformed. */
+function scannedCodeFrom(url: URL) {
+  const parsed = ScannedCodeSchema.safeParse({
+    code: url.searchParams.get(SCAN_PARAM),
+    codeType: url.searchParams.get(SCAN_TYPE_PARAM),
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+/** Whether the volunteer's own list holds the scanned item or kit. */
+function isHeldBy(state: SelfCustodyState | null, myItems: BrowseItem[]) {
+  if (state?.kind !== "in-custody") return false;
+  const kind = state.item.kind === "kit" ? "kit" : "item";
+  return myItems.some(
+    (entry) => entry.kind === kind && entry.id === state.item.id
+  );
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -407,6 +475,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
       );
     }
 
+    if (intent === "scan-take" || intent === "scan-return") {
+      return await scanAction(intent, formData, organization, context);
+    }
+
     const target = parseData(formData, ItemActionSchema);
     const { teamMemberId } = target;
     // The volunteer must be an NRM of this workspace, as on the loader.
@@ -491,6 +563,95 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const reason = makeShelfError(cause);
     return data(error(reason), { status: reason.status });
   }
+}
+
+/**
+ * Takes or returns the item or kit a scanned code labels. The code is resolved
+ * again here, never trusted as an id. A take needs no offer, like a scan of
+ * the item's QR code; a return releases only the volunteer's own custody.
+ *
+ * @throws {ShelfError} 400 for an unknown code, one self-service cannot
+ *   handle, or a volunteer who is not a team member of the workspace
+ */
+async function scanAction(
+  intent: "scan-take" | "scan-return",
+  formData: FormData,
+  organization: SelfCustodyBrowseOrganization,
+  context: AdditionalData
+) {
+  const { code, codeType, teamMemberId } = parseData(
+    formData,
+    ScannedCodeSchema.extend({ teamMemberId: z.string().min(1) }),
+    { additionalData: context, shouldBeCaptured: false }
+  );
+  const volunteer = await getVolunteer({
+    organizationId: organization.id,
+    teamMemberId,
+  });
+  if (!volunteer) {
+    throw refuse(400, "Please choose your name again.", context);
+  }
+
+  const state = await getScannedCodeState({
+    organizationId: organization.id,
+    code,
+    codeType,
+  });
+  if (!state?.item) {
+    throw refuse(
+      400,
+      "This code is not linked to any item or kit in this workspace.",
+      context
+    );
+  }
+  const { item } = state;
+  const workspace = {
+    organizationId: organization.id,
+    workspaceName: organization.name,
+    source: "scan" as const,
+  };
+
+  if (intent === "scan-return") {
+    if (state.kind !== "in-custody") {
+      throw refuse(400, "This is not in anyone's custody.", context);
+    }
+    const result =
+      item.kind === "kit"
+        ? await selfReturnKitCustody({
+            ...workspace,
+            kitId: item.id,
+            holderTeamMemberId: volunteer.id,
+          })
+        : await selfReturnCustody({
+            ...workspace,
+            assetId: item.id,
+            holderTeamMemberId: volunteer.id,
+          });
+    return data(payload({ done: { kind: "returned" as const, ...result } }));
+  }
+
+  if (state.kind !== "available") {
+    throw refuse(
+      400,
+      state.kind === "in-custody"
+        ? "Someone already has this."
+        : "This can't be handled here. Please ask a staff member.",
+      context
+    );
+  }
+  const result =
+    item.kind === "kit"
+      ? await selfTakeKitCustody({
+          ...workspace,
+          kitId: item.id,
+          teamMemberId: volunteer.id,
+        })
+      : await selfTakeCustody({
+          ...workspace,
+          assetId: item.id,
+          teamMemberId: volunteer.id,
+        });
+  return data(payload({ done: { kind: "taken" as const, ...result } }));
 }
 
 /**
@@ -657,10 +818,17 @@ export default function SelfServiceBrowsePage() {
       ) : (
         <>
           <VolunteerBar name={loaderData.volunteer.name} />
+          <ScanCodeButton />
           {actionData?.done ? (
             <div className="mb-6">
               <DoneNotice {...actionData.done} />
             </div>
+          ) : loaderData.scanned ? (
+            <ScannedItemPanel
+              scanned={loaderData.scanned}
+              memberId={loaderData.volunteer.id}
+              error={errorMessage}
+            />
           ) : (
             <FormError error={errorMessage} />
           )}

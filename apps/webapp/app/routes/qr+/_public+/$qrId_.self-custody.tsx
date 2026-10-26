@@ -1,10 +1,11 @@
 /**
  * Self-Service Custody Page (`/qr/:qrId/self-custody`)
  *
- * Public page a volunteer reaches by scanning an item's QR code on their own
- * phone, when the workspace has self-service custody turned on. Without an
- * account they enter the workspace PIN, find or add their name among the
- * workspace's NRMs, and take the item into their custody or return it.
+ * Public page a volunteer reaches by scanning an item's or a kit's QR code on
+ * their own phone, when the workspace has self-service custody turned on.
+ * Without an account they enter the workspace PIN, find or add their name
+ * among the workspace's NRMs, and take the item or the whole kit into their
+ * custody, or return it.
  *
  * Everything is decided on the server, per request: the workspace comes from
  * the QR (never from the form), self-service must still be on, the phone must
@@ -12,6 +13,7 @@
  * fresh. Names are only revealed to an unlocked phone.
  *
  * @see {@link file://./../../../modules/self-custody/custody.server.ts}
+ * @see {@link file://./../../../modules/self-custody/kit-custody.server.ts}
  * @see {@link file://./../../../components/self-custody/self-custody-steps.tsx}
  */
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
@@ -38,6 +40,10 @@ import type {
   SelfCustodyOrganization,
   SelfCustodyState,
 } from "~/modules/self-custody/custody.server";
+import {
+  selfReturnKitCustody,
+  selfTakeKitCustody,
+} from "~/modules/self-custody/kit-custody.server";
 import {
   checkLockout,
   clearFailedPins,
@@ -170,14 +176,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
       if (state.kind !== "in-custody") {
         throw refuse(400, "This item is not in anyone's custody.", context);
       }
-      const result = await selfReturnCustody({
-        ...target,
-        assetId: state.asset.id,
-      });
+      const result =
+        state.item.kind === "kit"
+          ? await selfReturnKitCustody({
+              ...target,
+              kitId: state.item.id,
+              source: "scan",
+            })
+          : await selfReturnCustody({ ...target, assetId: state.item.id });
       return data(payload({ done: { kind: "returned" as const, ...result } }));
     }
 
-    // take / take-new: the item is the scanned one, never one from the form.
+    // take / take-new: the item or kit is the scanned one, never one from the form.
     if (state.kind !== "available") {
       throw refuse(
         400,
@@ -202,11 +212,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
         : parseData(formData, z.object({ teamMemberId: z.string().min(1) }))
             .teamMemberId;
 
-    const result = await selfTakeCustody({
-      ...target,
-      assetId: state.asset.id,
-      teamMemberId,
-    });
+    const result =
+      state.item.kind === "kit"
+        ? await selfTakeKitCustody({
+            ...target,
+            kitId: state.item.id,
+            teamMemberId,
+            source: "scan",
+          })
+        : await selfTakeCustody({
+            ...target,
+            assetId: state.item.id,
+            teamMemberId,
+          });
     return data(payload({ done: { kind: "taken" as const, ...result } }));
   } catch (cause) {
     const reason = makeShelfError(cause, { qrId });
@@ -281,7 +299,7 @@ export default function SelfCustodyPage() {
       <h1 className="mb-1 text-[24px] font-semibold">Take or return an item</h1>
       <p className="mb-6 text-gray-600">{workspaceName}</p>
 
-      {state.asset ? <ItemCard item={state.asset} /> : null}
+      {state.item ? <ItemCard item={state.item} /> : null}
 
       {actionData?.done ? (
         <DoneNotice {...actionData.done} />
@@ -289,13 +307,17 @@ export default function SelfCustodyPage() {
         <PinForm error={errorMessage} />
       ) : state.kind === "available" ? (
         <VolunteerPicker
-          itemTitle={state.asset.title}
+          itemTitle={state.item.title}
           error={nameError || emailError ? null : errorMessage}
           nameError={nameError}
           emailError={emailError}
         />
       ) : state.kind === "in-custody" ? (
-        <ReturnPanel holderName={state.holderName} error={errorMessage} />
+        <ReturnPanel
+          holderName={state.holderName}
+          isKit={state.item.kind === "kit"}
+          error={errorMessage}
+        />
       ) : (
         <>
           <FormError error={errorMessage} />

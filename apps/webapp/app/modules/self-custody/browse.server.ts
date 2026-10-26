@@ -443,14 +443,16 @@ function offeredAssetWhere({
 }
 
 /**
- * Where clause for kits a volunteer may take from the list: available, held
- * by nobody, with at least one active item, offered (every active item tagged,
- * or the kit stored in an offered location), no active individual item out
- * of the depot, and no active item marked unavailable (awaiting repair, say). Archived items are left out of kit custody, so they
- * neither block nor qualify a kit.
+ * Where clause for kits a volunteer may take: available, held by nobody, with
+ * at least one active item, no active individual item out of the depot, no
+ * active item marked unavailable (awaiting repair, say), and, when an offer is
+ * given, offered (every active item tagged, or the kit stored in an offered
+ * location). Archived items are left out of kit custody, so they neither
+ * block nor qualify a kit.
  *
  * Also the eligibility check of `selfTakeKitCustody`, so the list and the
- * claim cannot disagree about which kits may be taken.
+ * claim cannot disagree about which kits may be taken. A scan passes no
+ * offer: scanning a kit's code takes it whether or not the list offers it.
  */
 export function offeredKitWhere({
   organizationId,
@@ -458,7 +460,7 @@ export function offeredKitWhere({
   filters,
 }: {
   organizationId: string;
-  offer: SelfCustodyOffer;
+  offer?: SelfCustodyOffer;
   filters?: Partial<BrowseFilters>;
 }): Prisma.KitWhereInput {
   const term = filters?.query?.trim() ?? "";
@@ -468,7 +470,7 @@ export function offeredKitWhere({
     custody: { is: null },
     AND: [
       { assetKits: { some: { asset: { archivedAt: null } } } },
-      offeredKitMatch(offer),
+      offer ? offeredKitMatch(offer) : {},
       {
         assetKits: {
           none: {

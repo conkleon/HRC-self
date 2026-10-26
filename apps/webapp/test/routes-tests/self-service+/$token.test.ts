@@ -24,6 +24,7 @@ const {
   mockFindOrCreate,
   mockGetVolunteer,
   mockFindLocations,
+  mockScanned,
 } = vi.hoisted(() => ({
   mockGetWorkspace: vi.fn(),
   mockOffered: vi.fn(),
@@ -39,6 +40,7 @@ const {
   mockFindOrCreate: vi.fn(),
   mockGetVolunteer: vi.fn(),
   mockFindLocations: vi.fn(),
+  mockScanned: vi.fn(),
 }));
 
 // why: the browse reads query the database; covered by browse.server.test.ts
@@ -51,6 +53,7 @@ vi.mock("~/modules/self-custody/browse.server", () => ({
 
 // why: take and return write the database; covered by custody.server.test.ts
 vi.mock("~/modules/self-custody/custody.server", () => ({
+  getScannedCodeState: mockScanned,
   selfTakeCustody: mockTake,
   selfReturnCustody: mockReturn,
 }));
@@ -429,6 +432,218 @@ describe("GET /self-service/:token", () => {
     );
 
     expect(body).toMatchObject({ tab: "take", filters: { kind: "all" } });
+  });
+});
+
+/** A scanned kit as `getScannedCodeState` resolves it. */
+const scannedKit = {
+  kind: "kit",
+  id: "kit-1",
+  title: "Trauma kit",
+  thumbnailImage: null,
+  locationName: "Depot",
+  itemCount: 4,
+};
+
+describe("scanning on /self-service/:token", () => {
+  it("resolves the scanned code in the URL within the link's workspace", async () => {
+    const cookie = await unlock();
+    mockScanned.mockResolvedValue({ kind: "available", item: scannedKit });
+
+    const { body } = read(
+      await loader(
+        args(get("?member=tm-1&scan=%20qr-kit%20&scanType=qr", cookie))
+      )
+    );
+
+    expect(mockScanned).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      code: "qr-kit",
+      codeType: "qr",
+    });
+    expect(body?.scanned).toEqual({
+      code: "qr-kit",
+      codeType: "qr",
+      state: { kind: "available", item: scannedKit },
+      heldByYou: false,
+    });
+  });
+
+  it("tells the volunteer when they hold the scanned kit themselves", async () => {
+    const cookie = await unlock();
+    mockMine.mockResolvedValue([
+      { ...radio, kind: "kit", id: "kit-1", title: "Trauma kit" },
+    ]);
+    mockScanned.mockResolvedValue({
+      kind: "in-custody",
+      item: scannedKit,
+      holderName: "Maria P.",
+    });
+
+    const { body } = read(
+      await loader(args(get("?member=tm-1&scan=qr-kit&scanType=qr", cookie)))
+    );
+    expect(body?.scanned).toMatchObject({ heldByYou: true });
+  });
+
+  it("ignores a scan whose type is unknown, and shows no scan without one", async () => {
+    const cookie = await unlock();
+
+    const odd = read(
+      await loader(args(get("?member=tm-1&scan=x&scanType=nfc", cookie)))
+    );
+    const none = read(await loader(args(get("?member=tm-1", cookie))));
+
+    expect(odd.body?.scanned).toBeNull();
+    expect(none.body?.scanned).toBeNull();
+    expect(mockScanned).not.toHaveBeenCalled();
+  });
+
+  it("takes a scanned kit by its code, without the list's offer", async () => {
+    const cookie = await unlock();
+    mockScanned.mockResolvedValue({ kind: "available", item: scannedKit });
+
+    const { body } = read(
+      await action(
+        args(
+          post(
+            {
+              intent: "scan-take",
+              code: "qr-kit",
+              codeType: "qr",
+              teamMemberId: "tm-1",
+              kitId: "some-other-kit",
+            },
+            { cookie }
+          )
+        )
+      )
+    );
+
+    expect(mockScanned).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      code: "qr-kit",
+      codeType: "qr",
+    });
+    expect(mockTakeKit).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      source: "scan",
+      kitId: "kit-1",
+      teamMemberId: "tm-1",
+    });
+    expect(body?.done).toMatchObject({
+      kind: "taken",
+      assetTitle: "Trauma kit",
+    });
+  });
+
+  it("takes a scanned single item by its barcode", async () => {
+    const cookie = await unlock();
+    mockScanned.mockResolvedValue({
+      kind: "available",
+      item: { ...scannedKit, kind: "asset", id: "asset-1", itemCount: null },
+    });
+
+    await action(
+      args(
+        post(
+          {
+            intent: "scan-take",
+            code: "12345678",
+            codeType: "barcode",
+            teamMemberId: "tm-1",
+          },
+          { cookie }
+        )
+      )
+    );
+
+    expect(mockTake).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      source: "scan",
+      assetId: "asset-1",
+      teamMemberId: "tm-1",
+    });
+    expect(mockTakeKit).not.toHaveBeenCalled();
+  });
+
+  it("returns a scanned kit only as the volunteer's own", async () => {
+    const cookie = await unlock();
+    mockScanned.mockResolvedValue({
+      kind: "in-custody",
+      item: scannedKit,
+      holderName: "Maria P.",
+    });
+
+    await action(
+      args(
+        post(
+          {
+            intent: "scan-return",
+            code: "qr-kit",
+            codeType: "qr",
+            teamMemberId: "tm-1",
+          },
+          { cookie }
+        )
+      )
+    );
+
+    expect(mockReturnKit).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      source: "scan",
+      kitId: "kit-1",
+      holderTeamMemberId: "tm-1",
+    });
+  });
+
+  it("refuses a code that labels nothing in the workspace, or something staff must handle", async () => {
+    const cookie = await unlock();
+    const scanTake = () =>
+      action(
+        args(
+          post(
+            {
+              intent: "scan-take",
+              code: "qr-x",
+              codeType: "qr",
+              teamMemberId: "tm-1",
+            },
+            { cookie }
+          )
+        )
+      );
+
+    mockScanned.mockResolvedValueOnce(null);
+    expect(read(await scanTake()).status).toBe(400);
+
+    mockScanned.mockResolvedValueOnce({
+      kind: "unsupported",
+      item: scannedKit,
+      reason: "kit-checked-out",
+    });
+    expect(read(await scanTake()).status).toBe(400);
+
+    expect(mockTakeKit).not.toHaveBeenCalled();
+    expect(mockTake).not.toHaveBeenCalled();
+  });
+
+  it("refuses a scan take without the PIN or for someone who is not a volunteer here", async () => {
+    const fields = {
+      intent: "scan-take",
+      code: "qr-kit",
+      codeType: "qr",
+      teamMemberId: "tm-1",
+    };
+    expect(read(await action(args(post(fields)))).status).toBe(401);
+
+    const cookie = await unlock();
+    mockGetVolunteer.mockResolvedValue(null);
+    expect(read(await action(args(post(fields, { cookie })))).status).toBe(400);
+    expect(mockScanned).not.toHaveBeenCalled();
   });
 });
 

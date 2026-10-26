@@ -8,21 +8,22 @@
  * marked `meta.via = "self-service"` and names the volunteer through
  * `teamMemberId`.
  *
- * This module covers INDIVIDUAL assets. Kit members, kit-held custody,
+ * A scanned code (a Shelf QR, a barcode or a sequential id) resolves to an
+ * INDIVIDUAL asset or a whole kit. Kit members, kit-held custody,
  * quantity-tracked, archived and checked-out assets are referred to staff,
  * and so is an asset marked unavailable for bookings (`availableToBook`,
  * e.g. awaiting repair) while nobody holds it. A volunteer who holds one can
- * still return it.
+ * still return it. Items in a kit go out with the kit: scanning the kit's own
+ * code takes and returns it through `kit-custody.server.ts`.
  * The same kit guards as the staff custody routes run inside the transaction,
- * so the two paths cannot disagree about what may be taken. Whole kits are
- * taken and returned from the browse list through `kit-custody.server.ts`.
+ * so the two paths cannot disagree about what may be taken.
  *
  * @see {@link file://./../../routes/_layout+/assets.$assetId.overview.assign-custody.tsx}
  * @see {@link file://./../../routes/qr+/_public+/$qrId_.self-custody.tsx}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  * @see {@link file://./kit-custody.server.ts}
  */
-import { AssetStatus, AssetType } from "@prisma/client";
+import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 
 import { db } from "~/database/db.server";
 import { recordEvent } from "~/modules/activity-event/service.server";
@@ -39,32 +40,39 @@ import { sendSelfCustodyAlert } from "./notify.server";
 import { offeredAssetMatch } from "./offer.server";
 import type { SelfCustodyOffer } from "./offer.server";
 
-/** The item card on the self-service page. */
-export type SelfCustodyAsset = {
+/** The item or kit card on the self-service page. */
+export type SelfCustodyTarget = {
+  /** A single item or a whole kit: decides which take and return run. */
+  kind: "asset" | "kit";
   id: string;
   title: string;
   thumbnailImage: string | null;
   locationName: string | null;
+  /** How many active items a kit holds; null for a single item. */
+  itemCount: number | null;
 };
 
-/** Why an item cannot be taken or returned on the self-service page. */
+/** Why an item or kit cannot be taken or returned on the self-service page. */
 export type SelfCustodyUnsupportedReason =
-  | "kit-qr"
   | "not-linked"
   | "archived"
   | "quantity-tracked"
   | "kit-member"
   | "kit-custody"
   | "checked-out"
-  | "unavailable";
+  | "unavailable"
+  | "kit-empty"
+  | "kit-checked-out"
+  | "kit-item-out"
+  | "kit-unavailable";
 
-/** What the self-service page offers for a scanned QR. */
+/** What the self-service page offers for a scanned code. */
 export type SelfCustodyState =
-  | { kind: "available"; asset: SelfCustodyAsset }
-  | { kind: "in-custody"; asset: SelfCustodyAsset; holderName: string }
+  | { kind: "available"; item: SelfCustodyTarget }
+  | { kind: "in-custody"; item: SelfCustodyTarget; holderName: string }
   | {
       kind: "unsupported";
-      asset: SelfCustodyAsset | null;
+      item: SelfCustodyTarget | null;
       reason: SelfCustodyUnsupportedReason;
     };
 
@@ -77,6 +85,9 @@ export type SelfCustodyOrganization = {
   selfCustodyPinUpdatedAt: Date | null;
 };
 
+/** How a scanned code reads: a Shelf QR, a barcode, or an asset's sequential id. */
+export type ScannedCodeType = "qr" | "barcode" | "samId";
+
 const NAME_FIELDS = { firstName: true, lastName: true, displayName: true };
 
 /** The team member fields `resolveTeamMemberName` reads. */
@@ -88,6 +99,50 @@ export const CUSTODIAN_SELECT = {
 /** The refusal for anything self-service cannot handle. */
 export const STAFF_MESSAGE =
   "This item can't be handled here. Please ask a staff member.";
+
+/**
+ * The asset fields its state reads. A label stays on an item when it is
+ * archived, so a scan must still resolve it and explain why it cannot be taken.
+ */
+const ASSET_STATE_SELECT = {
+  id: true,
+  title: true,
+  thumbnailImage: true,
+  type: true,
+  status: true,
+  archivedAt: true,
+  availableToBook: true,
+  assetLocations: {
+    where: { assetKitId: null },
+    select: { location: { select: { name: true } } },
+    take: 1,
+  },
+  assetKits: { select: { id: true }, take: 1 },
+  custody: {
+    select: {
+      kitCustodyId: true,
+      custodian: { select: CUSTODIAN_SELECT },
+    },
+  },
+} as const;
+
+/**
+ * The kit fields its state reads. Archived items are left out of kit custody,
+ * so they neither block nor count.
+ */
+const KIT_STATE_SELECT = {
+  id: true,
+  name: true,
+  status: true,
+  location: { select: { name: true } },
+  custody: { select: { custodian: { select: CUSTODIAN_SELECT } } },
+  assetKits: {
+    where: { asset: { archivedAt: null } },
+    select: {
+      asset: { select: { type: true, status: true, availableToBook: true } },
+    },
+  },
+} as const;
 
 /**
  * Resolves a scanned QR to its workspace and what the page may offer.
@@ -105,7 +160,6 @@ export async function getSelfCustodyState({ qrId }: { qrId: string }): Promise<{
     where: { id: qrId },
     select: {
       organizationId: true,
-      kitId: true,
       organization: {
         select: {
           id: true,
@@ -115,31 +169,8 @@ export async function getSelfCustodyState({ qrId }: { qrId: string }): Promise<{
           selfCustodyPinUpdatedAt: true,
         },
       },
-      // A label stays on the item when it is archived, so the scan must still
-      // resolve it and explain why it cannot be taken.
-      asset: {
-        select: {
-          id: true,
-          title: true,
-          thumbnailImage: true,
-          type: true,
-          status: true,
-          archivedAt: true,
-          availableToBook: true,
-          assetLocations: {
-            where: { assetKitId: null },
-            select: { location: { select: { name: true } } },
-            take: 1,
-          },
-          assetKits: { select: { id: true }, take: 1 },
-          custody: {
-            select: {
-              kitCustodyId: true,
-              custodian: { select: CUSTODIAN_SELECT },
-            },
-          },
-        },
-      },
+      asset: { select: ASSET_STATE_SELECT },
+      kit: { select: KIT_STATE_SELECT },
     },
   });
 
@@ -158,43 +189,101 @@ export async function getSelfCustodyState({ qrId }: { qrId: string }): Promise<{
   return { organization: qr.organization, state: stateOf(qr) };
 }
 
-/** Maps the selected QR row to what the page may offer. */
-function stateOf(qr: {
-  kitId: string | null;
-  asset: {
-    id: string;
-    title: string;
-    thumbnailImage: string | null;
-    type: AssetType;
-    status: AssetStatus;
-    archivedAt: Date | null;
-    availableToBook: boolean;
-    assetLocations: { location: { name: string } }[];
-    assetKits: { id: string }[];
-    custody: {
-      kitCustodyId: string | null;
-      custodian: Parameters<typeof resolveTeamMemberName>[0];
-    }[];
-  } | null;
-}): SelfCustodyState {
-  if (!qr.asset) {
-    return {
-      kind: "unsupported",
-      asset: null,
-      reason: qr.kitId ? "kit-qr" : "not-linked",
-    };
+/**
+ * Resolves a code scanned on the self-service page to the item or kit it
+ * labels in this workspace. A QR or barcode of another workspace resolves to
+ * nothing, exactly like an unknown code.
+ *
+ * @param args.organizationId - The workspace of the browse link (server-resolved)
+ * @param args.code - The QR id, barcode value or sequential id the scanner read
+ * @param args.codeType - How the scanner classified the code
+ * @returns The state, or null when no item or kit of this workspace carries the code
+ */
+export async function getScannedCodeState({
+  organizationId,
+  code,
+  codeType,
+}: {
+  organizationId: string;
+  code: string;
+  codeType: ScannedCodeType;
+}): Promise<SelfCustodyState | null> {
+  const select = {
+    asset: { select: ASSET_STATE_SELECT },
+    kit: { select: KIT_STATE_SELECT },
+  };
+
+  if (codeType === "samId") {
+    const asset = await db.asset.findFirst({
+      // eslint-disable-next-line local-rules/require-archived-at-check-on-asset-queries -- why: a scanned archived item is shown with the reason it cannot be taken
+      where: { organizationId, sequentialId: code },
+      select: ASSET_STATE_SELECT,
+    });
+    return asset ? stateOf({ asset, kit: null }) : null;
   }
 
-  const { asset } = qr;
-  const card: SelfCustodyAsset = {
+  const row =
+    codeType === "qr"
+      ? await db.qr.findFirst({ where: { id: code, organizationId }, select })
+      : await db.barcode.findFirst({
+          where: { value: code, organizationId },
+          select,
+        });
+  return row && (row.asset || row.kit) ? stateOf(row) : null;
+}
+
+/** The asset row `ASSET_STATE_SELECT` returns. */
+type AssetStateRow = {
+  id: string;
+  title: string;
+  thumbnailImage: string | null;
+  type: AssetType;
+  status: AssetStatus;
+  archivedAt: Date | null;
+  availableToBook: boolean;
+  assetLocations: { location: { name: string } }[];
+  assetKits: { id: string }[];
+  custody: {
+    kitCustodyId: string | null;
+    custodian: Parameters<typeof resolveTeamMemberName>[0];
+  }[];
+};
+
+/** The kit row `KIT_STATE_SELECT` returns. */
+type KitStateRow = {
+  id: string;
+  name: string;
+  status: KitStatus;
+  location: { name: string } | null;
+  custody: { custodian: Parameters<typeof resolveTeamMemberName>[0] } | null;
+  assetKits: {
+    asset: { type: AssetType; status: AssetStatus; availableToBook: boolean };
+  }[];
+};
+
+/** Maps the code's item or kit to what the page may offer. */
+function stateOf(row: {
+  asset: AssetStateRow | null;
+  kit: KitStateRow | null;
+}): SelfCustodyState {
+  if (row.asset) return assetStateOf(row.asset);
+  if (row.kit) return kitStateOf(row.kit);
+  return { kind: "unsupported", item: null, reason: "not-linked" };
+}
+
+/** What the page may offer for a single item. */
+function assetStateOf(asset: AssetStateRow): SelfCustodyState {
+  const card: SelfCustodyTarget = {
+    kind: "asset",
     id: asset.id,
     title: asset.title,
     thumbnailImage: asset.thumbnailImage,
     locationName: asset.assetLocations[0]?.location.name ?? null,
+    itemCount: null,
   };
   const refer = (reason: SelfCustodyUnsupportedReason): SelfCustodyState => ({
     kind: "unsupported",
-    asset: card,
+    item: card,
     reason,
   });
 
@@ -208,12 +297,55 @@ function stateOf(qr: {
   if (holder) {
     return {
       kind: "in-custody",
-      asset: card,
+      item: card,
       holderName: resolveTeamMemberName(holder.custodian),
     };
   }
   if (!asset.availableToBook) return refer("unavailable");
-  return { kind: "available", asset: card };
+  return { kind: "available", item: card };
+}
+
+/**
+ * What the page may offer for a whole kit. Mirrors the eligibility half of
+ * `offeredKitWhere`, which `selfTakeKitCustody` re-checks inside its
+ * transaction, so this only decides what to show.
+ */
+function kitStateOf(kit: KitStateRow): SelfCustodyState {
+  const card: SelfCustodyTarget = {
+    kind: "kit",
+    id: kit.id,
+    title: kit.name,
+    thumbnailImage: null,
+    locationName: kit.location?.name ?? null,
+    itemCount: kit.assetKits.length,
+  };
+  const refer = (reason: SelfCustodyUnsupportedReason): SelfCustodyState => ({
+    kind: "unsupported",
+    item: card,
+    reason,
+  });
+
+  if (kit.custody) {
+    return {
+      kind: "in-custody",
+      item: card,
+      holderName: resolveTeamMemberName(kit.custody.custodian),
+    };
+  }
+  if (kit.status === KitStatus.CHECKED_OUT) return refer("kit-checked-out");
+  if (kit.assetKits.length === 0) return refer("kit-empty");
+  const items = kit.assetKits.map(({ asset }) => asset);
+  if (
+    items.some(
+      (a) =>
+        a.type === AssetType.INDIVIDUAL && a.status !== AssetStatus.AVAILABLE
+    )
+  ) {
+    return refer("kit-item-out");
+  }
+  if (items.some((a) => !a.availableToBook)) return refer("kit-unavailable");
+  if (kit.status !== KitStatus.AVAILABLE) return refer("kit-unavailable");
+  return { kind: "available", item: card };
 }
 
 /**
@@ -221,7 +353,7 @@ function stateOf(qr: {
  * workspace's browse list. Named in the note, the activity event and the
  * manager email.
  */
-type SelfCustodySource = "scan" | "list";
+export type SelfCustodySource = "scan" | "list";
 
 /** Arguments shared by take and return. */
 type SelfCustodyActionArgs = {

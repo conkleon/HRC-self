@@ -9,20 +9,35 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockGetState, mockTake, mockReturn, mockSearch, mockFindOrCreate } =
-  vi.hoisted(() => ({
-    mockGetState: vi.fn(),
-    mockTake: vi.fn(),
-    mockReturn: vi.fn(),
-    mockSearch: vi.fn(),
-    mockFindOrCreate: vi.fn(),
-  }));
+const {
+  mockGetState,
+  mockTake,
+  mockReturn,
+  mockTakeKit,
+  mockReturnKit,
+  mockSearch,
+  mockFindOrCreate,
+} = vi.hoisted(() => ({
+  mockGetState: vi.fn(),
+  mockTake: vi.fn(),
+  mockReturn: vi.fn(),
+  mockTakeKit: vi.fn(),
+  mockReturnKit: vi.fn(),
+  mockSearch: vi.fn(),
+  mockFindOrCreate: vi.fn(),
+}));
 
 // why: state, take and return read and write the database; covered by custody.server.test.ts
 vi.mock("~/modules/self-custody/custody.server", () => ({
   getSelfCustodyState: mockGetState,
   selfTakeCustody: mockTake,
   selfReturnCustody: mockReturn,
+}));
+
+// why: kit take and return write the database; covered by kit-custody.server.test.ts
+vi.mock("~/modules/self-custody/kit-custody.server", () => ({
+  selfTakeKitCustody: mockTakeKit,
+  selfReturnKitCustody: mockReturnKit,
 }));
 
 // why: lookups read the database; the name schema stays real
@@ -54,10 +69,21 @@ const organization = () => ({
 });
 
 const asset = {
+  kind: "asset",
   id: "asset-1",
   title: "Radio #12",
   thumbnailImage: null,
   locationName: "Warehouse A",
+  itemCount: null,
+};
+
+const kit = {
+  kind: "kit",
+  id: "kit-1",
+  title: "First aid kit",
+  thumbnailImage: null,
+  locationName: "Depot",
+  itemCount: 3,
 };
 
 const URL_ = "http://localhost/qr/qr-1/self-custody";
@@ -100,7 +126,7 @@ beforeEach(async () => {
   pinHash ||= await hashPin(PIN);
   mockGetState.mockResolvedValue({
     organization: organization(),
-    state: { kind: "available", asset },
+    state: { kind: "available", item: asset },
   });
 });
 
@@ -108,7 +134,7 @@ describe("GET /qr/:qrId/self-custody", () => {
   it("redirects to the not-logged-in page when self-service is off", async () => {
     mockGetState.mockResolvedValue({
       organization: { ...organization(), selfCustodyEnabled: false },
-      state: { kind: "available", asset },
+      state: { kind: "available", item: asset },
     });
     const response = (await loader(args(new Request(URL_)))) as Response;
     expect(response.status).toBe(302);
@@ -120,7 +146,7 @@ describe("GET /qr/:qrId/self-custody", () => {
   it("hides who holds the item until the phone is unlocked", async () => {
     mockGetState.mockResolvedValue({
       organization: organization(),
-      state: { kind: "in-custody", asset, holderName: "Maria P." },
+      state: { kind: "in-custody", item: asset, holderName: "Maria P." },
     });
 
     const locked = read(await loader(args(new Request(URL_))));
@@ -176,7 +202,7 @@ describe("POST /qr/:qrId/self-custody", () => {
     const cookie = await unlock();
     mockGetState.mockResolvedValue({
       organization: { ...organization(), selfCustodyEnabled: false },
-      state: { kind: "available", asset },
+      state: { kind: "available", item: asset },
     });
     const result = read(
       await action(
@@ -294,7 +320,7 @@ describe("POST /qr/:qrId/self-custody", () => {
     const cookie = await unlock();
     mockGetState.mockResolvedValue({
       organization: organization(),
-      state: { kind: "in-custody", asset, holderName: "Maria P." },
+      state: { kind: "in-custody", item: asset, holderName: "Maria P." },
     });
     mockReturn.mockResolvedValue({
       assetTitle: "Radio #12",
@@ -311,11 +337,62 @@ describe("POST /qr/:qrId/self-custody", () => {
     expect(result.body?.done).toMatchObject({ kind: "returned" });
   });
 
+  it("takes a scanned kit as a whole, without needing an offer", async () => {
+    const cookie = await unlock();
+    mockGetState.mockResolvedValue({
+      organization: organization(),
+      state: { kind: "available", item: kit },
+    });
+    mockTakeKit.mockResolvedValue({
+      assetTitle: "First aid kit",
+      volunteerName: "Maria P.",
+    });
+    const result = read(
+      await action(
+        args(post({ intent: "take", teamMemberId: "tm-1" }, { cookie }))
+      )
+    );
+    expect(mockTakeKit).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      kitId: "kit-1",
+      teamMemberId: "tm-1",
+      source: "scan",
+    });
+    expect(mockTake).not.toHaveBeenCalled();
+    expect(result.body?.done).toMatchObject({
+      kind: "taken",
+      assetTitle: "First aid kit",
+    });
+  });
+
+  it("returns a scanned kit for whoever holds it", async () => {
+    const cookie = await unlock();
+    mockGetState.mockResolvedValue({
+      organization: organization(),
+      state: { kind: "in-custody", item: kit, holderName: "Maria P." },
+    });
+    mockReturnKit.mockResolvedValue({
+      assetTitle: "First aid kit",
+      volunteerName: "Maria P.",
+    });
+    const result = read(
+      await action(args(post({ intent: "return" }, { cookie })))
+    );
+    expect(mockReturnKit).toHaveBeenCalledWith({
+      organizationId: "org-1",
+      workspaceName: "Hellenic Red Cross",
+      kitId: "kit-1",
+      source: "scan",
+    });
+    expect(result.body?.done).toMatchObject({ kind: "returned" });
+  });
+
   it("refuses to take an item that is referred to staff", async () => {
     const cookie = await unlock();
     mockGetState.mockResolvedValue({
       organization: organization(),
-      state: { kind: "unsupported", asset, reason: "checked-out" },
+      state: { kind: "unsupported", item: asset, reason: "checked-out" },
     });
     const result = read(
       await action(

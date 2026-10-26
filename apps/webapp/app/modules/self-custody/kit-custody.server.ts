@@ -1,16 +1,18 @@
 /**
  * Self-Service Kit Custody
  *
- * Taking or returning a whole kit from the workspace's browse list, without an
- * account. The kit gets a `KitCustody` row and each active item in it inherits
- * custody exactly as when staff assign kit custody
- * (`kits.$kitId.assets.assign-custody`), so kit pages, reports and the staff
- * release button treat it like any other kit custody. Records carry no actor
- * user; events are marked `meta.via = "self-service"`, `source: "list"`.
+ * Taking or returning a whole kit without an account, from the workspace's
+ * browse list or by scanning the kit's code. The kit gets a `KitCustody` row
+ * and each active item in it inherits custody exactly as when staff assign kit
+ * custody (`kits.$kitId.assets.assign-custody`), so kit pages, reports and the
+ * staff release button treat it like any other kit custody. Records carry no
+ * actor user; events are marked `meta.via = "self-service"`, plus
+ * `source: "list"` for the browse list.
  *
- * Only kits the list offers can be taken (`offeredKitWhere`, checked inside
- * the transaction with the kit and its items locked), and only the holder can
- * return one here.
+ * Eligibility (`offeredKitWhere`) is checked inside the transaction with the
+ * kit and its items locked. From the list only offered kits can be taken and
+ * only the holder can return one; a scan, like a scan of a single item, needs
+ * no offer, and the QR page lets whoever has the kit in hand return it.
  *
  * @see {@link file://./browse.server.ts}
  * @see {@link file://./custody.server.ts}
@@ -36,17 +38,19 @@ import {
   STAFF_MESSAGE,
   eventMeta,
 } from "./custody.server";
-import type { SelfCustodyResult } from "./custody.server";
+import type { SelfCustodyResult, SelfCustodySource } from "./custody.server";
 import { sendSelfCustodyAlert } from "./notify.server";
 import type { SelfCustodyOffer } from "./offer.server";
 
 /** Arguments shared by kit take and return. */
 type SelfKitCustodyArgs = {
-  /** The workspace of the browse link, resolved on the server. */
+  /** The workspace of the QR or browse link, resolved on the server. */
   organizationId: string;
   /** Workspace name, for the manager email. */
   workspaceName: string;
   kitId: string;
+  /** Defaults to "list". */
+  source?: SelfCustodySource;
 };
 
 /** The member fields the per-item notes and event meta read. */
@@ -66,14 +70,15 @@ function notePhrase(
 }
 
 /**
- * Puts an offered kit, and every active item in it, into a volunteer's custody.
+ * Puts a kit, and every active item in it, into a volunteer's custody.
  *
- * @param args.organizationId - The workspace of the browse link (server-resolved)
+ * @param args.organizationId - The workspace of the QR or browse link (server-resolved)
  * @param args.workspaceName - For the manager email
  * @param args.kitId - The kit
- * @param args.teamMemberId - The volunteer, already proven to be an NRM of the workspace
- * @param args.requiredOffer - What the workspace offers: the kit must be
- *   offered by tag (every active item tagged) or by location
+ * @param args.teamMemberId - The volunteer, already proven to be a team member of the workspace
+ * @param args.requiredOffer - When set, the kit must be offered by tag (every
+ *   active item tagged) or by location: the browse list offers those kits only
+ * @param args.source - Scan or browse list; defaults to list
  * @returns The kit's name and the volunteer's name
  * @throws {ShelfError} 400 for a kit staff must handle (not offered, an
  *   item out, a booking holding it), 404 for an unknown kit, 409 when someone
@@ -85,9 +90,10 @@ export async function selfTakeKitCustody({
   kitId,
   teamMemberId,
   requiredOffer,
+  source = "list",
 }: SelfKitCustodyArgs & {
   teamMemberId: string;
-  requiredOffer: SelfCustodyOffer;
+  requiredOffer?: SelfCustodyOffer;
 }): Promise<SelfCustodyResult> {
   const result = await db.$transaction(async (tx) => {
     await assertTeamMemberBelongsToOrg({ teamMemberId, organizationId }, tx);
@@ -184,7 +190,7 @@ export async function selfTakeKitCustody({
             teamMemberId,
             meta: {
               viaKit: true,
-              ...eventMeta("list"),
+              ...eventMeta(source),
               ...(asset ? assetQtyMeta(asset, row.quantity) : {}),
             },
           };
@@ -199,7 +205,7 @@ export async function selfTakeKitCustody({
           content: `**${who}** took ${notePhrase(
             assetById.get(row.assetId),
             row.quantity ?? null
-          )} via kit **${kitName}** ${NOTE_CHANNEL.list}.`,
+          )} via kit **${kitName}** ${NOTE_CHANNEL[source]}.`,
           type: "UPDATE" as const,
           assetId: row.assetId,
         })),
@@ -214,7 +220,7 @@ export async function selfTakeKitCustody({
     workspaceName,
     kitId,
     kind: "taken",
-    source: "list",
+    source,
     volunteerTeamMemberId: teamMemberId,
     ...result,
   });
@@ -224,22 +230,26 @@ export async function selfTakeKitCustody({
 /**
  * Releases a volunteer's custody of a kit and of the items it gave them.
  *
- * @param args.organizationId - The workspace of the browse link (server-resolved)
+ * @param args.organizationId - The workspace of the QR or browse link (server-resolved)
  * @param args.workspaceName - For the manager email
  * @param args.kitId - The kit
- * @param args.holderTeamMemberId - The volunteer; custody held by anyone else
- *   is refused, never released
- * @returns The kit's name and the volunteer's name
- * @throws {ShelfError} 403 for a kit held by someone else, 404 for an unknown
- *   kit, 409 when nobody holds it any more
+ * @param args.holderTeamMemberId - When set, custody held by anyone else is
+ *   refused, never released: the browse list returns the volunteer's own kits
+ *   only. A QR scan leaves it unset, so whoever has the kit can return it
+ * @param args.source - Scan or browse list; defaults to list
+ * @returns The kit's name and the name of whoever held it
+ * @throws {ShelfError} 403 for a kit held by someone other than
+ *   `holderTeamMemberId`, 404 for an unknown kit, 409 when nobody holds it
+ *   any more
  */
 export async function selfReturnKitCustody({
   organizationId,
   workspaceName,
   kitId,
   holderTeamMemberId,
+  source = "list",
 }: SelfKitCustodyArgs & {
-  holderTeamMemberId: string;
+  holderTeamMemberId?: string;
 }): Promise<SelfCustodyResult> {
   const result = await db.$transaction(async (tx) => {
     const kit = await tx.kit.findFirst({
@@ -273,9 +283,14 @@ export async function selfReturnKitCustody({
 
     if (!kit) throw refuse(404, "This kit could not be found.");
     if (!kit.custody) throw refuse(409, "This kit is not in anyone's custody.");
-    if (kit.custody.custodianId !== holderTeamMemberId) {
+    if (
+      holderTeamMemberId !== undefined &&
+      kit.custody.custodianId !== holderTeamMemberId
+    ) {
       throw refuse(403, "You can only return kits in your own custody.");
     }
+    // Whoever held the kit, named in the events, notes and email.
+    const holderId = kit.custody.custodianId;
 
     // Read before the delete: removing the KitCustody row cascades to the
     // custody it gave each item, which the events and notes must name.
@@ -289,7 +304,7 @@ export async function selfReturnKitCustody({
     const released = await tx.kitCustody.deleteMany({
       where: {
         id: kit.custody.id,
-        custodianId: holderTeamMemberId,
+        custodianId: holderId,
         kit: { organizationId },
       },
     });
@@ -335,10 +350,10 @@ export async function selfReturnKitCustody({
             entityId: row.assetId,
             assetId: row.assetId,
             kitId,
-            teamMemberId: holderTeamMemberId,
+            teamMemberId: holderId,
             meta: {
               viaKit: true,
-              ...eventMeta("list"),
+              ...eventMeta(source),
               ...(asset ? assetQtyMeta(asset, row.quantity) : {}),
             },
           };
@@ -353,24 +368,25 @@ export async function selfReturnKitCustody({
           content: `**${who}** returned their ${notePhrase(
             assetById.get(row.assetId),
             row.quantity ?? null
-          )} via kit **${kitName}** ${NOTE_CHANNEL.list}.`,
+          )} via kit **${kitName}** ${NOTE_CHANNEL[source]}.`,
           type: "UPDATE" as const,
           assetId: row.assetId,
         })),
       });
     }
 
-    return { assetTitle: kit.name, volunteerName };
+    return { assetTitle: kit.name, volunteerName, holderId };
   });
 
+  const { holderId, ...done } = result;
   void sendSelfCustodyAlert({
     organizationId,
     workspaceName,
     kitId,
     kind: "returned",
-    source: "list",
-    volunteerTeamMemberId: holderTeamMemberId,
-    ...result,
+    source,
+    volunteerTeamMemberId: holderId,
+    ...done,
   });
-  return result;
+  return done;
 }

@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
  * Tests for self-service kit custody: taking an offered kit from the browse
- * list, and returning a kit the volunteer holds.
+ * list or any eligible kit by scanning its code, and returning a kit.
  *
  * @see {@link file://./kit-custody.server.ts}
  */
@@ -258,6 +258,35 @@ describe("selfTakeKitCustody", () => {
     await expect(take()).rejects.toMatchObject({ status: 400 });
     expect(assertKitsCustodyAssignable).not.toHaveBeenCalled();
   });
+
+  it("takes a scanned kit on eligibility alone, and says it was scanned", async () => {
+    await selfTakeKitCustody({
+      ...workspace,
+      kitId: "kit-1",
+      teamMemberId: "tm-1",
+      source: "scan",
+    });
+
+    const eligible = offeredKitWhere({ organizationId: ORG });
+    expect(tx.kit.findFirst).toHaveBeenCalledWith({
+      where: { id: "kit-1", ...eligible },
+      select: { name: true },
+    });
+    // Eligible still means available, unheld and with every item free
+    expect(eligible).toMatchObject({
+      status: KitStatus.AVAILABLE,
+      custody: { is: null },
+    });
+    expect(vi.mocked(recordEvents).mock.calls[0][0][0]).toMatchObject({
+      meta: { viaKit: true, via: "self-service" },
+    });
+    expect(tx.note.createMany.mock.calls[0][0].data[0].content).toBe(
+      "**Maria P.** took custody via kit **Trauma kit** via self-service scan."
+    );
+    expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
+      expect.objectContaining({ source: "scan" })
+    );
+  });
 });
 
 describe("selfReturnKitCustody", () => {
@@ -372,5 +401,31 @@ describe("selfReturnKitCustody", () => {
   it("answers 404 for a kit outside the workspace", async () => {
     tx.kit.findFirst.mockResolvedValue(null);
     await expect(giveBack()).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("lets a QR scan return the kit for whoever holds it", async () => {
+    tx.kit.findFirst.mockResolvedValue(heldKit("tm-other"));
+
+    await expect(
+      selfReturnKitCustody({ ...workspace, kitId: "kit-1", source: "scan" })
+    ).resolves.toEqual({ assetTitle: "Trauma kit", volunteerName: "Maria P." });
+
+    expect(tx.kitCustody.deleteMany).toHaveBeenCalledWith({
+      where: {
+        id: "kc-1",
+        custodianId: "tm-other",
+        kit: { organizationId: ORG },
+      },
+    });
+    expect(vi.mocked(recordEvents).mock.calls[0][0][0]).toMatchObject({
+      teamMemberId: "tm-other",
+      meta: { viaKit: true, via: "self-service" },
+    });
+    expect(sendSelfCustodyAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "scan",
+        volunteerTeamMemberId: "tm-other",
+      })
+    );
   });
 });

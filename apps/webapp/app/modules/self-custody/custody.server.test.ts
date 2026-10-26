@@ -1,11 +1,11 @@
 // @vitest-environment node
 /**
- * Tests for self-service custody: what a scan shows, and taking or returning
- * an item without an account.
+ * Tests for self-service custody: what a scan shows (an item or a whole kit),
+ * and taking or returning an item without an account.
  *
  * @see {@link file://./custody.server.ts}
  */
-import { AssetStatus, AssetType } from "@prisma/client";
+import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "~/database/db.server";
@@ -16,6 +16,7 @@ import {
   assertNotKitMembers,
 } from "~/modules/custody/service.server";
 import {
+  getScannedCodeState,
   getSelfCustodyState,
   selfReturnCustody,
   selfTakeCustody,
@@ -33,7 +34,9 @@ const tx = {
 // why: unit tests run without a database
 vi.mock("~/database/db.server", () => ({
   db: {
-    qr: { findUnique: vi.fn() },
+    qr: { findUnique: vi.fn(), findFirst: vi.fn() },
+    barcode: { findFirst: vi.fn() },
+    asset: { findFirst: vi.fn() },
     $transaction: vi.fn((callback: (client: unknown) => unknown) =>
       callback(tx)
     ),
@@ -85,12 +88,30 @@ function assetRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
+/** A kit as `getSelfCustodyState` selects it, with overrides. */
+function kitRow(overrides: Record<string, unknown> = {}) {
+  const radio = {
+    type: AssetType.INDIVIDUAL,
+    status: AssetStatus.AVAILABLE,
+    availableToBook: true,
+  };
+  return {
+    id: "kit-1",
+    name: "First aid kit",
+    status: KitStatus.AVAILABLE,
+    location: { name: "Depot" },
+    custody: null,
+    assetKits: [{ asset: radio }, { asset: radio }],
+    ...overrides,
+  };
+}
+
 function qrRow(overrides: Record<string, unknown> = {}) {
   return {
     organizationId: ORG,
-    kitId: null,
     organization,
     asset: assetRow(),
+    kit: null,
     ...overrides,
   };
 }
@@ -122,11 +143,13 @@ describe("getSelfCustodyState", () => {
     expect(org.id).toBe(ORG);
     expect(state).toEqual({
       kind: "available",
-      asset: {
+      item: {
+        kind: "asset",
         id: "asset-1",
         title: "Radio #12",
         thumbnailImage: null,
         locationName: "Warehouse A",
+        itemCount: null,
       },
     });
   });
@@ -176,7 +199,6 @@ describe("getSelfCustodyState", () => {
   });
 
   it.each([
-    ["kit-qr", { kitId: "kit-1", asset: null }],
     ["not-linked", { asset: null }],
     ["archived", { asset: assetRow({ archivedAt: new Date() }) }],
     [
@@ -220,6 +242,179 @@ describe("getSelfCustodyState", () => {
     );
     const { state } = await getSelfCustodyState({ qrId: "qr-1" });
     expect(state).toMatchObject({ kind: "in-custody", holderName: "Maria P." });
+  });
+});
+
+describe("getSelfCustodyState for a kit's QR", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("offers an available kit as a whole, with its size and location", async () => {
+    findQr.mockResolvedValue(qrRow({ asset: null, kit: kitRow() }) as never);
+    const { state } = await getSelfCustodyState({ qrId: "qr-1" });
+    expect(state).toEqual({
+      kind: "available",
+      item: {
+        kind: "kit",
+        id: "kit-1",
+        title: "First aid kit",
+        thumbnailImage: null,
+        locationName: "Depot",
+        itemCount: 2,
+      },
+    });
+  });
+
+  it("names the holder of a kit in custody", async () => {
+    findQr.mockResolvedValue(
+      qrRow({
+        asset: null,
+        kit: kitRow({
+          status: KitStatus.IN_CUSTODY,
+          custody: { custodian: { name: "Maria P.", user: null } },
+        }),
+      }) as never
+    );
+    const { state } = await getSelfCustodyState({ qrId: "qr-1" });
+    expect(state).toMatchObject({
+      kind: "in-custody",
+      item: { kind: "kit", id: "kit-1" },
+      holderName: "Maria P.",
+    });
+  });
+
+  it.each([
+    ["kit-checked-out", { status: KitStatus.CHECKED_OUT }],
+    ["kit-empty", { assetKits: [] }],
+    [
+      "kit-item-out",
+      {
+        assetKits: [
+          {
+            asset: {
+              type: AssetType.INDIVIDUAL,
+              status: AssetStatus.IN_CUSTODY,
+              availableToBook: true,
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "kit-unavailable",
+      {
+        assetKits: [
+          {
+            asset: {
+              type: AssetType.INDIVIDUAL,
+              status: AssetStatus.AVAILABLE,
+              availableToBook: false,
+            },
+          },
+        ],
+      },
+    ],
+  ])("refers a %s kit to staff", async (reason, overrides) => {
+    findQr.mockResolvedValue(
+      qrRow({ asset: null, kit: kitRow(overrides) }) as never
+    );
+    const { state } = await getSelfCustodyState({ qrId: "qr-1" });
+    expect(state).toMatchObject({ kind: "unsupported", reason });
+  });
+
+  it("does not let a stock item with units out elsewhere block its kit", async () => {
+    findQr.mockResolvedValue(
+      qrRow({
+        asset: null,
+        kit: kitRow({
+          assetKits: [
+            {
+              asset: {
+                type: AssetType.QUANTITY_TRACKED,
+                status: AssetStatus.IN_CUSTODY,
+                availableToBook: true,
+              },
+            },
+          ],
+        }),
+      }) as never
+    );
+    const { state } = await getSelfCustodyState({ qrId: "qr-1" });
+    expect(state.kind).toBe("available");
+  });
+});
+
+describe("getScannedCodeState", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("finds a QR only among the workspace's own codes", async () => {
+    vi.mocked(db.qr.findFirst).mockResolvedValue({
+      asset: null,
+      kit: kitRow(),
+    } as never);
+    const state = await getScannedCodeState({
+      organizationId: ORG,
+      code: "qr-1",
+      codeType: "qr",
+    });
+    expect(db.qr.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "qr-1", organizationId: ORG } })
+    );
+    expect(state).toMatchObject({ kind: "available", item: { kind: "kit" } });
+  });
+
+  it("finds a barcode by its value in the workspace", async () => {
+    vi.mocked(db.barcode.findFirst).mockResolvedValue({
+      asset: assetRow(),
+      kit: null,
+    } as never);
+    const state = await getScannedCodeState({
+      organizationId: ORG,
+      code: "12345678",
+      codeType: "barcode",
+    });
+    expect(db.barcode.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { value: "12345678", organizationId: ORG },
+      })
+    );
+    expect(state).toMatchObject({ kind: "available", item: { kind: "asset" } });
+  });
+
+  it("finds an item by its sequential id in the workspace", async () => {
+    vi.mocked(db.asset.findFirst).mockResolvedValue(assetRow() as never);
+    const state = await getScannedCodeState({
+      organizationId: ORG,
+      code: "SAM-0012",
+      codeType: "samId",
+    });
+    expect(db.asset.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { organizationId: ORG, sequentialId: "SAM-0012" },
+      })
+    );
+    expect(state).toMatchObject({ item: { id: "asset-1" } });
+  });
+
+  it("answers null for a code nothing in the workspace carries", async () => {
+    vi.mocked(db.qr.findFirst).mockResolvedValue(null);
+    vi.mocked(db.barcode.findFirst).mockResolvedValue({
+      asset: null,
+      kit: null,
+    } as never);
+    expect(
+      await getScannedCodeState({
+        organizationId: ORG,
+        code: "other-org-qr",
+        codeType: "qr",
+      })
+    ).toBeNull();
+    expect(
+      await getScannedCodeState({
+        organizationId: ORG,
+        code: "ORPHAN",
+        codeType: "barcode",
+      })
+    ).toBeNull();
   });
 });
 

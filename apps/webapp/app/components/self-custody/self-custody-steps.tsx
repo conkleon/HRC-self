@@ -19,20 +19,28 @@ import { useDisabled } from "~/hooks/use-disabled";
 /** A volunteer as the search returns them. */
 type Volunteer = { id: string; name: string };
 
-/** The item the page is about. */
+/** The item or kit the page is about. */
 export type SelfCustodyItem = {
   title: string;
   locationName: string | null;
+  /** How many items a kit holds; null or absent for a single item. */
+  itemCount?: number | null;
 };
 
 /** Error text shown under a form, from the action. */
 type ErrorProps = { error?: string | null };
 
-/** Title and location of the scanned item. */
+/** Title and location of the scanned item, and the size of a kit. */
 export function ItemCard({ item }: { item: SelfCustodyItem }) {
+  const isKit = item.itemCount != null;
   return (
     <div className="mb-6 rounded-md border border-gray-200 bg-white p-4 text-left">
       <p className="text-lg font-semibold text-gray-900">{item.title}</p>
+      {isKit ? (
+        <p className="text-sm text-gray-600">
+          Kit of {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
+        </p>
+      ) : null}
       {item.locationName ? (
         <p className="text-sm text-gray-600">Location: {item.locationName}</p>
       ) : null}
@@ -283,16 +291,19 @@ export function VolunteerPicker({
 }
 
 /**
- * Shows who holds the item and lets them return it.
+ * Shows who holds the item or kit and lets them return it.
  *
- * @param props.holderName - Who has the item now
+ * @param props.holderName - Who has it now
+ * @param props.isKit - Whether it is a whole kit, for the button's wording
  * @param props.error - Message from a failed return
  */
 export function ReturnPanel({
   holderName,
+  isKit = false,
   error,
 }: {
   holderName: string;
+  isKit?: boolean;
   error?: string | null;
 }) {
   const disabled = useDisabled();
@@ -304,30 +315,41 @@ export function ReturnPanel({
         Held by <strong>{holderName}</strong>.
       </p>
       <Button type="submit" disabled={disabled} className="w-full max-w-full">
-        {disabled ? "Saving..." : "Return this item"}
+        {disabled
+          ? "Saving..."
+          : isKit
+          ? "Return this kit"
+          : "Return this item"}
       </Button>
     </Form>
   );
 }
 
-/** Why an item is referred to staff, in the volunteer's words. */
+/** Why an item or kit is referred to staff, in the volunteer's words. */
 const UNSUPPORTED_COPY: Record<string, string> = {
-  "kit-qr": "This code belongs to a kit. Kits are handed out by staff.",
   "not-linked": "This code is not linked to an item yet.",
   archived: "This item is out of service.",
   "quantity-tracked":
     "This item is counted in stock and is handed out by staff.",
   "kit-member":
-    "This item is part of a kit and is handed out with it by staff.",
+    "This item is part of a kit and goes out with it. Scan the kit's code to take the whole kit.",
   "kit-custody":
-    "This item went out as part of a kit. Please return the kit to staff.",
+    "This item went out as part of a kit. Scan the kit's code to return the whole kit.",
   "checked-out": "This item is booked out. Please return it to staff.",
   unavailable:
     "This item is not available right now, for example because it is being repaired.",
+  "kit-empty": "This kit has no items in it.",
+  "kit-checked-out": "This kit is booked out. Please return it to staff.",
+  "kit-item-out": "An item in this kit is out with someone else.",
+  "kit-unavailable":
+    "This kit is not available right now, for example because an item in it is being repaired.",
 };
 
+/** Reasons the volunteer can solve themselves, by scanning the kit instead. */
+const KIT_SCAN_REASONS = new Set(["kit-member", "kit-custody"]);
+
 /**
- * Explains that staff must handle this item.
+ * Explains why this item can't be handled here, and who can help.
  *
  * @param props.reason - The unsupported reason from the server
  */
@@ -337,7 +359,9 @@ export function StaffOnlyNotice({ reason }: { reason: string }) {
       <p className="mb-2 text-gray-700">
         {UNSUPPORTED_COPY[reason] ?? "This item can't be handled here."}
       </p>
-      <p className="text-gray-700">Please ask a staff member.</p>
+      {KIT_SCAN_REASONS.has(reason) ? null : (
+        <p className="text-gray-700">Please ask a staff member.</p>
+      )}
     </div>
   );
 }
