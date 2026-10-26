@@ -15,6 +15,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useMatches,
   useRouteLoaderData,
 } from "react-router";
 import { ErrorContent } from "./components/errors";
@@ -58,6 +59,7 @@ import {
 } from "./utils/hydration-watchdog";
 import { useNonce } from "./utils/nonce-provider";
 import { isAdmin } from "./utils/roles.server";
+import { manifestHrefFor } from "./utils/route-manifest";
 import { splashScreenLinks } from "./utils/splash-screen-links";
 
 export interface RootData {
@@ -70,7 +72,6 @@ export const handle = {
 };
 
 export const links: LinksFunction = () => [
-  { rel: "manifest", href: "/manifest.webmanifest" },
   ...splashScreenLinks,
   { rel: "stylesheet", href: styles },
   { rel: "stylesheet", href: fontsStylesheetUrl },
@@ -191,6 +192,8 @@ export function Layout({ children }: { children: ReactNode }) {
   const data = useRouteLoaderData<typeof loader>("root");
   const branding = data?.branding ?? DEFAULT_INSTANCE_BRANDING;
   const nonce = useNonce();
+  // A page may link its own manifest (the self-service shortcut does)
+  const manifestHref = manifestHrefFor(useMatches());
   const hasCookies = useSyncExternalStore(
     subscribeCookieEnabled,
     getCookieEnabledSnapshot,
@@ -247,6 +250,7 @@ export function Layout({ children }: { children: ReactNode }) {
             global.css. */}
         <link rel="icon" href={branding.faviconUrl} />
         <link rel="apple-touch-icon" href={branding.iconUrl} />
+        <link rel="manifest" href={manifestHref} />
         <Links />
         <style nonce={nonce}>{branding.primaryCssVars}</style>
         <Clarity />

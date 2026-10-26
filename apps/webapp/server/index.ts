@@ -300,6 +300,8 @@ export default createHonoServer<ServerEnv>({
           "/qr/:qrId/contact-owner",
           "/qr/:qrId/self-custody", // Volunteer take/return; workspace PIN, not a session
           "/self-service/:token", // Volunteer browse list; secret link + workspace PIN, not a session
+          // Its shortcut manifest; browsers fetch manifests without credentials
+          "/self-service/:token/manifest.webmanifest",
           "/api/mobile/*path", // Mobile companion app API (JWT auth, not cookie)
           // why: auth-bypassed. The iCal feed authenticates via a secret URL
           // token (calendar clients can't send cookies). Scoped to the feed

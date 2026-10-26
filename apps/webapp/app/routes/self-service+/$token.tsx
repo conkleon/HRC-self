@@ -31,7 +31,11 @@
  */
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "react-router";
 import {
   Link,
   data,
@@ -44,6 +48,7 @@ import { z } from "zod";
 import { getClientIpFromRequest } from "@server/client-ip";
 import { ErrorContent } from "~/components/errors";
 import { ShelfFullLogo } from "~/components/marketing/logos";
+import { AddShortcutButton } from "~/components/self-custody/add-shortcut";
 import {
   ListTabs,
   MyItems,
@@ -122,10 +127,33 @@ import {
   parseData,
   payload,
 } from "~/utils/http.server";
+import type { ManifestHandle } from "~/utils/route-manifest";
 import { tw } from "~/utils/tw";
 import { requiredNumberFromString } from "~/utils/zod-numeric";
 
-export const meta = () => [{ title: appendToMetaTitle("Self-service") }];
+export const meta: MetaFunction<typeof loader> = ({ data: loaderData }) => [
+  { title: appendToMetaTitle("Self-service") },
+  // The name iOS gives a home-screen shortcut saved from this page
+  ...(loaderData?.workspaceName
+    ? [
+        {
+          name: "apple-mobile-web-app-title",
+          content: loaderData.workspaceName,
+        },
+      ]
+    : []),
+];
+
+/**
+ * Links this workspace's own manifest, so a shortcut saved from the page
+ * opens this link rather than the app's sign-in page.
+ */
+export const handle: ManifestHandle = {
+  manifest: (params) =>
+    `/self-service/${encodeURIComponent(
+      params.token ?? ""
+    )}/manifest.webmanifest`,
+};
 
 const ParamsSchema = z.object({ token: z.string() });
 
@@ -658,6 +686,8 @@ export default function SelfServiceBrowsePage() {
           )}
         </>
       )}
+
+      {loaderData.view === "off" ? null : <AddShortcutButton />}
     </Shell>
   );
 }
