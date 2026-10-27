@@ -1,0 +1,103 @@
+{
+  "assetBookingPseudoStatusLabels": {
+    "ALREADY_CHECKED_IN": "Already checked in",
+    "PARTIALLY_CHECKED_IN": "Partially checked in",
+    "PARTIALLY_CHECKED_OUT": "Partially checked out"
+  },
+  "assetQtyStatusLabels": {
+    "AVAILABLE": "Available",
+    "IN_CUSTODY": "In custody",
+    "PARTIAL_CUSTODY": "Partial custody",
+    "CHECKED_OUT": "Checked out",
+    "PARTIALLY_CHECKED_OUT": "Partially checked out",
+    "RESERVED": "Reserved",
+    "PARTIALLY_RESERVED": "Partially reserved"
+  },
+  "assetStatusLabels": {
+    "AVAILABLE": "Available",
+    "IN_CUSTODY": "In custody",
+    "CHECKED_OUT": "Checked out"
+  },
+  "assetTypeAdjectives": {
+    "INDIVIDUAL": "individually tracked",
+    "QUANTITY_TRACKED": "quantity-tracked"
+  },
+  "assetTypeLabels": {
+    "INDIVIDUAL": "Individually tracked",
+    "QUANTITY_TRACKED": "Tracked by quantity"
+  },
+  "assetUnavailableLabel": "Unavailable",
+  "auditAssetStatusLabels": {
+    "PENDING": "Not scanned",
+    "FOUND": "Found",
+    "MISSING": "Missing",
+    "UNEXPECTED": "Unexpected"
+  },
+  "auditDeletedAssetLabels": {
+    "UNTITLED": "Deleted asset"
+  },
+  "auditStatusLabels": {
+    "PENDING": "Pending",
+    "ACTIVE": "Active",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled",
+    "ARCHIVED": "Archived"
+  },
+  "auditUnassignedLabels": {
+    "SHORT": "Unassigned · owners, admins and managers can scan",
+    "A11Y": "unassigned, owners, admins and managers can scan",
+    "DETAIL": "Workspace owners, admins and managers can perform this audit because it has no specific assignee."
+  },
+  "bookingEmptyReservedMessage": "A reserved booking must keep at least one asset or model reservation. Cancel the booking instead, or add a replacement first.",
+  "bookingReserveBlockedLabels": {
+    "NOTHING_TO_RESERVE": "Add assets or reserve at least one model on this booking before you reserve it.",
+    "UNAVAILABLE_ASSETS": "This booking holds assets marked as unavailable. Remove them, or make them available again, before reserving.",
+    "ALREADY_BOOKED": "This booking holds assets already booked for that period. Remove them, or change the dates, before reserving."
+  },
+  "bookingStatusLabels": {
+    "DRAFT": "Draft",
+    "RESERVED": "Reserved",
+    "ONGOING": "Ongoing",
+    "OVERDUE": "Overdue",
+    "COMPLETE": "Complete",
+    "ARCHIVED": "Archived",
+    "CANCELLED": "Cancelled"
+  },
+  "consumptionTypeAdjectives": {
+    "ONE_WAY": "used up",
+    "TWO_WAY": "returnable"
+  },
+  "consumptionTypeDescriptions": {
+    "ONE_WAY": "consumed and not returned",
+    "TWO_WAY": "checked out and returned"
+  },
+  "consumptionTypeLabels": {
+    "ONE_WAY": "Used up (one-way)",
+    "TWO_WAY": "Returnable (two-way)"
+  },
+  "deleteConsequenceLabels": {
+    "ASSET": "This permanently deletes the asset and everything recorded on it: notes, custody, reminders and custom field values. It is removed from every booking, kit and audit it was part of, past and upcoming, and its QR code is unlinked. This cannot be undone.",
+    "BOOKING": "This permanently deletes the booking with its notes, model reservations and check-in and check-out history. If it is ongoing or overdue, its assets become available. This cannot be undone."
+  },
+  "explicitRequirementRoleLabels": {
+    "ADMIN": "Admins and Managers",
+    "SELF_SERVICE": "Self Service users"
+  },
+  "kitInUseReinstateReason": "This asset belongs to a kit that is in custody or checked out. Release or check in the kit first, then reinstate the asset.",
+  "kitMembersCustodyBlockedReason": "Some of the selected assets are part of a kit. Assign custody to the kit, or remove them from the kit first.",
+  "kitMemberCustodyBlockedTitle": "Asset is part of a kit",
+  "kitStatusLabels": {
+    "AVAILABLE": "Available",
+    "IN_CUSTODY": "In custody",
+    "CHECKED_OUT": "Checked out",
+    "PARTIALLY_CHECKED_IN": "Already checked in"
+  },
+  "withheldCustodianName": "private",
+  "roleLabels": {
+    "OWNER": "Owner",
+    "ADMIN": "Administrator",
+    "MANAGER": "Manager",
+    "SELF_SERVICE": "Self service",
+    "BASE": "Base"
+  }
+}

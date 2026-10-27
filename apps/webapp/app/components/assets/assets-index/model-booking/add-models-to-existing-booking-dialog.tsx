@@ -35,6 +35,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import { bulkDialogAtom } from "~/atoms/bulk-update-dialog";
@@ -156,6 +157,7 @@ function BookingSelect({
   disabled?: boolean;
   errorMessage?: string;
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -224,7 +226,7 @@ function BookingSelect({
           >
             <div className="flex items-center justify-between p-3">
               <div className="text-xs font-semibold text-gray-700">
-                Existing bookings
+                {t("assets.addModelsToExistingBookingDialog.existingBookings")}
               </div>
               <When truthy={Boolean(selectedBooking)}>
                 <Button
@@ -234,7 +236,7 @@ function BookingSelect({
                   className="whitespace-nowrap text-xs font-normal text-gray-500 hover:text-gray-600"
                   onClick={() => onSelect(undefined)}
                 >
-                  Clear selection
+                  {t("assets.addModelsToExistingBookingDialog.clearSelection")}
                 </Button>
               </When>
             </div>
@@ -243,8 +245,12 @@ function BookingSelect({
               <Input
                 ref={searchInputRef}
                 type="text"
-                label="Search bookings"
-                placeholder="Search bookings"
+                label={t(
+                  "assets.addModelsToExistingBookingDialog.searchBookings"
+                )}
+                placeholder={t(
+                  "assets.addModelsToExistingBookingDialog.searchBookings"
+                )}
                 hideLabel
                 className="text-gray-500"
                 icon="search"
@@ -256,15 +262,23 @@ function BookingSelect({
             <div
               className="max-h-[320px] divide-y overflow-y-auto"
               role="listbox"
-              aria-label="Existing bookings"
+              aria-label={t(
+                "assets.addModelsToExistingBookingDialog.existingBookings"
+              )}
             >
               {filteredBookings.length === 0 ? (
                 <div className="p-4 text-center text-sm text-gray-500">
                   {isLoading
-                    ? "Fetching bookings..."
+                    ? t(
+                        "assets.addModelsToExistingBookingDialog.fetchingBookings"
+                      )
                     : searchQuery
-                    ? "No bookings found"
-                    : "No open bookings available"}
+                    ? t(
+                        "assets.addModelsToExistingBookingDialog.noBookingsFound"
+                      )
+                    : t(
+                        "assets.addModelsToExistingBookingDialog.noOpenBookingsAvailable"
+                      )}
                 </div>
               ) : (
                 filteredBookings.map((booking) => (
@@ -344,6 +358,7 @@ function ReservationConfirmation({
   booking: { id: string; name: string };
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <DialogPortal>
       <Dialog
@@ -353,9 +368,13 @@ function ReservationConfirmation({
         title={
           <div className="w-full">
             <div className="mb-5">
-              <h4>Models reserved</h4>
+              <h4>
+                {t("assets.addModelsToExistingBookingDialog.modelsReserved")}
+              </h4>
               <p>
-                The units you chose are now reserved on{" "}
+                {t(
+                  "assets.addModelsToExistingBookingDialog.theUnitsYouChoseAre"
+                )}{" "}
                 <span className="font-medium text-gray-700">
                   {booking.name}
                 </span>
@@ -372,7 +391,7 @@ function ReservationConfirmation({
             width="full"
             onClick={onClose}
           >
-            Stay here
+            {t("assets.addModelsToExistingBookingDialog.stayHere")}
           </Button>
           <Button
             to={`/bookings/${booking.id}`}
@@ -380,7 +399,7 @@ function ReservationConfirmation({
             width="full"
             onClick={onClose}
           >
-            View booking
+            {t("assets.addModelsToExistingBookingDialog.viewBooking")}
           </Button>
         </div>
       </Dialog>
@@ -402,6 +421,7 @@ function ReservationConfirmation({
  * @returns The dialog, and the post-success confirmation that outlives it
  */
 export default function AddModelsToExistingBookingDialog() {
+  const { t } = useTranslation();
   const zo = useZorm(
     "AddModelsToExistingBooking",
     addModelsToExistingBookingSchema
@@ -585,8 +605,13 @@ export default function AddModelsToExistingBookingDialog() {
         // one carries a quantity that a bare list of ids cannot express. The
         // action ignores this field.
         arrayFieldId="selectedAssetModelIds"
-        title="Add models to existing booking"
-        description={`Reserve units of the selected (${modelsToReserve.length}) models on an existing booking.`}
+        title={t(
+          "assets.addModelsToExistingBookingDialog.addModelsToExistingBooking"
+        )}
+        description={t(
+          "assets.addModelsToExistingBookingDialog.reserveUnitsOfTheSelected",
+          { modelsToReserveCount: modelsToReserve.length }
+        )}
         actionUrl="/api/bookings/model-requests-bulk"
         className="lg:w-[600px]"
         onSuccess={handleSuccess}
@@ -618,9 +643,9 @@ export default function AddModelsToExistingBookingDialog() {
               />
 
               <p className="mb-4 mt-2 text-gray-500">
-                Only bookings whose reservations can still be changed are
-                listed. Reserved units are matched to real assets later, by
-                scanning or assigning them on the booking.
+                {t(
+                  "assets.addModelsToExistingBookingDialog.onlyBookingsWhoseReservationsCan"
+                )}
               </p>
 
               {rows.map((row, index) => (
@@ -648,8 +673,9 @@ export default function AddModelsToExistingBookingDialog() {
               <When truthy={rows.length === 0}>
                 <div className="mb-4 rounded-md border border-gray-300 bg-gray-25 p-2">
                   <p className="text-sm text-gray-600">
-                    No models left to reserve. Close this dialog and select at
-                    least one model.
+                    {t(
+                      "assets.addModelsToExistingBookingDialog.noModelsLeftToReserve"
+                    )}
                   </p>
                 </div>
               </When>
@@ -680,7 +706,7 @@ export default function AddModelsToExistingBookingDialog() {
                   disabled={disabled}
                   onClick={handleCloseDialog}
                 >
-                  Cancel
+                  {t("assets.addModelsToExistingBookingDialog.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -688,7 +714,9 @@ export default function AddModelsToExistingBookingDialog() {
                   width="full"
                   disabled={disabled}
                 >
-                  {disabled ? "Reserving..." : "Reserve"}
+                  {disabled
+                    ? "Reserving..."
+                    : t("assets.addModelsToExistingBookingDialog.reserve")}
                 </Button>
               </div>
             </div>

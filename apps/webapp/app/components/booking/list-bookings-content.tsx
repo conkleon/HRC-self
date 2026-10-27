@@ -15,6 +15,7 @@
  * @see {@link file://../../routes/_layout+/bookings._index.tsx}
  */
 import type { Prisma } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import {
   canAssignModelUnits,
@@ -57,6 +58,7 @@ import { TeamMemberBadge } from "../user/team-member-badge";
  * across row re-renders.
  */
 function StockConflictPill() {
+  const { t } = useTranslation();
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -68,7 +70,9 @@ function StockConflictPill() {
               jsx-a11y/no-noninteractive-tabindex. */}
           <span
             role="img"
-            aria-label="Stock conflict: one or more quantity-tracked assets are over-reserved for these dates. Open the booking to resolve."
+            aria-label={t(
+              "bookings.listBookingsContent.stockConflictOneOrMore"
+            )}
             className="cursor-help"
           >
             <Badge
@@ -76,13 +80,12 @@ function StockConflictPill() {
               textColor={BADGE_COLORS.amber.text}
               withDot={false}
             >
-              Stock conflict
+              {t("bookings.listBookingsContent.stockConflict")}
             </Badge>
           </span>
         </TooltipTrigger>
         <TooltipContent side="top" align="center" className="max-w-xs">
-          One or more quantity-tracked assets are over-reserved for these dates.
-          Open the booking to resolve.
+          {t("bookings.listBookingsContent.oneOrMoreQuantityTracked")}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -155,6 +158,7 @@ type ListBookingsContentProps = {
 export default function ListBookingsContent({
   item,
 }: ListBookingsContentProps) {
+  const { t } = useTranslation();
   return (
     <>
       {/* Item */}
@@ -191,11 +195,15 @@ export default function ListBookingsContent({
       <Td>
         {item.hasUnavailableAssets ? (
           <AvailabilityBadge
-            badgeText={"Includes unavailable assets"}
-            tooltipTitle={"Booking includes unavailable assets"}
-            tooltipContent={
-              "There are some assets within this booking that are unavailable for reservation because they are checked-out, have custody assigned or are marked as not allowed to book"
-            }
+            badgeText={t(
+              "bookings.listBookingsContent.includesUnavailableAssets"
+            )}
+            tooltipTitle={t(
+              "bookings.listBookingsContent.bookingIncludesUnavailableAssets"
+            )}
+            tooltipContent={t(
+              "bookings.listBookingsContent.thereAreSomeAssetsWithin"
+            )}
           />
         ) : null}
       </Td>
@@ -253,7 +261,11 @@ export default function ListBookingsContent({
           items={item.tags}
           idKey="id"
           labelKey="name"
-          emptyMessage={<div className="text-sm text-gray-500">No tags</div>}
+          emptyMessage={
+            <div className="text-sm text-gray-500">
+              {t("bookings.listBookingsContent.noTags")}
+            </div>
+          }
         />
       </Td>
 

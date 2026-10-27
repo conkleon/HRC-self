@@ -13,6 +13,7 @@
  * @see {@link file://./flow.tsx} Upload, preview and confirm stages
  * @see {@link file://./../../../routes/_layout+/assets.import.tsx} Route handler
  */
+import { Trans, useTranslation } from "react-i18next";
 import { formatCount } from "~/modules/asset-import/format";
 import type { AssetImportStatusPayload } from "~/modules/asset-import/types";
 import { getAppName } from "~/modules/branding/instance-branding";
@@ -74,6 +75,7 @@ function ImportContentWithRunningImport({
  * @param props.status - Live status of the running import
  */
 function RunningImportBox({ status }: { status: AssetImportStatusPayload }) {
+  const { t } = useTranslation();
   return (
     <div className="my-4 flex flex-col gap-3 rounded border border-primary-200 bg-primary-25 p-3 text-sm text-primary-700 sm:flex-row sm:items-center sm:justify-between">
       <p>
@@ -87,7 +89,7 @@ function RunningImportBox({ status }: { status: AssetImportStatusPayload }) {
         size="xs"
         className="shrink-0"
       >
-        View progress
+        {t("assets.index.viewProgress")}
       </Button>
     </div>
   );
@@ -104,11 +106,12 @@ function ImportContentBody({
 }: {
   runningStatus: AssetImportStatusPayload | null;
 }) {
+  const { t } = useTranslation();
   const { canUseBarcodes } = useBarcodePermissions();
 
   return (
     <div className="w-full text-left">
-      <h3>Import assets</h3>
+      <h3>{t("assets.index.importAssets")}</h3>
 
       {runningStatus ? <RunningImportBox status={runningStatus} /> : null}
 
@@ -120,38 +123,39 @@ function ImportContentBody({
           className="mt-0.5 shrink-0 text-gray-500"
         />
         <p className="text-[14px] text-gray-600">
-          <b>Want to update existing assets instead?</b> If you've exported
-          assets from the Asset Index and made changes in Excel, you can
-          re-import them to bulk update.{" "}
+          <b>{t("assets.index.wantToUpdateExistingAssets")}</b>{" "}
+          {t("assets.index.ifYouveExportedAssetsFrom")}{" "}
           <Button variant="link" to="/assets/import-update">
-            Go to bulk update →
+            {t("assets.index.goToBulkUpdate")}
           </Button>
         </p>
       </div>
 
-      <h4>Create new assets from CSV</h4>
+      <h4>{t("assets.index.createNewAssetsFromCsv")}</h4>
       <p>
-        Upload a CSV file to create new assets. Start with our{" "}
-        <Button
-          variant="link"
-          to={
-            canUseBarcodes
-              ? "/static/shelf.nu-example-asset-import-from-content-with-barcodes.csv"
-              : "/static/shelf.nu-example-asset-import-from-content.csv"
-          }
-          target="_blank"
-          download={`${slugify(getAppName())}-example-asset-import.csv`}
-        >
-          CSV template
-        </Button>{" "}
-        - each row becomes a new asset.
+        <Trans
+          t={t}
+          i18nKey="assets.index.uploadACsvFileTo"
+          components={[
+            <Button
+              key="slot0"
+              variant="link"
+              to={
+                canUseBarcodes
+                  ? "/static/shelf.nu-example-asset-import-from-content-with-barcodes.csv"
+                  : "/static/shelf.nu-example-asset-import-from-content.csv"
+              }
+              target="_blank"
+              download={`${slugify(getAppName())}-example-asset-import.csv`}
+            />,
+          ]}
+        />
       </p>
 
       <WarningBox className="my-4">
         <>
-          <strong>IMPORTANT</strong>: Use the template provided above, or a file
-          exported as Import-ready from the asset index. Any other file will
-          produce corrupted data.
+          <strong>IMPORTANT</strong>
+          {t("assets.index.useTheTemplateProvidedAbove")}
         </>
       </WarningBox>
 
@@ -164,28 +168,39 @@ function ImportContentBody({
             className="mt-0.5 shrink-0 text-gray-500"
           />
           <div>
-            <h5 className="font-semibold">Base rules</h5>
+            <h5 className="font-semibold">{t("assets.index.baseRules")}</h5>
             <ul className="list-inside list-disc text-[14px] text-gray-600">
               <li>
-                Use <b>, (comma)</b> or <b>; (semicolon)</b> as delimiter
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.use0Comma0Or"
+                  components={[<b key="slot0" />, <b key="slot1" />]}
+                />
               </li>
               <li>
-                Columns like <b>kit, category, location & custodian</b>{" "}
-                represent the name of the related entry - if it doesn't exist,
-                we'll create it
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.columnsLike0KitCategory"
+                  components={[<b key="slot0" />]}
+                />
               </li>
               <li>
-                <b>Tags</b> can be comma-separated - missing tags will be
-                created automatically
+                <b>{t("assets.index.tags")}</b>{" "}
+                {t("assets.index.canBeCommaSeparatedMissing")}
               </li>
               <li>
-                Each row creates a <b>new</b> asset - existing assets will not
-                be merged or overwritten
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.eachRowCreatesA0"
+                  components={[<b key="slot0" />]}
+                />
               </li>
               <li>
-                To onboard stock-room consumables (boxes, batteries, fasteners),
-                or to link items to a reusable asset model, see{" "}
-                <b>"Quantity-tracked assets"</b> below
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.toOnboardStockRoomConsumables"
+                  components={[<b key="slot0" />]}
+                />
               </li>
             </ul>
           </div>
@@ -199,28 +214,37 @@ function ImportContentBody({
             className="mt-0.5 shrink-0 text-gray-500"
           />
           <div>
-            <h5 className="font-semibold">Custom fields</h5>
+            <h5 className="font-semibold">{t("assets.index.customFields")}</h5>
             <p className="text-[14px] text-gray-600">
-              Prefix your column heading with <b>"cf: "</b> and add the type
-              after a comma. Supported types:
+              <Trans
+                t={t}
+                i18nKey="assets.index.prefixYourColumnHeadingWith"
+                components={[<b key="slot0" />]}
+              />
             </p>
             <ul className="list-inside list-disc pl-2 text-[14px] text-gray-600">
               <li>
-                <b>text</b> (default), <b>boolean</b>, <b>option</b>,{" "}
-                <b>multiline text</b>
+                <b>{t("assets.index.text")}</b> {t("assets.index.default")}{" "}
+                <b>{t("assets.index.boolean")}</b>,{" "}
+                <b>{t("assets.index.option")}</b>,{" "}
+                <b>{t("assets.index.multilineText")}</b>
               </li>
               <li>
-                <b>date</b> - must be YYYY-MM-DD
+                <b>{t("assets.index.date")}</b>{" "}
+                {t("assets.index.mustBeYyyyMmDd")}
               </li>
               <li>
-                <b>amount</b> - currency values, no symbols (e.g., 1234.56)
+                <b>{t("assets.index.amount")}</b>{" "}
+                {t("assets.index.currencyValuesNoSymbolsE")}
               </li>
               <li>
-                <b>number</b> - numeric values including negatives
+                <b>{t("assets.index.number")}</b>{" "}
+                {t("assets.index.numericValuesIncludingNegatives")}
               </li>
             </ul>
             <p className="mt-1 text-[14px] text-gray-600">
-              Example header: <b>"cf:purchase date, type:date"</b>
+              {t("assets.index.exampleHeader")}{" "}
+              <b>{t("assets.index.cfPurchaseDateTypeDate")}</b>
             </p>
           </div>
         </div>
@@ -233,32 +257,34 @@ function ImportContentBody({
             className="mt-0.5 shrink-0 text-gray-500"
           />
           <div>
-            <h5 className="font-semibold">QR codes</h5>
+            <h5 className="font-semibold">{t("assets.index.qrCodes")}</h5>
             <p className="text-[14px] text-gray-600">
-              You can link a Shelf QR code to each asset. This is useful if you
-              already have QR codes printed and want to connect them to the
-              assets you're importing. Limitations:
+              {t("assets.index.youCanLinkAShelf")}
             </p>
             <ul className="list-inside list-disc pl-2 text-[14px] text-gray-600">
               <li>
-                <b>Existing code</b> - the QR code must already exist in Shelf
+                <b>{t("assets.index.existingCode")}</b>{" "}
+                {t("assets.index.theQrCodeMustAlready")}
               </li>
               <li>
-                <b>No duplicates</b> - each qrId must be unique per asset
+                <b>{t("assets.index.noDuplicates")}</b>{" "}
+                {t("assets.index.eachQridMustBeUnique")}
               </li>
               <li>
-                <b>No linked codes</b> - the qrId must not already be linked to
-                another asset or kit
+                <b>{t("assets.index.noLinkedCodes")}</b>{" "}
+                {t("assets.index.theQridMustNotAlready")}
               </li>
               <li>
-                <b>QR ownership</b> - the code must be unclaimed or belong to
-                your organization
+                <b>{t("assets.index.qrOwnership")}</b>{" "}
+                {t("assets.index.theCodeMustBeUnclaimed")}
               </li>
             </ul>
             <p className="mt-1 text-[14px] text-gray-600">
-              If no <b>"qrId"</b> is provided, a new QR code will be generated.
-              Need unclaimed or unlinked codes? Contact support and we can
-              provide them.
+              <Trans
+                t={t}
+                i18nKey="assets.index.ifNo0Qrid0"
+                components={[<b key="slot0" />]}
+              />
             </p>
           </div>
         </div>
@@ -272,41 +298,39 @@ function ImportContentBody({
               className="mt-0.5 shrink-0 text-gray-500"
             />
             <div>
-              <h5 className="font-semibold">Barcodes</h5>
+              <h5 className="font-semibold">{t("assets.index.barcodes")}</h5>
               <p className="text-[14px] text-gray-600">
-                Import assets with barcodes using these columns:
+                {t("assets.index.importAssetsWithBarcodesUsing")}
               </p>
               <ul className="list-inside list-disc pl-2 text-[14px] text-gray-600">
                 <li>
-                  <b>barcode_Code128</b> - 4-40 characters, supports letters,
-                  numbers, and symbols
+                  <b>{t("assets.index.barcodeCode128")}</b>{" "}
+                  {t("assets.index.text440CharactersSupportsLetters")}
                 </li>
                 <li>
-                  <b>barcode_Code39</b> - 4-43 characters
+                  <b>{t("assets.index.barcodeCode39")}</b>{" "}
+                  {t("assets.index.text443Characters")}
                 </li>
                 <li>
-                  <b>barcode_DataMatrix</b> - 4-100 characters
+                  <b>{t("assets.index.barcodeDatamatrix")}</b>{" "}
+                  {t("assets.index.text4100Characters")}
                 </li>
                 <li>
-                  <b>barcode_ExternalQR</b> - 1-2048 characters (URLs, text, or
-                  any external QR content)
+                  <b>{t("assets.index.barcodeExternalqr")}</b>{" "}
+                  {t("assets.index.text12048CharactersUrlsText")}
                 </li>
                 <li>
-                  <b>barcode_EAN13</b> - 13-digit product identification codes
+                  <b>{t("assets.index.barcodeEan13")}</b>{" "}
+                  {t("assets.index.text13DigitProductIdentificationCodes")}
                 </li>
                 <li>
-                  <b>barcode_ITF</b> - Interleaved 2 of 5, 4-40 digits (an even
-                  number)
+                  <b>{t("assets.index.barcodeItf")}</b>{" "}
+                  {t("assets.index.interleaved2Of54")}
                 </li>
               </ul>
               <p className="mt-1 text-[14px] text-gray-600">
-                <b>Rules:</b> Use comma separation for multiple barcodes of the
-                same type (e.g., "ABC123,DEF456"). Each value must be unique in
-                your organization. Code39 and DataMatrix allow only letters and
-                numbers; Code128 supports most symbols. Values are automatically
-                converted to uppercase. Leave barcode columns empty if you don't
-                want to assign barcodes. Enter External QR values exactly as the
-                label encodes them, including https://.
+                <b>{t("assets.index.rules")}</b>{" "}
+                {t("assets.index.useCommaSeparationForMultiple")}
               </p>
             </div>
           </div>
@@ -320,56 +344,96 @@ function ImportContentBody({
             className="mt-0.5 shrink-0 text-gray-500"
           />
           <div>
-            <h5 className="font-semibold">Quantity-tracked assets</h5>
+            <h5 className="font-semibold">
+              {t("assets.index.quantityTrackedAssets2")}
+            </h5>
             <p className="text-[14px] text-gray-600">
-              Six optional columns let you onboard stock-room consumables
-              (boxes, batteries, fasteners) and link individually-tracked assets
-              to a reusable asset model:
+              {t("assets.index.sixOptionalColumnsLetYou")}
             </p>
             <ul className="list-inside list-disc pl-2 text-[14px] text-gray-600">
               <li>
-                <b>type</b> - <code>INDIVIDUAL</code> (the default if the column
-                is missing or the cell is blank) or{" "}
-                <code>QUANTITY_TRACKED</code>. On <b>update</b> imports, the
-                cell is silently ignored - type cannot be changed once an asset
-                exists.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Type01Individual"
+                  components={[
+                    <b key="slot0" />,
+                    <code key="slot1" />,
+                    <code key="slot2" />,
+                    <b key="slot3" />,
+                  ]}
+                />
               </li>
               <li>
-                <b>quantity</b> - required, must be a positive integer when{" "}
-                <code>type = QUANTITY_TRACKED</code>. Ignored on{" "}
-                <code>INDIVIDUAL</code> rows.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Quantity0RequiredMust"
+                  components={[
+                    <b key="slot0" />,
+                    <code key="slot1" />,
+                    <code key="slot2" />,
+                  ]}
+                />
               </li>
               <li>
-                <b>minQuantity</b> - optional non-negative integer; sets the
-                low-stock alert threshold. Ignored on <code>INDIVIDUAL</code>{" "}
-                rows.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Minquantity0OptionalNon"
+                  components={[<b key="slot0" />, <code key="slot1" />]}
+                />
               </li>
               <li>
-                <b>unitOfMeasure</b> - optional free-text label (e.g.{" "}
-                <code>boxes</code>, <code>liters</code>, <code>kg</code>).
-                Markdoc injection characters (<code>{"{"}</code>, <code>%</code>
-                , <code>{"}"}</code>) are stripped.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Unitofmeasure0OptionalFree"
+                  components={[
+                    <b key="slot0" />,
+                    <code key="slot1" />,
+                    <code key="slot2" />,
+                    <code key="slot3" />,
+                    <code key="slot4" />,
+                    <code key="slot5" />,
+                    <code key="slot6" />,
+                  ]}
+                />
               </li>
               <li>
-                <b>consumptionType</b> - required when{" "}
-                <code>type = QUANTITY_TRACKED</code>. <code>ONE_WAY</code>{" "}
-                (consumed on checkout, no return) or <code>TWO_WAY</code>{" "}
-                (returned with a consumption report). Ignored on{" "}
-                <code>INDIVIDUAL</code> rows.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Consumptiontype0RequiredWhen"
+                  components={[
+                    <b key="slot0" />,
+                    <code key="slot1" />,
+                    <code key="slot2" />,
+                    <code key="slot3" />,
+                    <code key="slot4" />,
+                  ]}
+                />
               </li>
               <li>
-                <b>assetModel</b> - optional asset model name; created
-                automatically (case-insensitive lookup) if it doesn't exist yet.{" "}
-                <b>INDIVIDUAL rows only</b> - on a <code>QUANTITY_TRACKED</code>{" "}
-                row during update, the cell is skipped with a warning and the
-                rest of the row still applies.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Assetmodel0OptionalAsset"
+                  components={[
+                    <b key="slot0" />,
+                    <b key="slot1" />,
+                    <code key="slot2" />,
+                  ]}
+                />
               </li>
             </ul>
             <p className="mt-1 text-[14px] text-gray-600">
-              <b>Tip:</b> the downloaded template above already contains one{" "}
-              <code>INDIVIDUAL</code> example with an <code>assetModel</code>{" "}
-              and one <code>QUANTITY_TRACKED</code> example with{" "}
-              <code>quantity</code> and <code>consumptionType</code> filled in.
+              <Trans
+                t={t}
+                i18nKey="assets.index.text0Tip0TheDownloaded"
+                components={[
+                  <b key="slot0" />,
+                  <code key="slot1" />,
+                  <code key="slot2" />,
+                  <code key="slot3" />,
+                  <code key="slot4" />,
+                  <code key="slot5" />,
+                ]}
+              />
             </p>
           </div>
         </div>
@@ -382,16 +446,10 @@ function ImportContentBody({
             className="mt-0.5 shrink-0 text-gray-500"
           />
           <div>
-            <h5 className="font-semibold">Good to know</h5>
+            <h5 className="font-semibold">{t("assets.index.goodToKnow")}</h5>
             <ul className="list-inside list-disc text-[14px] text-gray-600">
-              <li>
-                The first row is used as column headers - it won't be imported
-              </li>
-              <li>
-                Your file is checked before anything is imported. If any row is
-                invalid, nothing is created and you'll get a list of every
-                problem to fix
-              </li>
+              <li>{t("assets.index.theFirstRowIsUsed")}</li>
+              <li>{t("assets.index.yourFileIsCheckedBefore")}</li>
             </ul>
           </div>
         </div>
@@ -399,9 +457,9 @@ function ImportContentBody({
 
       {CSV_HELPER_URL ? (
         <p className="text-[14px] text-gray-500">
-          Need help preparing your file? Try our{" "}
+          {t("assets.index.needHelpPreparingYourFile")}{" "}
           <Button variant="link" to={CSV_HELPER_URL} target="_blank">
-            CSV Helper Tool
+            {t("assets.index.csvHelperTool")}
           </Button>
           .
         </p>

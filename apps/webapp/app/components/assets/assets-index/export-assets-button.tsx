@@ -20,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { selectedBulkItemsAtom } from "~/atoms/list";
 import { UpgradeMessage } from "~/components/marketing/upgrade-message";
@@ -116,6 +117,7 @@ function RadioRow({
  * Falls back to a disabled upgrade-prompt button on the free tier.
  */
 export function ExportAssetsButton() {
+  const { t } = useTranslation();
   const selectedAssets = useAtomValue(selectedBulkItemsAtom);
   const { canImportAssets } = useLoaderData<AssetIndexLoaderData>();
   const [searchParams] = useSearchParams();
@@ -187,7 +189,7 @@ export function ExportAssetsButton() {
         disabled={{
           reason: (
             <>
-              Exporting is not available on the free tier of shelf.{" "}
+              {t("assets.exportAssetsButton.exportingIsNotAvailableOn")}{" "}
               <UpgradeMessage />
             </>
           ),
@@ -236,46 +238,47 @@ export function ExportAssetsButton() {
         >
           <fieldset className="mb-4">
             <legend className="mb-2 text-sm font-semibold text-gray-900">
-              Format
+              {t("assets.exportAssetsButton.format")}
             </legend>
             <RadioRow
               name="export-format"
               checked={format === "standard"}
               onChange={() => handleFormatChange("standard")}
-              label="Standard"
-              hint="Readable spreadsheet, matches your columns"
+              label={t("assets.exportAssetsButton.standard")}
+              hint={t(
+                "assets.exportAssetsButton.readableSpreadsheetMatchesYourColumns"
+              )}
             />
             <RadioRow
               name="export-format"
               checked={format === "import"}
               onChange={() => handleFormatChange("import")}
-              label="Import-ready"
-              hint="Recreate elsewhere, or re-import to update these"
+              label={t("assets.exportAssetsButton.importReady")}
+              hint={t("assets.exportAssetsButton.recreateElsewhereOrReImport")}
             />
           </fieldset>
 
           <fieldset className="mb-4">
             <legend className="mb-2 text-sm font-semibold text-gray-900">
-              Columns
+              {t("assets.exportAssetsButton.columns")}
             </legend>
             <RadioRow
               name="export-scope"
               checked={columnScope === "visible"}
               onChange={() => setColumnScope("visible")}
-              label="Visible columns"
+              label={t("assets.exportAssetsButton.visibleColumns")}
             />
             <RadioRow
               name="export-scope"
               checked={columnScope === "all"}
               onChange={() => setColumnScope("all")}
-              label="All columns"
+              label={t("assets.exportAssetsButton.allColumns")}
             />
           </fieldset>
 
           {format === "import" ? (
             <p className="mb-4 text-xs text-gray-500">
-              Includes asset IDs plus every field needed to recreate assets —
-              the same file also works to update these assets later.
+              {t("assets.exportAssetsButton.includesAssetIdsPlusEvery")}
             </p>
           ) : null}
 
@@ -291,7 +294,9 @@ export function ExportAssetsButton() {
             onClick={handleExport}
             disabled={isDownloading}
           >
-            {isDownloading ? "Preparing…" : "Download CSV"}
+            {isDownloading
+              ? t("assets.exportAssetsButton.preparing")
+              : t("assets.exportAssetsButton.downloadCsv")}
           </Button>
         </PopoverContent>
       </PopoverPortal>

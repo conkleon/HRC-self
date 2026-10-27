@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { KIT_MEMBERS_CUSTODY_BLOCKED_REASON } from "@shelf/labels";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useNavigation } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { selectedBulkItemsAtom } from "~/atoms/list";
@@ -52,13 +53,15 @@ import BulkDownloadQrDialog from "./bulk-download-qr-dialog";
 import Icon from "../icons/icon";
 
 export default function BulkActionsDropdown() {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button variant="secondary" to="#" className="font-medium">
         <span className="flex items-center gap-2">
-          Actions <ChevronRight className="chev rotate-90" />
+          {t("assets.bulkActionsDropdown.actions")}{" "}
+          <ChevronRight className="chev rotate-90" />
         </span>
       </Button>
     );
@@ -74,6 +77,7 @@ export default function BulkActionsDropdown() {
 
 // react-doctor:no-giant-component — deferred for follow-up refactor
 function ConditionalDropdown() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const isLoading = isFormProcessing(navigation.state);
   const [isBulkDownloadQrOpen, setIsBulkDownloadQrOpen] = useState(false);
@@ -280,7 +284,9 @@ function ConditionalDropdown() {
                 : false
             }
           >
-            <span className="flex items-center gap-2">Actions</span>
+            <span className="flex items-center gap-2">
+              {t("assets.bulkActionsDropdown.actions")}
+            </span>
           </Button>
         </DropdownMenuTrigger>
 
@@ -292,7 +298,9 @@ function ConditionalDropdown() {
           disabled={disabled}
           type="button"
         >
-          <span className="flex items-center gap-2">Actions</span>
+          <span className="flex items-center gap-2">
+            {t("assets.bulkActionsDropdown.actions")}
+          </span>
         </Button>
 
         <MobileDropdownStyles open={open} />
@@ -319,7 +327,8 @@ function ConditionalDropdown() {
                 width="full"
               >
                 <span className="flex items-center gap-2">
-                  <Icon icon="download" /> Download QR Codes
+                  <Icon icon="download" />{" "}
+                  {t("assets.bulkActionsDropdown.downloadQrCodes")}
                 </span>
               </Button>
             </DropdownMenuItem>
@@ -333,7 +342,7 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="start-audit"
-                  label="Create audit"
+                  label={t("assets.bulkActionsDropdown.createAudit")}
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
                 />
@@ -350,7 +359,7 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="border-b py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="add-to-audit"
-                  label="Add to existing audit"
+                  label={t("assets.bulkActionsDropdown.addToExistingAudit")}
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
                 />
@@ -367,7 +376,7 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="release-custody"
-                  label="Release custody"
+                  label={t("assets.bulkActionsDropdown.releaseCustody")}
                   onClick={closeMenu}
                   disabled={
                     archivedBulkDisabled ||
@@ -388,7 +397,11 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="border-b py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="assign-custody"
-                  label={assignsSelfOnly ? "Take custody" : "Assign custody"}
+                  label={
+                    assignsSelfOnly
+                      ? t("assets.bulkActionsDropdown.takeCustody")
+                      : t("assets.bulkActionsDropdown.assignCustody")
+                  }
                   onClick={closeMenu}
                   disabled={
                     archivedBulkDisabled ||
@@ -420,7 +433,7 @@ function ConditionalDropdown() {
                   type="tag-add"
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
-                  label="Assign tags"
+                  label={t("assets.bulkActionsDropdown.assignTags")}
                 />
               </DropdownMenuItem>
               <DropdownMenuItem className="py-1 lg:p-0">
@@ -428,7 +441,7 @@ function ConditionalDropdown() {
                   type="tag-remove"
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
-                  label="Remove tags"
+                  label={t("assets.bulkActionsDropdown.removeTags")}
                 />
               </DropdownMenuItem>
               <DropdownMenuItem className="border-t py-1 lg:p-0">
@@ -448,7 +461,7 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="asset-model"
-                  label="Update asset model"
+                  label={t("assets.bulkActionsDropdown.updateAssetModel")}
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
                 />
@@ -456,14 +469,14 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="asset-model-remove"
-                  label="Remove from asset model"
+                  label={t("assets.bulkActionsDropdown.removeFromAssetModel")}
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
                 />
               </DropdownMenuItem>
               <DropdownMenuItem className="border-t py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
-                  label="Add to kit"
+                  label={t("assets.bulkActionsDropdown.addToKit")}
                   type="add-to-kit"
                   onClick={closeMenu}
                   disabled={
@@ -479,7 +492,7 @@ function ConditionalDropdown() {
               </DropdownMenuItem>
               <DropdownMenuItem className=" py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
-                  label="Remove from kit"
+                  label={t("assets.bulkActionsDropdown.removeFromKit")}
                   type="remove-from-kit"
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
@@ -487,7 +500,7 @@ function ConditionalDropdown() {
               </DropdownMenuItem>
               <DropdownMenuItem className="border-t py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
-                  label="Mark as available"
+                  label={t("assets.bulkActionsDropdown.markAsAvailable")}
                   type="available"
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
@@ -495,7 +508,7 @@ function ConditionalDropdown() {
               </DropdownMenuItem>
               <DropdownMenuItem className="border-b py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
-                  label="Mark as unavailable"
+                  label={t("assets.bulkActionsDropdown.markAsUnavailable")}
                   type="unavailable"
                   onClick={closeMenu}
                   disabled={archivedBulkDisabled || isLoading}
@@ -506,7 +519,7 @@ function ConditionalDropdown() {
                 <DropdownMenuItem className="py-1 lg:p-0">
                   <BulkUpdateDialogTrigger
                     type="archive"
-                    label="Archive"
+                    label={t("assets.bulkActionsDropdown.archive")}
                     onClick={closeMenu}
                     disabled={
                       archivedView
@@ -518,7 +531,7 @@ function ConditionalDropdown() {
                 <DropdownMenuItem className="border-b py-1 lg:p-0">
                   <BulkUpdateDialogTrigger
                     type="reinstate"
-                    label="Reinstate"
+                    label={t("assets.bulkActionsDropdown.reinstate")}
                     onClick={closeMenu}
                     disabled={
                       archivedView
@@ -535,7 +548,7 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="trash"
-                  label="Delete"
+                  label={t("assets.bulkActionsDropdown.delete")}
                   onClick={closeMenu}
                   disabled={
                     // Archived assets can still be permanently deleted in bulk
@@ -558,7 +571,7 @@ function ConditionalDropdown() {
                   width="full"
                   onClick={() => setOpen(false)}
                 >
-                  Close
+                  {t("assets.bulkActionsDropdown.close")}
                 </Button>
               </DropdownMenuItem>
             </When>

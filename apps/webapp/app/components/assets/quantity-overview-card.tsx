@@ -17,6 +17,7 @@
 import type React from "react";
 import type { ConsumptionType } from "@prisma/client";
 import { TriangleAlertIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import { Card } from "~/components/shared/card";
 import { InfoTooltip } from "~/components/shared/info-tooltip";
@@ -232,6 +233,7 @@ export function QuantityOverviewCard({
   className,
   custodySources,
 }: QuantityOverviewCardProps) {
+  const { t } = useTranslation();
   const qty = quantity ?? 0;
   const unit = unitOfMeasure || null;
   const reserved = reservedQuantity ?? 0;
@@ -297,7 +299,7 @@ export function QuantityOverviewCard({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
         <h3 className="text-[14px] font-semibold text-gray-900">
-          Quantity Overview
+          {t("assets.quantityOverviewCard.quantityOverview")}
         </h3>
         {canUpdate ? (
           <QuickAdjustDialog
@@ -307,7 +309,7 @@ export function QuantityOverviewCard({
             sources={custodySources}
             trigger={
               <Button type="button" variant="secondary" size="sm">
-                Adjust
+                {t("assets.quantityOverviewCard.adjust")}
               </Button>
             }
           />
@@ -315,9 +317,12 @@ export function QuantityOverviewCard({
       </div>
 
       {/* Detail rows */}
-      <OverviewRow label="Total quantity" value={formatWithUnit(qty, unit)} />
       <OverviewRow
-        label="Available"
+        label={t("assets.quantityOverviewCard.totalQuantity")}
+        value={formatWithUnit(qty, unit)}
+      />
+      <OverviewRow
+        label={t("assets.quantityOverviewCard.available")}
         value={formatWithUnit(available, unit)}
         warning={isLowStock}
       />
@@ -327,7 +332,10 @@ export function QuantityOverviewCard({
           to any kit. The detailed per-kit breakdown lives in the dedicated
           "Included in kits" card. */}
       {inKits > 0 ? (
-        <OverviewRow label="In kits" value={formatWithUnit(inKits, unit)} />
+        <OverviewRow
+          label={t("assets.quantityOverviewCard.inKits")}
+          value={formatWithUnit(inKits, unit)}
+        />
       ) : null}
       {/* "In locations" mirrors "In kits": only renders when > 0 so
           assets with no placements stay uncluttered. Always sits next
@@ -336,12 +344,15 @@ export function QuantityOverviewCard({
           "Placed at locations" card. */}
       {inLocations > 0 ? (
         <OverviewRow
-          label="In locations"
+          label={t("assets.quantityOverviewCard.inLocations")}
           value={formatWithUnit(inLocations, unit)}
         />
       ) : null}
       {inLocations > 0 && unplaced > 0 ? (
-        <OverviewRow label="Unplaced" value={formatWithUnit(unplaced, unit)} />
+        <OverviewRow
+          label={t("assets.quantityOverviewCard.unplaced")}
+          value={formatWithUnit(unplaced, unit)}
+        />
       ) : null}
       {/* Over-placed is the negative side of the same residual. It gets its
           own row rather than a negative "Unplaced" because the number is not
@@ -349,7 +360,7 @@ export function QuantityOverviewCard({
           needs a human to say which location actually lost the units. */}
       {overPlacedBy > 0 ? (
         <OverviewRow
-          label="Over-placed"
+          label={t("assets.quantityOverviewCard.overPlaced")}
           value={formatWithUnit(overPlacedBy, unit)}
           warning
           warningMessage={`Locations claim ${formatWithUnit(
@@ -358,19 +369,23 @@ export function QuantityOverviewCard({
           )} more than this asset's total. Open "Manage placements" and lower the location that lost them.`}
         />
       ) : null}
-      <OverviewRow label="In custody" value={formatWithUnit(inCustody, unit)} />
+      <OverviewRow
+        label={t("assets.quantityOverviewCard.inCustody")}
+        value={formatWithUnit(inCustody, unit)}
+      />
       {reserved > 0 ? (
         <OverviewRow
-          label="Reserved (bookings)"
+          label={t("assets.quantityOverviewCard.reservedBookings")}
           value={formatWithUnit(reserved, unit)}
           labelTooltip={
             <InfoTooltip
               content={
                 <p className="text-xs">
-                  {reserved} {unit || "units"} reserved across {bookingCount}{" "}
-                  upcoming {bookingCount === 1 ? "booking" : "bookings"}. These
-                  are committed for future dates and don&apos;t reduce
-                  what&apos;s physically on the shelf now.
+                  {t("assets.quantityOverviewCard.reservedAcrossBookings", {
+                    count: bookingCount,
+                    reserved,
+                    unit: unit || t("assets.quantityOverviewCard.units"),
+                  })}
                 </p>
               }
             />
@@ -379,18 +394,24 @@ export function QuantityOverviewCard({
       ) : null}
       {checkedOut > 0 ? (
         <OverviewRow
-          label="Checked out (bookings)"
+          label={t("assets.quantityOverviewCard.checkedOutBookings")}
           value={formatWithUnit(checkedOut, unit)}
         />
       ) : null}
-      <OverviewRow label="Unit of measure" value={unit ?? "—"} />
+      <OverviewRow
+        label={t("assets.quantityOverviewCard.unitOfMeasure")}
+        value={unit ?? "—"}
+      />
       {minQuantity != null ? (
         <OverviewRow
-          label="Min quantity (alert)"
+          label={t("assets.quantityOverviewCard.minQuantityAlert")}
           value={formatWithUnit(minQuantity, unit)}
         />
       ) : null}
-      <OverviewRow label="Behavior" value={behaviorLabel} />
+      <OverviewRow
+        label={t("assets.quantityOverviewCard.behavior")}
+        value={behaviorLabel}
+      />
     </Card>
   );
 }

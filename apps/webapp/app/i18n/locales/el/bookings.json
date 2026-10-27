@@ -1,0 +1,738 @@
+{
+  "bookingsBookingidActivity": {
+    "insufficientPermissions": "Ανεπαρκή δικαιώματα",
+    "youAreNotAllowedTo": "Δεν έχετε δικαίωμα προβολής των σημειώσεων κρατήσεων",
+    "notes": "Σημειώσεις"
+  },
+  "bookingsBookingidOverviewDuplicate": {
+    "duplicateBooking": "Αντιγραφή κράτησης: {{name}}",
+    "youreAboutToDuplicateThe": "Πρόκειται να αντιγράψετε την κράτηση",
+    "allCurrentBookingDetailsWill": "Όλα τα στοιχεία της κράτησης θα αντιγραφούν. Επιλέξτε παρακάτω τις ημερομηνίες έναρξης και λήξης της νέας κράτησης· όλα τα υπόλοιπα μπορείτε να τα ελέγξετε και να τα αλλάξετε αργότερα.",
+    "kitChangesSinceTheOriginal": "Αλλαγές στα σετ από την αρχική κράτηση· θα εφαρμοστούν στο αντίγραφο. Η αρχική κράτηση δεν αλλάζει.",
+    "addedSinceTheOriginal": "Προστέθηκαν μετά την αρχική",
+    "removedSinceTheOriginal": "Αφαιρέθηκαν μετά την αρχική",
+    "cancel": "Ακύρωση",
+    "confirm": "Επιβεβαίωση"
+  },
+  "bookingsBookingidOverviewManageAssets": {
+    "assets": "Αντικείμενα",
+    "kits": "Σετ",
+    "models": "Μοντέλα",
+    "categories": "Κατηγορίες",
+    "tags": "Ετικέτες",
+    "locations": "Τοποθεσίες",
+    "category": "Κατηγορία",
+    "location": "Τοποθεσία",
+    "assetsSelected": "αντικείμενα επιλεγμένα",
+    "close": "Κλείσιμο",
+    "confirm": "Επιβεβαίωση",
+    "youHaveAddedSomeAssets": "Προσθέσατε αντικείμενα στην κράτηση αλλά δεν την αποθηκεύσατε ακόμη. Θέλετε να επιβεβαιώσετε την προσθήκη τους;",
+    "qty": "Ποσ.:",
+    "filterByCategory": "Φίλτρο κατά κατηγορία",
+    "searchCategories": "Αναζήτηση κατηγοριών",
+    "filterByTag": "Φίλτρο κατά ετικέτα",
+    "filterByLocation": "Φίλτρο κατά τοποθεσία",
+    "imageOf": "Εικόνα του {{title}}",
+    "quantityFor": "Ποσότητα για {{title}}"
+  },
+  "bookingsBookingidOverviewManageKits": {
+    "assets": "Αντικείμενα",
+    "kits": "Σετ",
+    "models": "Μοντέλα",
+    "description": "Περιγραφή",
+    "location": "Τοποθεσία",
+    "kitsSelected": "{{selectedBulkItemsCount}} σετ επιλεγμένα",
+    "close": "Κλείσιμο",
+    "confirm": "Επιβεβαίωση",
+    "youHaveAddedSomeKits": "Προσθέσατε σετ στην κράτηση αλλά δεν την αποθηκεύσατε ακόμη. Θέλετε να επιβεβαιώσετε την προσθήκη τους;",
+    "kits2": "σετ"
+  },
+  "bookingsBookingid": {
+    "addToCalendar": "Προσθήκη στο ημερολόγιο",
+    "archivedBookingsCantBeAdded": "Οι αρχειοθετημένες κρατήσεις δεν μπορούν να προστεθούν σε ημερολόγιο",
+    "notPossibleToAddTo": "Η προσθήκη στο ημερολόγιο δεν είναι δυνατή λόγω της κατάστασης της κράτησης",
+    "downloadThisBookingAsA": "Λήψη αυτής της κράτησης ως συμβάν ημερολογίου"
+  },
+  "bookingsIndex": {
+    "newBooking": "Νέα κράτηση",
+    "assets": "Αντικείμενα",
+    "description": "Περιγραφή",
+    "from": "Από",
+    "to": "Έως",
+    "tags": "Ετικέτες",
+    "custodian": "Υπεύθυνος",
+    "createdBy": "Δημιουργήθηκε από",
+    "newBooking2": "νέα κράτηση"
+  },
+  "calendar": {
+    "newBooking": "Νέα κράτηση",
+    "subscribe": "Εγγραφή",
+    "newBooking2": "νέα κράτηση"
+  },
+  "notificationPreview": {
+    "whoWillBeNotified": "Ποιοι θα ειδοποιηθούν",
+    "remove": "Αφαίρεση {{name}}"
+  },
+  "bookingAssetsFilters": {
+    "keepsItemsStillToCheck": "κρατά πάνω όσα μένουν για παράδοση και μετακινεί κάτω όσα έχουν παραδοθεί, ώστε να εστιάζετε σε όσα απομένουν.",
+    "status": "Κατάσταση",
+    "groupsKitsFirstThenIndividual": "ομαδοποιεί πρώτα τα σετ και μετά τα μεμονωμένα αντικείμενα.",
+    "itemType": "Τύπος στοιχείου"
+  },
+  "kitRowActionsDropdown": {
+    "remove": "Αφαίρεση",
+    "removeFromBooking": "Αφαίρεση του \"{{name}}\" από την κράτηση",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να αφαιρέσετε αυτό το σετ από την κράτηση;",
+    "cancel": "Ακύρωση",
+    "close": "Κλείσιμο",
+    "actionsTrigger": "Ενέργειες",
+    "cannotRemoveAssetsFromCompleted": "Δεν μπορείτε να αφαιρέσετε αντικείμενα από ολοκληρωμένες κρατήσεις"
+  },
+  "bulkArchiveDialog": {
+    "cancel": "Ακύρωση",
+    "confirm": "Επιβεβαίωση",
+    "archiveBookings": "Αρχειοθέτηση ({{totalSelected}}) κρατήσεων",
+    "archiveTheseBookingsCompletedBookings": "Αρχειοθέτηση αυτών των ({{totalSelected}}) κρατήσεων; Οι ολοκληρωμένες κρατήσεις και οι δεσμευμένες που έχουν λήξει θα μετακινηθούν στο αρχείο σας."
+  },
+  "includeChildLocationsCheckbox": {
+    "includeAssetsFromChildLocations": "Συμπερίληψη αντικειμένων από υποτοποθεσίες"
+  },
+  "explicitRequirementSettingsCard": {
+    "onlyTheWorkspaceOwnerCan": "Μόνο ο ιδιοκτήτης του χώρου εργασίας μπορεί να αλλάξει αυτή τη ρύθμιση."
+  },
+  "deleteBooking": {
+    "delete": "Διαγραφή",
+    "delete2": "Διαγραφή {{name}}",
+    "cancel": "Ακύρωση"
+  },
+  "availabilitySelect": {
+    "all": "Όλα: {{label}}",
+    "hideUnavailable": "Απόκρυψη μη διαθέσιμων",
+    "selectAvailability": "Επιλέξτε διαθεσιμότητα"
+  },
+  "autoArchiveSettings": {
+    "automaticallyMoveCompletedBookingsTo": "Αυτόματη μετακίνηση των ολοκληρωμένων κρατήσεων στις Αρχειοθετημένες, όταν περάσει ο καθορισμένος αριθμός ημερών από την ολοκλήρωσή τους.",
+    "automaticallyMoveReservedBookingsTo": "Αυτόματη μετακίνηση των δεσμευμένων κρατήσεων στις Αρχειοθετημένες μόλις περάσει η ημερομηνία λήξης τους χωρίς να έχουν παραδοθεί ποτέ· για ομάδες που χρησιμοποιούν τις κρατήσεις ως ημερολόγιο δεσμεύσεων.",
+    "numberOfDaysToWait": "Αριθμός ημερών αναμονής μετά την ολοκλήρωση μιας κράτησης (ή τη λήξη της δέσμευσής της) πριν αρχειοθετηθεί αυτόματα.",
+    "autoArchiveCompletedBookings": "Αυτόματη αρχειοθέτηση ολοκληρωμένων κρατήσεων",
+    "autoArchiveReservedBookingsAfter": "Αυτόματη αρχειοθέτηση δεσμευμένων κρατήσεων μετά τη λήξη τους",
+    "daysBeforeAutoArchiving": "Ημέρες πριν την αυτόματη αρχειοθέτηση",
+    "saveSettings": "Αποθήκευση ρυθμίσεων"
+  },
+  "removeAssetFromBooking": {
+    "remove": "Αφαίρεση",
+    "removeFromBooking": "Αφαίρεση του \"{{title}}\" από την κράτηση",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να αφαιρέσετε αυτό το αντικείμενο από την κράτηση;",
+    "cancel": "Ακύρωση",
+    "cannotRemoveAssetsFromCompleted": "Δεν μπορείτε να αφαιρέσετε αντικείμενα από ολοκληρωμένες κρατήσεις"
+  },
+  "removedFromKitBadge": {
+    "removedFromKit": "Αφαιρέθηκε από το σετ",
+    "noLongerPartOfThis": "Δεν ανήκει πλέον σε αυτό το σετ",
+    "thisAssetWasRemovedFrom": "Αυτό το αντικείμενο αφαιρέθηκε από το σετ μετά τη δημιουργία της κράτησης. Παραμένει στην κράτηση ως καταγραφή του τι κρατήθηκε, ώστε να μην αλλάζουν οι τρέχουσες και οι παλιές κρατήσεις."
+  },
+  "bulkPartialCheckinDialog": {
+    "checkInSelectedItems": "Επιστροφή επιλεγμένων στοιχείων",
+    "theFollowingItemsWillBe": "Τα παρακάτω στοιχεία θα επιστραφούν και θα σημειωθούν ως Διαθέσιμα.",
+    "assets": "({{kitAssetsCount}} αντικείμενα)",
+    "cancel": "Ακύρωση",
+    "checkInItems": "Επιστροφή στοιχείων",
+    "mainImage": "Κύρια εικόνα του {{title}}",
+    "skippedItems_one": "{{count}} επιλεγμένο στοιχείο δεν μπορεί να επιστραφεί και θα παραλειφθεί.",
+    "skippedItems_other": "{{count}} επιλεγμένα στοιχεία δεν μπορούν να επιστραφούν και θα παραλειφθούν."
+  },
+  "cancelBookingDialog": {
+    "cancel": "Ακύρωση",
+    "cancel2": "Ακύρωση {{bookingName}}",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να ακυρώσετε αυτή την κράτηση; Η ενέργεια δεν αναιρείται.",
+    "cancellationReason": "Αιτία ακύρωσης",
+    "optional": "(προαιρετικό)",
+    "ifTheCustodianHasAn": "Αν ο υπεύθυνος έχει λογαριασμό χρήστη με email, θα ενημερωθεί για την αιτία ακύρωσης.",
+    "goBack": "Πίσω",
+    "cancelBooking": "Ακύρωση κράτησης",
+    "letTheCustodianKnowWhy": "Ενημερώστε τον υπεύθυνο γιατί ακυρώθηκε η κράτηση..."
+  },
+  "bulkPartialCheckoutDialog": {
+    "checkedOut": "Σε παράδοση",
+    "of": "από {{max}}",
+    "checkOutSelectedItems": "Παράδοση επιλεγμένων στοιχείων",
+    "theFollowingItemsWillBe": "Τα παρακάτω στοιχεία θα παραδοθούν και θα σημειωθούν ως Σε παράδοση.",
+    "assets": "({{kitAssetsCount}} αντικείμενα)",
+    "cancel": "Ακύρωση",
+    "checkOutItems": "Παράδοση στοιχείων",
+    "checkoutQuantity": "Ποσότητα παράδοσης",
+    "mainImage": "Κύρια εικόνα του {{title}}",
+    "skippedItems_one": "{{count}} επιλεγμένο στοιχείο έχει ήδη παραδοθεί και θα παραλειφθεί.",
+    "skippedItems_other": "{{count}} επιλεγμένα στοιχεία έχουν ήδη παραδοθεί και θα παραλειφθούν."
+  },
+  "bulkCancelDialog": {
+    "cancel": "Ακύρωση",
+    "confirm": "Επιβεβαίωση",
+    "cancelBookings": "Ακύρωση ({{totalSelected}}) κρατήσεων",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να ακυρώσετε και τις ({{totalSelected}}) κρατήσεις;"
+  },
+  "checkinDialog": {
+    "checkInBooking": "Επιστροφή κράτησης",
+    "cancel": "Ακύρωση",
+    "dontAdjustDate": "Χωρίς αλλαγή ημερομηνίας",
+    "adjustDate": "Αλλαγή ημερομηνίας",
+    "checkIn": "Επιστροφή"
+  },
+  "bookingProcessSidebar": {
+    "howBookingsWork": "Πώς λειτουργούν οι κρατήσεις",
+    "bookingProcess": "Διαδικασία κράτησης",
+    "close": "Κλείσιμο",
+    "baseUsersReserveBookingsThat": "Οι βασικοί χρήστες δεσμεύουν κρατήσεις που χρειάζονται έγκριση και μπορούν να ακυρωθούν οποιαδήποτε στιγμή αν συγκρούονται με άλλες κρατήσεις. Οι διαχειριστές και οι υπεύθυνοι χειρίζονται την παράδοση και την επιστροφή του εξοπλισμού.",
+    "importantNotes": "Σημαντικές σημειώσεις",
+    "equipmentMustBeReturnedIn": "Ο εξοπλισμός πρέπει να επιστρέφεται στην κατάσταση που παραδόθηκε.",
+    "ifYouNeedToExtend": "Αν χρειάζεστε παράταση της κράτησης, επικοινωνήστε με έναν διαχειριστή ή υπεύθυνο πριν από τη λήξη της.",
+    "administratorsAndManagersHaveFinal": "Οι διαχειριστές και οι υπεύθυνοι έχουν τον τελικό λόγο στην έγκριση κρατήσεων, με βάση τη διαθεσιμότητα του εξοπλισμού και τις προτεραιότητες."
+  },
+  "bookingCheckinReceiptPdf": {
+    "generateCheckInReceipt": "Δημιουργία αποδεικτικού επιστροφής",
+    "generateCheckInReceiptFor": "Δημιουργία αποδεικτικού επιστροφής για \"{{name}}\"",
+    "youCanEitherPreviewOr": "Μπορείτε να κάνετε προεπισκόπηση ή λήψη του PDF. Περιλαμβάνει κάθε στοιχείο της κράτησης και τι επιστράφηκε.",
+    "downloadPdf": "Λήψη PDF",
+    "generatingReceiptPreview": "Δημιουργία προεπισκόπησης αποδεικτικού...",
+    "cancel": "Ακύρωση",
+    "neverCheckedOut": "Δεν παραδόθηκε ποτέ",
+    "returned": "Επιστράφηκε",
+    "stillOut": "Ακόμη εκτός",
+    "returned2": "{{returned}} επιστράφηκαν",
+    "consumed": "{{consumed}} καταναλώθηκαν",
+    "lost": "{{lost}} χάθηκαν",
+    "damaged": "{{damaged}} με ζημιά",
+    "stillOut2": "{{stillOut}} ακόμη εκτός",
+    "checkInReceiptFor": "Αποδεικτικό επιστροφής για {{name}}",
+    "printed": "Εκτυπώθηκε",
+    "tags": "Ετικέτες",
+    "name": "Όνομα",
+    "qty": "Ποσ.",
+    "kit": "Σετ",
+    "code": "Κωδικός",
+    "checkedInOn": "Επιστράφηκε στις",
+    "checkedInBy": "Επιστράφηκε από",
+    "removedFromKitKeptAs": "Αφαιρέθηκε από το σετ, διατηρείται ως καταγραφή του τι κρατήθηκε",
+    "nameSignatureDate": "· όνομα, υπογραφή, ημερομηνία",
+    "timesAreTheRecordedCheck": "Οι ώρες είναι οι καταγεγραμμένες στιγμές επιστροφής, στη μορφή ημερομηνίας του χρήστη που εκτυπώνει. Δημιουργήθηκε από το {{appName}}.",
+    "booking": "Κράτηση",
+    "custodian": "Υπεύθυνος",
+    "plannedPeriod": "Προγραμματισμένη περίοδος",
+    "checkedOut": "Σε παράδοση",
+    "checkInMethod": "Τρόπος επιστροφής",
+    "description": "Περιγραφή",
+    "itemsBooked": "Στοιχεία κράτησης",
+    "unitsSentOut": "Μονάδες που παραδόθηκαν",
+    "consumed2": "Καταναλώθηκαν",
+    "lost2": "Χάθηκαν",
+    "damaged2": "Με ζημιά",
+    "accountedFor": "Καταγράφηκαν",
+    "returnedByCustodian": "Επιστράφηκε από (υπεύθυνος)",
+    "confirmedByCustodian": "Επιβεβαιώθηκε από (υπεύθυνος)",
+    "receivedBy": "Παραλήφθηκε από",
+    "recordedBy": "Καταγράφηκε από"
+  },
+  "bookingModelReservationsSection": {
+    "unassignedModelReservations": "Μη ανατεθειμένες δεσμεύσεις μοντέλων",
+    "notEnoughUnitsAreFree": "Δεν υπάρχουν αρκετές ελεύθερες μονάδες για τις ημερομηνίες αυτής της κράτησης. Μειώστε τη δέσμευση σε όσες μπορούν να ανατεθούν.",
+    "goToPreviousPage": "Προηγούμενη σελίδα",
+    "goToNextPage": "Επόμενη σελίδα",
+    "unitCount_one": "{{count}} μονάδα",
+    "unitCount_other": "{{count}} μονάδες",
+    "modelCount_one": "{{count}} μοντέλο",
+    "modelCount_other": "{{count}} μοντέλα",
+    "summaryToAssign": "{{units}} από {{reserved}} μένουν για ανάθεση, σε {{models}}",
+    "summaryNeverAssigned": "{{units}} από {{reserved}} δεν ανατέθηκαν ποτέ, σε {{models}}"
+  },
+  "unassignedModelUnitsPill": {
+    "reservedModelsThatHaveNot": "Δεσμευμένα μοντέλα που δεν έχουν αντιστοιχιστεί ακόμη σε πραγματικά αντικείμενα. Σαρώστε τα για να ανατεθούν.",
+    "thisBookingReservesAssetModels": "{{label}}. Αυτή η κράτηση δεσμεύει μοντέλα που δεν έχουν αντιστοιχιστεί ακόμη σε πραγματικά αντικείμενα. Σαρώστε τα για να ανατεθούν."
+  },
+  "bulkActionsDropdown": {
+    "actions": "Ενέργειες",
+    "cancel": "Ακύρωση",
+    "archive": "Αρχειοθέτηση",
+    "delete": "Διαγραφή"
+  },
+  "adjustModelReservationDialog": {
+    "adjustReservation": "Προσαρμογή δέσμευσης",
+    "setHowManyUnitsOf": "Ορίστε πόσες μονάδες του \"{{modelName}}\" δεσμεύει αυτή η κράτηση. Οι μονάδες που αποδεσμεύετε επιστρέφουν διαθέσιμες για άλλες κρατήσεις σε αυτό το διάστημα.",
+    "cancel": "Ακύρωση",
+    "reservedUnits": "Δεσμευμένες μονάδες",
+    "save": "Αποθήκευση",
+    "assignedSoFar_one": "{{fulfilled}} από {{count}} μονάδα έχει ανατεθεί μέχρι τώρα.",
+    "assignedSoFar_other": "{{fulfilled}} από {{count}} μονάδες έχουν ανατεθεί μέχρι τώρα.",
+    "cannotGoBelow": "Η δέσμευση δεν μπορεί να πέσει κάτω από {{fulfilled}}.",
+    "releaseUnassigned_one": "Αποδέσμευση της {{count}} μονάδας που δεν έχει ανατεθεί",
+    "releaseUnassigned_other": "Αποδέσμευση των {{count}} μονάδων που δεν έχουν ανατεθεί"
+  },
+  "bookingStatistics": {
+    "bookingStatistics": "Στατιστικά κράτησης",
+    "bookingDuration": "Διάρκεια κράτησης",
+    "assets": "Αντικείμενα",
+    "kits": "Σετ",
+    "totalAssets": "Σύνολο αντικειμένων",
+    "theTotalNumberOfAssets": "Ο συνολικός αριθμός αντικειμένων της κράτησης, μαζί με όσα βρίσκονται σε σετ.",
+    "totalValue": "Συνολική αξία",
+    "categories": "Κατηγορίες",
+    "tags": "Ετικέτες",
+    "createdBy": "Δημιουργήθηκε από",
+    "automaticallyArchived": "Αρχειοθετήθηκε αυτόματα",
+    "noCategories": "Χωρίς κατηγορίες",
+    "noTags": "Χωρίς ετικέτες",
+    "unassignedModelUnits": "Μη ανατεθειμένες μονάδες μοντέλων",
+    "modelUnitsNeverAssigned": "Μονάδες μοντέλων που δεν ανατέθηκαν ποτέ",
+    "reservedNotMatchedHelp": "Μονάδες δεσμευμένες σε μοντέλο που δεν έχουν αντιστοιχιστεί ακόμη σε πραγματικό αντικείμενο. Δεν μετρούν στα παραπάνω σύνολα αντικειμένων ούτε στη συνολική αξία, γιατί δεν έχει επιλεγεί συγκεκριμένο αντικείμενο.",
+    "reservedNeverMatchedHelp": "Μονάδες δεσμευμένες σε μοντέλο που δεν αντιστοιχίστηκαν ποτέ σε πραγματικό αντικείμενο. Δεν μετρούν στα παραπάνω σύνολα αντικειμένων ούτε στη συνολική αξία, γιατί δεν επιλέχθηκε ποτέ συγκεκριμένο αντικείμενο."
+  },
+  "checkoutSourceSelect": {
+    "from": "Από"
+  },
+  "assetRowActionsDropdown": {
+    "adjustQuantity": "Προσαρμογή ποσότητας",
+    "remove": "Αφαίρεση",
+    "close": "Κλείσιμο",
+    "actionsTrigger": "Ενέργειες"
+  },
+  "notificationSettings": {
+    "emailNotificationRecipients": "Παραλήπτες ειδοποιήσεων email",
+    "theBookingCustodianAlwaysReceives": "Ο υπεύθυνος της κράτησης λαμβάνει πάντα όλες τις ειδοποιήσεις. Αυτές οι ρυθμίσεις ορίζουν ποιοι άλλοι ειδοποιούνται. Μπορείτε επίσης να προσθέσετε παραλήπτες ανά κράτηση κατά τη δημιουργία ή την επεξεργασία της.",
+    "whenSomeoneCreatesABooking": "Όταν κάποιος δημιουργεί κράτηση για λογαριασμό άλλου, ο δημιουργός λαμβάνει όλες τις ενημερώσεις email για αυτή την κράτηση.",
+    "whenABookingIsReserved": "Όταν δεσμεύεται μια κράτηση, όλοι οι {{RESERVATION_AUDIENCE}} του χώρου εργασίας ειδοποιούνται ώστε κάποιος να εξετάσει το αίτημα. Δεν λαμβάνουν τις επόμενες ενημερώσεις (παράδοση, επιστροφή κ.λπ.) εκτός αν προστεθούν ως παραλήπτες ειδοποιήσεων στην κράτηση.",
+    "theseUsersReceiveAllBooking": "Αυτοί οι χρήστες λαμβάνουν όλες τις ειδοποιήσεις email για κάθε κράτηση του χώρου εργασίας. Χρησιμοποιήστε το για όσους χρειάζονται πλήρη εικόνα, π.χ. τον υπεύθυνο γραφείου ή επιχειρήσεων.",
+    "onlyCanBeAdded": "Μπορούν να προστεθούν μόνο {{PICKABLE_RECIPIENT_AUDIENCE}}.",
+    "youHaveUnsavedChanges": "Έχετε μη αποθηκευμένες αλλαγές.",
+    "notifyBookingCreator": "Ειδοποίηση του δημιουργού της κράτησης",
+    "notifyAllOnNewBooking": "Ειδοποίηση όλων των {{RESERVATION_AUDIENCE}} για νέα αιτήματα κράτησης",
+    "alwaysNotifyTheseUsers": "Να ειδοποιούνται πάντα αυτοί οι χρήστες",
+    "alwaysNotify": "Πάντα ειδοποίηση",
+    "searchTeamMembers": "Αναζήτηση μελών ομάδας...",
+    "selectUsers": "Επιλέξτε χρήστες...",
+    "saveNotificationSettings": "Αποθήκευση ρυθμίσεων ειδοποιήσεων"
+  },
+  "listAssetContent": {
+    "from": "από {{name}}",
+    "booked": "Κρατήθηκαν",
+    "returned": "Επιστράφηκε",
+    "consumed": "Καταναλώθηκαν",
+    "lost": "Χάθηκαν",
+    "damaged": "Με ζημιά",
+    "remaining": "Απομένουν",
+    "partiallyCheckedOut": "Μερικώς σε παράδοση",
+    "checkedOut": "Σε παράδοση",
+    "stillToCheckOut": "Μένουν για παράδοση",
+    "imageOf": "Εικόνα του {{title}}",
+    "allUnitsCheckedIn": "Όλες οι μονάδες επιστράφηκαν",
+    "partiallyCheckedIn": "Μερικώς επιστραμμένη"
+  },
+  "createBookingDialog": {
+    "createNewBooking": "Δημιουργία νέας κράτησης",
+    "chooseANameForYour": "Δώστε ένα όνομα στην κράτησή σας, επιλέξτε ώρα έναρξης και λήξης και ορίστε τον υπεύθυνο. Με βάση αυτά τα στοιχεία θα προσδιοριστεί η διαθεσιμότητα των αντικειμένων."
+  },
+  "bookingStatusBadge": {
+    "subjectToReview": "{{status}} - υπό έλεγχο",
+    "yourBookingIsCurrentlyReserved": "Η κράτησή σας είναι δεσμευμένη, αλλά ένας διαχειριστής ή υπεύθυνος μπορεί να την απορρίψει ή να την κλείσει οποιαδήποτε στιγμή αν συγκρούεται με άλλες κρατήσεις."
+  },
+  "checkoutDialog": {
+    "pickWhereTheUnitsLeave": "Επιλέξτε από πού φεύγουν οι μονάδες. Οι μονάδες που καταναλώνονται σε αυτή την κράτηση αφαιρούνται από αυτή την τοποθεσία κατά την επιστροφή.",
+    "cancel": "Ακύρωση",
+    "dontAdjustDate": "Χωρίς αλλαγή ημερομηνίας",
+    "adjustDate": "Αλλαγή ημερομηνίας",
+    "isNotAssignedYetIt": "δεν έχει ανατεθεί ακόμη. Παραμένει στην κράτηση ώστε να το σαρώσετε αργότερα ή να το αποδεσμεύσετε.",
+    "areNotAssignedYetThey": "δεν έχουν ανατεθεί ακόμη. Παραμένουν στην κράτηση ώστε να τα σαρώσετε αργότερα ή να τα αποδεσμεύσετε.",
+    "thisItemIsKeptAt": "Αυτό το στοιχείο φυλάσσεται σε περισσότερες από μία τοποθεσίες.",
+    "theseItemsAreKeptAt": "Αυτά τα στοιχεία φυλάσσονται σε περισσότερες από μία τοποθεσίες.",
+    "checkOutAnyway": "Παράδοση ούτως ή άλλως",
+    "checkOut": "Παράδοση",
+    "youAreCheckingOutThe": "Παραδίδετε την κράτηση περισσότερο από 15 λεπτά πριν την ημερομηνία έναρξης. Αν συνεχίσετε, η ημερομηνία έναρξης θα γίνει τώρα: <0><1></1></0>. Θέλετε να αλλάξετε την ημερομηνία έναρξης ή να κρατήσετε την αρχική;"
+  },
+  "statusFilter": {
+    "filterByStatus": "Φίλτρο κατά κατάσταση"
+  },
+  "progressiveCheckinSettings": {
+    "whenVisualisingTheStateOf": "Στην απεικόνιση της κατάστασης μιας κράτησης, κάθε σετ μετρά ως μία μονάδα αντί να μετρώνται τα αντικείμενα που περιέχει.",
+    "countEachKitAsA": "Κάθε σετ μετρά ως μία μονάδα"
+  },
+  "bookingFilters": {
+    "custodian": "Υπεύθυνος",
+    "tags": "Ετικέτες",
+    "filterByCustodian": "Φίλτρο κατά υπεύθυνο",
+    "searchTeamMembers": "Αναζήτηση μελών ομάδας",
+    "filterByTag": "Φίλτρο κατά ετικέτα"
+  },
+  "bulkRemoveAssetAndKitDialog": {
+    "cancel": "Ακύρωση",
+    "confirm": "Επιβεβαίωση",
+    "removeSelectedItems": "Αφαίρεση επιλεγμένων στοιχείων ({{totalSelectedItems}})",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να αφαιρέσετε {{totalSelectedItems}} επιλεγμένα στοιχεία; Η ενέργεια δεν αναιρείται."
+  },
+  "manageModelRequests": {
+    "fulfilledReservations": "Καλυμμένες δεσμεύσεις",
+    "theseModelLevelReservationsWere": "Αυτές οι δεσμεύσεις μοντέλων καλύφθηκαν με σάρωση συγκεκριμένων αντικειμένων. Εμφανίζονται εδώ ως ιστορικό· επεξεργαστείτε ή αφαιρέστε τα αντικείμενα από την καρτέλα Αντικείμενα.",
+    "ofFulfilled": "{{fulfilledQuantity}} από {{quantity}} καλύφθηκαν",
+    "fulfilled": "Καλύφθηκε",
+    "modelReservations": "Δεσμεύσεις μοντέλων",
+    "noModelLevelReservationsYet": "Δεν υπάρχουν ακόμη δεσμεύσεις μοντέλων. Χρησιμοποιήστε την παρακάτω φόρμα για να δεσμεύσετε ποσότητα ενός μοντέλου χωρίς να επιλέξετε συγκεκριμένα αντικείμενα.",
+    "reserved": "{{quantity}} δεσμευμένες",
+    "quantityFor": "Ποσότητα για {{assetModelName}}",
+    "addModelReservation": "Προσθήκη δέσμευσης μοντέλου",
+    "quantity": "Ποσότητα",
+    "allAvailableModelsAlreadyHave": "Όλα τα διαθέσιμα μοντέλα έχουν ήδη δεσμεύσεις σε αυτή την κράτηση. Προσαρμόστε μια υπάρχουσα δέσμευση παραπάνω ή αφαιρέστε πρώτα μία.",
+    "overReserved": "Υπερδέσμευση",
+    "modelOverReserved": "Υπερδέσμευση μοντέλου",
+    "newQuantityFor": "Νέα ποσότητα για {{assetModelName}}",
+    "updateReservationFor": "Ενημέρωση δέσμευσης για {{assetModelName}}",
+    "removeReservationFor": "Αφαίρεση δέσμευσης για {{assetModelName}}",
+    "model": "Μοντέλο",
+    "searchModels": "Αναζήτηση μοντέλων...",
+    "assetModels": "Μοντέλα αντικειμένων",
+    "quantityToReserve": "Ποσότητα για δέσμευση",
+    "update": "Ενημέρωση",
+    "remove": "Αφαίρεση",
+    "add": "Προσθήκη",
+    "noUnitsOf00": "Δεν υπάρχουν διαθέσιμες μονάδες του <0>{{name}}</0> σε αυτό το διάστημα."
+  },
+  "timeSettings": {
+    "setTheMaximumDurationFor": "Ορίστε τη μέγιστη διάρκεια μιας κράτησης. Αφήστε κενό για χωρίς όριο. Βοηθά να αποφεύγονται υπερβολικά μεγάλες κρατήσεις.",
+    "skipClosedDays": "Παράλειψη ημερών που είστε κλειστά",
+    "closedDaysWillNotBe": "Οι ημέρες που είστε κλειστά δεν λαμβάνονται υπόψη στους υπολογισμούς.",
+    "minimumAdvanceNoticeHours": "Ελάχιστη προειδοποίηση (ώρες)",
+    "maximumBookingLengthHours": "Μέγιστη διάρκεια κράτησης (ώρες)",
+    "noLimit": "Χωρίς όριο",
+    "saveSettings": "Αποθήκευση ρυθμίσεων",
+    "usersMustBookAtLeast": "Οι χρήστες πρέπει να κάνουν κράτηση τουλάχιστον τόσες ώρες πριν την έναρξή της. Βάλτε 0 για να επιτρέπονται άμεσες κρατήσεις. Ο περιορισμός ισχύει μόνο για χρήστες <0>Αυτοεξυπηρέτησης</0> και <1>Βασικούς</1>."
+  },
+  "checkoutDropdown": {
+    "scanToCheckOut": "Σάρωση για παράδοση",
+    "checkOut": "Παράδοση"
+  },
+  "checkinDropdown": {
+    "checkIn": "Επιστροφή",
+    "explicitCheckIn": "Επιστροφή με σάρωση",
+    "quickCheckIn": "Γρήγορη επιστροφή"
+  },
+  "listBookingsContent": {
+    "stockConflict": "Σύγκρουση αποθέματος",
+    "oneOrMoreQuantityTracked": "Ένα ή περισσότερα αντικείμενα με παρακολούθηση ποσότητας είναι υπερδεσμευμένα για αυτές τις ημερομηνίες. Ανοίξτε την κράτηση για επίλυση.",
+    "noTags": "Χωρίς ετικέτες",
+    "stockConflictOneOrMore": "Σύγκρουση αποθέματος: ένα ή περισσότερα αντικείμενα με παρακολούθηση ποσότητας είναι υπερδεσμευμένα για αυτές τις ημερομηνίες. Ανοίξτε την κράτηση για επίλυση.",
+    "includesUnavailableAssets": "Περιλαμβάνει μη διαθέσιμα αντικείμενα",
+    "bookingIncludesUnavailableAssets": "Η κράτηση περιλαμβάνει μη διαθέσιμα αντικείμενα",
+    "thereAreSomeAssetsWithin": "Ορισμένα αντικείμενα αυτής της κράτησης δεν μπορούν να δεσμευτούν επειδή είναι σε παράδοση, σε χρέωση ή έχουν σημειωθεί ως μη διαθέσιμα για κράτηση"
+  },
+  "pageContent": {
+    "cancellationReason": "Αιτία ακύρωσης",
+    "thisBookingHoldsArchivedAssets": "Αυτή η κράτηση περιέχει αρχειοθετημένα αντικείμενα",
+    "untilThenItCantBe": "Μέχρι τότε δεν μπορεί να δεσμευτεί ή να παραδοθεί."
+  },
+  "kitRow": {
+    "assets": "{{assetsCount}} αντικείμενα",
+    "goToKit": "Μετάβαση στο σετ",
+    "unavailable": "Μη διαθέσιμο",
+    "kitIsUnavailableForBookings": "Το σετ δεν είναι διαθέσιμο για κρατήσεις",
+    "anAdministratorHasMarkedOne": "Ένας διαχειριστής σημείωσε ένα από τα αντικείμενα αυτού του σετ ως μη διαθέσιμο για κρατήσεις. Αφαιρέστε το από την κράτηση ή κάντε το ξανά διαθέσιμο πριν τη δέσμευση.",
+    "alreadyBooked": "Ήδη κρατημένο",
+    "kitIsAlreadyBooked": "Το σετ είναι ήδη κρατημένο",
+    "thisKitIsAlreadyAdded": "Αυτό το σετ έχει ήδη προστεθεί σε κράτηση που επικαλύπτει την επιλεγμένη περίοδο.",
+    "toggleKitExpand": "Ανάπτυξη/σύμπτυξη σετ"
+  },
+  "modelProgressStrips": {
+    "reserved": "δεσμευμένες",
+    "ofUnitsFulfilledAcrossAll": "{{totalFulfilled}} από {{totalBooked}} μονάδες καλύφθηκαν σε όλα τα δεσμευμένα μοντέλα",
+    "ofFulfilled": "{{assetModelName}}: {{fulfilled}} από {{booked}} καλύφθηκαν",
+    "model": "μοντέλο",
+    "models": "μοντέλα"
+  },
+  "availabilityLabel": {
+    "alreadyAddedToThisBooking": "Έχει ήδη προστεθεί σε αυτή την κράτηση",
+    "assetIsPartOfBooking": "Το αντικείμενο ανήκει στην κράτηση",
+    "thisAssetIsAlreadyAdded": "Αυτό το αντικείμενο έχει ήδη προστεθεί στην τρέχουσα κράτηση.",
+    "unavailable": "Μη διαθέσιμο",
+    "assetIsUnavailableForBookings": "Το αντικείμενο δεν είναι διαθέσιμο για κρατήσεις",
+    "thisAssetIsMarkedAs": "Αυτό το αντικείμενο έχει σημειωθεί από διαχειριστή ως μη διαθέσιμο για κρατήσεις.",
+    "partOfKit": "Μέρος σετ",
+    "assetIsPartOfA": "Το αντικείμενο ανήκει σε σετ",
+    "removeTheAssetFromThe": "Αφαιρέστε το αντικείμενο από το σετ για να το προσθέσετε μεμονωμένα.",
+    "inCustody": "Σε χρέωση",
+    "assetIsInCustody": "Το αντικείμενο είναι σε χρέωση",
+    "thisAssetIsInCustody": "Αυτό το αντικείμενο είναι χρεωμένο σε μέλος της ομάδας και προς το παρόν δεν είναι διαθέσιμο για κρατήσεις.",
+    "alreadyBooked": "Ήδη κρατημένο",
+    "assetIsAlreadyPartOf": "Το αντικείμενο ανήκει ήδη σε κράτηση",
+    "checkedOut": "Σε παράδοση",
+    "assetIsCurrentlyCheckedOut": "Το αντικείμενο είναι σε παράδοση",
+    "reservedByModel": "Δεσμευμένο ανά μοντέλο",
+    "modelIsReservedForThis": "Το μοντέλο είναι δεσμευμένο για αυτή την περίοδο",
+    "otherBookingsReservedEveryFree": "Άλλες κρατήσεις δέσμευσαν κάθε ελεύθερη μονάδα του μοντέλου αυτού του αντικειμένου για τις επιλεγμένες ημερομηνίες. Αλλάξτε τις ημερομηνίες ή επιλέξτε αντικείμενο άλλου μοντέλου.",
+    "addedThroughKit": "Προστέθηκε μέσω σετ",
+    "assetWasAddedThroughA": "Το αντικείμενο προστέθηκε μέσω σετ",
+    "insufficientStock": "Ανεπαρκές απόθεμα",
+    "notEnoughUnitsAvailable": "Δεν υπάρχουν αρκετές διαθέσιμες μονάδες",
+    "thisBookingReservesUnitsBut": "Αυτή η κράτηση δεσμεύει {{bookedQuantity}} μονάδες, αλλά μόνο {{availableUnits}} είναι διαθέσιμες στον χώρο εργασίας (αφού αφαιρεθούν χρεώσεις, άλλες δεσμεύσεις και ενεργές παραδόσεις). Μειώστε την ποσότητα ή ελευθερώστε μονάδες πριν την παράδοση.",
+    "checkedOutElsewhere": "Σε παράδοση αλλού",
+    "someUnitsAreCheckedOut": "Ορισμένες μονάδες είναι σε παράδοση αυτή τη στιγμή",
+    "thisBookingReservesUnitsBut2": "Αυτή η κράτηση δεσμεύει {{bookedQuantity}} μονάδες, αλλά μόνο {{physicalUnitsNow}} βρίσκονται φυσικά στο ράφι αυτή τη στιγμή· οι υπόλοιπες είναι σε παράδοση σε άλλες κρατήσεις. Αναμένεται να επιστραφούν πριν ξεκινήσει αυτή η κράτηση, οπότε δεν χρειάζεται ενέργεια ακόμη.",
+    "kitIsInCustody": "Το σετ είναι σε χρέωση",
+    "thisKitIsInCustody": "Αυτό το σετ είναι σε χρέωση ή περιέχει αντικείμενα που είναι σε χρέωση.",
+    "kitIsCheckedOut": "Το σετ είναι σε παράδοση",
+    "noAssets": "Χωρίς αντικείμενα",
+    "noAssetsInKit": "Δεν υπάρχουν αντικείμενα στο σετ",
+    "thereAreNoAssetsAdded": "Δεν έχουν προστεθεί ακόμη αντικείμενα σε αυτό το σετ.",
+    "containsNonBookableAssets": "Περιέχει αντικείμενα μη διαθέσιμα για κράτηση",
+    "kitIsUnavailableForCheck": "Το σετ δεν είναι διαθέσιμο για παράδοση",
+    "someAssetsInThisKit": "Ορισμένα αντικείμενα αυτού του σετ έχουν σημειωθεί ως μη διαθέσιμα για κράτηση. Μπορείτε να προσθέσετε το σετ στην κράτησή σας, αλλά πρέπει να τα αφαιρέσετε για να γίνει η παράδοση.",
+    "kitIsAlreadyPartOf": "Το σετ ανήκει ήδη σε κράτηση",
+    "thisKitIsAlreadyAdded": "Αυτό το σετ έχει ήδη προστεθεί σε άλλη κράτηση.",
+    "thisAssetIsAddedTo": "Αυτό το αντικείμενο έχει προστεθεί σε κράτηση που επικαλύπτει την επιλεγμένη περίοδο.",
+    "thisAssetIsCurrentlyChecked": "Αυτό το αντικείμενο είναι σε παράδοση σε άλλη κράτηση και αναμένεται να είναι διαθέσιμο για το διάστημα που επιλέξατε",
+    "thisKitIsCurrentlyChecked": "Αυτό το σετ είναι σε παράδοση σε άλλη κράτηση και αναμένεται να είναι διαθέσιμο για το διάστημα που επιλέξατε",
+    "thisKitIsCurrentlyChecked2": "Αυτό το σετ είναι σε παράδοση και δεν είναι διαθέσιμο για το διάστημα που επιλέξατε",
+    "thisAssetIsAddedTo2": "Αυτό το αντικείμενο έχει προστεθεί σε κράτηση (<0>{{name}}</0>) που επικαλύπτει την επιλεγμένη περίοδο.",
+    "thisAssetIsCurrentlyChecked2": "Αυτό το αντικείμενο είναι σε παράδοση σε άλλη κράτηση (<0>{{name}}</0>) και αναμένεται να είναι διαθέσιμο για το διάστημα που επιλέξατε"
+  },
+  "revertToDraftDialog": {
+    "revertToDraft": "Επαναφορά σε πρόχειρη",
+    "revertingToDraftState": "Επαναφορά σε πρόχειρη κατάσταση",
+    "cancel": "Ακύρωση",
+    "confirm": "Επιβεβαίωση",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να επαναφέρετε την κράτηση <0>{{name}}</0> σε πρόχειρη;"
+  },
+  "bookingAssetsColumn": {
+    "scanToAssign": "Σάρωση για ανάθεση",
+    "name": "Όνομα",
+    "qty": "Ποσ.",
+    "category": "Κατηγορία",
+    "tags": "Ετικέτες",
+    "location": "Τοποθεσία",
+    "checkedOutOn": "Παραδόθηκε στις",
+    "showsTheDateWhenThe": "Η ημερομηνία που παραδόθηκε το αντικείμενο με μερική παράδοση.",
+    "checkedOutBy": "Παραδόθηκε από",
+    "showsTheUserWhoChecked": "Ο χρήστης που παρέδωσε το αντικείμενο με μερική παράδοση.",
+    "checkedInOn": "Επιστράφηκε στις",
+    "showsTheDateWhenThe2": "Η ημερομηνία που επιστράφηκε το αντικείμενο με μερική επιστροφή.",
+    "checkedInBy": "Επιστράφηκε από",
+    "showsTheUserWhoChecked2": "Ο χρήστης που επέστρεψε το αντικείμενο με μερική επιστροφή.",
+    "scanToAdd": "Σάρωση για προσθήκη",
+    "addAssets": "Προσθήκη αντικειμένων",
+    "scan": "Σάρωση",
+    "assetsKits": "Αντικείμενα και σετ"
+  },
+  "adjustBookingAssetQuantityDialog": {
+    "adjustBookedQuantity": "Προσαρμογή κρατημένης ποσότητας",
+    "ofAvailable": "{{maxQuantity}} από {{totalQuantity}} {{unitLabel}} διαθέσιμες",
+    "reservedByOtherBookings": "{{reservedByOthers}} {{unitLabel}} δεσμευμένες από άλλες κρατήσεις.",
+    "viewBookings": "Προβολή κρατήσεων",
+    "someUnitsAreAlsoReserved": "Ορισμένες μονάδες είναι δεσμευμένες και από άλλες κρατήσεις.",
+    "max": "Μέγ.: {{maxQuantity}} {{unitLabel}}",
+    "cancel": "Ακύρωση",
+    "quantity": "Ποσότητα ({{unitLabel}})",
+    "forTheSelectedDates": "για τις επιλεγμένες ημερομηνίες",
+    "save": "Αποθήκευση",
+    "setHowManyNamed": "Ορίστε πόσες {{unitLabel}} του \"{{assetTitle}}\" θα δεσμευτούν για αυτή την κράτηση.",
+    "setHowMany": "Ορίστε πόσες {{unitLabel}} αυτού του αντικειμένου θα δεσμευτούν για αυτή την κράτηση.",
+    "for00To1": "για <0></0> έως <1></1>"
+  },
+  "actionsDropdown": {
+    "actions": "Ενέργειες",
+    "archive": "Αρχειοθέτηση",
+    "duplicateBooking": "Αντιγραφή κράτησης",
+    "delete": "Διαγραφή",
+    "areYouSureYouWant": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη σημείωση;",
+    "thisActionCannotBeUndone": "Η ενέργεια δεν αναιρείται. Η σημείωση θα διαγραφεί οριστικά.",
+    "cancel": "Ακύρωση"
+  },
+  "extendBookingDialog": {
+    "extendBooking": "Παράταση κράτησης",
+    "changeTheEndDateOf": "Αλλάξτε την ημερομηνία λήξης της κράτησης σε μια μελλοντική ημερομηνία.",
+    "newEndDate": "Νέα ημερομηνία λήξης",
+    "workingHoursValidationUnavailable": "Ο έλεγχος ωραρίου δεν είναι διαθέσιμος: {{error}}",
+    "cancel": "Ακύρωση",
+    "submit": "Υποβολή",
+    "endDate": "Ημερομηνία λήξης",
+    "booking": "Κράτηση"
+  },
+  "listBulkActionsDropdown": {
+    "actions": "Ενέργειες",
+    "checkOutSelectedItems": "Παράδοση επιλεγμένων στοιχείων",
+    "checkInSelectedItems": "Επιστροφή επιλεγμένων στοιχείων",
+    "removeAssetsKits": "Αφαίρεση αντικειμένων/σετ"
+  },
+  "manageNotificationsDialog": {
+    "manageNotifications": "Διαχείριση ειδοποιήσεων",
+    "chooseWhoReceivesEmailNotifications": "Επιλέξτε ποιοι λαμβάνουν ειδοποιήσεις email για αυτή την κράτηση.",
+    "onlyCanBeAdded": "Μπορούν να προστεθούν μόνο {{PICKABLE_RECIPIENT_AUDIENCE}}.",
+    "cancel": "Ακύρωση",
+    "save": "Αποθήκευση",
+    "notificationRecipients": "Παραλήπτες ειδοποιήσεων",
+    "searchTeamMembers": "Αναζήτηση μελών ομάδας..."
+  },
+  "modelRequestRowActionsDropdown": {
+    "assignFromList": "Ανάθεση από λίστα",
+    "scanToAssign": "Σάρωση για ανάθεση",
+    "adjustQuantity": "Προσαρμογή ποσότητας",
+    "remove": "Αφαίρεση",
+    "close": "Κλείσιμο",
+    "removeReservationFor": "Αφαίρεση δέσμευσης για \"{{name}}\"",
+    "thisCancelsTheUnitModel": "Ακυρώνεται η δέσμευση μοντέλου {{quantity}} μονάδων. Η κράτηση παραμένει· μπορείτε να προσθέσετε αργότερα νέα δέσμευση ή συγκεκριμένα αντικείμενα.",
+    "cancel": "Ακύρωση",
+    "actionsTrigger": "Ενέργειες"
+  },
+  "bookingPagination": {
+    "page": "Σελίδα",
+    "of": "από",
+    "perPage": "ανά σελίδα",
+    "goToPage1": "Μετάβαση στη σελίδα 1",
+    "goToPreviousPage": "Προηγούμενη σελίδα",
+    "goToNextPage": "Επόμενη σελίδα",
+    "goToLastPage": "Μετάβαση στην τελευταία σελίδα"
+  },
+  "bookingLifecycleProgress": {
+    "kitsCountAsOneItem": "Τα σετ μετρούν ως ένα στοιχείο.",
+    "allAssetsInsideKitsAre": "Όλα τα αντικείμενα μέσα σε σετ μετρούν μεμονωμένα.",
+    "partialMeansAQuantityTracked": "Μερική σημαίνει ότι ένα αντικείμενο με παρακολούθηση ποσότητας έχει εκτός ορισμένες, όχι όλες, τις μονάδες του.",
+    "bookedPartialCheckedOutReturned": "{{bookedCount}} κρατημένα, {{partialCount}} μερικώς, {{checkedOutCount}} σε παράδοση, {{returnedCount}} επιστραμμένα, από {{totalUnits}}",
+    "booked": "Κρατήθηκαν",
+    "partial": "Μερική",
+    "fullyOut": "Πλήρως εκτός",
+    "returned": "Επιστράφηκε"
+  },
+  "bookingOverviewPdf": {
+    "generateOverviewPdf": "Δημιουργία PDF επισκόπησης",
+    "generateBookingChecklistFor": "Δημιουργία λίστας ελέγχου κράτησης για \"{{name}}\"",
+    "youCanEitherPreviewOr": "Μπορείτε να κάνετε προεπισκόπηση ή λήψη του PDF. Τα αντικείμενα ταξινομούνται κατά",
+    "downloadPdf": "Λήψη PDF",
+    "generatingPdfPreview": "Δημιουργία προεπισκόπησης PDF...",
+    "cancel": "Ακύρωση",
+    "bookingChecklistFor": "Λίστα ελέγχου κράτησης για {{name}}",
+    "booking": "Κράτηση",
+    "custodian": "Υπεύθυνος",
+    "bookingPeriod": "Περίοδος κράτησης",
+    "originalPeriod": "Αρχική περίοδος",
+    "description": "Περιγραφή",
+    "totalAssetsValue": "Συνολική αξία αντικειμένων",
+    "tags": "Ετικέτες",
+    "image": "Εικόνα",
+    "name": "Όνομα",
+    "qty": "Ποσ.",
+    "kit": "Σετ",
+    "category": "Κατηγορία",
+    "location": "Τοποθεσία",
+    "code": "Κωδικός",
+    "removedFromKitKeptAs": "Αφαιρέθηκε από το σετ, διατηρείται ως καταγραφή του τι κρατήθηκε",
+    "assetDescription": "Περιγραφή αντικειμένου",
+    "requestedModels": "Ζητούμενα μοντέλα",
+    "imageOf": "Εικόνα του {{title}}",
+    "codeOf": "Κωδικός του {{title}}",
+    "markAsPicked": "Σήμανση του {{title}} ως συλλεγμένου",
+    "ascending": "αύξουσα",
+    "descending": "φθίνουσα"
+  },
+  "fulfilsModelBadge": {
+    "fulfils": "Καλύπτει το {{modelName}}",
+    "answersAReservedUnit": "Καλύπτει μια δεσμευμένη μονάδα",
+    "thisBookingReservedUnitsOf": "Αυτή η κράτηση δέσμευσε μονάδες του <0>{{modelName}}</0> χωρίς να τις ορίσει. Αυτό το αντικείμενο είναι μία από τις μονάδες που κάλυψαν τη δέσμευση, οπότε μετρά σε αυτήν αντί να προστίθεται χωριστά στην κράτηση."
+  },
+  "bookingAssetsSidebar": {
+    "booked": "Κρατήθηκαν",
+    "returned": "Επιστράφηκε",
+    "consumed": "Καταναλώθηκαν",
+    "lost": "Χάθηκαν",
+    "damaged": "Με ζημιά",
+    "checkedIn": "Επιστράφηκε",
+    "remaining": "Απομένουν",
+    "assets": "{{assetCount}} αντικείμενα",
+    "assetsIn": "Αντικείμενα στο \"{{name}}\"",
+    "inThisBooking": "σε αυτή την κράτηση",
+    "scanToAssign": "Σάρωση για ανάθεση",
+    "loadingAssets": "Φόρτωση αντικειμένων",
+    "weCouldntLoadTheAssets": "Δεν ήταν δυνατή η φόρτωση των αντικειμένων αυτής της κράτησης.",
+    "tryAgain": "Δοκιμάστε ξανά",
+    "assetsKits": "Αντικείμενα και σετ",
+    "name": "Όνομα",
+    "category": "Κατηγορία",
+    "assets2": "{{assetsCount}} αντικείμενα",
+    "goToKit": "Μετάβαση στο σετ",
+    "toggleKitExpand": "Ανάπτυξη/σύμπτυξη σετ",
+    "imageOf": "Εικόνα του {{title}}",
+    "allUnitsCheckedIn": "Όλες οι μονάδες επιστράφηκαν",
+    "partiallyCheckedIn": "Μερικώς επιστραμμένη",
+    "asset": "αντικείμενο",
+    "assets3": "αντικείμενα"
+  },
+  "timeRemaining": {
+    "overdueByDays": "Εκπρόθεσμη κατά {{overdueDays}} ημέρες",
+    "hours": "{{overdueHours}} ώρες",
+    "minutes": "{{overdueMinutes}} λεπτά",
+    "startsInDays": "Ξεκινά σε: {{remainingDays}} ημέρες",
+    "hours2": "{{remainingHours}} ώρες",
+    "minutes2": "{{remainingMinutes}} λεπτά",
+    "days": "{{remainingDays}} ημέρες",
+    "remaining": "απομένουν"
+  },
+  "index": {
+    "exportActivityCsv": "Εξαγωγή δραστηριότητας σε CSV",
+    "noNotes": "Χωρίς σημειώσεις",
+    "graphicForNoNotes": "Γραφικό για απουσία σημειώσεων",
+    "yourBookingHasNoNotes": "Η κράτηση `{{name}}` δεν έχει σημειώσεις <0></0>."
+  },
+  "editBookingForm": {
+    "inKit": "στο σετ {{kitName}}",
+    "andMore": "και {{remaining}} ακόμη",
+    "save": "Αποθήκευση",
+    "checkOut": "Παράδοση",
+    "bookingDetails": "Στοιχεία κράτησης",
+    "requestReservation": "Αίτημα δέσμευσης",
+    "reserve": "Δέσμευση"
+  },
+  "newBookingForm": {
+    "scanQrCodes": "Σάρωση κωδικών QR",
+    "cancel": "Ακύρωση",
+    "createBooking": "Δημιουργία κράτησης",
+    "viewAssetsList": "Προβολή λίστας αντικειμένων"
+  },
+  "tagsRequiredSettings": {
+    "whenEnabledUsersMustAdd": "Όταν είναι ενεργό, οι χρήστες πρέπει να προσθέτουν τουλάχιστον μία ετικέτα στις κρατήσεις τους. Βοηθά στην κατηγοριοποίηση και την οργάνωση των κρατήσεων.",
+    "requireTagsForBookings": "Υποχρεωτικές ετικέτες σε κρατήσεις"
+  },
+  "dates": {
+    "withinThisPeriodTheAssets": "Σε αυτή την περίοδο τα αντικείμενα της κράτησης θα είναι σε παράδοση και μη διαθέσιμα για άλλες κρατήσεις.",
+    "maximumBookingLengthIs": "Η μέγιστη διάρκεια κράτησης είναι",
+    "hours": "{{maxBookingLength}} ώρες",
+    "workingHoursValidationUnavailable": "Ο έλεγχος ωραρίου δεν είναι διαθέσιμος: {{error}}",
+    "loadingWorkingHours": "Φόρτωση ωραρίου",
+    "workingDays": "Εργάσιμες ημέρες:",
+    "workingHours": "Ωράριο:",
+    "varyByDay": "Διαφέρει ανά ημέρα",
+    "specialDatesAndHolidaysAre": "Λαμβάνονται υπόψη και αργίες και ειδικές ημερομηνίες",
+    "localHoursOfThePhysical": "Τοπική ώρα της φυσικής τοποθεσίας",
+    "startDate": "Ημερομηνία έναρξης",
+    "booking": "Κράτηση",
+    "endDate": "Ημερομηνία λήξης",
+    "none": "Κανένα",
+    "minimumAdvanceNotice0Hours": "Ελάχιστη προειδοποίηση: <0>{{bufferStartTime}} ώρες</0> πριν την έναρξη της κράτησης."
+  },
+  "description": {
+    "description": "Περιγραφή",
+    "addADescription": "Προσθέστε περιγραφή..."
+  },
+  "tagField": {
+    "tags": "Ετικέτες"
+  },
+  "name": {
+    "name": "Όνομα",
+    "booking": "Κράτηση"
+  },
+  "notificationRecipients": {
+    "onlyCanBeAdded": "Μπορούν να προστεθούν μόνο {{PICKABLE_RECIPIENT_AUDIENCE}}.",
+    "theseUsersWillReceiveAll": "Αυτοί οι χρήστες θα λαμβάνουν όλες τις ειδοποιήσεις email για αυτή την κράτηση.",
+    "notifications": "Ειδοποιήσεις",
+    "notificationRecipients": "Παραλήπτες ειδοποιήσεων",
+    "searchTeamMembers": "Αναζήτηση μελών ομάδας..."
+  },
+  "custodian": {
+    "custodian": "Υπεύθυνος",
+    "thePersonThatWillBe": "Το άτομο που θα έχει τη χρέωση ή την ευθύνη των αντικειμένων κατά τη διάρκεια της κράτησης.",
+    "description": "Περιγραφή",
+    "teamMembers": "Μέλη ομάδας",
+    "selectATeamMember": "Επιλέξτε μέλος ομάδας"
+  }
+}

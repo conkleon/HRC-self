@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { CalendarCheck } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -245,6 +246,7 @@ export function links() {
 }
 
 export default function ExistingBooking() {
+  const { t } = useTranslation();
   const { ids, asset, assetAvailability } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const transition = useNavigation();
@@ -261,11 +263,15 @@ export default function ExistingBooking() {
           <CalendarCheck />
         </div>
         <div className="mb-5">
-          <h3>Add to Existing Booking</h3>
+          <h3>
+            {t(
+              "assets.assetsAssetidOverviewAddToExistingBooking.addToExistingBooking"
+            )}
+          </h3>
           <div>
-            You can add an asset to Draft, Reserved, Ongoing or Overdue
-            bookings. Assets added to an ongoing booking stay available until
-            you check them out.
+            {t(
+              "assets.assetsAssetidOverviewAddToExistingBooking.youCanAddAnAsset"
+            )}
           </div>
         </div>
         {ids?.map((item, i) => (
@@ -288,10 +294,14 @@ export default function ExistingBooking() {
               status: ADDABLE_BOOKING_STATUSES.join(","),
             }}
             fieldName="bookingId"
-            contentLabel="Existing Bookings"
+            contentLabel={t(
+              "assets.assetsAssetidOverviewAddToExistingBooking.existingBookings"
+            )}
             initialDataKey="bookings"
             countKey="bookingCount"
-            placeholder="Select a Booking"
+            placeholder={t(
+              "assets.assetsAssetidOverviewAddToExistingBooking.selectABooking"
+            )}
             allowClear
             closeOnSelect
             required={true}
@@ -313,11 +323,16 @@ export default function ExistingBooking() {
             }
           />
           <div className="mt-2 text-gray-500">
-            <span className="font-medium text-gray-600">Draft</span>,{" "}
-            <span className="font-medium text-gray-600">Reserved</span>,{" "}
-            <span className="font-medium text-gray-600">Ongoing</span> and{" "}
-            <span className="font-medium text-gray-600">Overdue</span> bookings
-            are visible
+            <Trans
+              t={t}
+              i18nKey="assets.assetsAssetidOverviewAddToExistingBooking.text0Draft01Reserved"
+              components={[
+                <span key="slot0" className="font-medium text-gray-600" />,
+                <span key="slot1" className="font-medium text-gray-600" />,
+                <span key="slot2" className="font-medium text-gray-600" />,
+                <span key="slot3" className="font-medium text-gray-600" />,
+              ]}
+            />
           </div>
         </div>
 
@@ -326,7 +341,10 @@ export default function ExistingBooking() {
             <Input
               name="quantity"
               type="number"
-              label={`Quantity (${unitLabel})`}
+              label={t(
+                "assets.assetsAssetidOverviewAddToExistingBooking.quantity",
+                { unitLabel }
+              )}
               min={1}
               max={maxQuantity}
               step={1}
@@ -335,7 +353,10 @@ export default function ExistingBooking() {
             />
             {maxQuantity != null ? (
               <p className="mt-1 text-xs text-gray-500">
-                Max available: {maxQuantity} {unitLabel}
+                {t(
+                  "assets.assetsAssetidOverviewAddToExistingBooking.maxAvailable",
+                  { maxQuantity, unitLabel }
+                )}
               </p>
             ) : null}
           </div>
@@ -352,7 +373,7 @@ export default function ExistingBooking() {
         <div className="mb-8"></div>
         <div className="flex gap-3">
           <Button to=".." variant="secondary" width="full" disabled={disabled}>
-            Cancel
+            {t("assets.assetsAssetidOverviewAddToExistingBooking.cancel")}
           </Button>
           <Button
             type="submit"
@@ -360,7 +381,7 @@ export default function ExistingBooking() {
             width="full"
             disabled={disabled}
           >
-            Confirm
+            {t("assets.assetsAssetidOverviewAddToExistingBooking.confirm")}
           </Button>
         </div>
       </div>

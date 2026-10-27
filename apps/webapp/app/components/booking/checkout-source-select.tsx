@@ -21,6 +21,7 @@
  */
 import { useId, useState } from "react";
 
+import { useTranslation } from "react-i18next";
 import type { CheckoutSourceQuestion } from "~/modules/booking/checkout-source-location";
 import {
   checkoutSourceOptions,
@@ -74,6 +75,7 @@ export function CheckoutSourceSelect({
   variant = "titled",
   className,
 }: CheckoutSourceSelectProps) {
+  const { t } = useTranslation();
   const id = useId();
   /** Whether the operator changed the answer: only then is it posted. */
   const [picked, setPicked] = useState(false);
@@ -96,7 +98,7 @@ export function CheckoutSourceSelect({
         )}
       >
         {isInline ? (
-          "From"
+          t("bookings.checkoutSourceSelect.from")
         ) : (
           <>
             <span className="text-gray-900">{question.title}</span>

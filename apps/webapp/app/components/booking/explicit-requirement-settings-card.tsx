@@ -22,6 +22,7 @@
  *   that persists both cards and refuses non-owners
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { useRoleAccess } from "~/hooks/use-role-access";
 import { tw } from "~/utils/tw";
@@ -63,6 +64,7 @@ export function ExplicitRequirementSettingsCard({
   intent: "updateExplicitCheckin" | "updateExplicitCheckout";
   switches: ExplicitRequirementSwitch[];
 }) {
+  const { t } = useTranslation();
   const fetcher = useFetcher();
   const { ownsWorkspace: isOwner } = useRoleAccess();
   // Bumped on every refused save; keyed on the form, it remounts the switches
@@ -142,7 +144,9 @@ export function ExplicitRequirementSettingsCard({
           })}
           {!isOwner && (
             <p className="text-sm text-gray-500">
-              Only the workspace owner can change this setting.
+              {t(
+                "bookings.explicitRequirementSettingsCard.onlyTheWorkspaceOwnerCan"
+              )}
             </p>
           )}
           <input type="hidden" value={intent} name="intent" />

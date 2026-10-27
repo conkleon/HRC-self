@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import type { User } from "@prisma/client";
 import nProgressStyles from "nprogress/nprogress.css?url";
+import { I18nextProvider } from "react-i18next";
 import type {
   LinksFunction,
   LoaderFunctionArgs,
@@ -29,6 +30,10 @@ import { Button } from "./components/shared/button";
 import { TooltipProvider } from "./components/shared/tooltip";
 import { db } from "./database/db.server";
 import { useNprogress } from "./hooks/use-nprogress";
+import { FALLBACK_LOCALE, resolveLocale } from "./i18n/config";
+import type { AppLocale } from "./i18n/config";
+import "./i18n/global";
+import { createI18n } from "./i18n/instance";
 import { DEFAULT_INSTANCE_BRANDING } from "./modules/branding/instance-branding";
 import { getInstanceBranding } from "./modules/branding/instance-branding.server";
 import { detectAndPersistFormatPrefs } from "./modules/user/format-prefs.server";
@@ -49,7 +54,7 @@ import {
 } from "./utils/client-hints";
 import { resolveFormatPrefs } from "./utils/date-format";
 import type { ResolvedFormatPrefs } from "./utils/date-format";
-import { getBrowserEnv, MAINTENANCE_MODE } from "./utils/env";
+import { DEFAULT_LOCALE, getBrowserEnv, MAINTENANCE_MODE } from "./utils/env";
 import { payload } from "./utils/http.server";
 import {
   HYDRATION_FAILED_SCREEN_ID,
@@ -108,6 +113,8 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   // snapshots this once per full navigation, and additionally re-runs right
   // after the user saves new format prefs so the snapshot never goes stale.
   let formatPrefs: ResolvedFormatPrefs;
+  // UI language: the user's choice when signed in, else the instance default.
+  let locale: AppLocale;
   try {
     const { userId } = context.getSession();
     const userPrefs = await db.user.findFirst({
@@ -117,9 +124,14 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
         timeFormat: true,
         weekStart: true,
         timeZone: true,
+        locale: true,
       },
     });
     formatPrefs = resolveFormatPrefs(userPrefs, hints);
+    locale = resolveLocale({
+      userLocale: userPrefs?.locale,
+      instanceDefault: DEFAULT_LOCALE,
+    });
 
     // Lazy backfill: pre-existing users have null pref columns. Snapshot the
     // detected values once, fire-and-forget (mirrors recordMobileActivity).
@@ -142,12 +154,14 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   } catch {
     // No session / getSession unavailable / transient DB error → hints govern.
     formatPrefs = resolveFormatPrefs(null, hints);
+    locale = resolveLocale({ instanceDefault: DEFAULT_LOCALE });
   }
 
   return payload({
     env: getBrowserEnv(),
     branding: getInstanceBranding(),
     maintenanceMode: MAINTENANCE_MODE && !admin,
+    locale,
     requestInfo: {
       hints,
       formatPrefs,
@@ -192,6 +206,9 @@ const getCookieEnabledServerSnapshot = () => true;
 export function Layout({ children }: { children: ReactNode }) {
   const data = useRouteLoaderData<typeof loader>("root");
   const branding = data?.branding ?? DEFAULT_INSTANCE_BRANDING;
+  const locale = data?.locale ?? FALLBACK_LOCALE;
+  // One instance per language: rebuilt only when the user switches.
+  const i18n = useMemo(() => createI18n(locale), [locale]);
   const nonce = useNonce();
   // A page may link its own manifest (the self-service shortcut does)
   const manifestHref = manifestHrefFor(useMatches());
@@ -208,7 +225,7 @@ export function Layout({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <html lang="en" className="overflow-hidden">
+    <html lang={locale} className="overflow-hidden">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -257,70 +274,72 @@ export function Layout({ children }: { children: ReactNode }) {
         <Clarity />
       </head>
       <body suppressHydrationWarning>
-        {/* Hidden by the inline gate styles in <head> and revealed when the
+        <I18nextProvider i18n={i18n}>
+          {/* Hidden by the inline gate styles in <head> and revealed when the
             inline check there flags the browser; hydration is skipped then. */}
-        <div id={UNSUPPORTED_BROWSER_SCREEN_ID}>
-          <BlockInteractions
-            title="Your browser is out of date"
-            content={`${branding.appName} needs a current browser. Please update your browser, or switch to the latest Chrome, Firefox, Edge or Safari.`}
-            icon="x"
-          />
-        </div>
+          <div id={UNSUPPORTED_BROWSER_SCREEN_ID}>
+            <BlockInteractions
+              title="Your browser is out of date"
+              content={`${branding.appName} needs a current browser. Please update your browser, or switch to the latest Chrome, Firefox, Edge or Safari.`}
+              icon="x"
+            />
+          </div>
 
-        {/* Hidden by the inline gate styles in <head> and revealed when the
+          {/* Hidden by the inline gate styles in <head> and revealed when the
             watchdog there sees the app fail to load. The button is wired by
             the watchdog, not React, because React never attached here. */}
-        <div id={HYDRATION_FAILED_SCREEN_ID}>
-          <BlockInteractions
-            title={`${branding.appName} could not finish loading`}
-            content="Part of the app did not download. This is usually a brief network problem, or a firewall or proxy blocking files from this site. Reloading normally fixes it."
-            icon="x"
-          >
-            <Button
-              type="button"
-              variant="primary"
-              width="full"
-              className="mt-8"
-              {...{ [HYDRATION_RELOAD_ATTRIBUTE]: "" }}
+          <div id={HYDRATION_FAILED_SCREEN_ID}>
+            <BlockInteractions
+              title={`${branding.appName} could not finish loading`}
+              content="Part of the app did not download. This is usually a brief network problem, or a firewall or proxy blocking files from this site. Reloading normally fixes it."
+              icon="x"
             >
-              Reload
-            </Button>
-          </BlockInteractions>
-        </div>
+              <Button
+                type="button"
+                variant="primary"
+                width="full"
+                className="mt-8"
+                {...{ [HYDRATION_RELOAD_ATTRIBUTE]: "" }}
+              >
+                Reload
+              </Button>
+            </BlockInteractions>
+          </div>
 
-        <noscript>
-          <BlockInteractions
-            title="JavaScript is disabled"
-            content="This website requires JavaScript to be enabled to function properly. Please enable JavaScript or change browser and try again."
-            icon="x"
+          <noscript>
+            <BlockInteractions
+              title="JavaScript is disabled"
+              content="This website requires JavaScript to be enabled to function properly. Please enable JavaScript or change browser and try again."
+              icon="x"
+            />
+          </noscript>
+
+          {hasCookies ? (
+            // Single app-level TooltipProvider. Radix recommends wrapping the
+            // app once and tolerates nested providers (they merge configs), but
+            // hoisting avoids spinning up a provider per-row for high-frequency
+            // chips like AssetCodeBadge. delayDuration matches the previous
+            // per-chip default so tooltip timing doesn't change.
+            <TooltipProvider delayDuration={100}>{children}</TooltipProvider>
+          ) : (
+            <BlockInteractions
+              title="Cookies are disabled"
+              content="This website requires cookies to be enabled to function properly. Please enable cookies and try again."
+              icon="x"
+            />
+          )}
+
+          <ScrollRestoration />
+          {/* why: SSR env injection must execute in the browser; React's `<script>{text}</script>` does not run. */}
+          <script
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: `window.env = ${JSON.stringify(data?.env)}`,
+            }}
           />
-        </noscript>
-
-        {hasCookies ? (
-          // Single app-level TooltipProvider. Radix recommends wrapping the
-          // app once and tolerates nested providers (they merge configs), but
-          // hoisting avoids spinning up a provider per-row for high-frequency
-          // chips like AssetCodeBadge. delayDuration matches the previous
-          // per-chip default so tooltip timing doesn't change.
-          <TooltipProvider delayDuration={100}>{children}</TooltipProvider>
-        ) : (
-          <BlockInteractions
-            title="Cookies are disabled"
-            content="This website requires cookies to be enabled to function properly. Please enable cookies and try again."
-            icon="x"
-          />
-        )}
-
-        <ScrollRestoration />
-        {/* why: SSR env injection must execute in the browser; React's `<script>{text}</script>` does not run. */}
-        <script
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: `window.env = ${JSON.stringify(data?.env)}`,
-          }}
-        />
-        <CloudflareWebAnalytics />
-        <Scripts />
+          <CloudflareWebAnalytics />
+          <Scripts />
+        </I18nextProvider>
       </body>
     </html>
   );

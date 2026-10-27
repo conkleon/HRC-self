@@ -1,4 +1,5 @@
 import type { Asset } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { tw } from "~/utils/tw";
 import type { KitRemovalBookingImpact } from "./booking-removal-notice";
 import RemoveAssetFromKit from "./remove-asset-from-kit";
@@ -26,10 +27,11 @@ export default function AssetRowActionsDropdown({
   fullWidth,
   bookingImpact,
 }: AssetRowActionsDropdownProps) {
+  const { t } = useTranslation();
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
-        aria-label="Actions Trigger"
+        aria-label={t("kits.assetRowActionsDropdown.actionsTrigger")}
         className={tw("asset-actions", fullWidth ? "w-full" : "")}
       >
         <span className="flex items-center gap-2">

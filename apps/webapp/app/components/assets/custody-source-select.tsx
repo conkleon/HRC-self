@@ -31,6 +31,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { sourceCommitmentParts } from "@shelf/quantity-control";
+import { useTranslation } from "react-i18next";
 import type { CustodySourceOption } from "~/modules/asset/custody-source";
 import { handleActivationKeyPress } from "~/utils/keyboard";
 import { tw } from "~/utils/tw";
@@ -94,6 +95,7 @@ export function CustodySourceSelect({
   disabled = false,
   compact = false,
 }: CustodySourceSelectProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -170,7 +172,7 @@ export function CustodySourceSelect({
               <span className="truncate whitespace-nowrap pr-2 text-left">
                 {selected
                   ? formatCustodySourceOption(selected, unitLabel)
-                  : "Select a location"}
+                  : t("assets.custodySourceSelect.selectALocation")}
               </span>
               <ChevronDownIcon className="text-gray-500" />
             </div>

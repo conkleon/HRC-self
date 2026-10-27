@@ -5,6 +5,7 @@
  * @see {@link file://./preview-display.tsx}
  * @see {@link file://./results-display.tsx}
  */
+import { useTranslation } from "react-i18next";
 import type { ClientValidation } from "./helpers";
 import Icon from "../../icons/icon";
 import { AlertIcon } from "../../icons/library";
@@ -59,27 +60,35 @@ export function ClientValidationFeedback({
   validation: ClientValidation;
   fileName: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-3 rounded-md border bg-gray-50 p-3 text-sm">
       <p className="mb-1 font-medium text-gray-700">
-        File: <span className="font-normal">{fileName}</span>
+        {t("assets.shared.file")}{" "}
+        <span className="font-normal">{fileName}</span>
       </p>
       <div className="flex items-center gap-4 text-gray-600">
         <span className="flex items-center gap-1">
           {validation.idColumnFound ? (
             <>
               <Icon icon="check" className="text-green-600" />
-              Matching by {validation.idColumnFound}
+              {t("assets.shared.matchingBy", {
+                idColumnFound: validation.idColumnFound,
+              })}
             </>
           ) : (
             <>
               <Icon icon="x" className="text-red-500" />
-              No identifier column found
+              {t("assets.shared.noIdentifierColumnFound")}
             </>
           )}
         </span>
-        <span>{validation.headerCount} columns</span>
-        <span>{validation.rowCount} data rows</span>
+        <span>
+          {t("assets.shared.columns", { headerCount: validation.headerCount })}
+        </span>
+        <span>
+          {t("assets.shared.dataRows", { rowCount: validation.rowCount })}
+        </span>
       </div>
       {validation.warnings.length > 0 && (
         <div className="mt-2 space-y-1">
@@ -109,15 +118,16 @@ export function DefectedHeadersTable({
 }: {
   data: { incorrectHeader: string; errorMessage: string }[];
 }) {
+  const { t } = useTranslation();
   return (
     <table className="mt-4 w-full rounded-md border text-left text-sm">
       <thead className="bg-red-100 text-xs">
         <tr>
           <th scope="col" className="px-2 py-1">
-            Unrecognized Header
+            {t("assets.shared.unrecognizedHeader")}
           </th>
           <th scope="col" className="px-2 py-1">
-            Error
+            {t("assets.shared.error")}
           </th>
         </tr>
       </thead>

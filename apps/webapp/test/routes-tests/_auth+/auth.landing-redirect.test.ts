@@ -117,8 +117,8 @@ beforeEach(() => {
 });
 
 describe("already signed in", () => {
-  it("the login page sends the member to /", () => {
-    const result = login.loader(
+  it("the login page sends the member to /", async () => {
+    const result = await login.loader(
       createLoaderArgs({
         request: new Request("http://localhost/login"),
         context: signedIn,
@@ -128,8 +128,8 @@ describe("already signed in", () => {
     expect(locationOf(result)).toBe("/");
   });
 
-  it("the SSO callback page sends the member to /", () => {
-    const result = oauthCallback.loader(
+  it("the SSO callback page sends the member to /", async () => {
+    const result = await oauthCallback.loader(
       createLoaderArgs({
         request: new Request("http://localhost/oauth/callback"),
         context: signedIn,

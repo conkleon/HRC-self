@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { AssetStatus } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
 import { CircleX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -100,6 +101,7 @@ export default function AssignCustodyDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   // Get the scanned items from jotai
   const items = useAtomValue(scannedItemsAtom);
   const clearList = useSetAtom(clearScannedItemsAtom);
@@ -153,7 +155,7 @@ export default function AssignCustodyDrawer({
       schema={AssignCustodyToSignedItemsSchema}
       items={items}
       onClearItems={clearList}
-      title="Items scanned"
+      title={t("scanner.assignCustodyDrawer.itemsScanned")}
       isLoading={isLoading}
       renderItem={renderItemRow}
       Blockers={Blockers}
@@ -174,6 +176,7 @@ type CustodyState = {
 };
 
 function CustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [custodyState, setCustodyState] = useState<CustodyState>({
     assetStatus: "processing",
@@ -355,7 +358,9 @@ function CustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
 
         <div className="px-4 md:pl-0">
           <div className="relative z-50 mb-3 mt-2">
-            <h5 className="mb-1">Assign custody to:</h5>
+            <h5 className="mb-1">
+              {t("scanner.assignCustodyDrawer.assignCustodyTo")}
+            </h5>
             <DynamicSelect
               defaultValue={
                 assignsSelfOnly && teamMembers?.length > 0
@@ -376,10 +381,10 @@ function CustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
                 custodyPurpose: "custody-assignment",
               }}
               fieldName="custodian"
-              contentLabel="Team members"
+              contentLabel={t("scanner.assignCustodyDrawer.teamMembers")}
               initialDataKey="teamMembers"
               countKey="totalTeamMembers"
-              placeholder="Select a team member"
+              placeholder={t("scanner.assignCustodyDrawer.selectATeamMember")}
               allowClear
               closeOnSelect
               transformItem={toCustodyAssignmentItem}
@@ -406,7 +411,7 @@ function CustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
               width="full"
               disabled={disabled || disableSubmit || idsTotalCount === 0}
             >
-              Assign custody
+              {t("scanner.assignCustodyDrawer.assignCustody")}
             </Button>
           </div>
         </div>
@@ -417,6 +422,7 @@ function CustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
 
 // Implement item renderers if they're not already defined elsewhere
 export function AssetRow({ asset }: { asset: AssetFromQr }) {
+  const { t } = useTranslation();
   const qtyTracked = isQuantityTracked(asset);
   const maxAllowed = assignableUnits(asset);
   const pickedSources = useAtomValue(scannedAssetSourcesAtom);
@@ -465,7 +471,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
               "text-xs text-gray-700"
             )}
           >
-            asset
+            {t("scanner.assignCustodyDrawer.asset")}
           </span>
           <AssetAvailabilityLabels />
         </div>
@@ -478,7 +484,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
           >
             <CustodySourceSelect
               id={`scan-source-${asset.id}`}
-              label="From location"
+              label={t("scanner.assignCustodyDrawer.fromLocation")}
               options={sourceChoice.options}
               value={sourceChoice.value}
               onChange={(source) =>
@@ -511,7 +517,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
       ) : null}
       {qtyTracked && maxAllowed > 0 && rowMax === 0 ? (
         <span className="shrink-0 whitespace-nowrap text-xs text-gray-500">
-          None left here
+          {t("scanner.assignCustodyDrawer.noneLeftHere")}
         </span>
       ) : null}
     </div>
@@ -519,6 +525,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   // Use predefined presets to create label configurations
   const availabilityConfigs = [
     kitLabelPresets.inCustody(kit.status === AssetStatus.IN_CUSTODY),
@@ -541,7 +548,9 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
       <p className="word-break whitespace-break-spaces font-medium">
         {kit.name}{" "}
         <span className="text-[12px] font-normal text-gray-700">
-          ({kit._count.assetKits} assets)
+          {t("scanner.assignCustodyDrawer.assets", {
+            assetKits: kit._count.assetKits,
+          })}
         </span>
       </p>
 
@@ -553,7 +562,7 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.assignCustodyDrawer.kit")}
         </span>
         <KitAvailabilityLabels />
       </div>
@@ -572,6 +581,7 @@ function SubmittingDialog({
   custodyState: CustodyState;
   cleanupState: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <AlertDialog
       open={open}
@@ -582,7 +592,9 @@ function SubmittingDialog({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Assigning custody</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("scanner.assignCustodyDrawer.assigningCustody")}
+          </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="flex flex-col gap-4">
               <SubmissionState
@@ -605,7 +617,7 @@ function SubmittingDialog({
           <div className="flex justify-center gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary">
-                Done
+                {t("scanner.assignCustodyDrawer.done")}
               </Button>
             </AlertDialogCancel>
           </div>
@@ -626,6 +638,7 @@ function SubmissionState({
   errorMessage?: string;
   custodianName?: string;
 }) {
+  const { t } = useTranslation();
   // Return null for skipped status to hide the component entirely
   if (status === "skipped") {
     return null;
@@ -635,7 +648,9 @@ function SubmissionState({
     return (
       <div className="flex flex-row gap-2">
         <Spinner />
-        <TextLoader text={`Assigning custody to ${type}s`} />
+        <TextLoader
+          text={t("scanner.assignCustodyDrawer.assigningCustodyToS", { type })}
+        />
       </div>
     );
   } else if (status === "success") {
@@ -645,8 +660,12 @@ function SubmissionState({
           <CheckmarkIcon />
         </span>
         <div className="font-mono">
-          {type === "asset" ? "Assets" : "Kits"} are now in custody of{" "}
-          {custodianName}
+          {type === "asset"
+            ? t("scanner.assignCustodyDrawer.assets2")
+            : t("scanner.assignCustodyDrawer.kits")}{" "}
+          {t("scanner.assignCustodyDrawer.areNowInCustodyOf", {
+            custodianName,
+          })}
         </div>
       </div>
     );
@@ -655,11 +674,14 @@ function SubmissionState({
       <div>
         <div className="flex flex-row items-center gap-2 text-left">
           <CircleX className="size-[18px] text-error-500" />
-          <div className="font-mono">Failed to assign custody to {type}s.</div>
+          <div className="font-mono">
+            {t("scanner.assignCustodyDrawer.failedToAssignCustodyTo", { type })}
+          </div>
         </div>
         {errorMessage && (
           <span className="text-[12px] text-error-500">
-            <strong>Error:</strong> {errorMessage}
+            <strong>{t("scanner.assignCustodyDrawer.error")}</strong>{" "}
+            {errorMessage}
           </span>
         )}
       </div>

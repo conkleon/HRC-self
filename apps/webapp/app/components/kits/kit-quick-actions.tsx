@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Kit } from "@prisma/client";
 import { PencilIcon, QrCodeIcon, Trash2Icon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useOrganizationRoles } from "~/hooks/use-organization-roles";
 import {
   PermissionAction,
@@ -24,6 +25,7 @@ export default function KitQuickActions({
   style,
   kit,
 }: KitQuickActionsProps) {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
 
   return (
@@ -40,8 +42,8 @@ export default function KitQuickActions({
           variant="secondary"
           className={"p-2"}
           to={`/kits/${kit.id}/edit`}
-          aria-label="Edit kit information"
-          tooltip="Edit kit information"
+          aria-label={t("kits.kitQuickActions.editKitInformation")}
+          tooltip={t("kits.kitQuickActions.editKitInformation")}
         >
           <PencilIcon className="size-4" />
         </Button>
@@ -67,8 +69,8 @@ export default function KitQuickActions({
               size="sm"
               variant="secondary"
               className="p-2"
-              aria-label="Show kit codes"
-              tooltip="Show kit codes"
+              aria-label={t("kits.kitQuickActions.showKitCodes")}
+              tooltip={t("kits.kitQuickActions.showKitCodes")}
             >
               <QrCodeIcon className="size-4" />
             </Button>
@@ -91,8 +93,8 @@ export default function KitQuickActions({
               size="sm"
               variant="secondary"
               className={"p-2"}
-              aria-label="Delete kit"
-              tooltip="Delete kit"
+              aria-label={t("kits.kitQuickActions.deleteKit")}
+              tooltip={t("kits.kitQuickActions.deleteKit")}
             >
               <Trash2Icon className="size-4" />
             </Button>

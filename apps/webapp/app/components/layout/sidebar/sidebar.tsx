@@ -14,6 +14,7 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
 import { MenuIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useFetcher, useLocation } from "react-router";
 import Input from "~/components/forms/input";
 import { SwitchIcon } from "~/components/icons/library";
@@ -334,6 +335,7 @@ const SidebarTrigger = forwardRef<
   ElementRef<typeof Button>,
   ComponentProps<typeof Button> & { iconClassName?: string }
 >(({ className, onClick, iconClassName, ...props }, ref) => {
+  const { t } = useTranslation();
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -354,7 +356,7 @@ const SidebarTrigger = forwardRef<
       <MenuIcon
         className={tw("block size-6 text-gray-500 md:hidden", iconClassName)}
       />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t("nav.sidebar.toggleSidebar")}</span>
     </Button>
   );
 });
@@ -362,16 +364,17 @@ SidebarTrigger.displayName = "SidebarTrigger";
 
 const SidebarRail = forwardRef<HTMLButtonElement, ComponentProps<"button">>(
   ({ className, ...props }, ref) => {
+    const { t } = useTranslation();
     const { toggleSidebar } = useSidebar();
 
     return (
       <button
         ref={ref}
         data-sidebar="rail"
-        aria-label="Toggle Sidebar"
+        aria-label={t("nav.sidebar.toggleSidebar")}
         tabIndex={-1}
         onClick={toggleSidebar}
-        title="Toggle Sidebar"
+        title={t("nav.sidebar.toggleSidebar")}
         className={tw(
           "absolute inset-y-0 z-50 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] group-data-[side=left]:-right-4 group-data-[side=right]:left-0 hover:after:bg-sidebar-border sm:flex",
           "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",

@@ -14,6 +14,7 @@
  *   loader/action that persists this setting via `updateBookingSettings`.
  */
 
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { useZorm } from "react-zorm";
 import z from "zod";
@@ -52,6 +53,7 @@ export function ProgressiveCheckinSettings({
   header: { title: string; subHeading?: string };
   defaultValue: boolean;
 }) {
+  const { t } = useTranslation();
   const fetcher = useFetcher();
   const disabled = useDisabled();
   const zo = useZorm("CountKitsAsUnitForm", CountKitsAsUnitSettingsSchema);
@@ -73,11 +75,12 @@ export function ProgressiveCheckinSettings({
           onChange={(e) => void fetcher.submit(e.currentTarget)}
         >
           <FormRow
-            rowLabel="Count each kit as a single unit"
+            rowLabel={t("bookings.progressiveCheckinSettings.countEachKitAsA")}
             subHeading={
               <div>
-                When visualising the state of a booking, treat each kit as one
-                unit rather than counting the assets inside it.
+                {t(
+                  "bookings.progressiveCheckinSettings.whenVisualisingTheStateOf"
+                )}
               </div>
             }
             className="border-b-0 pb-[10px] pt-0"
@@ -88,10 +91,10 @@ export function ProgressiveCheckinSettings({
                 name={countKitsField}
                 disabled={disabled}
                 defaultChecked={defaultValue}
-                title="Count each kit as a single unit"
+                title={t("bookings.progressiveCheckinSettings.countEachKitAsA")}
               />
               <label htmlFor={countKitsFieldId} className="sr-only">
-                Count each kit as a single unit
+                {t("bookings.progressiveCheckinSettings.countEachKitAsA")}
               </label>
             </div>
           </FormRow>

@@ -24,6 +24,7 @@
  * @see {@link file://./asset-model-sheet-empty-state.ts} The empty-sheet wording
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher, useLocation } from "react-router";
 import { AssetIndexSettingsProvider } from "~/context/asset-index-settings-context";
 import { useAssetIndexColumns } from "~/hooks/use-asset-index-columns";
@@ -94,6 +95,7 @@ export function AssetModelAssetsSheet({
   title: string;
   matchingAssets: number;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   /** The `endpoint:search` the currently-held `fetcher.data` was loaded for. */
   const loadedKeyRef = useRef<string | null>(null);
@@ -200,7 +202,10 @@ export function AssetModelAssetsSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button type="button" variant="link-gray">
-          {matchingAssets} {matchingAssets === 1 ? "asset" : "assets"}
+          {matchingAssets}{" "}
+          {matchingAssets === 1
+            ? t("assets.assetModelAssetsSheet.asset")
+            : t("assets.assetModelAssetsSheet.assets")}
         </Button>
       </SheetTrigger>
 
@@ -238,7 +243,7 @@ export function AssetModelAssetsSheet({
             <div className="flex h-32 flex-col items-center justify-center gap-2 px-6 text-center">
               <p className="text-sm text-gray-600">{loadError.message}</p>
               <Button type="button" variant="secondary" onClick={retry}>
-                Try again
+                {t("assets.assetModelAssetsSheet.tryAgain")}
               </Button>
             </div>
           ) : assets.length === 0 ? (
@@ -290,7 +295,7 @@ export function AssetModelAssetsSheet({
                         freezeColumnClassNames.sheetNameHeader
                       )}
                     >
-                      Name
+                      {t("assets.assetModelAssetsSheet.name")}
                     </Th>
                     <AdvancedTableHeader columns={columns} />
                   </tr>
@@ -309,7 +314,7 @@ export function AssetModelAssetsSheet({
 
         <div className="border-t pt-3">
           <Button variant="secondary" to={viewAllHref}>
-            View all in list →
+            {t("assets.assetModelAssetsSheet.viewAllInList")}
           </Button>
         </div>
       </SheetContent>

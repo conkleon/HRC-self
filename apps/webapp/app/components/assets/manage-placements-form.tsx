@@ -25,6 +25,7 @@
  * @see {@link file://./../../modules/asset/service.server.ts} — `replaceAssetPlacements`
  */
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Form } from "~/components/custom-form";
 import { Button } from "~/components/shared/button";
 import { useDisabled } from "~/hooks/use-disabled";
@@ -99,6 +100,7 @@ export function ManagePlacementsForm({
   kitDrivenPlacements,
   serverErrorMessage,
 }: ManagePlacementsFormProps) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const unit = unitOfMeasure || "units";
   const totalPool = assetQuantity ?? 1;
@@ -269,18 +271,22 @@ export function ManagePlacementsForm({
       {kitDriven.length > 0 ? (
         <div className="mb-4 space-y-2">
           <p className="text-xs font-medium text-gray-500">
-            Placements managed by kits (read-only)
+            {t("assets.managePlacementsForm.placementsManagedByKitsRead")}
           </p>
           {kitDriven.map((p) => (
             <div
               key={`${p.locationId}-${p.kit.id}`}
               className="flex items-center justify-between gap-2 rounded-md border border-blue-100 bg-blue-50/50 p-2 text-sm"
-              title={`Change the kit "${p.kit.name}" (location or per-asset qty) to modify this placement.`}
+              title={t("assets.managePlacementsForm.changeTheKitLocationOr", {
+                name: p.kit.name,
+              })}
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate text-gray-700">{p.locationName}</span>
                 <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                  via kit {p.kit.name}
+                  {t("assets.managePlacementsForm.viaKit", {
+                    name: p.kit.name,
+                  })}
                 </span>
               </div>
               {isQty ? (
@@ -307,7 +313,9 @@ export function ManagePlacementsForm({
               className="h-9 min-w-0 flex-1 rounded-md border border-gray-300 px-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               aria-label={`Location for placement ${idx + 1}`}
             >
-              <option value="">— Select a location —</option>
+              <option value="">
+                {t("assets.managePlacementsForm.selectALocation")}
+              </option>
               {availableLocations(row.locationId).map((loc) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.name}
@@ -353,7 +361,9 @@ export function ManagePlacementsForm({
           disabled={disabled || !canAddRow}
           onClick={addRow}
         >
-          + Add{rows.length > 0 ? " another" : ""} location
+          {rows.length > 0
+            ? t("assets.managePlacementsForm.addAnotherLocation")
+            : t("assets.managePlacementsForm.addLocation")}
         </Button>
       </div>
 
@@ -364,14 +374,14 @@ export function ManagePlacementsForm({
       {isQty ? (
         <div className="mb-4 rounded-md border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
           <div className="flex justify-between text-gray-700">
-            <span>Placed (manual)</span>
+            <span>{t("assets.managePlacementsForm.placedManual")}</span>
             <span className="tabular-nums">
               {placedSum} / {totalPool} {unit}
             </span>
           </div>
           {kitDrivenSum > 0 ? (
             <div className="flex justify-between text-blue-700">
-              <span>Via kits</span>
+              <span>{t("assets.managePlacementsForm.viaKits")}</span>
               <span className="tabular-nums">
                 {kitDrivenSum} {unit}
               </span>
@@ -379,14 +389,14 @@ export function ManagePlacementsForm({
           ) : null}
           {overPlacedBy > 0 ? (
             <div className="flex justify-between text-error-700">
-              <span>Over-placed</span>
+              <span>{t("assets.managePlacementsForm.overPlaced")}</span>
               <span className="tabular-nums">
                 {overPlacedBy} {unit}
               </span>
             </div>
           ) : (
             <div className="flex justify-between text-gray-500">
-              <span>Unplaced</span>
+              <span>{t("assets.managePlacementsForm.unplaced")}</span>
               <span className="tabular-nums">
                 {unplaced} {unit}
               </span>
@@ -411,7 +421,7 @@ export function ManagePlacementsForm({
 
       <div className="flex gap-3">
         <Button to=".." variant="secondary" width="full" disabled={disabled}>
-          Cancel
+          {t("assets.managePlacementsForm.cancel")}
         </Button>
         <Button
           type="submit"
@@ -419,7 +429,7 @@ export function ManagePlacementsForm({
           width="full"
           disabled={disabled || !!clientError}
         >
-          Save placements
+          {t("assets.managePlacementsForm.savePlacements")}
         </Button>
       </div>
     </Form>

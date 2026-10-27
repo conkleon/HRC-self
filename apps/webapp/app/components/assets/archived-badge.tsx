@@ -15,6 +15,7 @@
  */
 
 import { ArchiveIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import { Badge } from "../shared/badge";
 
@@ -25,6 +26,7 @@ import { Badge } from "../shared/badge";
  * @param props.className - Optional extra classes forwarded to the Badge.
  */
 export function ArchivedBadge({ className }: { className?: string }) {
+  const { t } = useTranslation();
   return (
     <Badge
       color={BADGE_COLORS.gray.bg}
@@ -34,7 +36,7 @@ export function ArchivedBadge({ className }: { className?: string }) {
     >
       <span className="flex items-center gap-1">
         <ArchiveIcon className="size-3" aria-hidden />
-        Archived
+        {t("assets.archivedBadge.archived")}
       </span>
     </Badge>
   );

@@ -35,6 +35,7 @@ import type { ReactNode } from "react";
 import { useEffect, useReducer, useRef, useState } from "react";
 import type { ConsumptionType, User } from "@prisma/client";
 import { releaseCategory } from "@shelf/quantity-control";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useFetcher } from "react-router";
 import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
@@ -168,6 +169,7 @@ export function QuantityCustodyList({
   sources,
   otherHoldersCount,
 }: QuantityCustodyListProps) {
+  const { t } = useTranslation();
   const unitLabel = unitOfMeasure || "units";
   const allRecords = custody ?? [];
   const multiSource = Boolean(sources?.multiSource);
@@ -217,7 +219,7 @@ export function QuantityCustodyList({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
         <h3 className="text-[14px] font-semibold text-gray-900">
-          Custody Breakdown
+          {t("assets.quantityCustodyList.custodyBreakdown")}
         </h3>
         {canCustody ? (
           <QuantityCustodyDialog
@@ -240,7 +242,7 @@ export function QuantityCustodyList({
                     : false
                 }
               >
-                Assign
+                {t("assets.quantityCustodyList.assign")}
               </Button>
             }
           />
@@ -267,17 +269,21 @@ export function QuantityCustodyList({
           </ul>
           {hiddenCount > 0 ? (
             <div className="border-t border-gray-100 px-4 py-3 text-[12px] text-gray-500">
-              +{hiddenCount} other {hiddenCount === 1 ? "person" : "people"}{" "}
-              also {hiddenCount === 1 ? "has" : "have"} custody of this asset.
+              {t("assets.quantityCustodyList.othersHaveCustody", {
+                count: hiddenCount,
+              })}
             </div>
           ) : null}
         </>
       ) : (
         <div className="px-4 py-6 text-center text-sm text-gray-500">
-          No custody assigned.
+          {t("assets.quantityCustodyList.noCustodyAssigned")}
           {availableQuantity != null ? (
             <span className="mt-1 block">
-              {availableQuantity} {unitLabel} available
+              {t("assets.quantityCustodyList.available", {
+                availableQuantity,
+                unitLabel,
+              })}
             </span>
           ) : null}
         </div>
@@ -416,16 +422,21 @@ function KitCustodyBadge({
 }: {
   kit?: { id: string; name: string } | null;
 }) {
+  const { t } = useTranslation();
   const tooltipBody = kit ? (
     <span className="block">
-      Held via kit{" "}
-      <Link
-        to={`/kits/${kit.id}`}
-        className="font-medium text-primary-600 underline"
-      >
-        {kit.name}
-      </Link>
-      . Release the kit's custody to clear this allocation.
+      <Trans
+        t={t}
+        i18nKey="assets.quantityCustodyList.heldViaKit00"
+        values={{ name: kit.name }}
+        components={[
+          <Link
+            key="slot0"
+            to={`/kits/${kit.id}`}
+            className="font-medium text-primary-600 underline"
+          />,
+        ]}
+      />
     </span>
   ) : (
     "Held via a kit's custody. Release the kit's custody to clear this allocation."
@@ -436,7 +447,7 @@ function KitCustodyBadge({
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="cursor-help rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-            Via kit
+            {t("assets.quantityCustodyList.viaKit")}
           </span>
         </TooltipTrigger>
         <TooltipContent side="left" className="max-w-xs text-xs">
@@ -571,6 +582,7 @@ function ReleaseButton({
   isConsumable = false,
   source = null,
 }: ReleaseButtonProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const fetcher = useFetcher({ key: fetcherKey });
   const sourceInfo = source
@@ -624,27 +636,33 @@ function ReleaseButton({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button type="button" variant="secondary" className="py-1 text-xs">
-          {isConsumable ? "Mark as consumed" : "Release"}
+          {isConsumable
+            ? t("assets.quantityCustodyList.markAsConsumed")
+            : t("assets.quantityCustodyList.release")}
         </Button>
       </AlertDialogTrigger>
 
       <AlertDialogContent onEscapeKeyDown={() => setOpen(false)}>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {isConsumable ? "Mark as consumed" : "Release Quantity"}
+            {isConsumable
+              ? t("assets.quantityCustodyList.markAsConsumed")
+              : t("assets.quantityCustodyList.releaseQuantity")}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isConsumable ? (
               <>
-                Choose how many {unitLabel} leave this custodian's hold, and how
-                many of those were used up. Used-up units permanently reduce
-                total stock and cannot be restored; the rest go back to the
-                available pool. Maximum: {maxQuantity}.
+                {t("assets.quantityCustodyList.chooseHowManyLeaveThis", {
+                  unitLabel,
+                  maxQuantity,
+                })}
               </>
             ) : (
               <>
-                Enter the number of {unitLabel} to release back to the available
-                pool. Maximum: {maxQuantity}.
+                {t("assets.quantityCustodyList.enterTheNumberOfTo", {
+                  unitLabel,
+                  maxQuantity,
+                })}
               </>
             )}
           </AlertDialogDescription>
@@ -681,7 +699,9 @@ function ReleaseButton({
                   ref={quantityInputRef}
                   name="quantity"
                   type="number"
-                  label={`Units to release (${unitLabel})`}
+                  label={t("assets.quantityCustodyList.unitsToRelease", {
+                    unitLabel,
+                  })}
                   min={1}
                   max={maxQuantity}
                   step={1}
@@ -699,7 +719,7 @@ function ReleaseButton({
                 <Input
                   name="consumed"
                   type="number"
-                  label="Of those, how many were used up?"
+                  label={t("assets.quantityCustodyList.ofThoseHowManyWere")}
                   min={0}
                   max={form.quantity}
                   step={1}
@@ -714,8 +734,11 @@ function ReleaseButton({
                 />
 
                 <p className="text-[12px] text-gray-500">
-                  {form.consumed} of {form.quantity} {unitLabel} will be removed
-                  from stock permanently
+                  {t("assets.quantityCustodyList.ofWillBeRemovedFrom", {
+                    consumed: form.consumed,
+                    quantity: form.quantity,
+                    unitLabel,
+                  })}
                   {form.quantity - form.consumed > 0
                     ? `; the remaining ${
                         form.quantity - form.consumed
@@ -729,8 +752,10 @@ function ReleaseButton({
                 ref={quantityInputRef}
                 name="quantity"
                 type="number"
-                label={`Quantity (${unitLabel})`}
-                placeholder={`Max: ${maxQuantity}`}
+                label={t("assets.quantityCustodyList.quantity", { unitLabel })}
+                placeholder={t("assets.quantityCustodyList.max", {
+                  maxQuantity,
+                })}
                 min={1}
                 max={maxQuantity}
                 step={1}
@@ -748,11 +773,11 @@ function ReleaseButton({
             <Input
               name="note"
               inputType="textarea"
-              label="Note (optional)"
+              label={t("assets.quantityCustodyList.noteOptional")}
               placeholder={
                 isConsumable
-                  ? "What were they used for..."
-                  : "Reason for release..."
+                  ? t("assets.quantityCustodyList.whatWereTheyUsedFor")
+                  : t("assets.quantityCustodyList.reasonForRelease")
               }
               rows={2}
             />
@@ -761,7 +786,7 @@ function ReleaseButton({
           <AlertDialogFooter className="mt-4 gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary" disabled={isSubmitting}>
-                Cancel
+                {t("assets.quantityCustodyList.cancel")}
               </Button>
             </AlertDialogCancel>
 
@@ -769,10 +794,10 @@ function ReleaseButton({
               {isConsumable
                 ? isSubmitting
                   ? "Marking..."
-                  : "Mark as consumed"
+                  : t("assets.quantityCustodyList.markAsConsumed")
                 : isSubmitting
                 ? "Releasing..."
-                : "Release"}
+                : t("assets.quantityCustodyList.release")}
             </Button>
           </AlertDialogFooter>
         </fetcher.Form>

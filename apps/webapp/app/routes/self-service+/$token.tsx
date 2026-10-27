@@ -40,6 +40,7 @@
  */
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -725,6 +726,7 @@ function Shell({
   scrollKey: string;
   resetOn: unknown;
 }) {
+  const { t } = useTranslation();
   const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
@@ -741,7 +743,7 @@ function Shell({
         >
           <Link
             to="/"
-            title="Home"
+            title={t("custody.token.home")}
             className="logo mx-auto inline-block h-[32px]"
             reloadDocument
           >
@@ -762,6 +764,7 @@ function Shell({
 }
 
 export default function SelfServiceBrowsePage() {
+  const { t } = useTranslation();
   const loaderData = useLoaderData<typeof loader>();
   const actionData = useActionData<
     DataOrErrorResponse & {
@@ -790,24 +793,25 @@ export default function SelfServiceBrowsePage() {
       }
       resetOn={actionData}
     >
-      <h1 className="mb-1 text-[24px] font-semibold">Take or return items</h1>
+      <h1 className="mb-1 text-[24px] font-semibold">
+        {t("custody.token.takeOrReturnItems")}
+      </h1>
       <p className="mb-6 text-gray-600">{loaderData.workspaceName}</p>
 
       {loaderData.view === "off" ? (
         <p className="text-gray-700">
-          Self-service is turned off for this workspace. Please ask a staff
-          member.
+          {t("custody.token.selfServiceIsTurnedOff")}
         </p>
       ) : loaderData.view === "locked" ? (
         <PinForm error={errorMessage} />
       ) : loaderData.view === "no-items" ? (
         <p className="text-gray-700">
-          No items are offered for self-service yet. Please ask a staff member.
+          {t("custody.token.noItemsAreOfferedFor")}
         </p>
       ) : loaderData.view === "identify" ? (
         <>
           <p className="mb-4 text-left text-gray-700">
-            First, tell us who you are.
+            {t("custody.token.firstTellUsWhoYou")}
           </p>
           <VolunteerPicker
             error={nameError || emailError ? null : errorMessage}

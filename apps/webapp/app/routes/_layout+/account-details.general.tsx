@@ -239,6 +239,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
           timeFormat: parsedData.timeFormat,
           weekStart: parsedData.weekStart,
           timeZone: parsedData.timeZone,
+          locale: parsedData.locale,
         });
 
         sendNotification({

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LogOutIcon, UserPenIcon, UserRoundIcon, Wallet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useFetcher, useLoaderData } from "react-router";
 import { ChevronRight } from "~/components/icons/library";
 import {
@@ -20,6 +21,7 @@ import {
 } from "./sidebar";
 
 export default function SidebarUserMenu() {
+  const { t } = useTranslation();
   const { user } = useLoaderData<typeof loader>();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { isMobile } = useSidebar();
@@ -84,7 +86,7 @@ export default function SidebarUserMenu() {
             >
               <NavLink to="/me">
                 <UserPenIcon className="size-4" />
-                My Profile
+                {t("nav.sidebarUserMenu.myProfile")}
               </NavLink>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -94,7 +96,7 @@ export default function SidebarUserMenu() {
             >
               <NavLink to="/account-details">
                 <UserRoundIcon className="size-4" />
-                Account settings
+                {t("nav.sidebarUserMenu.accountSettings")}
               </NavLink>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -104,7 +106,7 @@ export default function SidebarUserMenu() {
             >
               <NavLink to="/account-details/subscription">
                 <Wallet className="size-4" />
-                Subscriptions
+                {t("nav.sidebarUserMenu.subscriptions")}
               </NavLink>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -112,7 +114,7 @@ export default function SidebarUserMenu() {
               onSelect={logOut}
             >
               <LogOutIcon className="size-4" />
-              Log Out
+              {t("nav.sidebarUserMenu.logOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

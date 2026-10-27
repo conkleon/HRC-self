@@ -10,6 +10,7 @@
  * @see {@link file://./kits.$kitId.assets.tsx} the tab this modal sits over
  */
 import { MapPinIcon } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -139,6 +140,7 @@ export async function action({ params, request, context }: ActionFunctionArgs) {
  * The modal's form: a location picker, the cascade warning, and confirm/cancel.
  */
 export default function UpdateKitLocation() {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const { kit } = useLoaderData<typeof loader>();
   /**
@@ -155,20 +157,23 @@ export default function UpdateKitLocation() {
           <MapPinIcon />
         </div>
         <div className="mb-5">
-          <h4>Update location</h4>
+          <h4>{t("kits.kitsKitidAssetsUpdateLocation.updateLocation")}</h4>
           <p>
-            Adjust the location of{" "}
+            {t("kits.kitsKitidAssetsUpdateLocation.adjustTheLocationOf")}{" "}
             <span className="font-medium">{kit.name}</span>.
           </p>
           {kit._count.assetKits > 0 && (
             <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-3">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> This will also update the location of all{" "}
-                <span className="font-medium">
-                  {kit._count.assetKits} asset
-                  {kit._count.assetKits > 1 ? "s" : ""}
-                </span>{" "}
-                within this kit.
+                <Trans
+                  t={t}
+                  i18nKey="kits.kitsKitidAssetsUpdateLocation.alsoUpdatesAssets"
+                  count={kit._count.assetKits}
+                  components={{
+                    bold: <strong />,
+                    em: <span className="font-medium" />,
+                  }}
+                />
               </p>
             </div>
           )}
@@ -185,7 +190,7 @@ export default function UpdateKitLocation() {
 
         <div className="flex gap-3">
           <Button to=".." variant="secondary" width="full" disabled={disabled}>
-            Cancel
+            {t("kits.kitsKitidAssetsUpdateLocation.cancel")}
           </Button>
           <Button
             variant="primary"
@@ -193,7 +198,7 @@ export default function UpdateKitLocation() {
             type="submit"
             disabled={disabled}
           >
-            Confirm
+            {t("kits.kitsKitidAssetsUpdateLocation.confirm")}
           </Button>
         </div>
       </div>

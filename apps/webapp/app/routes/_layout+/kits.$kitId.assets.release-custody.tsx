@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { data, redirect, useLoaderData, useNavigation } from "react-router";
 
@@ -139,6 +140,7 @@ export function links() {
 }
 
 export default function ReleaseKitCustody() {
+  const { t } = useTranslation();
   const { kit } = useLoaderData<typeof loader>();
 
   const navigation = useNavigation();
@@ -153,17 +155,21 @@ export default function ReleaseKitCustody() {
           <UserXIcon />
         </div>
         <div className="mb-5">
-          <h4>Release custody of kit</h4>
+          <h4>{t("kits.kitsKitidAssetsReleaseCustody.releaseCustodyOfKit")}</h4>
           <p>
-            Are you sure you want to release{" "}
-            {assignsSelfOnly ? (
-              "your"
-            ) : (
-              <span className="font-medium">
-                {resolveTeamMemberName(kit.custody.custodian)}’s
-              </span>
-            )}{" "}
-            custody over <span className="font-medium">{kit.name}</span>?
+            <Trans
+              t={t}
+              i18nKey={
+                assignsSelfOnly
+                  ? "kits.kitsKitidAssetsReleaseCustody.confirmOwn"
+                  : "kits.kitsKitidAssetsReleaseCustody.confirmOther"
+              }
+              values={{
+                kit: kit.name,
+                custodian: resolveTeamMemberName(kit.custody.custodian),
+              }}
+              components={{ bold: <span className="font-medium" /> }}
+            />
           </p>
         </div>
         <div className="">
@@ -179,7 +185,7 @@ export default function ReleaseKitCustody() {
               width="full"
               disabled={disabled}
             >
-              Cancel
+              {t("kits.kitsKitidAssetsReleaseCustody.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -187,7 +193,7 @@ export default function ReleaseKitCustody() {
               type="submit"
               disabled={disabled}
             >
-              Confirm
+              {t("kits.kitsKitidAssetsReleaseCustody.confirm")}
             </Button>
           </Form>
         </div>

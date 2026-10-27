@@ -4,6 +4,7 @@ import type { BarcodeType } from "@prisma/client";
 import { TriangleLeftIcon } from "@radix-ui/react-icons";
 import { useAtom } from "jotai";
 import { ArrowRight, Camera, CameraIcon, ScanQrCode } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import Webcam from "react-webcam";
 import { ClientOnly } from "remix-utils/client-only";
@@ -167,6 +168,7 @@ export const CodeScanner = ({
   overlayPosition = "fullscreen",
   savedCameraId,
 }: CodeScannerProps) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { isMd } = useViewportHeight();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -284,10 +286,12 @@ export const CodeScanner = ({
                 >
                   <TabsList>
                     <TabsTrigger value="scanner" disabled={isLoading || paused}>
-                      <ScanQrCode className="mr-2 size-5" /> Scanner
+                      <ScanQrCode className="mr-2 size-5" />{" "}
+                      {t("scanner.codeScanner.scanner")}
                     </TabsTrigger>
                     <TabsTrigger value="camera" disabled={isLoading || paused}>
-                      <CameraIcon className="mr-2 size-5" /> Camera
+                      <CameraIcon className="mr-2 size-5" />{" "}
+                      {t("scanner.codeScanner.camera")}
                     </TabsTrigger>
                   </TabsList>
                   {/* Empty TabsContent elements required for ARIA compliance.
@@ -362,7 +366,8 @@ export const CodeScanner = ({
                     <ErrorIcon />
                   </span>
                   <h5 className="mb-2">
-                    {errorTitle || "Unsupported Barcode detected"}
+                    {errorTitle ||
+                      t("scanner.codeScanner.unsupportedBarcodeDetected")}
                   </h5>
                   <p className="mb-4 max-w-[300px] text-red-600">
                     {errorMessage}
@@ -373,22 +378,26 @@ export const CodeScanner = ({
                     variant="secondary"
                     className="mt-2"
                   >
-                    Scan again
+                    {t("scanner.codeScanner.scanAgain")}
                   </Button>
                 </>
               ) : (
                 <>
-                  <h5>Code detected</h5>
+                  <h5>{t("scanner.codeScanner.codeDetected")}</h5>
 
                   {typeof scanMessage === "string" ? (
                     <>
                       <ClientOnly fallback={null}>
                         {() => <SuccessAnimation />}
                       </ClientOnly>
-                      <p>{scanMessage || "Scanner paused"}</p>
+                      <p>
+                        {scanMessage || t("scanner.codeScanner.scannerPaused")}
+                      </p>
                     </>
                   ) : (
-                    scanMessage || <p>Scanner paused</p>
+                    scanMessage || (
+                      <p>{t("scanner.codeScanner.scannerPaused")}</p>
+                    )
                   )}
                 </>
               )}
@@ -420,6 +429,7 @@ function ScannerMode({
   callback?: (input: HTMLInputElement, paused: boolean) => void;
   action?: ActionType;
 }) {
+  const { t } = useTranslation();
   const [inputIsFocused, setInputIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState("");
   // Focus the scanner input on mount so users can start scanning immediately.
@@ -491,10 +501,10 @@ function ScannerMode({
             name="code"
             label={
               paused
-                ? "Scanner paused"
+                ? t("scanner.codeScanner.scannerPaused")
                 : inputIsFocused
-                ? "Waiting for scan..."
-                : "Please click on the text field before scanning"
+                ? t("scanner.codeScanner.waitingForScan")
+                : t("scanner.codeScanner.pleaseClickOnTheText")
             }
             icon={inputIsFocused ? "qr-code" : "mouse-pointer-click"}
             iconClassName={tw(
@@ -512,13 +522,15 @@ function ScannerMode({
             disabled={paused || !inputValue.trim()}
             variant="secondary"
             className="absolute bottom-1 right-1"
-            aria-label={`Submit scanned code: ${inputValue}`}
+            aria-label={t("scanner.codeScanner.submitScannedCode", {
+              inputValue,
+            })}
           >
             <ArrowRight className="size-4" />
           </Button>
         </div>
         <p className="relative mt-2 text-xs text-white/70">
-          Scan with your barcode scanner, or type a code and press Enter.
+          {t("scanner.codeScanner.scanWithYourBarcodeScanner")}
         </p>
       </div>
     </div>
@@ -608,6 +620,7 @@ function CameraMode({
   /** Saved camera ID from user preferences - used for initial constraint */
   savedCameraId?: string;
 }) {
+  const { t } = useTranslation();
   const videoRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrame = useRef<number>(0);
@@ -828,13 +841,15 @@ function CameraMode({
             <Camera className="size-12 text-white/50" />
           </div>
           <p className="mb-4">{error}</p>
-          <p className="mb-4">If the issue persists, please contact support.</p>
+          <p className="mb-4">
+            {t("scanner.codeScanner.ifTheIssuePersistsPlease")}
+          </p>
           <Button
             type="button"
             onClick={() => window.location.reload()}
             variant="secondary"
           >
-            Reload Page
+            {t("scanner.codeScanner.reloadPage")}
           </Button>
         </InfoOverlay>
       )}
@@ -901,6 +916,7 @@ function InfoOverlay({ children }: { children: ReactNode }) {
  * If the process takes more than 10 seconds we can safely assume something went wrong and we give the user the option to reload the page
  */
 function Initializing() {
+  const { t } = useTranslation();
   const [expired, setExpired] = useState(false);
 
   useEffect(() => {
@@ -915,8 +931,8 @@ function Initializing() {
       </div>
       <Spinner className="mx-auto mb-2" />
       {expired
-        ? "Camera initialization is taking longer than expected. Please reload the page"
-        : "Initializing camera..."}
+        ? t("scanner.codeScanner.cameraInitializationIsTakingLonger")
+        : t("scanner.codeScanner.initializingCamera")}
       {expired && (
         <div>
           <Button
@@ -925,7 +941,7 @@ function Initializing() {
             onClick={() => window.location.reload()}
             className={"mt-4"}
           >
-            Reload page
+            {t("scanner.codeScanner.reloadPage2")}
           </Button>
         </div>
       )}

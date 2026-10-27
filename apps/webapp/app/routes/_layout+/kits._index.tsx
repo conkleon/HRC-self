@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Prisma } from "@prisma/client";
 import { KitStatus } from "@prisma/client";
+import { Trans, useTranslation } from "react-i18next";
 import type {
   MetaFunction,
   LoaderFunctionArgs,
@@ -316,6 +317,7 @@ export const handle = {
 };
 
 export default function KitsIndexPage() {
+  const { t } = useTranslation();
   const { items } = useLoaderData<typeof loader>();
   const roles = useOrganizationRoles();
   /**
@@ -351,8 +353,8 @@ export default function KitsIndexPage() {
     <>
       <Header>
         {canCreateKit && (
-          <Button to="new" role="link" aria-label="new kit">
-            New kit
+          <Button to="new" role="link" aria-label={t("kits.kitsIndex.newKit2")}>
+            {t("kits.kitsIndex.newKit")}
           </Button>
         )}
       </Header>
@@ -375,7 +377,7 @@ export default function KitsIndexPage() {
             <DynamicDropdown
               trigger={
                 <div className="my-2 flex cursor-pointer items-center gap-2 md:my-0">
-                  Custodian{" "}
+                  {t("kits.kitsIndex.custodian")}{" "}
                   <ChevronRight className="hidden rotate-90 md:inline" />
                 </div>
               }
@@ -386,8 +388,8 @@ export default function KitsIndexPage() {
                 // A read FILTER — the workspace custody override governs.
                 custodyPurpose: "custody-filter",
               }}
-              label="Filter by custodian"
-              placeholder="Search team members"
+              label={t("kits.kitsIndex.filterByCustodian")}
+              placeholder={t("kits.kitsIndex.searchTeamMembers")}
               countKey="totalTeamMembers"
               initialDataKey="teamMembers"
               /*
@@ -461,29 +463,29 @@ export default function KitsIndexPage() {
             }}
             headerChildren={
               <>
-                <Th>Category</Th>
-                <Th>Location</Th>
-                <Th>Description</Th>
-                <Th>Assets</Th>
+                <Th>{t("kits.kitsIndex.category")}</Th>
+                <Th>{t("kits.kitsIndex.location")}</Th>
+                <Th>{t("kits.kitsIndex.description")}</Th>
+                <Th>{t("kits.kitsIndex.assets")}</Th>
                 <Th className="flex items-center gap-1 whitespace-nowrap">
-                  Custodian{" "}
+                  {t("kits.kitsIndex.custodian")}{" "}
                   <InfoTooltip
                     iconClassName="size-4"
                     content={
                       <>
-                        <h6>Asset custody</h6>
+                        <h6>{t("kits.kitsIndex.assetCustody")}</h6>
                         <p>
-                          This column shows if a user has custody of the asset
-                          either via direct assignment or via a booking. If you
-                          see <GrayBadge>private</GrayBadge> that means you
-                          don't have the permissions to see who has custody of
-                          the asset.
+                          <Trans
+                            t={t}
+                            i18nKey="kits.kitsIndex.thisColumnShowsIfA"
+                            components={[<GrayBadge key="slot0" />]}
+                          />
                         </p>
                       </>
                     }
                   />
                 </Th>
-                <Th>Actions</Th>
+                <Th>{t("kits.kitsIndex.actions")}</Th>
               </>
             }
           />

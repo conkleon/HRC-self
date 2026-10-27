@@ -81,6 +81,7 @@ export default {
         items: [
           { text: "App Configuration", link: "/app-configuration" },
           { text: "Instance Branding", link: "/instance-branding" },
+          { text: "Translations (i18n)", link: "/translations" },
           {
             text: "Tracking & Analytics Scripts",
             link: "/tracking-scripts",

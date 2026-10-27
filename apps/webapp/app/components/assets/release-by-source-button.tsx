@@ -16,6 +16,7 @@
  */
 
 import { useEffect, useReducer, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
@@ -144,6 +145,7 @@ export function ReleaseBySourceButton({
   unitLabel,
   isConsumable = false,
 }: ReleaseBySourceButtonProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const fetcher = useFetcher({ key: fetcherKey });
   const disabled = useDisabled(fetcher);
@@ -194,27 +196,33 @@ export function ReleaseBySourceButton({
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <Button type="button" variant="secondary" className="py-1 text-xs">
-          {isConsumable ? "Mark as consumed" : "Release"}
+          {isConsumable
+            ? t("assets.releaseBySourceButton.markAsConsumed")
+            : t("assets.releaseBySourceButton.release")}
         </Button>
       </AlertDialogTrigger>
 
       <AlertDialogContent onEscapeKeyDown={() => setOpen(false)}>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {isConsumable ? "Mark as consumed" : "Release Quantity"}
+            {isConsumable
+              ? t("assets.releaseBySourceButton.markAsConsumed")
+              : t("assets.releaseBySourceButton.releaseQuantity")}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isConsumable ? (
               <>
-                These {unitLabel} came from more than one location. Choose how
-                many leave this custodian's hold from each, and how many of
-                those were used up. Used-up units come off the location they
-                were taken from and cannot be restored. Maximum: {held}.
+                {t("assets.releaseBySourceButton.theseCameFromMoreThan", {
+                  unitLabel,
+                  held,
+                })}
               </>
             ) : (
               <>
-                These {unitLabel} came from more than one location. Enter how
-                many to release from each. Maximum: {held}.
+                {t("assets.releaseBySourceButton.theseCameFromMoreThan2", {
+                  unitLabel,
+                  held,
+                })}
               </>
             )}
           </AlertDialogDescription>
@@ -255,7 +263,10 @@ export function ReleaseBySourceButton({
                     <Input
                       name={`sourceQuantity-${index}`}
                       type="number"
-                      label={`Units, max ${line.max} ${unitLabel}`}
+                      label={t("assets.releaseBySourceButton.unitsMax", {
+                        max: line.max,
+                        unitLabel,
+                      })}
                       min={0}
                       max={line.max}
                       step={1}
@@ -267,7 +278,7 @@ export function ReleaseBySourceButton({
                     <Input
                       name={`sourceConsumed-${index}`}
                       type="number"
-                      label="Of those, used up"
+                      label={t("assets.releaseBySourceButton.ofThoseUsedUp")}
                       min={0}
                       max={line.quantity}
                       step={1}
@@ -287,7 +298,11 @@ export function ReleaseBySourceButton({
                   key={line.source}
                   name={`sourceQuantity-${index}`}
                   type="number"
-                  label={`${line.label}: max ${line.max} ${unitLabel}`}
+                  label={t("assets.releaseBySourceButton.max", {
+                    label: line.label,
+                    max: line.max,
+                    unitLabel,
+                  })}
                   min={0}
                   max={line.max}
                   step={1}
@@ -312,11 +327,11 @@ export function ReleaseBySourceButton({
             <Input
               name="note"
               inputType="textarea"
-              label="Note (optional)"
+              label={t("assets.releaseBySourceButton.noteOptional")}
               placeholder={
                 isConsumable
-                  ? "What were they used for..."
-                  : "Reason for release..."
+                  ? t("assets.releaseBySourceButton.whatWereTheyUsedFor")
+                  : t("assets.releaseBySourceButton.reasonForRelease")
               }
               rows={2}
             />
@@ -325,7 +340,7 @@ export function ReleaseBySourceButton({
           <AlertDialogFooter className="mt-4 gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary" disabled={isSubmitting}>
-                Cancel
+                {t("assets.releaseBySourceButton.cancel")}
               </Button>
             </AlertDialogCancel>
 
@@ -343,10 +358,10 @@ export function ReleaseBySourceButton({
               {isConsumable
                 ? isSubmitting
                   ? "Marking..."
-                  : "Mark as consumed"
+                  : t("assets.releaseBySourceButton.markAsConsumed")
                 : isSubmitting
                 ? "Releasing..."
-                : "Release"}
+                : t("assets.releaseBySourceButton.release")}
             </Button>
           </AlertDialogFooter>
         </fetcher.Form>

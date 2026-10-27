@@ -27,6 +27,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { useZorm } from "react-zorm";
 import DynamicSelect from "~/components/dynamic-select/dynamic-select";
@@ -162,15 +163,14 @@ function FulfilledRequestsList({
 }: {
   modelRequests: ManageModelRequestsRequest[];
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <h3 className="mb-2 text-sm font-semibold text-gray-700">
-        Fulfilled reservations
+        {t("bookings.manageModelRequests.fulfilledReservations")}
       </h3>
       <p className="mb-2 text-xs text-gray-500">
-        These model-level reservations were fulfilled by scanning specific
-        assets. Shown here as an audit trail — edit or remove the concrete
-        assets via the Assets tab.
+        {t("bookings.manageModelRequests.theseModelLevelReservationsWere")}
       </p>
       <ul className="flex flex-col divide-y divide-gray-100 rounded-md border border-gray-200">
         {modelRequests.map((req) => (
@@ -183,7 +183,10 @@ function FulfilledRequestsList({
                 {req.assetModelName}
               </span>
               <span className="text-xs text-gray-500">
-                {req.fulfilledQuantity} of {req.quantity} fulfilled
+                {t("bookings.manageModelRequests.ofFulfilled", {
+                  fulfilledQuantity: req.fulfilledQuantity,
+                  quantity: req.quantity,
+                })}
               </span>
             </div>
             <span
@@ -193,7 +196,7 @@ function FulfilledRequestsList({
                 color: BADGE_COLORS.green.text,
               }}
             >
-              Fulfilled
+              {t("bookings.manageModelRequests.fulfilled")}
             </span>
           </li>
         ))}
@@ -217,15 +220,15 @@ function ExistingRequestsList({
   assetModels: ManageModelRequestsModel[];
   modelRequests: ManageModelRequestsRequest[];
 }) {
+  const { t } = useTranslation();
   if (modelRequests.length === 0) {
     return (
       <div>
         <h3 className="mb-1 text-sm font-semibold text-gray-700">
-          Model reservations
+          {t("bookings.manageModelRequests.modelReservations")}
         </h3>
         <p className="text-sm text-gray-500">
-          No model-level reservations yet. Use the form below to reserve a
-          quantity of a model without picking specific assets.
+          {t("bookings.manageModelRequests.noModelLevelReservationsYet")}
         </p>
       </div>
     );
@@ -234,7 +237,7 @@ function ExistingRequestsList({
   return (
     <div>
       <h3 className="mb-2 text-sm font-semibold text-gray-700">
-        Model reservations
+        {t("bookings.manageModelRequests.modelReservations")}
       </h3>
       <ul className="flex flex-col divide-y divide-gray-100 rounded-md border border-gray-200">
         {modelRequests.map((req) => {
@@ -269,6 +272,7 @@ function ExistingRequestRow({
   /** Matching loader row — missing when the model was deleted out-of-band. */
   model?: ManageModelRequestsModel;
 }) {
+  const { t } = useTranslation();
   // Two fetchers per row — one for the inline upsert (Update button)
   // and one for the DELETE (Remove button). Keyed per-request so
   // multiple rows don't share loading state.
@@ -392,14 +396,18 @@ function ExistingRequestRow({
           </span>
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <span>
-              {request.quantity} reserved
+              {t("bookings.manageModelRequests.reserved", {
+                quantity: request.quantity,
+              })}
               {floor > 0 ? ` · ${floor} assigned` : null}
               {model ? ` · ${model.total} total in workspace` : null}
             </span>
             {hasShortfall ? (
               <AvailabilityBadge
-                badgeText="Over-reserved"
-                tooltipTitle="Model over-reserved"
+                badgeText={t("bookings.manageModelRequests.overReserved")}
+                tooltipTitle={t(
+                  "bookings.manageModelRequests.modelOverReserved"
+                )}
                 tooltipContent={`Only ${shortfallUnitsLeft} unit${
                   shortfallUnitsLeft === 1 ? "" : "s"
                 } available for this window — someone else may have reserved more after you. Reduce the quantity or remove the reservation to resolve.`}
@@ -427,7 +435,9 @@ function ExistingRequestRow({
               htmlFor={`model-request-quantity-${request.assetModelId}`}
               className="sr-only"
             >
-              Quantity for {request.assetModelName}
+              {t("bookings.manageModelRequests.quantityFor", {
+                assetModelName: request.assetModelName,
+              })}
             </label>
             <input
               id={`model-request-quantity-${request.assetModelId}`}
@@ -445,7 +455,9 @@ function ExistingRequestRow({
                   ? "border-error-500 focus:border-error-500 focus:ring-error-500"
                   : "border-gray-300 focus:border-primary-500 focus:ring-primary-500"
               )}
-              aria-label={`New quantity for ${request.assetModelName}`}
+              aria-label={t("bookings.manageModelRequests.newQuantityFor", {
+                assetModelName: request.assetModelName,
+              })}
               aria-invalid={quantityError ? true : undefined}
               disabled={disabled}
             />
@@ -453,9 +465,14 @@ function ExistingRequestRow({
               type="submit"
               variant="secondary"
               disabled={disabled || !isDirty || !isValid}
-              aria-label={`Update reservation for ${request.assetModelName}`}
+              aria-label={t(
+                "bookings.manageModelRequests.updateReservationFor",
+                { assetModelName: request.assetModelName }
+              )}
             >
-              {isUpdating ? "Saving..." : "Update"}
+              {isUpdating
+                ? "Saving..."
+                : t("bookings.manageModelRequests.update")}
             </Button>
           </updateFetcher.Form>
 
@@ -475,9 +492,14 @@ function ExistingRequestRow({
                 type="submit"
                 variant="secondary"
                 disabled={disabled}
-                aria-label={`Remove reservation for ${request.assetModelName}`}
+                aria-label={t(
+                  "bookings.manageModelRequests.removeReservationFor",
+                  { assetModelName: request.assetModelName }
+                )}
               >
-                {isRemoving ? "Removing..." : "Remove"}
+                {isRemoving
+                  ? "Removing..."
+                  : t("bookings.manageModelRequests.remove")}
               </Button>
             </removeFetcher.Form>
           ) : null}
@@ -521,6 +543,7 @@ function AddRequestRow({
   assetModels: ManageModelRequestsModel[];
   excludeModelIds: string[];
 }) {
+  const { t } = useTranslation();
   const fetcher = useFetcher({ key: "booking-model-request-add" });
   const disabled = useDisabled(fetcher);
 
@@ -628,7 +651,7 @@ function AddRequestRow({
   return (
     <div>
       <h3 className="mb-2 text-sm font-semibold text-gray-700">
-        Add model reservation
+        {t("bookings.manageModelRequests.addModelReservation")}
       </h3>
 
       <fetcher.Form
@@ -645,9 +668,9 @@ function AddRequestRow({
           <DynamicSelect
             fieldName={zo.fields.assetModelId()}
             model={{ name: "assetModel", queryKey: "name" }}
-            label="Model"
-            placeholder="Search models..."
-            contentLabel="Asset models"
+            label={t("bookings.manageModelRequests.model")}
+            placeholder={t("bookings.manageModelRequests.searchModels")}
+            contentLabel={t("bookings.manageModelRequests.assetModels")}
             initialDataKey="initialAssetModels"
             countKey="totalAssetModels"
             selectionMode="none"
@@ -695,7 +718,7 @@ function AddRequestRow({
             htmlFor="model-request-quantity"
             className="mb-[6px] block text-[14px] font-medium text-gray-700"
           >
-            Quantity
+            {t("bookings.manageModelRequests.quantity")}
           </label>
           <input
             id="model-request-quantity"
@@ -713,7 +736,7 @@ function AddRequestRow({
                 ? "border-error-500 focus:border-error-500 focus:ring-error-500"
                 : "border-gray-300 focus:border-primary-500 focus:ring-primary-500"
             )}
-            aria-label="Quantity to reserve"
+            aria-label={t("bookings.manageModelRequests.quantityToReserve")}
             aria-invalid={quantityError ? true : undefined}
             disabled={disabled || !assetModelId}
           />
@@ -733,10 +756,10 @@ function AddRequestRow({
             type="submit"
             variant="primary"
             disabled={disabled || !isValid || !hasAvailability}
-            aria-label="Add model reservation"
+            aria-label={t("bookings.manageModelRequests.addModelReservation")}
             className="h-[38px] w-full sm:w-auto"
           >
-            {disabled ? "Adding..." : "Add"}
+            {disabled ? "Adding..." : t("bookings.manageModelRequests.add")}
           </Button>
         </div>
       </fetcher.Form>
@@ -761,9 +784,12 @@ function AddRequestRow({
           </p>
         ) : selectedModel && !hasAvailability ? (
           <p className="text-error-600">
-            No units of{" "}
-            <span className="font-semibold">{selectedModel.name}</span> are
-            available in this window.
+            <Trans
+              t={t}
+              i18nKey="bookings.manageModelRequests.noUnitsOf00"
+              values={{ name: selectedModel.name }}
+              components={[<span key="slot0" className="font-semibold" />]}
+            />
           </p>
         ) : selectionHint ? (
           <p className="text-gray-500">{selectionHint}</p>
@@ -772,8 +798,7 @@ function AddRequestRow({
 
       {!pickerHasOptions ? (
         <p className="mt-2 text-xs text-gray-500">
-          All available models already have reservations on this booking. Adjust
-          an existing reservation above or remove one first.
+          {t("bookings.manageModelRequests.allAvailableModelsAlreadyHave")}
         </p>
       ) : null}
     </div>

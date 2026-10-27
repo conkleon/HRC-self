@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { Reorder } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { useFetcher, useLoaderData } from "react-router";
 import { FakeCheckbox } from "~/components/forms/fake-checkbox";
 import { ChevronRight, HandleIcon } from "~/components/icons/library";
@@ -35,6 +36,7 @@ import { tw } from "~/utils/tw";
  * @see {@link file://./asset-model-assets-sheet.tsx}
  */
 export function ConfigureColumnsDropdown() {
+  const { t } = useTranslation();
   const fetcher = useFetcher({
     key: "asset-index-settings-columns",
   });
@@ -129,29 +131,32 @@ export function ConfigureColumnsDropdown() {
             <div className="content-inner relative mb-[60px] max-h-[412px] overflow-y-scroll">
               {isModelView ? (
                 <p className="border-b px-[10px] py-2 text-xs text-gray-500">
-                  These columns apply to the asset list inside a model, not to
-                  the model rows.
+                  {t("assets.configureColumnsDropdown.theseColumnsApplyToThe")}
                 </p>
               ) : null}
               <div className="py-[2px]">
                 <div className="px-[10px] py-2 text-gray-500">
-                  Fixed columns
+                  {t("assets.configureColumnsDropdown.fixedColumns")}
                 </div>
                 <ColumnRow className="flex items-center gap-1 pb-2">
                   <FakeCheckbox
                     checked={true}
                     className={tw("mr-1 text-gray-600")}
                   />
-                  Name
+                  {t("assets.configureColumnsDropdown.name")}
                 </ColumnRow>
               </div>
 
               <div className="border-t py-[2px]">
                 <div className="flex items-center justify-between px-[10px] py-2 text-gray-500">
                   <div>
-                    <div>Columns ({currentColumns.length})</div>
+                    <div>
+                      {t("assets.configureColumnsDropdown.columns", {
+                        currentColumnsCount: currentColumns.length,
+                      })}
+                    </div>
                     <div className="text-xs text-gray-400">
-                      Alt+↑↓ to reorder
+                      {t("assets.configureColumnsDropdown.altToReorder")}
                     </div>
                   </div>
                   <ColumnsBulkActions
@@ -161,17 +166,16 @@ export function ConfigureColumnsDropdown() {
                 </div>
                 {/* Screen reader instructions */}
                 <div className="sr-only" id="reorder-instructions">
-                  Use Tab to navigate between column labels and drag handles.
-                  Press Space or Enter on a column label to toggle its
-                  visibility. Focus the drag handle and press Alt plus arrow up
-                  or arrow down to reorder columns.
+                  {t("assets.configureColumnsDropdown.useTabToNavigateBetween")}
                 </div>
                 <Reorder.Group
                   values={currentColumns}
                   onReorder={setCurrentColumns}
                   as="ul"
                   role="list"
-                  aria-label="Reorderable columns list"
+                  aria-label={t(
+                    "assets.configureColumnsDropdown.reorderableColumnsList"
+                  )}
                   aria-describedby="reorder-instructions"
                 >
                   {currentColumns.map((column, index) => (
@@ -226,7 +230,9 @@ export function ConfigureColumnsDropdown() {
                               }
                             }}
                             className="flex flex-1 items-center text-[14px] font-medium text-gray-700 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
-                            title="Custom field"
+                            title={t(
+                              "assets.configureColumnsDropdown.customField"
+                            )}
                           >
                             {" "}
                             <FakeCheckbox
@@ -240,7 +246,7 @@ export function ConfigureColumnsDropdown() {
                             {column.name.startsWith("cf_") && (
                               <span className=" lowercase text-gray-500">
                                 {" "}
-                                (cf)
+                                {t("assets.configureColumnsDropdown.cf")}
                               </span>
                             )}
                           </div>
@@ -256,7 +262,9 @@ export function ConfigureColumnsDropdown() {
                             )}`}
                             aria-describedby="reorder-instructions"
                             aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
-                            title="Drag to reorder or use Alt+Arrow keys"
+                            title={t(
+                              "assets.configureColumnsDropdown.dragToReorderOrUse"
+                            )}
                             tabIndex={0}
                           >
                             <div className="h-auto w-2">
@@ -277,7 +285,7 @@ export function ConfigureColumnsDropdown() {
                 variant="secondary"
                 width="full"
               >
-                Apply
+                {t("assets.configureColumnsDropdown.apply")}
               </Button>
             </footer>
           </fetcher.Form>
@@ -304,6 +312,7 @@ function ColumnsBulkActions({
   onSelectAll: () => void;
   onDeselectAll: () => void;
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -327,7 +336,7 @@ function ColumnsBulkActions({
               setIsOpen(false);
             }}
           >
-            Select all
+            {t("assets.configureColumnsDropdown.selectAll")}
           </Button>
 
           <Button
@@ -340,7 +349,7 @@ function ColumnsBulkActions({
               setIsOpen(false);
             }}
           >
-            Disselect all
+            {t("assets.configureColumnsDropdown.disselectAll")}
           </Button>
         </PopoverContent>
       </PopoverPortal>

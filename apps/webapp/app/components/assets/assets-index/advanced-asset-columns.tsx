@@ -8,6 +8,7 @@ import {
   PopoverPortal,
   PopoverContent,
 } from "@radix-ui/react-popover";
+import { useTranslation } from "react-i18next";
 import { Link, useLoaderData } from "react-router";
 import { EventCardContent } from "~/components/calendar/event-card";
 import LineBreakText from "~/components/layout/line-break-text";
@@ -81,6 +82,7 @@ export function AdvancedIndexColumn({
   column: ColumnLabelKey;
   item: AdvancedIndexAsset;
 }) {
+  const { t } = useTranslation();
   const { locale, currentOrganization, lastAuditDateAccess } =
     useLoaderData<AssetIndexLoaderData>();
   const { prefs } = useDateFormatter();
@@ -116,7 +118,7 @@ export function AdvancedIndexColumn({
         {field.customField.type === CustomFieldType.MULTILINE_TEXT ? (
           <Popover>
             <PopoverTrigger className="underline hover:cursor-pointer">
-              View content
+              {t("assets.advancedAssetColumns.viewContent")}
             </PopoverTrigger>
             <PopoverPortal>
               <PopoverContent
@@ -176,7 +178,9 @@ export function AdvancedIndexColumn({
                     mainImageExpiration: item.mainImageExpiration,
                     assetModel: item.assetModel ?? null,
                   }}
-                  alt={`Image of ${item.title}`}
+                  alt={t("assets.advancedAssetColumns.imageOf", {
+                    title: item.title,
+                  })}
                   className="size-10 shrink-0 rounded-[4px] border object-cover"
                   withPreview={true}
                 />
@@ -353,7 +357,7 @@ export function AdvancedIndexColumn({
               QTY
             </span>
           ) : (
-            "Individual"
+            t("assets.advancedAssetColumns.individual")
           )}
         </Td>
       );
@@ -514,6 +518,7 @@ const DESCRIPTION_TOOLTIP_MAX_LENGTH = 600;
  * Description column component - exported for reuse in other index pages
  */
 export function DescriptionColumn({ value }: { value: string }) {
+  const { t } = useTranslation();
   const plainPreview = cleanMarkdownFormatting(value ?? "");
   const hasContent = Boolean(value && value.trim().length > 0);
   const previewText = plainPreview.length > 0 ? plainPreview : value.trim();
@@ -531,7 +536,7 @@ export function DescriptionColumn({ value }: { value: string }) {
             </TooltipTrigger>
 
             <TooltipContent side="top" className="max-w-[400px]">
-              <h5>Asset description</h5>
+              <h5>{t("assets.advancedAssetColumns.assetDescription")}</h5>
               {/* No `allowExternalLinks`: descriptions are authored in a plain
                   textarea and rendered as plain text on the asset page, so
                   they are not a markdown surface. Links here would also be
@@ -542,7 +547,7 @@ export function DescriptionColumn({ value }: { value: string }) {
               />
               {isTooltipTruncated ? (
                 <p className="mt-2 text-xs text-gray-500">
-                  Open the asset to read the full description
+                  {t("assets.advancedAssetColumns.openTheAssetToRead")}
                 </p>
               ) : null}
             </TooltipContent>
@@ -878,8 +883,9 @@ function UpcomingReminderColumn({
   assetId: string;
   upcomingReminder: AdvancedIndexAsset["upcomingReminder"];
 }) {
+  const { t } = useTranslation();
   if (!upcomingReminder) {
-    return <Td>No upcoming reminder</Td>;
+    return <Td>{t("assets.advancedAssetColumns.noUpcomingReminder")}</Td>;
   }
 
   return (
@@ -905,6 +911,7 @@ function UpcomingBookingsColumn({
 }: {
   bookings: AdvancedIndexAsset["bookings"];
 }) {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const organization = useCurrentOrganization();
   const canSeeAllCustody = userHasCustodyViewPermission({
@@ -913,7 +920,7 @@ function UpcomingBookingsColumn({
   });
 
   if (!bookings || bookings.length === 0) {
-    return <Td>No upcoming bookings</Td>;
+    return <Td>{t("assets.advancedAssetColumns.noUpcomingBookings")}</Td>;
   }
 
   return (
@@ -923,7 +930,7 @@ function UpcomingBookingsColumn({
           <Button type="button" variant="link-gray">
             {bookings.length > 1
               ? `${bookings.length} upcoming bookings`
-              : "1 upcoming booking"}
+              : t("assets.advancedAssetColumns.text1UpcomingBooking")}
           </Button>
         </PopoverTrigger>
 
@@ -932,7 +939,9 @@ function UpcomingBookingsColumn({
             align="start"
             className="flex max-h-64 w-auto max-w-full flex-col gap-1 overflow-auto rounded-md border bg-white p-4"
           >
-            <h5 className="mb-1 border-b pb-2 text-sm">Upcoming Bookings</h5>
+            <h5 className="mb-1 border-b pb-2 text-sm">
+              {t("assets.advancedAssetColumns.upcomingBookings")}
+            </h5>
             {bookings.map((booking) => {
               const custodianName = booking?.custodianUser
                 ? resolveUserDisplayName(booking.custodianUser)

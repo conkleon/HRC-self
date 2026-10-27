@@ -12,6 +12,7 @@
 import type React from "react";
 import { useCallback, useId, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { PREVIEW_DISPLAY_LIMIT } from "~/modules/asset-import/constants";
 import { formatCount } from "~/modules/asset-import/format";
 import type {
@@ -107,6 +108,7 @@ export function ImportGrid({
   labelHeading = "Row",
   ariaLabel = "Import preview",
 }: ImportGridProps) {
+  const { t } = useTranslation();
   const idPrefix = useId();
   const [hoveredCell, setHoveredCell] = useState<HoveredCell | null>(null);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
@@ -250,9 +252,9 @@ export function ImportGrid({
                             {cell.previous !== undefined ? (
                               <p className="text-gray-500">
                                 <span className="font-medium text-gray-400">
-                                  Was:
+                                  {t("assets.importGrid.was")}
                                 </span>{" "}
-                                {cell.previous || "(empty)"}
+                                {cell.previous || t("assets.importGrid.empty")}
                               </p>
                             ) : null}
                             <p className={tone.tooltipText}>
@@ -265,7 +267,7 @@ export function ImportGrid({
                                         : "text-blue-600"
                                     }`}
                                   >
-                                    Now:
+                                    {t("assets.importGrid.now")}
                                   </span>{" "}
                                 </>
                               ) : null}

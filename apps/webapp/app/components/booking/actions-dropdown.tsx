@@ -1,4 +1,5 @@
 import { BookingStatus } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useLoaderData, useSubmit } from "react-router";
 import { ChevronRight } from "~/components/icons/library";
 import {
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export const ActionsDropdown = ({ fullWidth }: Props) => {
+  const { t } = useTranslation();
   const { booking, hasDispositionedUnits } = useLoaderData<typeof loader>();
   // Seed the extend dialog in the RESOLVED preference zone — the same zone this
   // page displays the booking in and the extend action parses the submission in.
@@ -89,7 +91,8 @@ export const ActionsDropdown = ({ fullWidth }: Props) => {
           className="flex"
         >
           <span className="flex items-center gap-2">
-            Actions <ChevronRight className="chev rotate-90" />
+            {t("bookings.actionsDropdown.actions")}{" "}
+            <ChevronRight className="chev rotate-90" />
           </span>
         </Button>
       </DropdownMenuTrigger>
@@ -139,7 +142,7 @@ export const ActionsDropdown = ({ fullWidth }: Props) => {
                   void submit(formData, { method: "post" });
                 }}
               >
-                Archive
+                {t("bookings.actionsDropdown.archive")}
               </Button>
             </DropdownMenuItem>
           </When>
@@ -151,7 +154,7 @@ export const ActionsDropdown = ({ fullWidth }: Props) => {
               width="full"
               to="duplicate"
             >
-              Duplicate booking
+              {t("bookings.actionsDropdown.duplicateBooking")}
             </Button>
           </DropdownMenuItem>
 

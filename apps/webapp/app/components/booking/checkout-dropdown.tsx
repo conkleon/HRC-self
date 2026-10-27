@@ -27,6 +27,7 @@
  */
 import type { Booking } from "@prisma/client";
 import { ChevronRightIcon, ScanLine } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useControlledDropdownMenu } from "~/hooks/use-controlled-dropdown-menu";
 import type { CheckoutSourceQuestion } from "~/modules/booking/checkout-source-location";
 import { tw } from "~/utils/tw";
@@ -104,6 +105,7 @@ export default function CheckoutDropdown({
   requireExplicitCheckout,
   sourceQuestions,
 }: CheckoutDropdownProps) {
+  const { t } = useTranslation();
   const {
     ref: dropdownRef,
     onOpenChange,
@@ -153,7 +155,8 @@ export default function CheckoutDropdown({
       to={`/bookings/${booking.id}/overview/checkout-assets`}
     >
       <span className="flex items-center gap-2">
-        <ScanLine className="size-4" /> Scan to check out
+        <ScanLine className="size-4" />{" "}
+        {t("bookings.checkoutDropdown.scanToCheckOut")}
       </span>
     </Button>
   );
@@ -174,7 +177,7 @@ export default function CheckoutDropdown({
         to={`/bookings/${booking.id}/overview/checkout-assets`}
         disabled={disabled}
       >
-        Scan to check out
+        {t("bookings.checkoutDropdown.scanToCheckOut")}
       </Button>
     );
   }
@@ -191,7 +194,7 @@ export default function CheckoutDropdown({
         to={`/bookings/${booking.id}/overview/checkout-assets`}
         disabled={disabled}
       >
-        Scan to check out
+        {t("bookings.checkoutDropdown.scanToCheckOut")}
       </Button>
     );
   }
@@ -240,7 +243,8 @@ export default function CheckoutDropdown({
             size="sm"
           >
             <span className="flex items-center gap-2">
-              Check out <ChevronRightIcon className="chev size-4 rotate-90" />
+              {t("bookings.checkoutDropdown.checkOut")}{" "}
+              <ChevronRightIcon className="chev size-4 rotate-90" />
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -255,7 +259,8 @@ export default function CheckoutDropdown({
           size="sm"
         >
           <span className="flex items-center gap-2">
-            Check out <ChevronRightIcon className="chev size-4" />
+            {t("bookings.checkoutDropdown.checkOut")}{" "}
+            <ChevronRightIcon className="chev size-4" />
           </span>
         </Button>
 

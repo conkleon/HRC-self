@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useFetcher, useParams } from "react-router";
 import { TrashIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
@@ -20,6 +21,7 @@ import {
 import { useDisabled } from "~/hooks/use-disabled";
 
 export const BookingActionsDropdown = ({ noteId }: { noteId: string }) => {
+  const { t } = useTranslation();
   const fetcher = useFetcher();
   const params = useParams();
   const disabled = useDisabled(fetcher);
@@ -61,7 +63,7 @@ export const BookingActionsDropdown = ({ noteId }: { noteId: string }) => {
               <DropdownMenuItem className="w-full cursor-pointer rounded  py-2 text-left text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700">
                 <span className="flex items-center gap-2">
                   <TrashIcon />
-                  Delete
+                  {t("bookings.actionsDropdown.delete")}
                 </span>
               </DropdownMenuItem>
             </AlertDialogTrigger>
@@ -72,15 +74,16 @@ export const BookingActionsDropdown = ({ noteId }: { noteId: string }) => {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Are you sure you want to delete this note?
+            {t("bookings.actionsDropdown.areYouSureYouWant")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently remove this note
-            from our servers.
+            {t("bookings.actionsDropdown.thisActionCannotBeUndone")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={disabled}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={disabled}>
+            {t("bookings.actionsDropdown.cancel")}
+          </AlertDialogCancel>
           <fetcher.Form
             action={`/bookings/${params.bookingId}/activity`}
             method="DELETE"
@@ -92,7 +95,7 @@ export const BookingActionsDropdown = ({ noteId }: { noteId: string }) => {
               size="sm"
               disabled={disabled}
             >
-              Delete
+              {t("bookings.actionsDropdown.delete")}
             </Button>
           </fetcher.Form>
         </AlertDialogFooter>

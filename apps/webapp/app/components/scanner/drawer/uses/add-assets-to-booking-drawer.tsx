@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
 import { PackageIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { z } from "zod";
 import {
@@ -91,6 +92,7 @@ export default function AddAssetsToBookingDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   const { booking } = useLoaderData<typeof loader>();
 
   // Get the scanned items from jotai
@@ -331,7 +333,7 @@ export default function AddAssetsToBookingDrawer({
       }}
       items={items}
       onClearItems={clearList}
-      title="Items scanned"
+      title={t("scanner.addAssetsToBookingDrawer.itemsScanned")}
       isLoading={isLoading}
       renderItem={renderItemRow}
       Blockers={Blockers}
@@ -402,6 +404,7 @@ function AssignReservationHeader({
  * same as the placeholder row Check Out shows for the same unit.
  */
 function PendingModelRowItem({ assetModelName }: { assetModelName: string }) {
+  const { t } = useTranslation();
   return (
     <li className="flex items-center gap-2 border-b border-gray-200 pb-2">
       <div
@@ -419,7 +422,7 @@ function PendingModelRowItem({ assetModelName }: { assetModelName: string }) {
           textColor={BADGE_COLORS.gray.text}
           withDot={false}
         >
-          Pending
+          {t("scanner.addAssetsToBookingDrawer.pending")}
         </Badge>
       </div>
     </li>
@@ -438,6 +441,7 @@ export function AssetRow({
   /** Name of the model that unit belongs to, when known. */
   claimedModelName?: string;
 }) {
+  const { t } = useTranslation();
   const { booking } = useLoaderData<typeof loader>();
   // Whether the booking is in a checked-out state and the asset is checked out.
   // INDIVIDUAL only — a QUANTITY_TRACKED row reads CHECKED_OUT while free stock
@@ -523,10 +527,14 @@ export function AssetRow({
           {asset.title}
           {qtyTracked ? (
             <span className="ml-2 text-xs font-normal text-gray-500">
-              · {totalQty} {asset.unitOfMeasure || "units"}
+              · {totalQty}{" "}
+              {asset.unitOfMeasure ||
+                t("scanner.addAssetsToBookingDrawer.units")}
               {maxAllowed < totalQty ? (
                 <span className="ml-1 text-warning-700">
-                  · {maxAllowed} available
+                  {t("scanner.addAssetsToBookingDrawer.available", {
+                    maxAllowed,
+                  })}
                 </span>
               ) : null}
             </span>
@@ -541,7 +549,7 @@ export function AssetRow({
               "text-xs text-gray-700"
             )}
           >
-            asset
+            {t("scanner.addAssetsToBookingDrawer.asset")}
           </span>
           <AssetAvailabilityLabels />
         </div>
@@ -559,6 +567,7 @@ export function AssetRow({
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   const { booking } = useLoaderData<typeof loader>();
 
   // Check if booking is in checked-out state and kit is checked out
@@ -595,7 +604,9 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
       <p className="word-break whitespace-break-spaces font-medium">
         {kit.name}{" "}
         <span className="text-[12px] font-normal text-gray-700">
-          ({kit._count.assetKits} assets)
+          {t("scanner.addAssetsToBookingDrawer.assets", {
+            assetKits: kit._count.assetKits,
+          })}
         </span>
       </p>
 
@@ -607,7 +618,7 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.addAssetsToBookingDrawer.kit")}
         </span>
         <KitAvailabilityLabels />
       </div>

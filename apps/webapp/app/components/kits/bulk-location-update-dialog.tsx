@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import { BulkUpdateDialogContent } from "../bulk-update-dialog/bulk-update-dialog";
@@ -10,6 +11,7 @@ export const KitBulkLocationUpdateSchema = z.object({
 });
 
 export default function KitBulkLocationUpdateDialog() {
+  const { t } = useTranslation();
   const zo = useZorm("KitBulkLocationUpdate", KitBulkLocationUpdateSchema);
 
   return (
@@ -37,9 +39,10 @@ export default function KitBulkLocationUpdateDialog() {
 
           <div className="mb-6 rounded-md border border-blue-200 bg-blue-50 p-3">
             <p className="text-sm text-blue-800">
-              <strong>Location Update Notice:</strong> Changing kit locations
-              will also automatically update the location of all assets within
-              those kits.
+              <strong>
+                {t("kits.bulkLocationUpdateDialog.locationUpdateNotice")}
+              </strong>{" "}
+              {t("kits.bulkLocationUpdateDialog.changingKitLocationsWillAlso")}
             </p>
           </div>
 
@@ -51,7 +54,7 @@ export default function KitBulkLocationUpdateDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("kits.bulkLocationUpdateDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -59,7 +62,7 @@ export default function KitBulkLocationUpdateDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("kits.bulkLocationUpdateDialog.confirm")}
             </Button>
           </div>
         </div>

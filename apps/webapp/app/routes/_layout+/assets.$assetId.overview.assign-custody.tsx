@@ -1,5 +1,6 @@
 import type { Asset, Prisma } from "@prisma/client";
 import { AssetStatus, BookingStatus } from "@prisma/client";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -556,6 +557,7 @@ export function links() {
 }
 
 export default function Custody() {
+  const { t } = useTranslation();
   const { asset, teamMembers } = useLoaderData<typeof loader>();
   const firstReservedBookingId = asset?.bookingAssets?.[0]?.booking?.id;
   const actionData = useActionData<typeof action>();
@@ -573,10 +575,22 @@ export default function Custody() {
             <UserIcon />
           </div>
           <div className="mb-5">
-            <h4>{assignsSelfOnly ? "Take" : "Assign"} custody of asset</h4>
+            <h4>
+              {assignsSelfOnly
+                ? t("assets.assetsAssetidOverviewAssignCustody.take")
+                : t("assets.assetsAssetidOverviewAssignCustody.assign")}{" "}
+              {t("assets.assetsAssetidOverviewAssignCustody.custodyOfAsset")}
+            </h4>
             <p>
-              This asset is currently available. You’re about to assign custody
-              to {assignsSelfOnly ? "yourself" : "one of your team members"}.
+              {t(
+                "assets.assetsAssetidOverviewAssignCustody.thisAssetIsCurrentlyAvailable"
+              )}{" "}
+              {assignsSelfOnly
+                ? t("assets.assetsAssetidOverviewAssignCustody.yourself")
+                : t(
+                    "assets.assetsAssetidOverviewAssignCustody.oneOfYourTeamMembers"
+                  )}
+              .
             </p>
           </div>
           <div className="relative z-50 mb-8">
@@ -601,10 +615,14 @@ export default function Custody() {
                 custodyPurpose: "custody-assignment",
               }}
               fieldName="custodian"
-              contentLabel="Team members"
+              contentLabel={t(
+                "assets.assetsAssetidOverviewAssignCustody.teamMembers"
+              )}
               initialDataKey="teamMembers"
               countKey="totalTeamMembers"
-              placeholder="Select a team member"
+              placeholder={t(
+                "assets.assetsAssetidOverviewAssignCustody.selectATeamMember"
+              )}
               allowClear
               closeOnSelect
               showSearch={!assignsSelfOnly}
@@ -626,16 +644,18 @@ export default function Custody() {
           {firstReservedBookingId ? (
             <WarningBox className="-mt-4 mb-8">
               <>
-                Asset is part of an{" "}
-                <Link
-                  to={`/bookings/${firstReservedBookingId}`}
-                  className="underline"
-                  target="_blank"
-                >
-                  upcoming booking
-                </Link>
-                . You will not be able to check-out your booking if this asset
-                has custody.
+                <Trans
+                  t={t}
+                  i18nKey="assets.assetsAssetidOverviewAssignCustody.assetIsPartOfAn"
+                  components={[
+                    <Link
+                      key="slot0"
+                      to={`/bookings/${firstReservedBookingId}`}
+                      className="underline"
+                      target="_blank"
+                    />,
+                  ]}
+                />
               </>
             </WarningBox>
           ) : null}
@@ -647,7 +667,7 @@ export default function Custody() {
               width="full"
               disabled={disabled}
             >
-              Cancel
+              {t("assets.assetsAssetidOverviewAssignCustody.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -655,7 +675,7 @@ export default function Custody() {
               type="submit"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.assetsAssetidOverviewAssignCustody.confirm")}
             </Button>
           </div>
         </div>

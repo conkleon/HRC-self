@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -13,6 +14,7 @@ import PasswordInput from "~/components/forms/password-input";
 import { Button } from "~/components/shared/button";
 import { useSearchParams } from "~/hooks/search-params";
 import { useDisabled } from "~/hooks/use-disabled";
+import { getServerT } from "~/i18n/i18n.server";
 import { getSupabaseAdmin } from "~/integrations/supabase/client";
 
 import {
@@ -67,14 +69,15 @@ const OtpSchema = z
     return { password, confirmPassword, otp, email };
   });
 
-export function loader({ context, request }: LoaderFunctionArgs) {
+export async function loader({ context, request }: LoaderFunctionArgs) {
   const searchParams = getCurrentSearchParams(request);
+  const t = await getServerT(context);
 
-  const title = "Forgot password?";
+  const title = t("auth.pages.forgotPassword.title");
   const subHeading =
     searchParams.has("email") && searchParams.get("email") !== ""
-      ? "Step 2 of 2: Enter OTP and your new password"
-      : "Step 1 of 2: Enter your email";
+      ? t("auth.pages.forgotPassword.step2")
+      : t("auth.pages.forgotPassword.step1");
 
   if (context.isAuthenticated) {
     return redirect("/");
@@ -251,6 +254,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const zo = useZorm("ForgotPasswordForm", ForgotPasswordSchema);
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
@@ -277,14 +281,13 @@ export default function ForgotPassword() {
         email === "" ? (
           <div>
             <p className="mb-4 text-center">
-              Enter your email address and we'll send you a one-time code to
-              reset your password.
+              {t("auth.forgotPassword.enterYourEmailAddressAnd")}
             </p>
             <Form ref={zo.ref} method="post" className="space-y-2" replace>
               <input type="hidden" name="intent" value="request-otp" />
               <div>
                 <Input
-                  label="Email address"
+                  label={t("auth.forgotPassword.emailAddress")}
                   data-test-id="email"
                   name={zo.fields.email()}
                   type="email"
@@ -302,24 +305,25 @@ export default function ForgotPassword() {
                 type="submit"
                 disabled={disabled}
               >
-                {!disabled ? "Reset password" : "Sending code..."}
+                {!disabled
+                  ? t("auth.forgotPassword.resetPassword")
+                  : t("auth.forgotPassword.sendingCode")}
               </Button>
             </Form>
             <p className="mt-2 text-center text-gray-500">
-              Tip: Check your spam folder if you don't see the email within a
-              few minutes.
+              {t("auth.forgotPassword.tipCheckYourSpamFolder")}
             </p>
           </div>
         ) : (
           <>
             <p className="mb-2">
-              We've sent a 6-digit code to{" "}
+              {t("auth.forgotPassword.weveSentA6Digit")}{" "}
               <span className="font-semibold">{email}</span>.
             </p>
             <ol className="mb-4 list-inside list-decimal">
-              <li>Enter the code from your email</li>
-              <li>Enter your new password</li>
-              <li>Confirm your new password</li>
+              <li>{t("auth.forgotPassword.enterTheCodeFromYour")}</li>
+              <li>{t("auth.forgotPassword.enterYourNewPassword")}</li>
+              <li>{t("auth.forgotPassword.confirmYourNewPassword")}</li>
             </ol>
             <PasswordResetForm email={email} />
           </>
@@ -327,11 +331,11 @@ export default function ForgotPassword() {
         <div className="pt-4 text-center">
           {email ? (
             <Button variant="link" to={"/forgot-password"}>
-              Request new code
+              {t("auth.forgotPassword.requestNewCode")}
             </Button>
           ) : (
             <Button variant="link" to={"/login"}>
-              Back to login
+              {t("auth.forgotPassword.backToLogin")}
             </Button>
           )}
         </div>
@@ -341,6 +345,7 @@ export default function ForgotPassword() {
 }
 
 function PasswordResetForm({ email }: { email: string }) {
+  const { t } = useTranslation();
   const zoReset = useZorm("ResetPasswordForm", OtpSchema);
   const disabled = useDisabled();
   const actionData = useActionData<typeof action>();
@@ -357,13 +362,13 @@ function PasswordResetForm({ email }: { email: string }) {
   // Keep the form mounted for validation errors so field-level messages render;
   // only a hard error (e.g. invalid OTP) falls back to the generic message.
   return !email || email === "" || (actionData?.error && !validationErrors) ? (
-    <div>Something went wrong. Please refresh the page and try again.</div>
+    <div>{t("auth.forgotPassword.somethingWentWrongPleaseRefresh")}</div>
   ) : (
     <Form method="post" ref={zoReset.ref} className="space-y-2">
       <ShelfOTP error={zoReset.errors.otp()?.message} />
 
       <PasswordInput
-        label="New password"
+        label={t("auth.forgotPassword.newPassword")}
         data-test-id="password"
         name={zoReset.fields.password()}
         type="password"
@@ -377,7 +382,7 @@ function PasswordResetForm({ email }: { email: string }) {
         required
       />
       <PasswordInput
-        label="Confirm new password"
+        label={t("auth.forgotPassword.confirmNewPassword")}
         data-test-id="confirmPassword"
         name={zoReset.fields.confirmPassword()}
         type="password"
@@ -400,7 +405,7 @@ function PasswordResetForm({ email }: { email: string }) {
         className="w-full "
         disabled={disabled}
       >
-        Confirm password reset
+        {t("auth.forgotPassword.confirmPasswordReset")}
       </Button>
     </Form>
   );

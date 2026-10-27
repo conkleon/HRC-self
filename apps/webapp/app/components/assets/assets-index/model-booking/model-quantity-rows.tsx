@@ -23,6 +23,7 @@
  * @see {@link file://./../../../../modules/booking-model-request/service.server.ts} — the transactional guard the hint anticipates
  */
 import { useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import { numberInputWheelGuard } from "~/utils/number-input-wheel-guard";
 
@@ -164,6 +165,7 @@ function ModelQuantityRowItem({
   onChange: (assetModelId: string, quantity: number) => void;
   onRemove: (assetModelId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<string | null>(null);
   const inputId = `${idPrefix}model-quantity-${row.assetModelId}`;
   const nameId = `${idPrefix}model-name-${row.assetModelId}`;
@@ -195,7 +197,7 @@ function ModelQuantityRowItem({
         {/* `Add`, on every row and in full view: the one word that says the
             number joins the reservation instead of replacing it. */}
         <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
-          Add
+          {t("assets.modelQuantityRows.add")}
         </label>
         <input
           id={inputId}
@@ -250,7 +252,7 @@ function ModelQuantityRowItem({
           type="button"
           variant="secondary"
           icon="x"
-          label={`Remove ${row.name}`}
+          label={t("assets.modelQuantityRows.remove", { name: row.name })}
           onClick={() => onRemove(row.assetModelId)}
         />
       </div>

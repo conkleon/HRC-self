@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { useRef, useState } from "react";
 import type { Asset, Booking } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { useReactToPrint } from "react-to-print";
 import { Button } from "~/components/shared/button";
@@ -70,6 +71,7 @@ export const BookingOverviewPDF = ({
   };
   timeStamp: number;
 }) => {
+  const { t } = useTranslation();
   const totalAssets = booking.assets.length;
   const componentRef = useRef<HTMLDivElement>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -116,7 +118,7 @@ export const BookingOverviewPDF = ({
         onClick={handleOpenDialog}
         disabled={disabled}
       >
-        Generate overview PDF
+        {t("bookings.bookingOverviewPdf.generateOverviewPdf")}
       </Button>
       <DialogPortal>
         <Dialog
@@ -125,18 +127,26 @@ export const BookingOverviewPDF = ({
           className="h-dvh w-full md:h-[calc(100vh-4rem)] md:w-[90%] md:py-0"
           title={
             <div className="mx-auto w-full max-w-[210mm] border p-4 text-center">
-              <h3>Generate booking checklist for "{booking?.name}"</h3>
+              <h3>
+                {t("bookings.bookingOverviewPdf.generateBookingChecklistFor", {
+                  name: booking?.name,
+                })}
+              </h3>
               <p>
-                You can either preview or download the PDF. Assets are sorted by{" "}
+                {t("bookings.bookingOverviewPdf.youCanEitherPreviewOr")}{" "}
                 {BOOKING_ASSET_SORTING_OPTIONS[
                   orderBy as keyof typeof BOOKING_ASSET_SORTING_OPTIONS
                 ] || BOOKING_ASSET_SORTING_OPTIONS.status}{" "}
-                ({orderDirection === "asc" ? "ascending" : "descending"}).
+                (
+                {orderDirection === "asc"
+                  ? t("bookings.bookingOverviewPdf.ascending")
+                  : t("bookings.bookingOverviewPdf.descending")}
+                ).
               </p>
               {!isFetchingBookings && (
                 <div className="mt-4">
                   <Button type="button" onClick={handlePrint}>
-                    Download PDF
+                    {t("bookings.bookingOverviewPdf.downloadPdf")}
                   </Button>
                 </div>
               )}
@@ -147,7 +157,9 @@ export const BookingOverviewPDF = ({
             <div className="grow">
               {isFetchingBookings ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2">
-                  <div>Generating PDF preview...</div>
+                  <div>
+                    {t("bookings.bookingOverviewPdf.generatingPdfPreview")}
+                  </div>
                   <div>
                     <Spinner />
                   </div>
@@ -167,7 +179,7 @@ export const BookingOverviewPDF = ({
                 variant="secondary"
                 onClick={handleCloseDialog}
               >
-                Cancel
+                {t("bookings.bookingOverviewPdf.cancel")}
               </Button>
             </div>
           </div>
@@ -184,7 +196,7 @@ export const BookingOverviewPDF = ({
         disabled={disabled}
         onClick={handleOpenDialog}
       >
-        Generate overview PDF
+        {t("bookings.bookingOverviewPdf.generateOverviewPdf")}
       </Button>
     </>
   );
@@ -210,6 +222,7 @@ export const BookingPDFPreview = ({
   componentRef: RefObject<HTMLDivElement | null>;
   pdfMeta: PdfDbResult | null;
 }) => {
+  const { t } = useTranslation();
   if (!pdfMeta) return null;
 
   const {
@@ -274,7 +287,9 @@ export const BookingPDFPreview = ({
               <h3 className="m-0 p-0 text-gray-600">{organization?.name}</h3>
             </div>
             <h1 className="mt-0.5 text-xl font-medium">
-              Booking checklist for {booking?.name}
+              {t("bookings.bookingOverviewPdf.bookingChecklistFor", {
+                name: booking?.name,
+              })}
             </h1>
           </div>
           <div className="text-gray-500">
@@ -284,16 +299,20 @@ export const BookingPDFPreview = ({
 
         <section className="mb-5 mt-2.5 border border-gray-300">
           <div className="flex border-b border-gray-300 p-2">
-            <span className="min-w-[150px] text-sm font-medium">Booking</span>
+            <span className="min-w-[150px] text-sm font-medium">
+              {t("bookings.bookingOverviewPdf.booking")}
+            </span>
             <span className="grow text-gray-600">{booking?.name}</span>
           </div>
           <div className="flex border-b border-gray-300 p-2">
-            <span className="min-w-[150px] text-sm font-medium">Custodian</span>
+            <span className="min-w-[150px] text-sm font-medium">
+              {t("bookings.bookingOverviewPdf.custodian")}
+            </span>
             <span className="grow text-gray-600">{custodianName}</span>
           </div>
           <div className="flex border-b border-gray-300 p-2">
             <span className="min-w-[150px] text-sm font-medium">
-              Booking period
+              {t("bookings.bookingOverviewPdf.bookingPeriod")}
             </span>
             <span className="grow text-gray-600">
               {pdfMeta?.from && pdfMeta?.to
@@ -306,7 +325,7 @@ export const BookingPDFPreview = ({
           <When truthy={isPeriodDifferentFromOriginal}>
             <div className="flex border-b border-gray-300 p-2">
               <span className="min-w-[150px] text-sm font-medium">
-                Original period
+                {t("bookings.bookingOverviewPdf.originalPeriod")}
               </span>
               <span className="grow text-gray-600">{`${
                 isFromDifferentFromOriginal
@@ -321,7 +340,7 @@ export const BookingPDFPreview = ({
           <When truthy={hasDescription}>
             <div className="flex border-b border-gray-300 p-2">
               <span className="min-w-[150px] text-sm font-medium">
-                Description
+                {t("bookings.bookingOverviewPdf.description")}
               </span>
               <span className="grow whitespace-pre-wrap text-gray-600">
                 {booking.description}
@@ -331,7 +350,7 @@ export const BookingPDFPreview = ({
 
           <div className="flex p-2">
             <span className="min-w-[150px] text-sm font-medium">
-              Total assets value
+              {t("bookings.bookingOverviewPdf.totalAssetsValue")}
             </span>
             <span className="grow whitespace-pre-wrap text-gray-600">
               {totalValue}
@@ -340,7 +359,9 @@ export const BookingPDFPreview = ({
 
           <When truthy={booking.tags?.length > 0}>
             <div className="flex items-center border-t border-gray-300 p-2">
-              <span className="min-w-[150px] text-sm font-medium">Tags</span>
+              <span className="min-w-[150px] text-sm font-medium">
+                {t("bookings.bookingOverviewPdf.tags")}
+              </span>
 
               <div className="flex flex-wrap items-center gap-2">
                 {booking.tags.map((tag) => (
@@ -359,28 +380,28 @@ export const BookingPDFPreview = ({
                 #
               </th>
               <th className="border-b border-r border-gray-300 px-1.5 py-2.5 text-left text-xs font-medium">
-                Image
+                {t("bookings.bookingOverviewPdf.image")}
               </th>
               <th className="border-b border-r border-gray-300 px-2 py-2.5 text-left text-xs font-medium">
-                Name
+                {t("bookings.bookingOverviewPdf.name")}
               </th>
               <th className="border-b border-r border-gray-300 px-1 py-2.5 text-left text-xs font-medium">
-                Qty
+                {t("bookings.bookingOverviewPdf.qty")}
               </th>
               <th className="border-b border-r border-gray-300 px-2 py-2.5 text-left text-xs font-medium">
-                Kit
+                {t("bookings.bookingOverviewPdf.kit")}
               </th>
               <th className="border-b border-r border-gray-300 px-2 py-2.5 text-left text-xs font-medium">
-                Category
+                {t("bookings.bookingOverviewPdf.category")}
               </th>
               <th className="border-b border-r border-gray-300 px-2 py-2.5 text-left text-xs font-medium">
-                Location
+                {t("bookings.bookingOverviewPdf.location")}
               </th>
               {/* Wide enough for the tick box and code line, and for an
                   11-character Code 128 picture at 0.25mm per bar. The code
                   text wraps on `break-all`. */}
               <th className="border-b border-r border-gray-300 p-2.5 text-left text-xs font-medium">
-                Code
+                {t("bookings.bookingOverviewPdf.code")}
               </th>
             </tr>
           </thead>
@@ -413,7 +434,9 @@ export const BookingPDFPreview = ({
                   <td className="border-r border-gray-300 px-1.5 py-2.5 text-sm text-gray-600">
                     <AssetPrintImage
                       asset={asset}
-                      alt={`Image of ${asset.title}`}
+                      alt={t("bookings.bookingOverviewPdf.imageOf", {
+                        title: asset.title,
+                      })}
                       className="size-14"
                     />
                   </td>
@@ -439,7 +462,7 @@ export const BookingPDFPreview = ({
                         rows too and may never have gone out. */}
                     <When truthy={!!asset.isRemovedFromKit}>
                       <span className="mt-1 block text-xs text-gray-500">
-                        Removed from kit, kept as a record of what was booked
+                        {t("bookings.bookingOverviewPdf.removedFromKitKeptAs")}
                       </span>
                     </When>
                   </td>
@@ -458,14 +481,19 @@ export const BookingPDFPreview = ({
                       <When truthy={!printsCodeOnLine}>
                         <AssetCodePrintImage
                           image={codeImage}
-                          alt={`Code of ${asset.title}`}
+                          alt={t("bookings.bookingOverviewPdf.codeOf", {
+                            title: asset.title,
+                          })}
                           squareClassName="size-14"
                         />
                       </When>
                       <div className="flex items-center gap-3">
                         <input
                           type="checkbox"
-                          aria-label={`Mark ${asset.title} as picked`}
+                          aria-label={t(
+                            "bookings.bookingOverviewPdf.markAsPicked",
+                            { title: asset.title }
+                          )}
                           className="block size-5 border"
                         />
                         {/* Printed even when there is no picture: the code is
@@ -492,7 +520,9 @@ export const BookingPDFPreview = ({
                     >
                       <AssetCodePrintImage
                         image={codeImage}
-                        alt={`Code of ${asset.title}`}
+                        alt={t("bookings.bookingOverviewPdf.codeOf", {
+                          title: asset.title,
+                        })}
                         squareClassName="size-14"
                       />
                     </td>
@@ -506,7 +536,9 @@ export const BookingPDFPreview = ({
                       className="m-2 p-2"
                     >
                       <div className="flex items-start gap-4 bg-gray-100 p-4">
-                        <div className="w-20 text-xs">Asset Description</div>
+                        <div className="w-20 text-xs">
+                          {t("bookings.bookingOverviewPdf.assetDescription")}
+                        </div>
                         <div className="flex-1 text-sm">
                           {truncateText(
                             asset.description ?? "",
@@ -532,7 +564,9 @@ export const BookingPDFPreview = ({
         <When truthy={outstandingModelRequests.length > 0}>
           <section className="mt-5 border border-gray-300">
             <div className="border-b border-gray-300 bg-gray-50 p-2.5">
-              <h2 className="m-0 text-sm font-medium">Requested models</h2>
+              <h2 className="m-0 text-sm font-medium">
+                {t("bookings.bookingOverviewPdf.requestedModels")}
+              </h2>
             </div>
             <ul className="m-0 list-none p-0">
               {outstandingModelRequests.map((req) => (

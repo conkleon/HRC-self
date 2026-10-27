@@ -1,6 +1,7 @@
 import type { ReactNode, MouseEvent } from "react";
 import { useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Outlet, useMatches, useNavigate } from "react-router";
 import { handleActivationKeyPress } from "~/utils/keyboard";
 import { tw } from "~/utils/tw";
@@ -16,6 +17,7 @@ const Dialog = ({
   open: boolean;
   noScroll: boolean;
 }) => {
+  const { t } = useTranslation();
   const matches = useMatches();
   const prevRoute = matches[matches.length - 2];
 
@@ -64,7 +66,7 @@ const Dialog = ({
             className={
               "absolute right-4 top-[16px] leading-none text-gray-500 md:right-6 md:top-[26px]"
             }
-            aria-label="Close dialog"
+            aria-label={t("nav.contextualModal.closeDialog")}
           >
             <XIcon />
           </Button>

@@ -1,5 +1,6 @@
 import { BarcodeType } from "@prisma/client";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LinksFunction,
@@ -568,6 +569,7 @@ export const links: LinksFunction = () => [
 ];
 
 export default function AssetDetailsPage() {
+  const { t } = useTranslation();
   const { asset } = useLoaderData<typeof loader>();
 
   const roles = useOrganizationRoles();
@@ -608,7 +610,7 @@ export default function AssetDetailsPage() {
                 mainImageExpiration: asset.mainImageExpiration,
                 assetModel: asset.assetModel ?? null,
               }}
-              alt={`Image of ${asset.title}`}
+              alt={t("assets.assetsAssetid.imageOf", { title: asset.title })}
               className={tw(
                 "mr-4 size-14 cursor-pointer rounded border object-cover"
               )}
@@ -628,7 +630,8 @@ export default function AssetDetailsPage() {
             {/* When it left service; who did it is on the Activity tab. */}
             {asset.archivedAt ? (
               <span className="text-sm text-gray-600">
-                Archived on <DateS date={asset.archivedAt} />
+                {t("assets.assetsAssetid.archivedOn")}{" "}
+                <DateS date={asset.archivedAt} />
               </span>
             ) : null}
           </div>

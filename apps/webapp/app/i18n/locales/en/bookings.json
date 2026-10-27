@@ -1,0 +1,738 @@
+{
+  "bookingsBookingidActivity": {
+    "insufficientPermissions": "Insufficient permissions",
+    "youAreNotAllowedTo": "You are not allowed to view booking notes",
+    "notes": "Notes"
+  },
+  "bookingsBookingidOverviewDuplicate": {
+    "duplicateBooking": "Duplicate Booking: {{name}}",
+    "youreAboutToDuplicateThe": "You're about to duplicate the booking",
+    "allCurrentBookingDetailsWill": "All current booking details will be copied. Choose the start and end dates for the new booking below, you can review and edit everything else later.",
+    "kitChangesSinceTheOriginal": "Kit changes since the original booking, these will be applied to the duplicate. The original booking is unchanged.",
+    "addedSinceTheOriginal": "Added since the original",
+    "removedSinceTheOriginal": "Removed since the original",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "bookingsBookingidOverviewManageAssets": {
+    "assets": "Assets",
+    "kits": "Kits",
+    "models": "Models",
+    "categories": "Categories",
+    "tags": "Tags",
+    "locations": "Locations",
+    "category": "Category",
+    "location": "Location",
+    "assetsSelected": "assets selected",
+    "close": "Close",
+    "confirm": "Confirm",
+    "youHaveAddedSomeAssets": "You have added some assets to the booking but haven't saved it yet. Do you want to confirm adding those assets?",
+    "qty": "Qty:",
+    "filterByCategory": "Filter by category",
+    "searchCategories": "Search categories",
+    "filterByTag": "Filter by tag",
+    "filterByLocation": "Filter by location",
+    "imageOf": "Image of {{title}}",
+    "quantityFor": "Quantity for {{title}}"
+  },
+  "bookingsBookingidOverviewManageKits": {
+    "assets": "Assets",
+    "kits": "Kits",
+    "models": "Models",
+    "description": "Description",
+    "location": "Location",
+    "kitsSelected": "{{selectedBulkItemsCount}} kits selected",
+    "close": "Close",
+    "confirm": "Confirm",
+    "youHaveAddedSomeKits": "You have added some kits to the booking but haven't saved it yet. Do you want to confirm adding those kits?",
+    "kits2": "kits"
+  },
+  "bookingsBookingid": {
+    "addToCalendar": "Add to calendar",
+    "archivedBookingsCantBeAdded": "Archived bookings can't be added to a calendar",
+    "notPossibleToAddTo": "Not possible to add to calendar due to booking status",
+    "downloadThisBookingAsA": "Download this booking as a calendar event"
+  },
+  "bookingsIndex": {
+    "newBooking": "New booking",
+    "assets": "Assets",
+    "description": "Description",
+    "from": "From",
+    "to": "To",
+    "tags": "Tags",
+    "custodian": "Custodian",
+    "createdBy": "Created by",
+    "newBooking2": "new booking"
+  },
+  "calendar": {
+    "newBooking": "New booking",
+    "subscribe": "Subscribe",
+    "newBooking2": "new booking"
+  },
+  "notificationPreview": {
+    "whoWillBeNotified": "Who will be notified",
+    "remove": "Remove {{name}}"
+  },
+  "bookingAssetsFilters": {
+    "keepsItemsStillToCheck": "keeps items still to check out on top and moves checked-out items to the bottom, so you can focus on what's left.",
+    "status": "Status",
+    "groupsKitsFirstThenIndividual": "groups kits first, then individual assets.",
+    "itemType": "Item type"
+  },
+  "kitRowActionsDropdown": {
+    "remove": "Remove",
+    "removeFromBooking": "Remove \"{{name}}\" from booking",
+    "areYouSureYouWant": "Are you sure you want to remove this kit from the booking?",
+    "cancel": "Cancel",
+    "close": "Close",
+    "actionsTrigger": "Actions Trigger",
+    "cannotRemoveAssetsFromCompleted": "Cannot remove assets from completed bookings"
+  },
+  "bulkArchiveDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "archiveBookings": "Archive ({{totalSelected}}) bookings",
+    "archiveTheseBookingsCompletedBookings": "Archive these ({{totalSelected}}) bookings? Completed bookings and past-due reserved bookings will be moved to your archive."
+  },
+  "includeChildLocationsCheckbox": {
+    "includeAssetsFromChildLocations": "Include assets from child locations"
+  },
+  "explicitRequirementSettingsCard": {
+    "onlyTheWorkspaceOwnerCan": "Only the workspace owner can change this setting."
+  },
+  "deleteBooking": {
+    "delete": "Delete",
+    "delete2": "Delete {{name}}",
+    "cancel": "Cancel"
+  },
+  "availabilitySelect": {
+    "all": "All {{label}}",
+    "hideUnavailable": "Hide unavailable",
+    "selectAvailability": "Select availability"
+  },
+  "autoArchiveSettings": {
+    "automaticallyMoveCompletedBookingsTo": "Automatically move completed bookings to Archived after they've been completed for the specified number of days.",
+    "automaticallyMoveReservedBookingsTo": "Automatically move reserved bookings to Archived once their end date has passed without ever being checked out, for teams that use bookings as a reservation calendar.",
+    "numberOfDaysToWait": "Number of days to wait after a booking is completed (or its reservation's end date has passed) before automatically archiving it.",
+    "autoArchiveCompletedBookings": "Auto-archive completed bookings",
+    "autoArchiveReservedBookingsAfter": "Auto-archive reserved bookings after their end date",
+    "daysBeforeAutoArchiving": "Days before auto-archiving",
+    "saveSettings": "Save settings"
+  },
+  "removeAssetFromBooking": {
+    "remove": "Remove",
+    "removeFromBooking": "Remove \"{{title}}\" from booking",
+    "areYouSureYouWant": "Are you sure you want to remove this asset from the booking?",
+    "cancel": "Cancel",
+    "cannotRemoveAssetsFromCompleted": "Cannot remove assets from completed bookings"
+  },
+  "removedFromKitBadge": {
+    "removedFromKit": "Removed from kit",
+    "noLongerPartOfThis": "No longer part of this kit",
+    "thisAssetWasRemovedFrom": "This asset was removed from the kit after this booking was made. It stays on the booking as a record of what was booked, so in-progress and past bookings aren't rewritten."
+  },
+  "bulkPartialCheckinDialog": {
+    "checkInSelectedItems": "Check in selected items",
+    "theFollowingItemsWillBe": "The following items will be checked in and marked as Available.",
+    "assets": "({{kitAssetsCount}} assets)",
+    "cancel": "Cancel",
+    "checkInItems": "Check in items",
+    "mainImage": "{{title}} main image",
+    "skippedItems_one": "{{count}} selected item is not eligible for check-in and will be skipped.",
+    "skippedItems_other": "{{count}} selected items are not eligible for check-in and will be skipped."
+  },
+  "cancelBookingDialog": {
+    "cancel": "Cancel",
+    "cancel2": "Cancel {{bookingName}}",
+    "areYouSureYouWant": "Are you sure you want to cancel this booking? This action cannot be undone.",
+    "cancellationReason": "Cancellation reason",
+    "optional": "(optional)",
+    "ifTheCustodianHasAn": "If the custodian has an associated user account with an email address, they will be notified of the cancellation reason.",
+    "goBack": "Go back",
+    "cancelBooking": "Cancel booking",
+    "letTheCustodianKnowWhy": "Let the custodian know why this booking was cancelled..."
+  },
+  "bulkPartialCheckoutDialog": {
+    "checkedOut": "Checked out",
+    "of": "of {{max}}",
+    "checkOutSelectedItems": "Check out selected items",
+    "theFollowingItemsWillBe": "The following items will be checked out and marked as Checked out.",
+    "assets": "({{kitAssetsCount}} assets)",
+    "cancel": "Cancel",
+    "checkOutItems": "Check out items",
+    "checkoutQuantity": "Checkout quantity",
+    "mainImage": "{{title}} main image",
+    "skippedItems_one": "{{count}} selected item is already checked out and will be skipped.",
+    "skippedItems_other": "{{count}} selected items are already checked out and will be skipped."
+  },
+  "bulkCancelDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "cancelBookings": "Cancel ({{totalSelected}}) bookings",
+    "areYouSureYouWant": "Are you sure you want to cancel all ({{totalSelected}}) bookings?"
+  },
+  "checkinDialog": {
+    "checkInBooking": "Check in booking",
+    "cancel": "Cancel",
+    "dontAdjustDate": "Don't Adjust Date",
+    "adjustDate": "Adjust Date",
+    "checkIn": "Check in"
+  },
+  "bookingProcessSidebar": {
+    "howBookingsWork": "How bookings work",
+    "bookingProcess": "Booking Process",
+    "close": "Close",
+    "baseUsersReserveBookingsThat": "Base users reserve bookings that require approval and can be cancelled at any time if there are conflicts with other bookings. Administrators and managers handle equipment check-out and check-in.",
+    "importantNotes": "Important Notes",
+    "equipmentMustBeReturnedIn": "Equipment must be returned in the same condition it was checked out.",
+    "ifYouNeedToExtend": "If you need to extend your booking, contact an administrator or manager before your booking end date.",
+    "administratorsAndManagersHaveFinal": "Administrators and managers have final say on booking approvals based on equipment availability and priorities."
+  },
+  "bookingCheckinReceiptPdf": {
+    "generateCheckInReceipt": "Generate check-in receipt",
+    "generateCheckInReceiptFor": "Generate check-in receipt for \"{{name}}\"",
+    "youCanEitherPreviewOr": "You can either preview or download the PDF. It lists every booked item and what came back.",
+    "downloadPdf": "Download PDF",
+    "generatingReceiptPreview": "Generating receipt preview...",
+    "cancel": "Cancel",
+    "neverCheckedOut": "Never checked out",
+    "returned": "Returned",
+    "stillOut": "Still out",
+    "returned2": "{{returned}} returned",
+    "consumed": "{{consumed}} consumed",
+    "lost": "{{lost}} lost",
+    "damaged": "{{damaged}} damaged",
+    "stillOut2": "{{stillOut}} still out",
+    "checkInReceiptFor": "Check-in receipt for {{name}}",
+    "printed": "Printed",
+    "tags": "Tags",
+    "name": "Name",
+    "qty": "Qty",
+    "kit": "Kit",
+    "code": "Code",
+    "checkedInOn": "Checked in on",
+    "checkedInBy": "Checked in by",
+    "removedFromKitKeptAs": "Removed from kit, kept as a record of what was booked",
+    "nameSignatureDate": "· name, signature, date",
+    "timesAreTheRecordedCheck": "Times are the recorded check-in moments, in the printing user's date format. Generated by {{appName}}.",
+    "booking": "Booking",
+    "custodian": "Custodian",
+    "plannedPeriod": "Planned period",
+    "checkedOut": "Checked out",
+    "checkInMethod": "Check-in method",
+    "description": "Description",
+    "itemsBooked": "Items booked",
+    "unitsSentOut": "Units sent out",
+    "consumed2": "Consumed",
+    "lost2": "Lost",
+    "damaged2": "Damaged",
+    "accountedFor": "Accounted for",
+    "returnedByCustodian": "Returned by (custodian)",
+    "confirmedByCustodian": "Confirmed by (custodian)",
+    "receivedBy": "Received by",
+    "recordedBy": "Recorded by"
+  },
+  "bookingModelReservationsSection": {
+    "unassignedModelReservations": "Unassigned model reservations",
+    "notEnoughUnitsAreFree": "Not enough units are free for this booking's dates. Reduce the reservation to what can be assigned.",
+    "goToPreviousPage": "Go to previous page",
+    "goToNextPage": "Go to next page",
+    "unitCount_one": "{{count}} unit",
+    "unitCount_other": "{{count}} units",
+    "modelCount_one": "{{count}} model",
+    "modelCount_other": "{{count}} models",
+    "summaryToAssign": "{{units}} of {{reserved}} still to assign, across {{models}}",
+    "summaryNeverAssigned": "{{units}} of {{reserved}} never assigned, across {{models}}"
+  },
+  "unassignedModelUnitsPill": {
+    "reservedModelsThatHaveNot": "Reserved models that have not been matched to physical assets yet. Scan them in to assign them.",
+    "thisBookingReservesAssetModels": "{{label}}. This booking reserves asset models that have not been matched to physical assets yet. Scan them in to assign them."
+  },
+  "bulkActionsDropdown": {
+    "actions": "Actions",
+    "cancel": "Cancel",
+    "archive": "Archive",
+    "delete": "Delete"
+  },
+  "adjustModelReservationDialog": {
+    "adjustReservation": "Adjust reservation",
+    "setHowManyUnitsOf": "Set how many units of \"{{modelName}}\" this booking reserves. Units you release go back to the pool for other bookings in this window.",
+    "cancel": "Cancel",
+    "reservedUnits": "Reserved units",
+    "save": "Save",
+    "assignedSoFar_one": "{{fulfilled}} of {{count}} unit assigned so far.",
+    "assignedSoFar_other": "{{fulfilled}} of {{count}} units assigned so far.",
+    "cannotGoBelow": "This reservation can't go below {{fulfilled}}.",
+    "releaseUnassigned_one": "Release the {{count}} unit still unassigned",
+    "releaseUnassigned_other": "Release the {{count}} units still unassigned"
+  },
+  "bookingStatistics": {
+    "bookingStatistics": "Booking statistics",
+    "bookingDuration": "Booking duration",
+    "assets": "Assets",
+    "kits": "Kits",
+    "totalAssets": "Total assets",
+    "theTotalNumberOfAssets": "The total number of assets in this booking including assets inside kits.",
+    "totalValue": "Total value",
+    "categories": "Categories",
+    "tags": "Tags",
+    "createdBy": "Created by",
+    "automaticallyArchived": "Automatically archived",
+    "noCategories": "No categories",
+    "noTags": "No tags",
+    "unassignedModelUnits": "Unassigned model units",
+    "modelUnitsNeverAssigned": "Model units never assigned",
+    "reservedNotMatchedHelp": "Units reserved against an asset model that have not been matched to a physical asset yet. They are not counted in the asset totals above, and they are not included in total value because no specific asset was ever chosen.",
+    "reservedNeverMatchedHelp": "Units reserved against an asset model that were never matched to a physical asset. They are not counted in the asset totals above, and they are not included in total value because no specific asset was ever chosen."
+  },
+  "checkoutSourceSelect": {
+    "from": "From"
+  },
+  "assetRowActionsDropdown": {
+    "adjustQuantity": "Adjust quantity",
+    "remove": "Remove",
+    "close": "Close",
+    "actionsTrigger": "Actions Trigger"
+  },
+  "notificationSettings": {
+    "emailNotificationRecipients": "Email Notification Recipients",
+    "theBookingCustodianAlwaysReceives": "The booking custodian always receives all notifications. These settings control who else gets notified. You can also add per-booking recipients when creating or editing a booking.",
+    "whenSomeoneCreatesABooking": "When someone creates a booking on behalf of another person, the creator will receive all email updates for that booking.",
+    "whenABookingIsReserved": "When a booking is reserved, all workspace {{RESERVATION_AUDIENCE}} receive a notification so someone can review and handle the request. They will not receive subsequent updates (checkout, checkin, etc.) unless they are added as a notification recipient on the booking.",
+    "theseUsersReceiveAllBooking": "These users receive all booking email notifications for every booking in this workspace. Use this for people who need complete visibility, like an office manager or operations lead.",
+    "onlyCanBeAdded": "Only {{PICKABLE_RECIPIENT_AUDIENCE}} can be added.",
+    "youHaveUnsavedChanges": "You have unsaved changes.",
+    "notifyBookingCreator": "Notify booking creator",
+    "notifyAllOnNewBooking": "Notify all {{RESERVATION_AUDIENCE}} on new booking requests",
+    "alwaysNotifyTheseUsers": "Always notify these users",
+    "alwaysNotify": "Always notify",
+    "searchTeamMembers": "Search team members...",
+    "selectUsers": "Select users...",
+    "saveNotificationSettings": "Save notification settings"
+  },
+  "listAssetContent": {
+    "from": "from {{name}}",
+    "booked": "Booked",
+    "returned": "Returned",
+    "consumed": "Consumed",
+    "lost": "Lost",
+    "damaged": "Damaged",
+    "remaining": "Remaining",
+    "partiallyCheckedOut": "Partially checked out",
+    "checkedOut": "Checked out",
+    "stillToCheckOut": "Still to check out",
+    "imageOf": "Image of {{title}}",
+    "allUnitsCheckedIn": "All units checked in",
+    "partiallyCheckedIn": "Partially checked in"
+  },
+  "createBookingDialog": {
+    "createNewBooking": "Create new booking",
+    "chooseANameForYour": "Choose a name for your booking, select a start and end time and choose the custodian. Based on the selected information, asset availability will be determined."
+  },
+  "bookingStatusBadge": {
+    "subjectToReview": "{{status}} - subject to review",
+    "yourBookingIsCurrentlyReserved": "Your booking is currently reserved, however an administrator or manager can choose to reject or close it at any point of time, if there are conflicts with other bookings."
+  },
+  "checkoutDialog": {
+    "pickWhereTheUnitsLeave": "Pick where the units leave from. Units used up on this booking come off that location at check-in.",
+    "cancel": "Cancel",
+    "dontAdjustDate": "Don't Adjust Date",
+    "adjustDate": "Adjust Date",
+    "isNotAssignedYetIt": "is not assigned yet. It stays on the booking so you can scan it later or release it.",
+    "areNotAssignedYetThey": "are not assigned yet. They stay on the booking so you can scan them later or release them.",
+    "thisItemIsKeptAt": "This item is kept at more than one location.",
+    "theseItemsAreKeptAt": "These items are kept at more than one location.",
+    "checkOutAnyway": "Check out anyway",
+    "checkOut": "Check out",
+    "youAreCheckingOutThe": "You are checking out the booking more than 15 minutes before the start date. If you proceed, the start date will be adjusted to now: <0><1></1></0>. Do you want to adjust the start date or keep the original date?"
+  },
+  "statusFilter": {
+    "filterByStatus": "Filter by status"
+  },
+  "progressiveCheckinSettings": {
+    "whenVisualisingTheStateOf": "When visualising the state of a booking, treat each kit as one unit rather than counting the assets inside it.",
+    "countEachKitAsA": "Count each kit as a single unit"
+  },
+  "bookingFilters": {
+    "custodian": "Custodian",
+    "tags": "Tags",
+    "filterByCustodian": "Filter by custodian",
+    "searchTeamMembers": "Search team members",
+    "filterByTag": "Filter by tag"
+  },
+  "bulkRemoveAssetAndKitDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "removeSelectedItems": "Remove selected items ({{totalSelectedItems}})",
+    "areYouSureYouWant": "Are you sure you want to remove {{totalSelectedItems}} selected item(s)? This action cannot be undone."
+  },
+  "manageModelRequests": {
+    "fulfilledReservations": "Fulfilled reservations",
+    "theseModelLevelReservationsWere": "These model-level reservations were fulfilled by scanning specific assets. Shown here as an audit trail, edit or remove the concrete assets via the Assets tab.",
+    "ofFulfilled": "{{fulfilledQuantity}} of {{quantity}} fulfilled",
+    "fulfilled": "Fulfilled",
+    "modelReservations": "Model reservations",
+    "noModelLevelReservationsYet": "No model-level reservations yet. Use the form below to reserve a quantity of a model without picking specific assets.",
+    "reserved": "{{quantity}} reserved",
+    "quantityFor": "Quantity for {{assetModelName}}",
+    "addModelReservation": "Add model reservation",
+    "quantity": "Quantity",
+    "allAvailableModelsAlreadyHave": "All available models already have reservations on this booking. Adjust an existing reservation above or remove one first.",
+    "overReserved": "Over-reserved",
+    "modelOverReserved": "Model over-reserved",
+    "newQuantityFor": "New quantity for {{assetModelName}}",
+    "updateReservationFor": "Update reservation for {{assetModelName}}",
+    "removeReservationFor": "Remove reservation for {{assetModelName}}",
+    "model": "Model",
+    "searchModels": "Search models...",
+    "assetModels": "Asset models",
+    "quantityToReserve": "Quantity to reserve",
+    "update": "Update",
+    "remove": "Remove",
+    "add": "Add",
+    "noUnitsOf00": "No units of <0>{{name}}</0> are available in this window."
+  },
+  "timeSettings": {
+    "setTheMaximumDurationFor": "Set the maximum duration for a single booking. Leave empty for no limit. This helps prevent excessively long bookings.",
+    "skipClosedDays": "Skip closed days",
+    "closedDaysWillNotBe": "Closed days will not be considered for calculations.",
+    "minimumAdvanceNoticeHours": "Minimum advance notice (hours)",
+    "maximumBookingLengthHours": "Maximum booking length (hours)",
+    "noLimit": "No limit",
+    "saveSettings": "Save settings",
+    "usersMustBookAtLeast": "Users must book at least this many hours ahead of their booking start time. Enter 0 to allow immediate bookings. This limitation is only valid for <0>Self service</0> & <1>Base</1> users."
+  },
+  "checkoutDropdown": {
+    "scanToCheckOut": "Scan to check out",
+    "checkOut": "Check out"
+  },
+  "checkinDropdown": {
+    "checkIn": "Check-in",
+    "explicitCheckIn": "Explicit check-in",
+    "quickCheckIn": "Quick check-in"
+  },
+  "listBookingsContent": {
+    "stockConflict": "Stock conflict",
+    "oneOrMoreQuantityTracked": "One or more quantity-tracked assets are over-reserved for these dates. Open the booking to resolve.",
+    "noTags": "No tags",
+    "stockConflictOneOrMore": "Stock conflict: one or more quantity-tracked assets are over-reserved for these dates. Open the booking to resolve.",
+    "includesUnavailableAssets": "Includes unavailable assets",
+    "bookingIncludesUnavailableAssets": "Booking includes unavailable assets",
+    "thereAreSomeAssetsWithin": "There are some assets within this booking that are unavailable for reservation because they are checked-out, have custody assigned or are marked as not allowed to book"
+  },
+  "pageContent": {
+    "cancellationReason": "Cancellation reason",
+    "thisBookingHoldsArchivedAssets": "This booking holds archived assets",
+    "untilThenItCantBe": "Until then it can't be reserved or checked out."
+  },
+  "kitRow": {
+    "assets": "{{assetsCount}} assets",
+    "goToKit": "Go to kit",
+    "unavailable": "Unavailable",
+    "kitIsUnavailableForBookings": "Kit is unavailable for bookings",
+    "anAdministratorHasMarkedOne": "An administrator has marked one of this kit's assets as unavailable for bookings. Remove it from the booking, or make it available again, before reserving.",
+    "alreadyBooked": "Already booked",
+    "kitIsAlreadyBooked": "Kit is already booked",
+    "thisKitIsAlreadyAdded": "This kit is already added to a booking that is overlapping the selected time period.",
+    "toggleKitExpand": "Toggle kit expand"
+  },
+  "modelProgressStrips": {
+    "reserved": "reserved",
+    "ofUnitsFulfilledAcrossAll": "{{totalFulfilled}} of {{totalBooked}} units fulfilled across all reserved models",
+    "ofFulfilled": "{{assetModelName}}: {{fulfilled}} of {{booked}} fulfilled",
+    "model": "model",
+    "models": "models"
+  },
+  "availabilityLabel": {
+    "alreadyAddedToThisBooking": "Already added to this booking",
+    "assetIsPartOfBooking": "Asset is part of booking",
+    "thisAssetIsAlreadyAdded": "This asset is already added to the current booking.",
+    "unavailable": "Unavailable",
+    "assetIsUnavailableForBookings": "Asset is unavailable for bookings",
+    "thisAssetIsMarkedAs": "This asset is marked as unavailable for bookings by an administrator.",
+    "partOfKit": "Part of kit",
+    "assetIsPartOfA": "Asset is part of a kit",
+    "removeTheAssetFromThe": "Remove the asset from the kit to add it individually.",
+    "inCustody": "In custody",
+    "assetIsInCustody": "Asset is in custody",
+    "thisAssetIsInCustody": "This asset is in custody of a team member making it currently unavailable for bookings.",
+    "alreadyBooked": "Already booked",
+    "assetIsAlreadyPartOf": "Asset is already part of a booking",
+    "checkedOut": "Checked out",
+    "assetIsCurrentlyCheckedOut": "Asset is currently checked out",
+    "reservedByModel": "Reserved by model",
+    "modelIsReservedForThis": "Model is reserved for this period",
+    "otherBookingsReservedEveryFree": "Other bookings reserved every free unit of this asset's model for the selected dates. Change the dates, or pick an asset of another model.",
+    "addedThroughKit": "Added through kit",
+    "assetWasAddedThroughA": "Asset was added through a kit",
+    "insufficientStock": "Insufficient stock",
+    "notEnoughUnitsAvailable": "Not enough units available",
+    "thisBookingReservesUnitsBut": "This booking reserves {{bookedQuantity}} units, but only {{availableUnits}} are available across the workspace (after subtracting custody, other reservations, and active checkouts). Reduce the booked quantity or free up units before checking out.",
+    "checkedOutElsewhere": "Checked out elsewhere",
+    "someUnitsAreCheckedOut": "Some units are checked out right now",
+    "thisBookingReservesUnitsBut2": "This booking reserves {{bookedQuantity}} units, but only {{physicalUnitsNow}} are physically on the shelf right now, the rest are checked out on other bookings. They're expected back before this booking starts, so no action is needed yet.",
+    "kitIsInCustody": "Kit is in custody",
+    "thisKitIsInCustody": "This kit is in custody or it contains some assets that are in custody.",
+    "kitIsCheckedOut": "Kit is checked out",
+    "noAssets": "No assets",
+    "noAssetsInKit": "No assets in kit",
+    "thereAreNoAssetsAdded": "There are no assets added to this kit yet.",
+    "containsNonBookableAssets": "Contains non-bookable assets",
+    "kitIsUnavailableForCheck": "Kit is unavailable for check-out",
+    "someAssetsInThisKit": "Some assets in this kit are marked as non-bookable. You can still add the kit to your booking, but you must remove the non-bookable assets to proceed with check-out.",
+    "kitIsAlreadyPartOf": "Kit is already part of a booking",
+    "thisKitIsAlreadyAdded": "This kit is already added to another booking.",
+    "thisAssetIsAddedTo": "This asset is added to a booking that is overlapping the selected time period.",
+    "thisAssetIsCurrentlyChecked": "This asset is currently checked out as part of another booking and should be available for your selected date range period",
+    "thisKitIsCurrentlyChecked": "This kit is currently checked out as part of another booking and should be available for your selected date range period",
+    "thisKitIsCurrentlyChecked2": "This kit is currently checked out and is not available for your selected date range period",
+    "thisAssetIsAddedTo2": "This asset is added to a booking (<0>{{name}}</0>) that is overlapping the selected time period.",
+    "thisAssetIsCurrentlyChecked2": "This asset is currently checked out as part of another booking (<0>{{name}}</0>) and should be available for your selected date range period"
+  },
+  "revertToDraftDialog": {
+    "revertToDraft": "Revert to Draft",
+    "revertingToDraftState": "Reverting to draft state",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "areYouSureYouWant": "Are you sure you want to revert <0>{{name}}</0> booking back to draft?"
+  },
+  "bookingAssetsColumn": {
+    "scanToAssign": "Scan to assign",
+    "name": "Name",
+    "qty": "Qty",
+    "category": "Category",
+    "tags": "Tags",
+    "location": "Location",
+    "checkedOutOn": "Checked out on",
+    "showsTheDateWhenThe": "Shows the date when the asset was checked out via a partial check-out.",
+    "checkedOutBy": "Checked out by",
+    "showsTheUserWhoChecked": "Shows the user who checked out the asset via a partial check-out.",
+    "checkedInOn": "Checked in on",
+    "showsTheDateWhenThe2": "Shows the date when the asset was checked in via a partial check-in.",
+    "checkedInBy": "Checked in by",
+    "showsTheUserWhoChecked2": "Shows the user who checked in the asset via a partial check-in.",
+    "scanToAdd": "Scan to add",
+    "addAssets": "Add assets",
+    "scan": "Scan",
+    "assetsKits": "Assets & Kits"
+  },
+  "adjustBookingAssetQuantityDialog": {
+    "adjustBookedQuantity": "Adjust booked quantity",
+    "ofAvailable": "{{maxQuantity}} of {{totalQuantity}} {{unitLabel}} available",
+    "reservedByOtherBookings": "{{reservedByOthers}} {{unitLabel}} reserved by other bookings.",
+    "viewBookings": "View bookings",
+    "someUnitsAreAlsoReserved": "Some units are also reserved by other bookings.",
+    "max": "Max: {{maxQuantity}} {{unitLabel}}",
+    "cancel": "Cancel",
+    "quantity": "Quantity ({{unitLabel}})",
+    "forTheSelectedDates": "for the selected dates",
+    "save": "Save",
+    "setHowManyNamed": "Set how many {{unitLabel}} of \"{{assetTitle}}\" to reserve for this booking.",
+    "setHowMany": "Set how many {{unitLabel}} of this asset to reserve for this booking.",
+    "for00To1": "for <0></0> to <1></1>"
+  },
+  "actionsDropdown": {
+    "actions": "Actions",
+    "archive": "Archive",
+    "duplicateBooking": "Duplicate booking",
+    "delete": "Delete",
+    "areYouSureYouWant": "Are you sure you want to delete this note?",
+    "thisActionCannotBeUndone": "This action cannot be undone. This will permanently remove this note from our servers.",
+    "cancel": "Cancel"
+  },
+  "extendBookingDialog": {
+    "extendBooking": "Extend booking",
+    "changeTheEndDateOf": "Change the end date of your booking to a date in the future.",
+    "newEndDate": "New end date",
+    "workingHoursValidationUnavailable": "Working hours validation unavailable: {{error}}",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "endDate": "End Date",
+    "booking": "Booking"
+  },
+  "listBulkActionsDropdown": {
+    "actions": "Actions",
+    "checkOutSelectedItems": "Check out selected items",
+    "checkInSelectedItems": "Check in selected items",
+    "removeAssetsKits": "Remove assets/kits"
+  },
+  "manageNotificationsDialog": {
+    "manageNotifications": "Manage notifications",
+    "chooseWhoReceivesEmailNotifications": "Choose who receives email notifications for this booking.",
+    "onlyCanBeAdded": "Only {{PICKABLE_RECIPIENT_AUDIENCE}} can be added.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "notificationRecipients": "Notification recipients",
+    "searchTeamMembers": "Search team members..."
+  },
+  "modelRequestRowActionsDropdown": {
+    "assignFromList": "Assign from list",
+    "scanToAssign": "Scan to assign",
+    "adjustQuantity": "Adjust quantity",
+    "remove": "Remove",
+    "close": "Close",
+    "removeReservationFor": "Remove reservation for \"{{name}}\"",
+    "thisCancelsTheUnitModel": "This cancels the {{quantity}}-unit model-level reservation. The booking stays in place, you can add a new reservation or specific assets afterwards.",
+    "cancel": "Cancel",
+    "actionsTrigger": "Actions Trigger"
+  },
+  "bookingPagination": {
+    "page": "Page",
+    "of": "of",
+    "perPage": "per page",
+    "goToPage1": "Go to page 1",
+    "goToPreviousPage": "Go to previous page",
+    "goToNextPage": "Go to next page",
+    "goToLastPage": "Go to last page"
+  },
+  "bookingLifecycleProgress": {
+    "kitsCountAsOneItem": "Kits count as one item.",
+    "allAssetsInsideKitsAre": "All assets inside kits are counted individually.",
+    "partialMeansAQuantityTracked": "Partial means a quantity-tracked asset has some, but not all, units out.",
+    "bookedPartialCheckedOutReturned": "{{bookedCount}} booked, {{partialCount}} partial, {{checkedOutCount}} checked out, {{returnedCount}} returned, out of {{totalUnits}}",
+    "booked": "Booked",
+    "partial": "Partial",
+    "fullyOut": "Fully out",
+    "returned": "Returned"
+  },
+  "bookingOverviewPdf": {
+    "generateOverviewPdf": "Generate overview PDF",
+    "generateBookingChecklistFor": "Generate booking checklist for \"{{name}}\"",
+    "youCanEitherPreviewOr": "You can either preview or download the PDF. Assets are sorted by",
+    "downloadPdf": "Download PDF",
+    "generatingPdfPreview": "Generating PDF preview...",
+    "cancel": "Cancel",
+    "bookingChecklistFor": "Booking checklist for {{name}}",
+    "booking": "Booking",
+    "custodian": "Custodian",
+    "bookingPeriod": "Booking period",
+    "originalPeriod": "Original period",
+    "description": "Description",
+    "totalAssetsValue": "Total assets value",
+    "tags": "Tags",
+    "image": "Image",
+    "name": "Name",
+    "qty": "Qty",
+    "kit": "Kit",
+    "category": "Category",
+    "location": "Location",
+    "code": "Code",
+    "removedFromKitKeptAs": "Removed from kit, kept as a record of what was booked",
+    "assetDescription": "Asset Description",
+    "requestedModels": "Requested models",
+    "imageOf": "Image of {{title}}",
+    "codeOf": "Code of {{title}}",
+    "markAsPicked": "Mark {{title}} as picked",
+    "ascending": "ascending",
+    "descending": "descending"
+  },
+  "fulfilsModelBadge": {
+    "fulfils": "Fulfils {{modelName}}",
+    "answersAReservedUnit": "Answers a reserved unit",
+    "thisBookingReservedUnitsOf": "This booking reserved units of <0>{{modelName}}</0> without naming them. This asset is one of the units that answered that reservation, so it counts toward it instead of adding to the booking on its own."
+  },
+  "bookingAssetsSidebar": {
+    "booked": "Booked",
+    "returned": "Returned",
+    "consumed": "Consumed",
+    "lost": "Lost",
+    "damaged": "Damaged",
+    "checkedIn": "Checked in",
+    "remaining": "Remaining",
+    "assets": "{{assetCount}} assets",
+    "assetsIn": "Assets in \"{{name}}\"",
+    "inThisBooking": "in this booking",
+    "scanToAssign": "Scan to assign",
+    "loadingAssets": "Loading assets",
+    "weCouldntLoadTheAssets": "We couldn't load the assets for this booking.",
+    "tryAgain": "Try again",
+    "assetsKits": "Assets & kits",
+    "name": "Name",
+    "category": "Category",
+    "assets2": "{{assetsCount}} assets",
+    "goToKit": "Go to kit",
+    "toggleKitExpand": "Toggle kit expand",
+    "imageOf": "Image of {{title}}",
+    "allUnitsCheckedIn": "All units checked in",
+    "partiallyCheckedIn": "Partially checked in",
+    "asset": "asset",
+    "assets3": "assets"
+  },
+  "timeRemaining": {
+    "overdueByDays": "Overdue by {{overdueDays}} days",
+    "hours": "{{overdueHours}} hours",
+    "minutes": "{{overdueMinutes}} minutes",
+    "startsInDays": "Starts in: {{remainingDays}} days",
+    "hours2": "{{remainingHours}} hours",
+    "minutes2": "{{remainingMinutes}} minutes",
+    "days": "{{remainingDays}} days",
+    "remaining": "remaining"
+  },
+  "index": {
+    "exportActivityCsv": "Export activity CSV",
+    "noNotes": "No Notes",
+    "graphicForNoNotes": "Graphic for no notes",
+    "yourBookingHasNoNotes": "Your booking `{{name}}` has no notes <0></0>attached to it."
+  },
+  "editBookingForm": {
+    "inKit": "in kit {{kitName}}",
+    "andMore": "and {{remaining}} more",
+    "save": "Save",
+    "checkOut": "Check Out",
+    "bookingDetails": "Booking details",
+    "requestReservation": "Request reservation",
+    "reserve": "Reserve"
+  },
+  "newBookingForm": {
+    "scanQrCodes": "Scan QR codes",
+    "cancel": "Cancel",
+    "createBooking": "Create Booking",
+    "viewAssetsList": "View assets list"
+  },
+  "tagsRequiredSettings": {
+    "whenEnabledUsersMustAdd": "When enabled, users must add at least one tag to their bookings. This helps with categorization and organization of bookings.",
+    "requireTagsForBookings": "Require tags for bookings"
+  },
+  "dates": {
+    "withinThisPeriodTheAssets": "Within this period the assets in this booking will be checked out and unavailable for other bookings.",
+    "maximumBookingLengthIs": "Maximum booking length is",
+    "hours": "{{maxBookingLength}} hours",
+    "workingHoursValidationUnavailable": "Working hours validation unavailable: {{error}}",
+    "loadingWorkingHours": "Loading working hours",
+    "workingDays": "Working days:",
+    "workingHours": "Working hours:",
+    "varyByDay": "Vary by day",
+    "specialDatesAndHolidaysAre": "Special dates and holidays are also considered",
+    "localHoursOfThePhysical": "Local hours of the physical location",
+    "startDate": "Start Date",
+    "booking": "Booking",
+    "endDate": "End Date",
+    "none": "None",
+    "minimumAdvanceNotice0Hours": "Minimum advance notice: <0>{{bufferStartTime}} hours</0> before booking start time."
+  },
+  "description": {
+    "description": "Description",
+    "addADescription": "Add a description..."
+  },
+  "tagField": {
+    "tags": "Tags"
+  },
+  "name": {
+    "name": "Name",
+    "booking": "Booking"
+  },
+  "notificationRecipients": {
+    "onlyCanBeAdded": "Only {{PICKABLE_RECIPIENT_AUDIENCE}} can be added.",
+    "theseUsersWillReceiveAll": "These users will receive all email notifications for this booking.",
+    "notifications": "Notifications",
+    "notificationRecipients": "Notification recipients",
+    "searchTeamMembers": "Search team members..."
+  },
+  "custodian": {
+    "custodian": "Custodian",
+    "thePersonThatWillBe": "The person that will be in custody of or responsible for the assets during the duration of the booking period.",
+    "description": "Description",
+    "teamMembers": "Team members",
+    "selectATeamMember": "Select a team member"
+  }
+}

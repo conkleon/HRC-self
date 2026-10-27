@@ -14,6 +14,7 @@
 
 import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 import type { BookingStatus } from "@prisma/client";
+import { Trans } from "react-i18next";
 import type { ScanListItems } from "~/atoms/qr-scanner";
 import { isQuantityTracked } from "~/modules/asset/utils";
 import type { AssetFromQr } from "~/routes/api+/get-scanned-item.$qrId";
@@ -174,10 +175,11 @@ export function buildAddToBookingBlockers({
       condition: bookingIsOut && checkedOutAssetsIds.length > 0,
       count: checkedOutAssetsIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already checked out.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.assetsCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(checkedOutAssetsIds),
     },
@@ -186,10 +188,11 @@ export function buildAddToBookingBlockers({
       condition: noUnitsAvailableIds.length > 0,
       count: noUnitsAvailableIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s have" : " has"}`}</strong> no
-          units available.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.qtyNoUnits.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(noUnitsAvailableIds),
     },
@@ -198,10 +201,11 @@ export function buildAddToBookingBlockers({
       condition: bookingIsOut && qrIdsOfCheckedOutKits.length > 0,
       count: qrIdsOfCheckedOutKits.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already checked out.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.kitsCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(qrIdsOfCheckedOutKits),
     },
@@ -210,10 +214,11 @@ export function buildAddToBookingBlockers({
       condition: unavailableAssetsIds.length > 0,
       count: unavailableAssetsIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          marked as <strong>unavailable</strong>.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.assetsUnavailable.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(unavailableAssetsIds),
     },
@@ -222,10 +227,11 @@ export function buildAddToBookingBlockers({
       condition: assetsAlreadyAddedIds.length > 0,
       count: assetsAlreadyAddedIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s" : ""}`}</strong> already
-          added to the booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.assetsAlreadyAdded.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(assetsAlreadyAddedIds),
     },
@@ -234,13 +240,15 @@ export function buildAddToBookingBlockers({
       condition: assetsPartOfKitIds.length > 0,
       count: assetsPartOfKitIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s" : ""} `}</strong> are part
-          of a kit.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.assetsPartOfKit.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Note: Scan the kit QR to add them. The kit fulfils any reserved units its assets cover.",
+      description: (
+        <Trans i18nKey="scanner.blockers.bookingScanBlockers.assetsPartOfKit.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsPartOfKitIds),
     },
     {
@@ -248,10 +256,11 @@ export function buildAddToBookingBlockers({
       condition: qrIdsOfKitsWithUnavailableAssets.length > 0,
       count: qrIdsOfKitsWithUnavailableAssets.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s have" : " has"} `}</strong>{" "}
-          unavailable assets inside {count > 1 ? "them" : "it"}.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.bookingScanBlockers.kitsWithUnavailableAssets.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsWithUnavailableAssets),
     },

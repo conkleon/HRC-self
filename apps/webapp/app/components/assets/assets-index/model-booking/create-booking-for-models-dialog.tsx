@@ -33,6 +33,7 @@
  */
 import { Fragment, useMemo, useReducer, useRef, useState } from "react";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { bulkDialogAtom } from "~/atoms/bulk-update-dialog";
@@ -182,6 +183,7 @@ function toModelRows(items: SelectedModelItem[]): ModelQuantityRow[] {
  * @returns The bulk dialog content for the `model-bookings` type
  */
 export default function CreateBookingForModelsDialog() {
+  const { t } = useTranslation();
   const { currentOrganization, teamMembers, teamMembersForForm, tagsData } =
     useLoaderData<AssetIndexLoaderData>();
   const tagsSuggestions = tagsData.tags.map((tag) => ({
@@ -371,8 +373,11 @@ export default function CreateBookingForModelsDialog() {
       // list is the `models[…]` fields rendered below, which reflect what the
       // user is actually looking at.
       arrayFieldId="selectedAssetModelIds"
-      title="Create booking"
-      description={`Create a new booking reserving units of the selected (${rows.length}) models`}
+      title={t("assets.createBookingForModelsDialog.createBooking")}
+      description={t(
+        "assets.createBookingForModelsDialog.createANewBookingReserving",
+        { rowsCount: rows.length }
+      )}
       actionUrl="/api/bookings/create-for-models"
       className="lg:w-[600px]"
       // No `allowBodyOverflow` despite the TagsAutocomplete below: this dialog
@@ -481,11 +486,12 @@ export default function CreateBookingForModelsDialog() {
             <Card className="m-0 mb-2">
               <div className="mb-3">
                 <span className="block text-sm font-medium text-gray-700">
-                  Units to reserve
+                  {t("assets.createBookingForModelsDialog.unitsToReserve")}
                 </span>
                 <p className="text-xs text-gray-500">
-                  These units are promised to the booking. The assets that serve
-                  them are chosen later, by scanning or assigning.
+                  {t(
+                    "assets.createBookingForModelsDialog.theseUnitsArePromisedTo"
+                  )}
                 </p>
               </div>
 
@@ -502,8 +508,7 @@ export default function CreateBookingForModelsDialog() {
                 />
               ) : (
                 <p className="text-sm text-gray-500">
-                  No models left to book. Close this dialog and select at least
-                  one model.
+                  {t("assets.createBookingForModelsDialog.noModelsLeftToBook")}
                 </p>
               )}
 
@@ -553,7 +558,7 @@ export default function CreateBookingForModelsDialog() {
                 disabled={disabled}
                 onClick={handleCloseDialog}
               >
-                Cancel
+                {t("assets.createBookingForModelsDialog.cancel")}
               </Button>
               {/* `disabled` is the dialog's own fetcher state — the same value
                   `useDisabled(fetcher)` computes — because the form belongs to
@@ -569,7 +574,7 @@ export default function CreateBookingForModelsDialog() {
                     : false)
                 }
               >
-                Confirm
+                {t("assets.createBookingForModelsDialog.confirm")}
               </Button>
             </div>
           </div>

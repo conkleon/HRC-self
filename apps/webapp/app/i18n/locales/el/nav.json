@@ -1,0 +1,82 @@
+{
+  "noticeCard": {
+    "writtenTutorial": "Οδηγός χρήσης",
+    "installForMobile": "Εγκαταστήστε το {{appName}} στο κινητό",
+    "alwaysAvailableAccessToWith": "Πρόσβαση στο {{appName}} παντού, με όλες τις λειτουργίες της έκδοσης υπολογιστή.",
+    "support": "Υποστήριξη {{appName}}"
+  },
+  "organizationSelector": {
+    "manageWorkspaces": "Διαχείριση χώρων εργασίας",
+    "inviteYourTeam": "Προσκαλέστε την ομάδα σας"
+  },
+  "sidebarUserMenu": {
+    "myProfile": "Το προφίλ μου",
+    "accountSettings": "Ρυθμίσεις λογαριασμού",
+    "subscriptions": "Συνδρομές",
+    "logOut": "Αποσύνδεση"
+  },
+  "sidebar": {
+    "toggleSidebar": "Εμφάνιση/απόκρυψη πλαϊνής στήλης"
+  },
+  "updatesNavItem": {
+    "updates": "Ενημερώσεις"
+  },
+  "breadcrumb": {
+    "notFound": "Δεν βρέθηκε"
+  },
+  "assetImportCard": {
+    "viewProgress": "Προβολή προόδου",
+    "assetImportProgress": "Πρόοδος εισαγωγής αντικειμένων",
+    "closeImportProgress": "Κλείσιμο προόδου εισαγωγής",
+    "importProgress": "Πρόοδος εισαγωγής",
+    "expandImportProgress": "Ανάπτυξη προόδου εισαγωγής",
+    "collapseImportProgress": "Σύμπτυξη προόδου εισαγωγής",
+    "warningCount_one": "{{formatted}} προειδοποίηση",
+    "warningCount_other": "{{formatted}} προειδοποιήσεις",
+    "progress": "{{processed}} από {{total}}"
+  },
+  "contextualModal": {
+    "closeDialog": "Κλείσιμο παραθύρου"
+  },
+  "dialog": {
+    "closeDialog": "Κλείσιμο παραθύρου"
+  },
+  "skipLinks": {
+    "skipToMainContent": "Μετάβαση στο κύριο περιεχόμενο",
+    "skipToNavigation": "Μετάβαση στην πλοήγηση",
+    "skipLinks": "Σύνδεσμοι παράκαμψης"
+  },
+  "useSidebarNavItems": {
+    "disabled": "Μη διαθέσιμο",
+    "bookingIsAPremiumFeature": "Οι κρατήσεις είναι premium λειτουργία, διαθέσιμη μόνο σε ομαδικούς χώρους εργασίας.",
+    "pleaseSwitchToYourTeam": "Μεταβείτε στον ομαδικό σας χώρο εργασίας για να χρησιμοποιήσετε αυτή τη λειτουργία.",
+    "adminDashboard": "Πίνακας διαχείρισης",
+    "assetManagement": "Διαχείριση αντικειμένων",
+    "home": "Αρχική",
+    "assets": "Αντικείμενα",
+    "kits": "Σετ",
+    "categories": "Κατηγορίες",
+    "tags": "Ετικέτες",
+    "locations": "Τοποθεσίες",
+    "audits": "Απογραφές",
+    "bookings": "Κρατήσεις",
+    "viewBookings": "Προβολή κρατήσεων",
+    "calendar": "Ημερολόγιο",
+    "reminders": "Υπενθυμίσεις",
+    "reports": "Αναφορές",
+    "organization": "Οργανισμός",
+    "team": "Ομάδα",
+    "users": "Χρήστες",
+    "pendingInvites": "Εκκρεμείς προσκλήσεις",
+    "nonRegisteredMembers": "Μη εγγεγραμμένα μέλη",
+    "workspaceSettings": "Ρυθμίσεις χώρου εργασίας",
+    "general": "Γενικά",
+    "customFields": "Προσαρμοσμένα πεδία",
+    "assetModels": "Μοντέλα αντικειμένων",
+    "assetLabels": "Ετικέτες εκτύπωσης",
+    "qrScanner": "Σαρωτής QR",
+    "updates": "Ενημερώσεις",
+    "questionsFeedback": "Ερωτήσεις/Σχόλια",
+    "invitingUsersTeamOnly": "Οι προσκλήσεις χρηστών είναι διαθέσιμες σε ομαδικούς χώρους εργασίας"
+  }
+}

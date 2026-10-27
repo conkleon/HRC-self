@@ -1,0 +1,82 @@
+{
+  "noticeCard": {
+    "writtenTutorial": "Written Tutorial",
+    "installForMobile": "Install {{appName}} for Mobile",
+    "alwaysAvailableAccessToWith": "Always available access to {{appName}}, with all features you have on desktop.",
+    "support": "{{appName}} support"
+  },
+  "organizationSelector": {
+    "manageWorkspaces": "Manage workspaces",
+    "inviteYourTeam": "Invite your team"
+  },
+  "sidebarUserMenu": {
+    "myProfile": "My Profile",
+    "accountSettings": "Account settings",
+    "subscriptions": "Subscriptions",
+    "logOut": "Log Out"
+  },
+  "sidebar": {
+    "toggleSidebar": "Toggle Sidebar"
+  },
+  "updatesNavItem": {
+    "updates": "Updates"
+  },
+  "breadcrumb": {
+    "notFound": "Not found"
+  },
+  "assetImportCard": {
+    "viewProgress": "View progress",
+    "assetImportProgress": "Asset import progress",
+    "closeImportProgress": "Close import progress",
+    "importProgress": "Import progress",
+    "expandImportProgress": "Expand import progress",
+    "collapseImportProgress": "Collapse import progress",
+    "warningCount_one": "{{formatted}} warning",
+    "warningCount_other": "{{formatted}} warnings",
+    "progress": "{{processed}} of {{total}}"
+  },
+  "contextualModal": {
+    "closeDialog": "Close dialog"
+  },
+  "dialog": {
+    "closeDialog": "Close dialog"
+  },
+  "skipLinks": {
+    "skipToMainContent": "Skip to main content",
+    "skipToNavigation": "Skip to navigation",
+    "skipLinks": "Skip links"
+  },
+  "useSidebarNavItems": {
+    "disabled": "Disabled",
+    "bookingIsAPremiumFeature": "Booking is a premium feature only available for Team workspaces.",
+    "pleaseSwitchToYourTeam": "Please switch to your team workspace to access this feature.",
+    "adminDashboard": "Admin Dashboard",
+    "assetManagement": "Asset management",
+    "home": "Home",
+    "assets": "Assets",
+    "kits": "Kits",
+    "categories": "Categories",
+    "tags": "Tags",
+    "locations": "Locations",
+    "audits": "Audits",
+    "bookings": "Bookings",
+    "viewBookings": "View Bookings",
+    "calendar": "Calendar",
+    "reminders": "Reminders",
+    "reports": "Reports",
+    "organization": "Organization",
+    "team": "Team",
+    "users": "Users",
+    "pendingInvites": "Pending invites",
+    "nonRegisteredMembers": "Non-registered members",
+    "workspaceSettings": "Workspace settings",
+    "general": "General",
+    "customFields": "Custom fields",
+    "assetModels": "Asset models",
+    "assetLabels": "Asset labels",
+    "qrScanner": "QR Scanner",
+    "updates": "Updates",
+    "questionsFeedback": "Questions/Feedback",
+    "invitingUsersTeamOnly": "Inviting users is available on Team workspaces"
+  }
+}

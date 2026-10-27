@@ -16,6 +16,7 @@
  * @see {@link file://./../../routes/_layout+/assets.new.tsx} bulk branch
  */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../shared/button";
 import {
   AlertDialog,
@@ -73,6 +74,7 @@ function BulkCreateSuccessDialog({
   success: BulkCreateSuccess;
   sampleTitles?: string[];
 }) {
+  const { t } = useTranslation();
   // Local dismissal flag — fresh per `key` change above, so the next
   // submit's payload remounts with `dismissed=false` automatically.
   const [dismissed, setDismissed] = useState(false);
@@ -88,10 +90,17 @@ function BulkCreateSuccessDialog({
       <AlertDialogContent data-test-id="bulkCreateSuccessModal">
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Created {count} {count === 1 ? "asset" : "assets"}
+            {t("assets.bulkCreateSuccessModal.created", { count })}{" "}
+            {count === 1
+              ? t("assets.bulkCreateSuccessModal.asset")
+              : t("assets.bulkCreateSuccessModal.assets")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {count} {count === 1 ? "asset" : "assets"} created from{" "}
+            {count}{" "}
+            {count === 1
+              ? t("assets.bulkCreateSuccessModal.asset")
+              : t("assets.bulkCreateSuccessModal.assets")}{" "}
+            {t("assets.bulkCreateSuccessModal.createdFrom")}{" "}
             <span className="font-medium text-gray-900">
               {success.assetModelName}
             </span>
@@ -103,7 +112,10 @@ function BulkCreateSuccessDialog({
           <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700">
             <span className="font-mono">{head.join(", ")}</span>
             {remaining > 0 ? (
-              <span className="text-gray-500"> …and {remaining} more</span>
+              <span className="text-gray-500">
+                {" "}
+                {t("assets.bulkCreateSuccessModal.andMore", { remaining })}
+              </span>
             ) : null}
           </div>
         ) : null}
@@ -114,13 +126,13 @@ function BulkCreateSuccessDialog({
             variant="secondary"
             onClick={() => setDismissed(true)}
           >
-            Close
+            {t("assets.bulkCreateSuccessModal.close")}
           </Button>
           <Button
             to={`/assets?assetModel=${success.assetModelId}`}
             onClick={() => setDismissed(true)}
           >
-            View assets
+            {t("assets.bulkCreateSuccessModal.viewAssets")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

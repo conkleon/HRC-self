@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { archivedAssetBlockedReason } from "@shelf/labels";
 import { CopyIcon, PencilIcon, QrCodeIcon, Trash2Icon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import When from "~/components/when/when";
 import { useCanArchiveAssets } from "~/hooks/use-can-archive-assets";
@@ -31,6 +32,7 @@ export default function AssetQuickActions({
   style,
   asset,
 }: AssetQuickActionsProps) {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const canArchiveAssets = useCanArchiveAssets();
   /**
@@ -58,8 +60,8 @@ export default function AssetQuickActions({
           variant="secondary"
           className={"p-2"}
           to={`/assets/${asset.id}/edit`}
-          aria-label="Edit asset information"
-          tooltip="Edit asset information"
+          aria-label={t("assets.assetQuickActions.editAssetInformation")}
+          tooltip={t("assets.assetQuickActions.editAssetInformation")}
           disabled={archivedDisabled}
         >
           <PencilIcon className="size-4" />
@@ -80,8 +82,8 @@ export default function AssetQuickActions({
             size="sm"
             variant="secondary"
             className={"p-2"}
-            aria-label="Show asset label"
-            tooltip="Show asset label"
+            aria-label={t("assets.assetQuickActions.showAssetLabel")}
+            tooltip={t("assets.assetQuickActions.showAssetLabel")}
           >
             <QrCodeIcon className="size-4" />
           </Button>
@@ -100,8 +102,8 @@ export default function AssetQuickActions({
           variant="secondary"
           className={"p-2"}
           to={`/assets/${asset.id}/overview/duplicate`}
-          aria-label="Duplicate asset"
-          tooltip="Duplicate asset"
+          aria-label={t("assets.assetQuickActions.duplicateAsset")}
+          tooltip={t("assets.assetQuickActions.duplicateAsset")}
           disabled={archivedDisabled}
         >
           <CopyIcon className="size-4" />
@@ -123,8 +125,8 @@ export default function AssetQuickActions({
               size="sm"
               variant="secondary"
               className={"p-2"}
-              aria-label="Delete asset"
-              tooltip="Delete asset"
+              aria-label={t("assets.assetQuickActions.deleteAsset")}
+              tooltip={t("assets.assetQuickActions.deleteAsset")}
             >
               <Trash2Icon className="size-4" />
             </Button>

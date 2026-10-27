@@ -27,6 +27,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AssetType } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useActionData, useLoaderData } from "react-router";
 import z from "zod";
 import {
@@ -132,9 +133,12 @@ function CheckoutQtyInput({
   value: string;
   onChange: (bookingAssetId: string, next: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <label className="ml-auto flex items-center gap-2">
-      <span className="text-xs font-medium text-gray-700">Checked out</span>
+      <span className="text-xs font-medium text-gray-700">
+        {t("bookings.bulkPartialCheckoutDialog.checkedOut")}
+      </span>
       <input
         type="number"
         {...numberInputWheelGuard}
@@ -144,7 +148,7 @@ function CheckoutQtyInput({
         value={value}
         onChange={(e) => onChange(bookingAssetId, e.target.value)}
         inputMode="numeric"
-        aria-label="Checkout quantity"
+        aria-label={t("bookings.bulkPartialCheckoutDialog.checkoutQuantity")}
         className={tw(
           "w-14 rounded-md border border-gray-200 px-2 py-1 text-right text-sm tabular-nums text-gray-900",
           "focus:outline-none focus:ring-1 focus:ring-primary-500",
@@ -153,7 +157,9 @@ function CheckoutQtyInput({
           "[&::-webkit-outer-spin-button]:appearance-none"
         )}
       />
-      <span className="text-xs tabular-nums text-gray-500">of {max}</span>
+      <span className="text-xs tabular-nums text-gray-500">
+        {t("bookings.bulkPartialCheckoutDialog.of", { max })}
+      </span>
     </label>
   );
 }
@@ -172,6 +178,7 @@ export default function BulkPartialCheckoutDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const {
     booking,
@@ -565,10 +572,13 @@ export default function BulkPartialCheckoutDialog({
         title={
           <div className="w-full">
             <div className={tw("mb-2")}>
-              <h4>Check out selected items</h4>
+              <h4>
+                {t("bookings.bulkPartialCheckoutDialog.checkOutSelectedItems")}
+              </h4>
               <p>
-                The following items will be checked out and marked as Checked
-                out.
+                {t(
+                  "bookings.bulkPartialCheckoutDialog.theFollowingItemsWillBe"
+                )}
               </p>
             </div>
           </div>
@@ -607,9 +617,9 @@ export default function BulkPartialCheckoutDialog({
 
           {skippedCount > 0 && (
             <p className="mb-3 rounded border border-warning-200 bg-warning-50 p-2 text-xs text-warning-800">
-              {skippedCount} selected item{skippedCount === 1 ? "" : "s"}{" "}
-              {skippedCount === 1 ? "is" : "are"} already checked out and will
-              be skipped.
+              {t("bookings.bulkPartialCheckoutDialog.skippedItems", {
+                count: skippedCount,
+              })}
             </p>
           )}
 
@@ -655,7 +665,9 @@ export default function BulkPartialCheckoutDialog({
                         />
                         <span className="text-sm font-medium">{kit.name}</span>
                         <span className="text-xs text-gray-500">
-                          ({kitAssets.length} assets)
+                          {t("bookings.bulkPartialCheckoutDialog.assets", {
+                            kitAssetsCount: kitAssets.length,
+                          })}
                         </span>
                         <span className="rounded bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">
                           KIT
@@ -693,7 +705,10 @@ export default function BulkPartialCheckoutDialog({
                                     asset.mainImageExpiration,
                                   assetModel: asset.assetModel ?? null,
                                 }}
-                                alt={`${asset.title} main image`}
+                                alt={t(
+                                  "bookings.bulkPartialCheckoutDialog.mainImage",
+                                  { title: asset.title }
+                                )}
                               />
                               <span className="font-medium">{asset.title}</span>
                               {asset.category && (
@@ -758,7 +773,10 @@ export default function BulkPartialCheckoutDialog({
                                     asset.mainImageExpiration,
                                   assetModel: asset.assetModel ?? null,
                                 }}
-                                alt={`${asset.title} main image`}
+                                alt={t(
+                                  "bookings.bulkPartialCheckoutDialog.mainImage",
+                                  { title: asset.title }
+                                )}
                               />
                               <span className="font-medium">{asset.title}</span>
                               {asset.category && (
@@ -805,7 +823,7 @@ export default function BulkPartialCheckoutDialog({
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("bookings.bulkPartialCheckoutDialog.cancel")}
             </Button>
 
             {/* Submit button - a confirming CheckoutDialog for an early
@@ -825,7 +843,11 @@ export default function BulkPartialCheckoutDialog({
                   from: booking.from,
                 }}
                 intent="partial-checkout"
-                label={isEarlyCheckout ? undefined : "Check out items"}
+                label={
+                  isEarlyCheckout
+                    ? undefined
+                    : t("bookings.bulkPartialCheckoutDialog.checkOutItems")
+                }
                 disabled={disabled || noAssetsToCheckOut}
                 portalContainer={formElement || undefined}
                 formId="bulk-partial-checkout-form"
@@ -843,7 +865,7 @@ export default function BulkPartialCheckoutDialog({
                 value="partial-checkout"
                 className="whitespace-nowrap"
               >
-                Check out items
+                {t("bookings.bulkPartialCheckoutDialog.checkOutItems")}
               </Button>
             )}
           </div>

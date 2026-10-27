@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useFetcher, useParams } from "react-router";
 import { TrashIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
@@ -15,6 +16,7 @@ import {
 import { useDisabled } from "~/hooks/use-disabled";
 
 export const DeleteNote = ({ noteId }: { noteId: string }) => {
+  const { t } = useTranslation();
   const fetcher = useFetcher();
   const params = useParams();
   const disabled = useDisabled(fetcher);
@@ -30,7 +32,7 @@ export const DeleteNote = ({ noteId }: { noteId: string }) => {
             icon="trash"
             width="full"
           >
-            Delete
+            {t("assets.deleteNote.delete")}
           </Button>
         </AlertDialogTrigger>
       </div>
@@ -40,16 +42,17 @@ export const DeleteNote = ({ noteId }: { noteId: string }) => {
           <span className="flex size-12 items-center justify-center rounded-full bg-error-50 p-2 text-error-600">
             <TrashIcon />
           </span>
-          <AlertDialogTitle>Delete note</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("assets.deleteNote.deleteNote")}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete this note? This action cannot be
-            undone.
+            {t("assets.deleteNote.areYouSureYouWant")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
             <Button type="button" variant="secondary" disabled={disabled}>
-              Cancel
+              {t("assets.deleteNote.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -64,7 +67,7 @@ export const DeleteNote = ({ noteId }: { noteId: string }) => {
               data-test-id="confirmDeleteNoteButton"
               disabled={disabled}
             >
-              Delete
+              {t("assets.deleteNote.delete")}
             </Button>
           </fetcher.Form>
         </AlertDialogFooter>

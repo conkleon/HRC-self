@@ -36,6 +36,7 @@ import {
   ChevronRight as ChevronRightIcon,
   Package as PackageIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import {
@@ -166,6 +167,7 @@ export function BookingModelReservationsSection({
   shortfalls,
   className,
 }: BookingModelReservationsSectionProps) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
 
   const outstanding = getOutstandingModelRequests(modelRequests);
@@ -200,21 +202,41 @@ export function BookingModelReservationsSection({
       <div className="flex items-start justify-between gap-3 border-b border-gray-200 p-4 md:px-6">
         <div>
           <h5 className="text-left text-text-sm font-semibold text-gray-900">
-            Unassigned model reservations
+            {t(
+              "bookings.bookingModelReservationsSection.unassignedModelReservations"
+            )}
           </h5>
           {/* Same `"X of Y units"` shape the rows use, so the header is checkable
             against them by eye: the rows' first numbers sum to X and their
             second numbers sum to Y. Stating both stops a reader having to
             guess whether a lone number means promised or remaining. */}
           <p className="text-sm text-gray-600">
-            {units} of {reserved} {reserved === 1 ? "unit" : "units"}{" "}
-            {canAssign ? "still to assign" : "never assigned"}, across{" "}
-            {outstanding.length} {outstanding.length === 1 ? "model" : "models"}
+            {t(
+              canAssign
+                ? "bookings.bookingModelReservationsSection.summaryToAssign"
+                : "bookings.bookingModelReservationsSection.summaryNeverAssigned",
+              {
+                units,
+                reserved: t(
+                  "bookings.bookingModelReservationsSection.unitCount",
+                  {
+                    count: reserved,
+                  }
+                ),
+                models: t(
+                  "bookings.bookingModelReservationsSection.modelCount",
+                  {
+                    count: outstanding.length,
+                  }
+                ),
+              }
+            )}
           </p>
           {shortfallByModelId.size > 0 ? (
             <p className="mt-1 text-sm font-medium text-error-600">
-              Not enough units are free for this booking&apos;s dates. Reduce
-              the reservation to what can be assigned.
+              {t(
+                "bookings.bookingModelReservationsSection.notEnoughUnitsAreFree"
+              )}
             </p>
           ) : null}
         </div>
@@ -286,7 +308,9 @@ export function BookingModelReservationsSection({
               type="button"
               variant="secondary"
               size="sm"
-              aria-label="Go to previous page"
+              aria-label={t(
+                "bookings.bookingModelReservationsSection.goToPreviousPage"
+              )}
               disabled={currentPage === 1}
               onClick={() => setPage(currentPage - 1)}
             >
@@ -301,7 +325,9 @@ export function BookingModelReservationsSection({
               type="button"
               variant="secondary"
               size="sm"
-              aria-label="Go to next page"
+              aria-label={t(
+                "bookings.bookingModelReservationsSection.goToNextPage"
+              )}
               disabled={currentPage === totalPages}
               onClick={() => setPage(currentPage + 1)}
             >

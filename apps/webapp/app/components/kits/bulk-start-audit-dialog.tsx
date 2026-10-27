@@ -21,6 +21,7 @@ import {
 import { useAtomValue } from "jotai";
 import { InfoIcon } from "lucide-react";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -90,19 +91,20 @@ function SelectedKitsSummary({
   kits: ListItemData[];
   search: string | null;
 }) {
-  const plural = count === 1 ? "" : "s";
+  const { t } = useTranslation();
 
   if (allSelected) {
     return (
       <p className="text-sm text-gray-700">
-        Auditing assets in{" "}
+        {t("kits.bulkStartAuditDialog.auditingAssetsIn")}{" "}
         <span className="font-medium">
-          all {count} kit{plural}
+          {t("kits.bulkStartAuditDialog.allKits", { count })}
         </span>
         {search ? (
           <>
             {" "}
-            matching <span className="font-medium">“{search}”</span>
+            {t("kits.bulkStartAuditDialog.matching")}{" "}
+            <span className="font-medium">“{search}”</span>
           </>
         ) : null}
         .
@@ -113,9 +115,9 @@ function SelectedKitsSummary({
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-700">
       <span>
-        Auditing assets in{" "}
+        {t("kits.bulkStartAuditDialog.auditingAssetsIn")}{" "}
         <span className="font-medium">
-          {count} kit{plural}
+          {t("kits.bulkStartAuditDialog.kitCount", { count })}
         </span>
         .
       </span>
@@ -126,7 +128,7 @@ function SelectedKitsSummary({
             variant="link"
             className="h-auto p-0 text-sm font-medium"
           >
-            View list
+            {t("kits.bulkStartAuditDialog.viewList")}
           </Button>
         </PopoverTrigger>
         <PopoverPortal>
@@ -135,7 +137,7 @@ function SelectedKitsSummary({
             className="z-[999999] mt-2 max-h-[300px] w-[260px] overflow-y-auto rounded-md border border-gray-200 bg-white shadow-md"
           >
             <p className="border-b border-gray-100 px-3 py-2 text-xs font-medium text-gray-500">
-              Selected kits ({count})
+              {t("kits.bulkStartAuditDialog.selectedKits", { count })}
             </p>
             <ul className="py-1">
               {kits.map((kit) => {
@@ -151,10 +153,12 @@ function SelectedKitsSummary({
                       className="truncate text-gray-700"
                       title={kit.name ?? undefined}
                     >
-                      {kit.name || "Untitled kit"}
+                      {kit.name || t("kits.bulkStartAuditDialog.untitledKit")}
                     </span>
                     <span className="shrink-0 text-xs tabular-nums text-gray-500">
-                      {assetCount} asset{assetCount === 1 ? "" : "s"}
+                      {t("kits.bulkStartAuditDialog.assetCount", {
+                        count: assetCount,
+                      })}
                     </span>
                   </li>
                 );
@@ -172,6 +176,7 @@ function SelectedKitsSummary({
  * The audit covers the union of all assets in the selected kits.
  */
 export default function KitsBulkStartAuditDialog() {
+  const { t } = useTranslation();
   const { totalItems } = useLoaderData<IndexResponse>();
   const selectedItems = useAtomValue(selectedBulkItemsAtom);
   const selectedCount = useAtomValue(selectedBulkItemsCountAtom);
@@ -199,8 +204,8 @@ export default function KitsBulkStartAuditDialog() {
       ref={zo.ref}
       type="start-audit"
       className="md:w-[800px]"
-      title="Start an audit"
-      description="Set up an audit for the assets in the kits you selected."
+      title={t("kits.bulkStartAuditDialog.startAnAudit")}
+      description={t("kits.bulkStartAuditDialog.setUpAnAuditFor")}
       actionUrl="/api/audits/start"
       arrayFieldId="kitIds"
       formClassName="px-0"
@@ -222,8 +227,9 @@ export default function KitsBulkStartAuditDialog() {
             <div className="flex items-start gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
               <InfoIcon className="mt-0.5 size-4 shrink-0 text-gray-400" />
               <p>
-                The audit will include every asset currently in the selected kit
-                {displayCount === 1 ? "" : "s"}.
+                {t("kits.bulkStartAuditDialog.includesEveryAsset", {
+                  count: displayCount,
+                })}
               </p>
             </div>
           </div>

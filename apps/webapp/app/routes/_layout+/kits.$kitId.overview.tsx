@@ -1,4 +1,5 @@
 import type { Barcode } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { data, useLoaderData } from "react-router";
 import { z } from "zod";
@@ -90,6 +91,7 @@ export const handle = {
 };
 
 export default function KitOverview() {
+  const { t } = useTranslation();
   const { kit, currentOrganization, locale } = useLoaderData<typeof loader>();
   const { canUseBarcodes } = useBarcodePermissions();
   // Multiplies per-unit `valuation` by `AssetKit.quantity` — units of
@@ -118,7 +120,7 @@ export default function KitOverview() {
         {kit?.qrCodes?.[0] ? (
           <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
             <span className="w-1/4 text-[14px] font-medium text-gray-900">
-              Shelf QR ID
+              {t("kits.kitsKitidOverview.shelfQrId")}
             </span>
             <div className="mt-1 w-3/5 text-gray-600 md:mt-0">
               {kit.qrCodes[0].id}
@@ -127,7 +129,7 @@ export default function KitOverview() {
         ) : null}
         <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
           <span className="w-1/4 text-[14px] font-medium text-gray-900">
-            Created
+            {t("kits.kitsKitidOverview.created")}
           </span>
           <div className="mt-1 w-3/5 text-gray-600 md:mt-0">
             <DateS date={kit.createdAt} includeTime />
@@ -137,7 +139,7 @@ export default function KitOverview() {
         {kit?.description ? (
           <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
             <span className="w-1/4 text-[14px] font-medium text-gray-900">
-              Description
+              {t("kits.kitsKitidOverview.description")}
             </span>
             <div className="mt-1 whitespace-pre-wrap text-gray-600 md:mt-0 md:w-3/5">
               {kit.description}
@@ -148,7 +150,7 @@ export default function KitOverview() {
         <When truthy={!!kit.category}>
           <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
             <span className="w-1/4 text-[14px] font-medium text-gray-900">
-              Category
+              {t("kits.kitsKitidOverview.category")}
             </span>
             <div className="mt-1 whitespace-pre-wrap text-gray-600 md:mt-0 md:w-3/5">
               <CategoryBadge category={kit.category} />
@@ -159,7 +161,7 @@ export default function KitOverview() {
         <When truthy={!!kit.location}>
           <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
             <span className="w-1/4 text-[14px] font-medium text-gray-900">
-              Location
+              {t("kits.kitsKitidOverview.location")}
             </span>
             <div className="mt-1 md:mt-0 md:w-3/5">
               {kit.location ? (
@@ -178,16 +180,13 @@ export default function KitOverview() {
 
         <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
           <span className="w-1/4 text-[14px] font-medium text-gray-900">
-            Total value{" "}
+            {t("kits.kitsKitidOverview.totalValue")}{" "}
             <InfoTooltip
               iconClassName="size-4"
               content={
                 <>
-                  <h6>Total value</h6>
-                  <p>
-                    A sum of all assets' values in this kit. If no assets are
-                    present, this will be zero.
-                  </p>
+                  <h6>{t("kits.kitsKitidOverview.totalValue")}</h6>
+                  <p>{t("kits.kitsKitidOverview.aSumOfAllAssets")}</p>
                 </>
               }
             />
@@ -212,22 +211,24 @@ export default function KitOverview() {
         })() ? (
           <li className="w-full p-4 last:border-b-0 md:block">
             <span className="mb-3 flex items-center gap-1 text-[14px] font-medium text-gray-900">
-              Barcodes ({(kit as KitWithOptionalBarcodes).barcodes?.length})
+              {t("kits.kitsKitidOverview.barcodes", {
+                barcodesCount: (kit as KitWithOptionalBarcodes).barcodes
+                  ?.length,
+              })}
               <InfoTooltip
                 iconClassName="size-4"
                 content={
                   <>
-                    <h6>Barcodes support</h6>
+                    <h6>{t("kits.kitsKitidOverview.barcodesSupport")}</h6>
                     {BARCODES_KB_URL ? (
                       <p>
-                        Want to know more about barcodes? Check out our
-                        knowledge base article on{" "}
+                        {t("kits.kitsKitidOverview.wantToKnowMoreAbout")}{" "}
                         <Button
                           variant="link"
                           target="_blank"
                           to={BARCODES_KB_URL}
                         >
-                          barcode support
+                          {t("kits.kitsKitidOverview.barcodeSupport")}
                         </Button>
                       </p>
                     ) : null}

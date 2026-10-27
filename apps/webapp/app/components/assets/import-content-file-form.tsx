@@ -8,6 +8,7 @@
  */
 import type { ChangeEvent } from "react";
 import { useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
 import { useDisabled } from "~/hooks/use-disabled";
 import useFetcherWithReset from "~/hooks/use-fetcher-with-reset";
@@ -35,6 +36,7 @@ import When from "../when/when";
  * @param intent - The form intent value sent to the action
  */
 export const FileForm = ({ intent }: { intent: string }) => {
+  const { t } = useTranslation();
   // Widened to `string` so toUpperCase() doesn't need a cast.
   // The "I AGREE" check happens at submit time.
   const [agreed, setAgreed] = useState("");
@@ -75,7 +77,7 @@ export const FileForm = ({ intent }: { intent: string }) => {
       <Input
         type="file"
         name="file"
-        label="Select a csv file"
+        label={t("assets.importContentFileForm.selectACsvFile")}
         required
         onChange={handleFileSelect}
         accept=".csv"
@@ -95,32 +97,35 @@ export const FileForm = ({ intent }: { intent: string }) => {
         <AlertDialogTrigger asChild>
           <Button
             type="button"
-            title={"Confirm asset import"}
+            title={t("assets.importContentFileForm.confirmAssetImport")}
             disabled={!selectedFile}
             className="my-4"
           >
-            Confirm asset import
+            {t("assets.importContentFileForm.confirmAssetImport")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent className="max-w-[600px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm asset import</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("assets.importContentFileForm.confirmAssetImport")}
+            </AlertDialogTitle>
             {!isSuccessful ? (
               <>
                 <AlertDialogDescription>
-                  You need to type: <b>"I AGREE"</b> in the field below to
-                  accept the import. By doing this you agree that you have read
-                  the requirements and you understand the limitations and
-                  consequences of using this feature.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.importContentFileForm.youNeedToType0"
+                    components={[<b key="slot0" />]}
+                  />
                 </AlertDialogDescription>
                 <Input
                   type="text"
-                  label={"Confirmation"}
+                  label={t("assets.importContentFileForm.confirmation")}
                   ref={agreeInputRef}
                   name="agree"
                   value={agreed}
                   onChange={(e) => setAgreed(e.target.value.toUpperCase())}
-                  placeholder="I AGREE"
+                  placeholder={t("assets.importContentFileForm.iAgree2")}
                   pattern="^I AGREE$" // We use a regex to make sure the user types the exact string
                   required
                   onKeyDown={(e) => {
@@ -141,8 +146,12 @@ export const FileForm = ({ intent }: { intent: string }) => {
 
           <When truthy={isSuccessful}>
             <div>
-              <b className="text-green-500">Success!</b>
-              <p>Your assets have been imported.</p>
+              <b className="text-green-500">
+                {t("assets.importContentFileForm.success")}
+              </b>
+              <p>
+                {t("assets.importContentFileForm.yourAssetsHaveBeenImported")}
+              </p>
             </div>
           </When>
 
@@ -151,18 +160,18 @@ export const FileForm = ({ intent }: { intent: string }) => {
               <div className="flex gap-2">
                 <AlertDialogCancel asChild>
                   <Button type="button" variant="secondary" width="full">
-                    Close
+                    {t("assets.importContentFileForm.close")}
                   </Button>
                 </AlertDialogCancel>
                 <Button to="/assets" width="full" className="whitespace-nowrap">
-                  View new assets
+                  {t("assets.importContentFileForm.viewNewAssets")}
                 </Button>
               </div>
             ) : (
               <>
                 <AlertDialogCancel asChild>
                   <Button type="button" variant="secondary">
-                    Cancel
+                    {t("assets.importContentFileForm.cancel")}
                   </Button>
                 </AlertDialogCancel>
                 <Button
@@ -173,7 +182,9 @@ export const FileForm = ({ intent }: { intent: string }) => {
                   }}
                   disabled={disabled}
                 >
-                  {isSubmitting ? "Importing..." : "Import"}
+                  {isSubmitting
+                    ? "Importing..."
+                    : t("assets.importContentFileForm.import")}
                 </Button>
               </>
             )}

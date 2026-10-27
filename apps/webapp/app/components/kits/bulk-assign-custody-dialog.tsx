@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -18,6 +19,7 @@ export const BulkAssignKitCustodySchema = z.object({
 });
 
 export default function BulkAssignCustodyDialog() {
+  const { t } = useTranslation();
   const zo = useZorm("BulkAssignKitCustody", BulkAssignKitCustodySchema);
 
   const assignsSelfOnly = useRoleAccess().custody.assign === "self";
@@ -60,10 +62,12 @@ export default function BulkAssignCustodyDialog() {
                   custodyPurpose: "custody-assignment",
                 }}
                 fieldName="custodian"
-                contentLabel="Team members"
+                contentLabel={t("kits.bulkAssignCustodyDialog.teamMembers")}
                 initialDataKey="teamMembers"
                 countKey="totalTeamMembers"
-                placeholder="Select a team member"
+                placeholder={t(
+                  "kits.bulkAssignCustodyDialog.selectATeamMember"
+                )}
                 closeOnSelect
                 transformItem={toCustodyAssignmentItem}
                 extraContent={({ onItemCreated, closePopover }) => (
@@ -94,7 +98,7 @@ export default function BulkAssignCustodyDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("kits.bulkAssignCustodyDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -102,7 +106,7 @@ export default function BulkAssignCustodyDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("kits.bulkAssignCustodyDialog.confirm")}
             </Button>
           </div>
         </div>

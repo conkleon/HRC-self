@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { type loader } from "~/routes/_layout+/assets.$assetId.overview";
 import { tw } from "~/utils/tw";
@@ -15,6 +16,7 @@ export function AssetReminderCards({
   className,
   style,
 }: AssetReminderCardsProps) {
+  const { t } = useTranslation();
   const { asset, reminders } = useLoaderData<typeof loader>();
 
   if (!reminders.length) {
@@ -24,14 +26,14 @@ export function AssetReminderCards({
   return (
     <div className={tw("rounded border bg-white", className)} style={style}>
       <div className="flex items-center justify-between gap-4 border-b px-4 py-3">
-        <h5>Reminders</h5>
+        <h5>{t("assets.assetReminderCards.reminders")}</h5>
 
         <Button
           to={`/assets/${asset.id}/reminders`}
           variant="block-link-gray"
           className="!mt-0"
         >
-          View all
+          {t("assets.assetReminderCards.viewAll")}
         </Button>
       </div>
 

@@ -13,6 +13,7 @@ import {
   CONSUMPTION_TYPE_LABELS,
 } from "@shelf/labels";
 import { useAtom, useAtomValue } from "jotai";
+import { Trans, useTranslation } from "react-i18next";
 import {
   useActionData,
   useLoaderData,
@@ -322,6 +323,7 @@ const AssetFormInner = ({
   /** Focus the Name field on mount; false after a Discard. */
   autoFocusName: boolean;
 }) => {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { canUseBarcodes } = useBarcodePermissions();
   // Workspace's current code-display preference — used by PreferredBarcodeSelector
@@ -761,12 +763,14 @@ const AssetFormInner = ({
         <div className="flex items-start justify-between border-b pb-5">
           <div className=" ">
             <h2 className="mb-1 text-[18px] font-semibold">
-              {bulkMode ? "Bulk create from model" : "Basic fields"}
+              {bulkMode
+                ? t("assets.form.bulkCreateFromModel")
+                : t("assets.form.basicFields")}
             </h2>
             <p>
               {bulkMode
-                ? "Create multiple assets from a model in one go. Common fields below apply to every asset created."
-                : "Basic information about your asset."}
+                ? t("assets.form.createMultipleAssetsFromA")
+                : t("assets.form.basicInformationAboutYourAsset")}
             </p>
           </div>
           <div className="hidden flex-1 justify-end gap-2 md:flex">
@@ -780,13 +784,13 @@ const AssetFormInner = ({
 
         <When truthy={!bulkMode}>
           <FormRow
-            rowLabel={"Name"}
+            rowLabel={t("assets.form.name")}
             className="border-b-0 pb-[10px]"
             required={true}
           >
             <Input
               ref={titleInputRef}
-              label="Name"
+              label={t("assets.form.name")}
               hideLabel
               name="title"
               disabled={disabled}
@@ -809,15 +813,20 @@ const AssetFormInner = ({
 
         <When truthy={bulkMode}>
           <FormRow
-            rowLabel="Batch"
+            rowLabel={t("assets.form.batch")}
             className="border-b-0 pb-[10px]"
             subHeading={
               <p>
-                Each asset will be named using the template below. Use{" "}
-                <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">
-                  {"{i}"}
-                </code>{" "}
-                to substitute the asset number; otherwise it&apos;s appended.
+                <Trans
+                  t={t}
+                  i18nKey="assets.form.eachAssetWillBeNamed"
+                  components={[
+                    <code
+                      key="slot0"
+                      className="rounded bg-gray-100 px-1 py-0.5 text-xs"
+                    />,
+                  ]}
+                />
               </p>
             }
             required={true}
@@ -826,7 +835,7 @@ const AssetFormInner = ({
               <div className="flex flex-col gap-3 md:flex-row md:items-end">
                 <div className="flex-1">
                   <Input
-                    label="Name template"
+                    label={t("assets.form.nameTemplate")}
                     name="nameTemplate"
                     disabled={disabled}
                     value={bulkNameTemplate}
@@ -846,7 +855,7 @@ const AssetFormInner = ({
                 <div className="w-full md:w-32">
                   <Input
                     type="number"
-                    label="Count"
+                    label={t("assets.form.count")}
                     name="count"
                     disabled={disabled}
                     value={bulkCount}
@@ -873,7 +882,7 @@ const AssetFormInner = ({
                 <div className="w-full md:w-32">
                   <Input
                     type="number"
-                    label="Start at"
+                    label={t("assets.form.startAt")}
                     name="startNumber"
                     disabled={disabled}
                     value={bulkStartNumber}
@@ -896,7 +905,7 @@ const AssetFormInner = ({
 
         <When truthy={!bulkMode}>
           <FormRow
-            rowLabel={"Tracking method"}
+            rowLabel={t("assets.form.trackingMethod")}
             className="border-b-0 pb-[10px]"
             subHeading={
               <p>
@@ -931,14 +940,14 @@ const AssetFormInner = ({
         <When truthy={isQtyTracked}>
           <div className="flex flex-col gap-2">
             <FormRow
-              rowLabel="Quantity"
+              rowLabel={t("assets.form.quantity")}
               className="border-b-0 pb-[10px]"
-              subHeading="Total number of items in this pool."
+              subHeading={t("assets.form.totalNumberOfItemsIn")}
               required={true}
             >
               <Input
                 type="number"
-                label="Quantity"
+                label={t("assets.form.quantity")}
                 hideLabel
                 name="quantity"
                 disabled={disabled}
@@ -955,29 +964,29 @@ const AssetFormInner = ({
             </FormRow>
 
             <FormRow
-              rowLabel="Unit of measure"
+              rowLabel={t("assets.form.unitOfMeasure")}
               className="border-b-0 pb-[10px]"
-              subHeading="Label for the unit (e.g. pcs, boxes, liters)."
+              subHeading={t("assets.form.labelForTheUnitE")}
             >
               <Input
-                label="Unit of measure"
+                label={t("assets.form.unitOfMeasure")}
                 hideLabel
                 name="unitOfMeasure"
                 disabled={disabled}
                 className="w-full"
-                placeholder="e.g., pcs, boxes, liters"
+                placeholder={t("assets.form.eGPcsBoxesLiters")}
                 defaultValue={unitOfMeasure ?? ""}
               />
             </FormRow>
 
             <FormRow
-              rowLabel="Min quantity"
+              rowLabel={t("assets.form.minQuantity")}
               className="border-b-0 pb-[10px]"
-              subHeading="Low-stock alert threshold. You will be notified when available quantity falls to or below this number."
+              subHeading={t("assets.form.lowStockAlertThresholdYou")}
             >
               <Input
                 type="number"
-                label="Min quantity"
+                label={t("assets.form.minQuantity")}
                 hideLabel
                 name="minQuantity"
                 disabled={disabled}
@@ -993,11 +1002,9 @@ const AssetFormInner = ({
             </FormRow>
 
             <FormRow
-              rowLabel="Consumption type"
+              rowLabel={t("assets.form.consumptionType")}
               className="border-b-0 pb-[10px]"
-              subHeading={
-                'Choose "Used up (one-way)" for items that are consumed and not returned, or "Returnable (two-way)" for items that are checked out and returned.'
-              }
+              subHeading={t("assets.form.chooseUsedUpOneWay")}
               required={true}
             >
               <ConsumptionTypeSelect
@@ -1016,18 +1023,18 @@ const AssetFormInner = ({
             from the same sequence. Hide entirely under bulkMode. */}
         <When truthy={!bulkMode}>
           <FormRow
-            rowLabel={"Asset ID"}
+            rowLabel={t("assets.form.assetId")}
             className="border-b-0 pb-[10px]"
             subHeading={
               id
-                ? "This is the unique identifier for this asset"
-                : "This sequential ID will be assigned when the asset is created"
+                ? t("assets.form.thisIsTheUniqueIdentifier")
+                : t("assets.form.thisSequentialIdWillBe")
             }
           >
             <div className="flex items-center gap-2">
               <div className="shrink-0">
                 <Input
-                  label="Prefix"
+                  label={t("assets.form.prefix")}
                   hideLabel
                   name="sequentialIdPrefix"
                   disabled={true}
@@ -1039,7 +1046,7 @@ const AssetFormInner = ({
               <span className="font-medium text-gray-400">-</span>
               <div className="grow">
                 <Input
-                  label="Number"
+                  label={t("assets.form.number")}
                   hideLabel
                   name="sequentialIdNumber"
                   disabled={true}
@@ -1055,10 +1062,10 @@ const AssetFormInner = ({
           </FormRow>
         </When>
 
-        <FormRow rowLabel={"Main image"} className="pt-[10px]">
+        <FormRow rowLabel={t("assets.form.mainImage")} className="pt-[10px]">
           <ImageFileField
             name="mainImage"
-            label="Main image"
+            label={t("assets.form.mainImage")}
             /*
               One picture for both tiers of the cascade. `clearMainImage` makes
               the row behave as though the asset's own image were already gone,
@@ -1080,7 +1087,7 @@ const AssetFormInner = ({
                       : null,
                     assetModel: inheritableAssetModelImage,
                   }}
-                  alt={`${title} main image`}
+                  alt={t("assets.form.mainImage2", { title })}
                 />
               ) : inheritableAssetModelImage ? (
                 <AssetImage
@@ -1098,14 +1105,9 @@ const AssetFormInner = ({
                 />
               ) : null
             }
-            previewAlt="Asset main image"
+            previewAlt={t("assets.form.assetMainImage")}
             validateFileAtom={assetImageValidateFileAtom}
-            hint={
-              <>
-                Accepts PNG, JPG, JPEG, or WebP (max.8 MB). Resized to 1200px
-                wide on upload.
-              </>
-            }
+            hint={<>{t("assets.form.acceptsPngJpgJpegOr")}</>}
             onFileChange={(file) => setHasPickedImage(Boolean(file))}
             aboveInput={
               <>
@@ -1116,8 +1118,7 @@ const AssetFormInner = ({
                   }
                 >
                   <p className="mb-1 text-sm text-gray-600">
-                    The picked image becomes this asset's own image when you
-                    save.
+                    {t("assets.form.thePickedImageBecomesThis")}
                   </p>
                 </When>
                 <When
@@ -1128,23 +1129,32 @@ const AssetFormInner = ({
                   <p className="mb-1 text-sm text-gray-600">
                     {showOwnImagePreview ? (
                       <>
-                        This asset uses its own image.{" "}
+                        {t("assets.form.thisAssetUsesItsOwn")}{" "}
                         <Button
                           type="button"
                           variant="link"
                           className="!p-0 text-sm"
                           onClick={() => setClearMainImage(true)}
                         >
-                          Use the model's image instead
+                          {t("assets.form.useTheModelsImageInstead")}
                         </Button>
                       </>
                     ) : (
                       <>
-                        Using the image from{" "}
-                        <span className="font-medium text-gray-700">
-                          {selectedAssetModel?.name ?? "the selected model"}
-                        </span>
-                        . Upload one below to override it for this asset.
+                        <Trans
+                          t={t}
+                          i18nKey="assets.form.usingModelImage"
+                          values={{
+                            model:
+                              selectedAssetModel?.name ??
+                              t("assets.form.theSelectedModel"),
+                          }}
+                          components={{
+                            bold: (
+                              <span className="font-medium text-gray-700" />
+                            ),
+                          }}
+                        />
                         <When truthy={clearMainImage}>
                           {" "}
                           <Button
@@ -1153,7 +1163,7 @@ const AssetFormInner = ({
                             className="!p-0 text-sm"
                             onClick={() => setClearMainImage(false)}
                           >
-                            Undo
+                            {t("assets.form.undo")}
                           </Button>
                         </When>
                       </>
@@ -1183,7 +1193,9 @@ const AssetFormInner = ({
                       className="!p-0 text-sm"
                       onClick={() => setClearMainImage(!clearMainImage)}
                     >
-                      {clearMainImage ? "Undo remove image" : "Remove image"}
+                      {clearMainImage
+                        ? t("assets.form.undoRemoveImage")
+                        : t("assets.form.removeImage")}
                     </Button>
                   </p>
                 </When>
@@ -1196,12 +1208,12 @@ const AssetFormInner = ({
 
         <div>
           <FormRow
-            rowLabel={"Description"}
+            rowLabel={t("assets.form.description")}
             subHeading={
               <p>
-                This is the initial object description. It will be shown on the
-                asset’s overview page. You can always change it. Maximum{" "}
-                {ASSET_DESCRIPTION_MAX_LENGTH_LABEL} characters.
+                {t("assets.form.thisIsTheInitialObject", {
+                  ASSET_DESCRIPTION_MAX_LENGTH_LABEL,
+                })}
               </p>
             }
             className="border-b-0"
@@ -1209,7 +1221,7 @@ const AssetFormInner = ({
             <Input
               inputType="textarea"
               characterLimit={ASSET_DESCRIPTION_MAX_LENGTH}
-              label={"Description"}
+              label={t("assets.form.description")}
               name={zo.fields.description()}
               defaultValue={description || ""}
               error={
@@ -1217,7 +1229,7 @@ const AssetFormInner = ({
                 zo.errors.description()?.message
               }
               hideLabel
-              placeholder="Add a description for your asset."
+              placeholder={t("assets.form.addADescriptionForYour")}
               disabled={disabled}
               data-test-id="assetDescription"
               className="w-full"
@@ -1233,18 +1245,17 @@ const AssetFormInner = ({
         <When truthy={!bulkMode}>{assetModelFormRow}</When>
 
         <FormRow
-          rowLabel="Category"
+          rowLabel={t("assets.form.category")}
           subHeading={
             <p>
-              Make it unique. Each asset can have 1 category. It will show on
-              your index.{" "}
+              {t("assets.form.makeItUniqueEachAsset")}{" "}
               <Button
                 to="/categories/new"
                 variant="link-gray"
                 className="text-gray-600 underline"
                 target="_blank"
               >
-                Create categories
+                {t("assets.form.createCategories")}
               </Button>
             </p>
           }
@@ -1259,8 +1270,8 @@ const AssetFormInner = ({
             }
             model={{ name: "category", queryKey: "name" }}
             triggerWrapperClassName="flex flex-col !gap-0 justify-start items-start [&_.inner-label]:w-full [&_.inner-label]:text-left "
-            contentLabel="Categories"
-            label="Category"
+            contentLabel={t("assets.form.categories")}
+            label={t("assets.form.category")}
             hideLabel
             initialDataKey="categories"
             countKey="totalCategories"
@@ -1269,9 +1280,9 @@ const AssetFormInner = ({
             allowClear={true}
             extraContent={({ onItemCreated, closePopover }) => (
               <InlineEntityCreationDialog
-                title="Create new category"
+                title={t("assets.form.createNewCategory")}
                 type="category"
-                buttonLabel="Create new category"
+                buttonLabel={t("assets.form.createNewCategory")}
                 onCreated={(created) => {
                   if (created?.type !== "category") return;
                   const category = created.entity;
@@ -1289,17 +1300,17 @@ const AssetFormInner = ({
         </FormRow>
 
         <FormRow
-          rowLabel="Tags"
+          rowLabel={t("assets.form.tags")}
           subHeading={
             <p>
-              Tags can help you organise your database. They can be combined.{" "}
+              {t("assets.form.tagsCanHelpYouOrganise")}{" "}
               <Button
                 to="/tags/new"
                 className="text-gray-600 underline"
                 target="_blank"
                 variant="link-gray"
               >
-                Create tags
+                {t("assets.form.createTags")}
               </Button>
             </p>
           }
@@ -1314,18 +1325,17 @@ const AssetFormInner = ({
         </FormRow>
 
         <FormRow
-          rowLabel="Location"
+          rowLabel={t("assets.form.location")}
           subHeading={
             <p>
-              A location is a place where an item is supposed to be located.
-              This is different than the last scanned location{" "}
+              {t("assets.form.aLocationIsAPlace")}{" "}
               <Button
                 to="/locations/new"
                 className="text-gray-600 underline"
                 target="_blank"
                 variant="link-gray"
               >
-                Create locations
+                {t("assets.form.createLocations")}
               </Button>
             </p>
           }
@@ -1341,9 +1351,12 @@ const AssetFormInner = ({
               triggerClassName="disabled w-full cursor-not-allowed"
               reason={
                 <>
-                  This asset's location is managed by its parent kit{" "}
-                  <strong>"{kitMembership?.name}"</strong>. Update the kit's
-                  location instead.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.form.thisAssetsLocationIsManaged"
+                    values={{ name: kitMembership?.name }}
+                    components={[<strong key="slot0" />]}
+                  />
                 </>
               }
             >
@@ -1354,8 +1367,8 @@ const AssetFormInner = ({
                 triggerWrapperClassName="flex flex-col !gap-0 justify-start items-start [&_.inner-label]:w-full [&_.inner-label]:text-left "
                 defaultValue={locationId || undefined}
                 model={{ name: "location", queryKey: "name" }}
-                contentLabel="Locations"
-                label="Location"
+                contentLabel={t("assets.form.locations")}
+                label={t("assets.form.location")}
                 hideLabel
                 initialDataKey="locations"
                 countKey="totalLocations"
@@ -1371,8 +1384,8 @@ const AssetFormInner = ({
               triggerWrapperClassName="flex flex-col !gap-0 justify-start items-start [&_.inner-label]:w-full [&_.inner-label]:text-left "
               defaultValue={locationId || undefined}
               model={{ name: "location", queryKey: "name" }}
-              contentLabel="Locations"
-              label="Location"
+              contentLabel={t("assets.form.locations")}
+              label={t("assets.form.location")}
               hideLabel
               initialDataKey="locations"
               countKey="totalLocations"
@@ -1381,8 +1394,8 @@ const AssetFormInner = ({
               extraContent={({ onItemCreated, closePopover }) => (
                 <InlineEntityCreationDialog
                   type="location"
-                  title="Create new location"
-                  buttonLabel="Create new location"
+                  title={t("assets.form.createNewLocation")}
+                  buttonLabel={t("assets.form.createNewLocation")}
                   onCreated={(created) => {
                     if (created?.type !== "location") return;
                     const location = created.entity;
@@ -1412,19 +1425,14 @@ const AssetFormInner = ({
         </FormRow>
 
         <FormRow
-          rowLabel={"Value"}
-          subHeading={
-            <p>
-              Specify the value of assets to get an idea of the total value of
-              your inventory.
-            </p>
-          }
+          rowLabel={t("assets.form.value")}
+          subHeading={<p>{t("assets.form.specifyTheValueOfAssets")}</p>}
           className="border-b-0 py-[10px]"
         >
           <div className="relative w-full">
             <Input
               type="number"
-              label="Value"
+              label={t("assets.form.value")}
               inputClassName="pl-[70px] valuation-input"
               hideLabel
               name="valuation"
@@ -1450,9 +1458,9 @@ const AssetFormInner = ({
           {canUseBarcodes ? (
             <>
               <FormRow
-                rowLabel={"Barcodes"}
+                rowLabel={t("assets.form.barcodes")}
                 className="border-b-0"
-                subHeading="Add additional barcodes to this asset (Code 128, Code 39, or Data Matrix). Note: Each asset automatically gets a default Shelf QR code for tracking."
+                subHeading={t("assets.form.addAdditionalBarcodesToThis")}
               >
                 <BarcodesInput
                   ref={barcodesInputRef}
@@ -1480,7 +1488,10 @@ const AssetFormInner = ({
               />
             </>
           ) : (
-            <FormRow rowLabel={"Barcodes"} className="border-b-0">
+            <FormRow
+              rowLabel={t("assets.form.barcodes")}
+              className="border-b-0"
+            >
               <UnlockBarcodesBanner />
             </FormRow>
           )}
@@ -1520,42 +1531,48 @@ const Actions = ({
    * sense — one submit already creates many assets, and the success
    * modal offers the natural follow-up CTAs — so the caller hides it. */
   showAddAnother?: boolean;
-}) => (
-  <>
-    {/* Save button is first in DOM order so Enter key triggers it by default */}
-    <Button type="submit" disabled={disabled} className="order-last">
-      Save
-    </Button>
-
-    <ButtonGroup>
-      <Button to={cancelTo} variant="secondary" disabled={disabled}>
-        Cancel
+}) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      {/* Save button is first in DOM order so Enter key triggers it by default */}
+      <Button type="submit" disabled={disabled} className="order-last">
+        {t("assets.form.save")}
       </Button>
-      {showAddAnother ? <AddAnother disabled={disabled} /> : null}
-    </ButtonGroup>
-  </>
-);
 
-const AddAnother = ({ disabled }: { disabled: boolean }) => (
-  <TooltipProvider delayDuration={100}>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="submit"
-          variant="secondary"
-          disabled={disabled}
-          name="addAnother"
-          value="true"
-        >
-          Add another
+      <ButtonGroup>
+        <Button to={cancelTo} variant="secondary" disabled={disabled}>
+          {t("assets.form.cancel")}
         </Button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom">
-        <p className="text-sm">Save the asset and add a new one</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
+        {showAddAnother ? <AddAnother disabled={disabled} /> : null}
+      </ButtonGroup>
+    </>
+  );
+};
+
+const AddAnother = ({ disabled }: { disabled: boolean }) => {
+  const { t } = useTranslation();
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={disabled}
+            name="addAnother"
+            value="true"
+          >
+            {t("assets.form.addAnother")}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p className="text-sm">{t("assets.form.saveTheAssetAndAdd")}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 /**
  * Live-preview block rendered inside the bulk-create row.
@@ -1565,6 +1582,7 @@ const AddAnother = ({ disabled }: { disabled: boolean }) => (
  * more" tail for larger batches. Empty array → nothing rendered.
  */
 function BulkCreatePreview({ titles }: { titles: string[] }) {
+  const { t } = useTranslation();
   if (titles.length === 0) return null;
   const PREVIEW_LIMIT = 5;
   const head = titles.slice(0, PREVIEW_LIMIT);
@@ -1578,10 +1596,15 @@ function BulkCreatePreview({ titles }: { titles: string[] }) {
       className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700"
       data-test-id="bulkCreatePreview"
     >
-      <span className="font-medium text-gray-900">Preview:</span>{" "}
+      <span className="font-medium text-gray-900">
+        {t("assets.form.preview")}
+      </span>{" "}
       <span className="font-mono">{head.join(", ")}</span>
       {remaining > 0 ? (
-        <span className="text-gray-500"> …and {remaining} more</span>
+        <span className="text-gray-500">
+          {" "}
+          {t("assets.form.andMore", { remaining })}
+        </span>
       ) : null}
     </div>
   );
@@ -1602,6 +1625,7 @@ const TRACKING_METHOD_KB_URL = helpSiteUrl(
  * method is locked by then and the question is what to do about it.
  */
 function TrackingMethodGuideLink({ isEditMode }: { isEditMode: boolean }) {
+  const { t } = useTranslation();
   if (!TRACKING_METHOD_KB_URL) return null;
   return (
     <Button
@@ -1614,7 +1638,9 @@ function TrackingMethodGuideLink({ isEditMode }: { isEditMode: boolean }) {
       className="text-gray-600 underline"
       target="_blank"
     >
-      {isEditMode ? "Picked the wrong one?" : "Which should I pick?"}
+      {isEditMode
+        ? t("assets.form.pickedTheWrongOne")
+        : t("assets.form.whichShouldIPick")}
     </Button>
   );
 }
@@ -1656,6 +1682,7 @@ function TrackingMethodCards({
   disabled: boolean;
   isEditMode: boolean;
 }) {
+  const { t } = useTranslation();
   const cards = (
     <div className="flex flex-col gap-2">
       {TRACKING_OPTIONS.map((option) => {
@@ -1709,7 +1736,7 @@ function TrackingMethodCards({
           </TooltipTrigger>
           <TooltipContent side="bottom">
             <p className="text-sm">
-              Tracking method cannot be changed after creation.
+              {t("assets.form.trackingMethodCannotBeChanged")}
             </p>
           </TooltipContent>
         </Tooltip>

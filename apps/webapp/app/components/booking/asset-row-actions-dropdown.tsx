@@ -28,6 +28,7 @@ import {
   PopoverPortal,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { VerticalDotsIcon } from "~/components/icons/library";
@@ -83,19 +84,22 @@ type TriggerButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const TriggerButton = forwardRef<HTMLButtonElement, TriggerButtonProps>(
-  ({ fullWidth, className, ...props }, ref) => (
-    <button
-      ref={ref}
-      type="button"
-      aria-label="Actions Trigger"
-      {...props}
-      className={tw("asset-actions", fullWidth ? "w-full" : "", className)}
-    >
-      <span className="flex size-6 items-center justify-center gap-2 text-center">
-        <VerticalDotsIcon />
-      </span>
-    </button>
-  )
+  ({ fullWidth, className, ...props }, ref) => {
+    const { t } = useTranslation();
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-label={t("bookings.assetRowActionsDropdown.actionsTrigger")}
+        {...props}
+        className={tw("asset-actions", fullWidth ? "w-full" : "", className)}
+      >
+        <span className="flex size-6 items-center justify-center gap-2 text-center">
+          <VerticalDotsIcon />
+        </span>
+      </button>
+    );
+  }
 );
 TriggerButton.displayName = "AssetRowActionsTrigger";
 
@@ -104,6 +108,7 @@ const ConditionalActionsDropdown = ({
   fullWidth,
   qtyAvailability,
 }: Props) => {
+  const { t } = useTranslation();
   const { booking } = useLoaderData<{ booking: BookingWithCustodians }>();
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
   const isQtyTracked = isQuantityTracked(asset);
@@ -212,7 +217,7 @@ const ConditionalActionsDropdown = ({
                       handleMenuClose();
                     }}
                   >
-                    Adjust quantity
+                    {t("bookings.assetRowActionsDropdown.adjustQuantity")}
                   </Button>
                 </div>
               ) : null}
@@ -229,7 +234,7 @@ const ConditionalActionsDropdown = ({
                       className="justify-start px-4 py-3 text-gray-700 hover:bg-slate-100 hover:text-gray-700"
                       width="full"
                     >
-                      Remove
+                      {t("bookings.assetRowActionsDropdown.remove")}
                     </Button>
                   }
                 />
@@ -244,7 +249,7 @@ const ConditionalActionsDropdown = ({
                   width="full"
                   onClick={handleMenuClose}
                 >
-                  Close
+                  {t("bookings.assetRowActionsDropdown.close")}
                 </Button>
               </div>
             </div>

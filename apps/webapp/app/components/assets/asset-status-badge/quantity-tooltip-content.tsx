@@ -14,6 +14,7 @@
  * @see {@link file://./quantity-data.ts}
  */
 
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { tw } from "~/utils/tw";
 import type { BookingAssetRecord, QuantityBreakdown } from "./quantity-data";
@@ -28,6 +29,7 @@ function SliceBookingName({
     viaKitName?: string;
   };
 }) {
+  const { t } = useTranslation();
   return (
     <>
       {slice.bookingId ? (
@@ -42,7 +44,12 @@ function SliceBookingName({
         <span>{slice.bookingName}</span>
       )}
       {slice.viaKitName && (
-        <span className="text-gray-500"> · via {slice.viaKitName}</span>
+        <span className="text-gray-500">
+          {" "}
+          {t("assets.quantityTooltipContent.via", {
+            viaKitName: slice.viaKitName,
+          })}
+        </span>
       )}
     </>
   );
@@ -54,6 +61,7 @@ function SliceBookingName({
  * custody and availability lines.
  */
 export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
+  const { t } = useTranslation();
   const {
     total,
     inCustody,
@@ -123,12 +131,17 @@ export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
     return (
       <div>
         <p className="font-semibold text-gray-900">
-          {headlineCount} of {total} {headlineLabel}
+          {t("assets.quantityTooltipContent.of", {
+            headlineCount,
+            total,
+            headlineLabel,
+          })}
         </p>
         {standaloneTotal > 0 && (
           <>
             <p className="pl-2 text-gray-700">
-              <span className="font-medium">{standaloneTotal}</span> standalone
+              <span className="font-medium">{standaloneTotal}</span>{" "}
+              {t("assets.quantityTooltipContent.standalone")}
             </p>
             {buckets.standalone.map((b) => (
               <p
@@ -136,7 +149,9 @@ export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
                 className="pl-4 text-gray-600"
               >
                 • <SliceBookingName slice={b} /> — {b.quantity}{" "}
-                {b.quantity === 1 ? "unit" : "units"}
+                {b.quantity === 1
+                  ? t("assets.quantityTooltipContent.unit")
+                  : t("assets.quantityTooltipContent.units")}
               </p>
             ))}
           </>
@@ -144,7 +159,8 @@ export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
         {kitTotal > 0 && (
           <>
             <p className="pl-2 text-gray-700">
-              <span className="font-medium">{kitTotal}</span> via kits
+              <span className="font-medium">{kitTotal}</span>{" "}
+              {t("assets.quantityTooltipContent.viaKits")}
             </p>
             {buckets.kitDriven.map((b) => (
               <p
@@ -152,7 +168,9 @@ export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
                 className="pl-4 text-gray-600"
               >
                 • <SliceBookingName slice={b} /> — {b.quantity}{" "}
-                {b.quantity === 1 ? "unit" : "units"}
+                {b.quantity === 1
+                  ? t("assets.quantityTooltipContent.unit")
+                  : t("assets.quantityTooltipContent.units")}
               </p>
             ))}
           </>
@@ -184,13 +202,15 @@ export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
       {/* Custody line (only when there's also booking data, otherwise
        * show a simpler format) */}
       {inCustody > 0 && (checkedOut > 0 || reserved > 0) && (
-        <p className="text-gray-700">{inCustody} in custody</p>
+        <p className="text-gray-700">
+          {t("assets.quantityTooltipContent.inCustody", { inCustody })}
+        </p>
       )}
 
       {/* Simple custody-only format (no bookings involved) */}
       {inCustody > 0 && checkedOut === 0 && reserved === 0 && (
         <p className="text-gray-700">
-          {inCustody} of {total} in custody
+          {t("assets.quantityTooltipContent.ofInCustody", { inCustody, total })}
         </p>
       )}
 
@@ -202,7 +222,7 @@ export function QuantityTooltipContent({ data }: { data: QuantityBreakdown }) {
           available > 0 ? "text-emerald-700" : "text-gray-500"
         )}
       >
-        {available} available
+        {t("assets.quantityTooltipContent.available", { available })}
       </p>
     </div>
   );

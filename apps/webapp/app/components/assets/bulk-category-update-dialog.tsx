@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import { BulkUpdateDialogContent } from "../bulk-update-dialog/bulk-update-dialog";
@@ -11,6 +12,7 @@ export const BulkCategoryUpdateSchema = z.object({
 });
 
 export default function BulkCategoryUpdateDialog() {
+  const { t } = useTranslation();
   const zo = useZorm("BulkCategoryUpdate", BulkCategoryUpdateSchema);
 
   return (
@@ -25,18 +27,20 @@ export default function BulkCategoryUpdateDialog() {
             <DynamicSelect
               disabled={disabled}
               model={{ name: "category", queryKey: "name" }}
-              placeholder="Uncategorized"
+              placeholder={t("assets.bulkCategoryUpdateDialog.uncategorized")}
               initialDataKey="categories"
               countKey="totalCategories"
               fieldName="category"
-              contentLabel="Categories"
+              contentLabel={t("assets.bulkCategoryUpdateDialog.categories")}
               closeOnSelect
               allowClear
               extraContent={({ onItemCreated, closePopover }) => (
                 <InlineEntityCreationDialog
                   type="category"
-                  title="Create new category"
-                  buttonLabel="Create new category"
+                  title={t("assets.bulkCategoryUpdateDialog.createNewCategory")}
+                  buttonLabel={t(
+                    "assets.bulkCategoryUpdateDialog.createNewCategory"
+                  )}
                   onCreated={(created) => {
                     if (created?.type !== "category") return;
                     const category = created.entity;
@@ -69,7 +73,7 @@ export default function BulkCategoryUpdateDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkCategoryUpdateDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -77,7 +81,7 @@ export default function BulkCategoryUpdateDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkCategoryUpdateDialog.confirm")}
             </Button>
           </div>
         </div>

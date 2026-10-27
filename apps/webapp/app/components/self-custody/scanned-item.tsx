@@ -12,6 +12,7 @@
  * @see {@link file://./scan-code.tsx}
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
+import { Trans, useTranslation } from "react-i18next";
 import { Form, Link, useLocation } from "react-router";
 
 import { Button } from "~/components/shared/button";
@@ -79,6 +80,7 @@ export function ScannedItemPanel({
   memberId: string;
   error: string | null;
 }) {
+  const { t } = useTranslation();
   const closed = new URLSearchParams(useLocation().search);
   closed.delete(SCAN_PARAM);
   closed.delete(SCAN_TYPE_PARAM);
@@ -86,24 +88,24 @@ export function ScannedItemPanel({
 
   return (
     <section
-      aria-label="Scanned code"
+      aria-label={t("custody.scannedItem.scannedCode")}
       className="mb-6 rounded-md border border-gray-200 bg-gray-50 p-4 text-left"
     >
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">
-          Scanned
+          {t("custody.scannedItem.scanned")}
         </h2>
         <Link
           to={`?${closed.toString()}`}
           className="text-sm text-gray-600 underline hover:text-gray-500"
         >
-          Close
+          {t("custody.scannedItem.close")}
         </Link>
       </div>
 
       {!state ? (
         <p className="text-gray-700">
-          This code is not linked to any item or kit in this workspace.
+          {t("custody.scannedItem.thisCodeIsNotLinked")}
         </p>
       ) : (
         <>
@@ -115,7 +117,9 @@ export function ScannedItemPanel({
               scanned={scanned}
               memberId={memberId}
               label={
-                state.item.kind === "kit" ? "Take this kit" : "Take this item"
+                state.item.kind === "kit"
+                  ? t("custody.scannedItem.takeThisKit")
+                  : t("custody.scannedItem.takeThisItem")
               }
             />
           ) : state.kind === "in-custody" ? (
@@ -126,14 +130,18 @@ export function ScannedItemPanel({
                 memberId={memberId}
                 label={
                   state.item.kind === "kit"
-                    ? "Return this kit"
-                    : "Return this item"
+                    ? t("custody.scannedItem.returnThisKit")
+                    : t("custody.scannedItem.returnThisItem")
                 }
               />
             ) : (
               <p className="text-gray-700">
-                Held by <strong>{state.holderName}</strong>. Only they can
-                return it here.
+                <Trans
+                  t={t}
+                  i18nKey="custody.scannedItem.heldBy"
+                  values={{ holder: state.holderName }}
+                  components={{ bold: <strong /> }}
+                />
               </p>
             )
           ) : (

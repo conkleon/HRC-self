@@ -1,0 +1,436 @@
+{
+  "scanner": {
+    "qrCodeScanner": "QR code scanner"
+  },
+  "cameraSelector": {
+    "switchCamera": "Switch camera",
+    "cameraSelection": "Camera selection"
+  },
+  "codeScanner": {
+    "scanner": "Scanner",
+    "camera": "Camera",
+    "scanAgain": "Scan again",
+    "codeDetected": "Code detected",
+    "scannerPaused": "Scanner paused",
+    "scanWithYourBarcodeScanner": "Scan with your barcode scanner, or type a code and press Enter.",
+    "ifTheIssuePersistsPlease": "If the issue persists, please contact support.",
+    "reloadPage": "Reload Page",
+    "reloadPage2": "Reload page",
+    "submitScannedCode": "Submit scanned code: {{inputValue}}",
+    "unsupportedBarcodeDetected": "Unsupported Barcode detected",
+    "waitingForScan": "Waiting for scan...",
+    "pleaseClickOnTheText": "Please click on the text field before scanning",
+    "cameraInitializationIsTakingLonger": "Camera initialization is taking longer than expected. Please reload the page",
+    "initializingCamera": "Initializing camera..."
+  },
+  "scannedAssetQuantityInput": {
+    "qty": "Qty",
+    "quantity": "Quantity"
+  },
+  "genericItemRow": {
+    "code": "Code:",
+    "fetchingItem": "Fetching item",
+    "removeScannedItem": "Remove scanned item"
+  },
+  "actionSwitcher": {
+    "action": "Action:",
+    "noColumnsFound": "No columns found",
+    "searchAction": "Search action..."
+  },
+  "configurableDrawer": {
+    "listIsEmpty": "List is empty",
+    "fillListByScanningCodes": "Fill list by scanning codes...",
+    "cancel": "Cancel",
+    "scannedThisSession": "Scanned this session"
+  },
+  "scanBookingHeader": {
+    "from": "From",
+    "to": "to"
+  },
+  "baseDrawer": {
+    "clearList": "Clear list"
+  },
+  "blockersFactory": {
+    "resolveAll": "Resolve all ({{total}})",
+    "removeFromList": "Remove from list",
+    "needsAttention": "Needs attention",
+    "removesAllConflictingItemsFrom": "Removes all conflicting items from the list",
+    "resolveIssues_one": "Resolve {{count}} issue above to continue.",
+    "resolveIssues_other": "Resolve {{count}} issues above to continue."
+  },
+  "addAssetsToBookingDrawer": {
+    "pending": "Pending",
+    "available": "· {{maxAllowed}} available",
+    "asset": "asset",
+    "assets": "({{assetKits}} assets)",
+    "kit": "kit",
+    "itemsScanned": "Items scanned",
+    "units": "units"
+  },
+  "releaseCustodyDrawer": {
+    "releaseCustody": "Release custody",
+    "asset": "asset",
+    "assets": "({{assetKits}} assets)",
+    "kit": "kit",
+    "releasingCustody": "Releasing custody",
+    "done": "Done",
+    "haveBeenReleasedFromCustody": "have been released from custody",
+    "failedToReleaseCustodyFrom": "Failed to release custody from {{type}}s.",
+    "error": "Error:",
+    "itemsScanned": "Items scanned",
+    "releasingCustodyFromS": "Releasing custody from {{type}}s",
+    "assets2": "Assets",
+    "kits": "Kits"
+  },
+  "addAssetsToKitDrawer": {
+    "available": "· {{maxAllowed}} available",
+    "asset": "asset",
+    "assets": "({{assetKits}} assets)",
+    "kit": "kit",
+    "itemsScanned": "Items scanned",
+    "units": "units"
+  },
+  "assignCustodyDrawer": {
+    "assignCustodyTo": "Assign custody to:",
+    "assignCustody": "Assign custody",
+    "asset": "asset",
+    "noneLeftHere": "None left here",
+    "assets": "({{assetKits}} assets)",
+    "kit": "kit",
+    "assigningCustody": "Assigning custody",
+    "done": "Done",
+    "areNowInCustodyOf": "are now in custody of {{custodianName}}",
+    "failedToAssignCustodyTo": "Failed to assign custody to {{type}}s.",
+    "error": "Error:",
+    "itemsScanned": "Items scanned",
+    "teamMembers": "Team members",
+    "selectATeamMember": "Select a team member",
+    "fromLocation": "From location",
+    "assigningCustodyToS": "Assigning custody to {{type}}s",
+    "assets2": "Assets",
+    "kits": "Kits"
+  },
+  "pendingItemsList": {
+    "kit": "Kit",
+    "kit2": "kit",
+    "asset": "asset",
+    "pending": "Pending",
+    "pendingKit": "Pending kit",
+    "reconciled": "{{reconciled}}/{{booked}} reconciled",
+    "partiallyReconciled": "Partially reconciled",
+    "someUnitsWereAlreadyReconciled": "Some units were already reconciled in a previous check-in. The remainder can still be checked in below.",
+    "pendingCheckIn": "Pending check-in",
+    "needs": "needs {{remaining}}",
+    "skipScanEnterDispositionInline": "Skip scan, enter disposition inline below.",
+    "assets": "assets",
+    "asset2": "Asset"
+  },
+  "updateLocationDrawer": {
+    "updateLocation": "Update location:",
+    "updateLocation2": "Update location",
+    "asset": "asset",
+    "assets": "({{assetKits}} assets)",
+    "kit": "kit",
+    "addingToLocation": "Adding to location",
+    "done": "Done",
+    "assetsKitSuccessfullyAddedTo": "Assets/kit successfully added to location",
+    "failedToAddAssetsKit": "Failed to add assets/kit to location",
+    "error": "Error:",
+    "itemsScanned": "Items scanned",
+    "selectLocation": "Select location",
+    "addingAssetsKitToLocation": "Adding assets/kit to location"
+  },
+  "addAssetsToLocationDrawer": {
+    "available": "· {{maxAllowed}} available",
+    "asset": "asset",
+    "assets": "({{assetKits}} assets)",
+    "kit": "kit",
+    "itemsScanned": "Items scanned",
+    "units": "units"
+  },
+  "partialCheckoutDrawer": {
+    "assetsScanned": "{{submittedAssetIdsCount}}/{{remainingBookedAssets}} Assets scanned",
+    "allAssetsInsideKitsAre": "All assets inside kits are counted individually",
+    "asset": "asset",
+    "checkOut": "Check out",
+    "of": "of {{remaining}}",
+    "kit": "kit",
+    "cancel": "Cancel",
+    "checkOutAssets": "Check out assets",
+    "ofAssetsToBeChecked": "({{uncheckedKitAssetsInBookingCount}} of {{totalKitAssetsInBooking}} assets to be checked out)",
+    "ofAssetsRemaining": "({{remainingKitAssetsInBookingCount}} of {{totalKitAssetsInBooking}} assets remaining)",
+    "scannedThisSession": "Scanned this session",
+    "pending": "Pending",
+    "checkOutQuantity": "Check out quantity"
+  },
+  "partialCheckinDrawer": {
+    "kit": "Kit",
+    "kit2": "kit",
+    "asset": "asset",
+    "booked": "Booked",
+    "returned": "Returned",
+    "consumed": "Consumed",
+    "lost": "Lost",
+    "damaged": "Damaged",
+    "remaining": "Remaining",
+    "of": "of {{remaining}}",
+    "pending": "pending",
+    "cancel": "Cancel",
+    "checkInAssets": "Check in assets",
+    "notPartOfThisBooking": "not part of this booking.",
+    "alreadyBeenCheckedInFor": "already been checked in for this booking.",
+    "beenCheckedOutYetAnd": "been checked out yet and can't be checked in.",
+    "alreadyCoveredByScannedKit": "already covered by scanned kit QR codes.",
+    "noQuantityEntered": "no quantity entered.",
+    "theRemainingQuantityOnThis": "the remaining quantity on this booking.",
+    "ofAssetsToBeChecked": "({{uncheckedKitAssetsInBookingCount}} of {{totalKitAssetsInBooking}} assets to be checked in)",
+    "ofAssetsRemaining": "({{remainingKitAssetsInBookingCount}} of {{totalKitAssetsInBooking}} assets remaining)",
+    "scannedThisSession": "Scanned this session",
+    "pending2": "Pending",
+    "alreadyCheckedIn": "Already checked in",
+    "checkedIn": "Checked in",
+    "allOfThisKitsAssets": "All of this kit's assets on the booking have been reconciled.",
+    "quantity": "{{primaryLabel}} quantity",
+    "returnedQuantity": "Returned quantity",
+    "lostQuantity": "Lost quantity",
+    "damagedQuantity": "Damaged quantity",
+    "unitsLeftForAFuture": "Units left for a future check-in session",
+    "fromKit": "From kit",
+    "quantityTrackedKitMember": "Quantity-tracked kit member",
+    "thisQuantityTrackedAssetIs": "This quantity-tracked asset is part of the scanned kit. Enter how its units are being returned / consumed / lost / damaged.",
+    "noAssetsInThisBooking": "No assets in this booking",
+    "assets": "assets",
+    "asset2": "Asset",
+    "allBookedUnitsForThis": "All booked units for this quantity-tracked asset have already been reconciled on this booking.",
+    "thisAssetWasAlreadyChecked": "This asset was already checked in during a previous session.",
+    "allUnitsCheckedIn": "All units checked in",
+    "partiallyCheckedIn": "Partially checked in"
+  },
+  "fulfilReservationsDrawer": {
+    "scanReservedModelsToFulfil": "Scan reserved models to fulfil this booking. Off-model scans are accepted with a warning.",
+    "model": "model",
+    "pending": "Pending",
+    "asset": "asset",
+    "ready": "Ready",
+    "readyToCheckOut": "Ready to check out",
+    "alreadyOnThisBookingRemove": "Already on this booking, remove this scan",
+    "willBeAddedToBooking": "Will be added to booking and checked out",
+    "kit": "kit",
+    "alreadyIncluded": "Already included",
+    "cancel": "Cancel",
+    "scannedThisSession": "Scanned this session",
+    "fulfilReservationsCheckOut": "Fulfil reservations & check out",
+    "asset2": "Asset",
+    "arrivesWithItsKit": "Arrives with its kit",
+    "alreadyHereNowCounts": "Already here, now counts",
+    "assets": "assets",
+    "assigns1ReservedUnit": "Assigns 1 reserved unit"
+  },
+  "blockers": {
+    "custodyBlockers": {
+      "qtyNothingFree": {
+        "description": "Every unit is already in custody, allocated to a kit, or out on a booking.",
+        "message_one": "<bold>{{count}} asset has</bold> no units available.",
+        "message_other": "<bold>{{count}} assets have</bold> no units available."
+      },
+      "qtySourceEmpty": {
+        "description": "Pick another location for them, or remove them.",
+        "message_one": "<bold>{{count}} asset has</bold> no units left at the chosen location.",
+        "message_other": "<bold>{{count}} assets have</bold> no units left at the chosen location."
+      },
+      "assetsCheckedOut": {
+        "description": "Note: Checked out assets cannot be assigned custody.",
+        "message_one": "<bold>{{count}} asset is</bold> checked out.",
+        "message_other": "<bold>{{count}} assets are</bold> checked out."
+      },
+      "assetsPartOfKit": {
+        "description": "Note: Scan Kit QR to add the full kit",
+        "message_one": "<bold>{{count}} asset</bold> are part of a kit.",
+        "message_other": "<bold>{{count}} assets</bold> are part of a kit."
+      },
+      "kitsCheckedOut": {
+        "description": "Note: Checked out kits cannot be assigned custody.",
+        "message_one": "<bold>{{count}} kit is</bold> checked out.",
+        "message_other": "<bold>{{count}} kits are</bold> checked out."
+      },
+      "qtyHeldViaKit": {
+        "description": "Scan the kit's QR to release the whole kit from custody.",
+        "message_one": "<bold>{{count}} asset is</bold> held through a kit.",
+        "message_other": "<bold>{{count}} assets are</bold> held through a kit."
+      },
+      "qtyNothingHeld": {
+        "description": "There is nothing to release for them.",
+        "message_one": "<bold>{{count}} asset has</bold> no units in custody.",
+        "message_other": "<bold>{{count}} assets have</bold> no units in custody."
+      },
+      "qtySeveralHolders": {
+        "description": "Release these from the asset's custody list, where each holder is listed separately.",
+        "message_one": "<bold>{{count}} asset is</bold> held by more than one person.",
+        "message_other": "<bold>{{count}} assets are</bold> held by more than one person."
+      },
+      "assetsNotInCustody": {
+        "description": "Only assets in custody can be released.",
+        "message_one": "<bold>{{count}} asset is</bold> not in custody.",
+        "message_other": "<bold>{{count}} assets are</bold> not in custody."
+      },
+      "kitsNotInCustody": {
+        "description": "Only kits in custody can be released.",
+        "message_one": "<bold>{{count}} kit is</bold> not in custody.",
+        "message_other": "<bold>{{count}} kits are</bold> not in custody."
+      },
+      "assetsAlreadyInCustody": {
+        "message_one": "<bold>{{count}} asset is</bold> already <bold>in custody</bold>.",
+        "message_other": "<bold>{{count}} assets are</bold> already <bold>in custody</bold>."
+      },
+      "kitsInCustody": {
+        "message_one": "<bold>{{count}} kit is</bold> already <bold>in custody</bold>.",
+        "message_other": "<bold>{{count}} kits are</bold> already <bold>in custody</bold>."
+      },
+      "kitsWithAssetsInCustody": {
+        "message_one": "<bold>{{count}} kit is</bold> already have assets <bold>in custody</bold>.",
+        "message_other": "<bold>{{count}} kits are</bold> already have assets <bold>in custody</bold>."
+      },
+      "assetsPartOfKitRelease": {
+        "description": "Note: Scan Kit QR to release the full kit from custody",
+        "message_one": "<bold>{{count}} asset</bold> are part of a kit.",
+        "message_other": "<bold>{{count}} assets</bold> are part of a kit."
+      }
+    },
+    "kitScanBlockers": {
+      "assetsWithCustody": {
+        "description": "Assets with custody cannot be added to kits. Please release custody first.",
+        "message_one": "<bold>{{count}} asset is</bold> unavailable for kit assignment.",
+        "message_other": "<bold>{{count}} assets are</bold> unavailable for kit assignment."
+      },
+      "assetsCheckedOut": {
+        "description": "Checked out assets cannot be added to kits. Please check them in first.",
+        "message_one": "<bold>{{count}} asset is</bold> checked out.",
+        "message_other": "<bold>{{count}} assets are</bold> checked out."
+      },
+      "kitsNotAllowed": {
+        "description": "Note: Only individual assets can be added to kits.",
+        "message_one": "<bold>{{count}} kit</bold> detected. Kits cannot be added to other kits.",
+        "message_other": "<bold>{{count}} kits</bold> detected. Kits cannot be added to other kits."
+      },
+      "assetsAlreadyAdded": {
+        "message_one": "<bold>{{count}} asset is</bold> already added to this kit.",
+        "message_other": "<bold>{{count}} assets are</bold> already added to this kit."
+      }
+    },
+    "partialCheckoutBlockers": {
+      "assetsAlreadyCheckedOut": {
+        "description": "These assets cannot be checked out again",
+        "message_one": "<bold>{{count}} asset</bold> already checked out for this booking.",
+        "message_other": "<bold>{{count}} assets</bold> already checked out for this booking."
+      },
+      "assetsInCustody": {
+        "description": "Release custody before checking these assets out",
+        "message_one": "<bold>{{count}} asset</bold> currently in custody. Release custody first.",
+        "message_other": "<bold>{{count}} assets</bold> currently in custody. Release custody first."
+      },
+      "kitsAlreadyCheckedOut": {
+        "description": "All assets from these kits have already been checked out",
+        "message_one": "<bold>{{count}} kit has</bold> already been checked out for this booking.",
+        "message_other": "<bold>{{count}} kits have</bold> already been checked out for this booking."
+      },
+      "kitInCustody": {
+        "description": "Release the kit's custody before checking it out on a booking.",
+        "message_one": "<bold>{{count}} kit is</bold> currently <bold>in custody</bold>.",
+        "message_other": "<bold>{{count}} kits are</bold> currently <bold>in custody</bold>."
+      },
+      "kitsBookedElsewhere": {
+        "description": "Another booking holds this kit for an overlapping period, or it has not come back from an overdue one.",
+        "message_one": "<bold>{{count}} kit is</bold> already booked or checked out on another booking.",
+        "message_other": "<bold>{{count}} kits are</bold> already booked or checked out on another booking."
+      },
+      "kitAssetsBookedElsewhere": {
+        "description": "The kit these assets belong to on this booking is held by another booking.",
+        "message_one": "<bold>{{count}} asset is</bold> part of a kit that is booked or checked out on another booking.",
+        "message_other": "<bold>{{count}} assets are</bold> part of a kit that is booked or checked out on another booking."
+      },
+      "redundantKitAssets": {
+        "description": "Kit QR codes include all kit assets automatically",
+        "message_one": "<bold>{{count}} asset is</bold> already covered by scanned kit QR codes.",
+        "message_other": "<bold>{{count}} assets are</bold> already covered by scanned kit QR codes."
+      },
+      "assetsNotInBooking": {
+        "message_one": "<bold>{{count}} asset is</bold> not part of this booking.",
+        "message_other": "<bold>{{count}} assets are</bold> not part of this booking."
+      },
+      "kitsNotInBooking": {
+        "message_one": "<bold>{{count}} kit is</bold> not part of this booking.",
+        "message_other": "<bold>{{count}} kits are</bold> not part of this booking."
+      },
+      "invalidCodes": {
+        "message_one": "<bold>{{count}} QR code</bold> is invalid.",
+        "message_other": "<bold>{{count}} QR codes</bold> are invalid."
+      }
+    },
+    "fulfilReservationsDrawer": {
+      "kitMembers": {
+        "description": "Scan the kit to take all of it, or scan another unit of the same model. Sending one member out on its own would split the kit.",
+        "message_one": "<bold>{{count}} asset</bold> belongs to a kit.",
+        "message_other": "<bold>{{count}} assets</bold> belong to a kit."
+      },
+      "invalidCodes": {
+        "message_one": "<bold>{{count}} QR code</bold> is invalid.",
+        "message_other": "<bold>{{count}} QR codes</bold> are invalid."
+      }
+    },
+    "bookingScanBlockers": {
+      "assetsPartOfKit": {
+        "description": "Note: Scan the kit QR to add them. The kit fulfils any reserved units its assets cover.",
+        "message_one": "<bold>{{count}} asset</bold> are part of a kit.",
+        "message_other": "<bold>{{count}} assets</bold> are part of a kit."
+      },
+      "assetsCheckedOut": {
+        "message_one": "<bold>{{count}} asset is</bold> already checked out.",
+        "message_other": "<bold>{{count}} assets are</bold> already checked out."
+      },
+      "qtyNoUnits": {
+        "message_one": "<bold>{{count}} asset has</bold> no units available.",
+        "message_other": "<bold>{{count}} assets have</bold> no units available."
+      },
+      "kitsCheckedOut": {
+        "message_one": "<bold>{{count}} kit is</bold> already checked out.",
+        "message_other": "<bold>{{count}} kits are</bold> already checked out."
+      },
+      "assetsUnavailable": {
+        "message_one": "<bold>{{count}} asset is</bold> marked as <bold>unavailable</bold>.",
+        "message_other": "<bold>{{count}} assets are</bold> marked as <bold>unavailable</bold>."
+      },
+      "assetsAlreadyAdded": {
+        "message_one": "<bold>{{count}} asset</bold> already added to the booking.",
+        "message_other": "<bold>{{count}} assets</bold> already added to the booking."
+      },
+      "kitsWithUnavailableAssets": {
+        "message_one": "<bold>{{count}} kit has</bold> unavailable assets inside it.",
+        "message_other": "<bold>{{count}} kits have</bold> unavailable assets inside them."
+      }
+    },
+    "scanBlockerHelpers": {
+      "invalidCodes": {
+        "message_one": "<bold>{{count}} QR code</bold> is invalid.",
+        "message_other": "<bold>{{count}} QR codes</bold> are invalid."
+      },
+      "assetsArchived": {
+        "message_one": "<bold>{{count}} asset is</bold> archived.",
+        "message_other": "<bold>{{count}} assets are</bold> archived."
+      },
+      "kitsOnlyArchived": {
+        "message_one": "<bold>{{count}} kit holds</bold> only archived assets.",
+        "message_other": "<bold>{{count}} kits hold</bold> only archived assets."
+      }
+    },
+    "locationScanBlockers": {
+      "assetsAlreadyAdded": {
+        "message_one": "<bold>{{count}} asset is</bold> already added to this location.",
+        "message_other": "<bold>{{count}} assets are</bold> already added to this location."
+      },
+      "kitsAlreadyAdded": {
+        "message_one": "<bold>{{count}} kit is</bold> already added to this location.",
+        "message_other": "<bold>{{count}} kits are</bold> already added to this location."
+      }
+    }
+  }
+}

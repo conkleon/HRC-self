@@ -12,6 +12,7 @@
  */
 
 import { AssetStatus } from "@prisma/client";
+import { Trans } from "react-i18next";
 import type { ScanListItems } from "~/atoms/qr-scanner";
 import { hasCustody } from "~/modules/custody/utils";
 import type { BlockerConfig } from "../blockers-factory";
@@ -83,10 +84,11 @@ export function buildAddToKitBlockers({
       condition: assetsAlreadyAddedIds.length > 0,
       count: assetsAlreadyAddedIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already added to this kit.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.kitScanBlockers.assetsAlreadyAdded.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(assetsAlreadyAddedIds),
     },
@@ -95,13 +97,15 @@ export function buildAddToKitBlockers({
       condition: assetsWithCustodyIds.length > 0,
       count: assetsWithCustodyIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          unavailable for kit assignment.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.kitScanBlockers.assetsWithCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Assets with custody cannot be added to kits. Please release custody first.",
+      description: (
+        <Trans i18nKey="scanner.blockers.kitScanBlockers.assetsWithCustody.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsWithCustodyIds),
     },
     {
@@ -109,13 +113,15 @@ export function buildAddToKitBlockers({
       condition: assetsCheckedOutIds.length > 0,
       count: assetsCheckedOutIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          checked out.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.kitScanBlockers.assetsCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Checked out assets cannot be added to kits. Please check them in first.",
+      description: (
+        <Trans i18nKey="scanner.blockers.kitScanBlockers.assetsCheckedOut.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsCheckedOutIds),
     },
     {
@@ -123,12 +129,15 @@ export function buildAddToKitBlockers({
       condition: kitQrIds.length > 0,
       count: kitQrIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s" : ""}`}</strong> detected.
-          Kits cannot be added to other kits.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.kitScanBlockers.kitsNotAllowed.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Note: Only individual assets can be added to kits.",
+      description: (
+        <Trans i18nKey="scanner.blockers.kitScanBlockers.kitsNotAllowed.description" />
+      ),
       onResolve: () => removeItemsFromList(kitQrIds),
     },
     archivedAssetsBlocker(

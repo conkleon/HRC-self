@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { isFormProcessing } from "~/utils/form";
 import type { NormalizedPreset } from "./preset-list-item";
@@ -12,6 +13,7 @@ import type { NormalizedPreset } from "./preset-list-item";
  * @param preset - The preset to star/unstar
  */
 export function StarButton({ preset }: { preset: NormalizedPreset }) {
+  const { t } = useTranslation();
   // Use unique fetcher key per preset to allow concurrent star requests
   const starFetcher = useFetcher({ key: `toggle-star-${preset.id}` });
 
@@ -33,7 +35,11 @@ export function StarButton({ preset }: { preset: NormalizedPreset }) {
       <button
         type="submit"
         className="mt-0.5 text-gray-400 hover:text-yellow-500"
-        title={optimisticStarred ? "Unstar" : "Star"}
+        title={
+          optimisticStarred
+            ? t("assets.starButton.unstar")
+            : t("assets.starButton.star")
+        }
         // why: Prevent form submission from bubbling and closing parent popover
         onClick={(e) => e.stopPropagation()}
       >

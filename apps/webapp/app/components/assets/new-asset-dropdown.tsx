@@ -27,6 +27,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { tw } from "~/utils/tw";
 import { Button } from "../shared/button";
@@ -40,6 +41,7 @@ export function NewAssetDropdown({
 }: {
   canImportAssets: boolean;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -47,17 +49,17 @@ export function NewAssetDropdown({
       <Button
         to="/assets/new"
         role="link"
-        aria-label="new asset"
+        aria-label={t("assets.newAssetDropdown.newAsset2")}
         data-test-id="createNewAsset"
         className="rounded-r-none border-r-0"
       >
-        New asset
+        {t("assets.newAssetDropdown.newAsset")}
       </Button>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             type="button"
-            aria-label="More create options"
+            aria-label={t("assets.newAssetDropdown.moreCreateOptions")}
             // Mirror the main button's height (size=sm → py-2) so the two
             // halves line up; flex-center the caret so the chevron sits in
             // the middle regardless of its intrinsic SVG bounds.
@@ -85,15 +87,19 @@ export function NewAssetDropdown({
           >
             <DropdownLink
               to="/assets/new?bulk=1"
-              label="Bulk create from model"
-              description="Create multiple assets at once from a model"
+              label={t("assets.newAssetDropdown.bulkCreateFromModel")}
+              description={t(
+                "assets.newAssetDropdown.createMultipleAssetsAtOnce"
+              )}
               onClose={() => setOpen(false)}
             />
             {canImportAssets ? (
               <DropdownLink
                 to="/assets/import"
-                label="Import from CSV"
-                description="Onboard many assets from a spreadsheet"
+                label={t("assets.newAssetDropdown.importFromCsv")}
+                description={t(
+                  "assets.newAssetDropdown.onboardManyAssetsFromA"
+                )}
                 onClose={() => setOpen(false)}
               />
             ) : null}

@@ -68,6 +68,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AssetType } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Package as PackageIcon } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { z } from "zod";
 import {
   clearScannedItemsAtom,
@@ -179,6 +180,7 @@ export default function FulfilReservationsDrawer({
   defaultExpanded = false,
   sourceQuestions,
 }: FulfilReservationsDrawerProps) {
+  const { t } = useTranslation();
   const session = useAtomValue(fulfilSessionAtom);
   const expectedModelRequests = useAtomValue(expectedModelRequestsAtom);
   const items = useAtomValue(scannedItemsAtom);
@@ -402,13 +404,15 @@ export default function FulfilReservationsDrawer({
         condition: kitMemberScanIds.length > 0,
         count: kitMemberScanIds.length,
         message: (count: number) => (
-          <>
-            <strong>{`${count} asset${count > 1 ? "s" : ""} `}</strong>
-            {count > 1 ? "belong" : "belongs"} to a kit.
-          </>
+          <Trans
+            i18nKey="scanner.blockers.fulfilReservationsDrawer.kitMembers.message"
+            count={count}
+            components={{ bold: <strong /> }}
+          />
         ),
-        description:
-          "Scan the kit to take all of it, or scan another unit of the same model. Sending one member out on its own would split the kit.",
+        description: (
+          <Trans i18nKey="scanner.blockers.fulfilReservationsDrawer.kitMembers.description" />
+        ),
         onResolve: () => removeAssetsFromList(kitMemberScanIds),
       },
       {
@@ -416,10 +420,11 @@ export default function FulfilReservationsDrawer({
         condition: invalidCodeQrIds.length > 0,
         count: invalidCodeQrIds.length,
         message: (count: number) => (
-          <>
-            <strong>{`${count} QR code${count > 1 ? "s" : ""}`}</strong>{" "}
-            {count > 1 ? "are" : "is"} invalid.
-          </>
+          <Trans
+            i18nKey="scanner.blockers.fulfilReservationsDrawer.invalidCodes.message"
+            count={count}
+            components={{ bold: <strong /> }}
+          />
         ),
         onResolve: () => removeItemsFromList(invalidCodeQrIds),
       },
@@ -519,7 +524,7 @@ export default function FulfilReservationsDrawer({
       <>
         {scannedCount > 0 ? (
           <ScanItemGroup
-            label="Scanned this session"
+            label={t("scanner.fulfilReservationsDrawer.scannedThisSession")}
             count={scannedCount}
             tone="active"
             openWhenCountGrows
@@ -537,7 +542,7 @@ export default function FulfilReservationsDrawer({
 
         {pendingModelRows.length > 0 ? (
           <ScanItemGroup
-            label="Pending"
+            label={t("scanner.fulfilReservationsDrawer.pending")}
             count={pendingModelRows.length}
             tone="muted"
           >
@@ -552,7 +557,7 @@ export default function FulfilReservationsDrawer({
 
         {session.alreadyIncluded.length > 0 ? (
           <ScanItemGroup
-            label="Already included"
+            label={t("scanner.fulfilReservationsDrawer.alreadyIncluded")}
             count={session.alreadyIncluded.length}
             tone="done"
             defaultOpen={false}
@@ -590,7 +595,7 @@ export default function FulfilReservationsDrawer({
       schema={fulfilAndCheckoutSchema}
       items={items}
       onClearItems={clearList}
-      title="Fulfil reservations & check out"
+      title={t("scanner.fulfilReservationsDrawer.fulfilReservationsCheckOut")}
       isLoading={isLoading}
       renderGroups={renderGroups}
       // Render body even when nothing has been scanned yet — pending
@@ -648,6 +653,7 @@ function FulfilHeader({
   session: Exclude<FulfilSessionInfo, null>;
   progressByModel: ModelProgress[];
 }) {
+  const { t } = useTranslation();
   return (
     <div className="border border-b-0 bg-gray-50 p-4">
       <div className="flex flex-col gap-3">
@@ -661,8 +667,7 @@ function FulfilHeader({
               {session.bookingName}
             </Button>
             <p className="text-xs text-gray-600">
-              Scan reserved models to fulfil this booking. Off-model scans are
-              accepted with a warning.
+              {t("scanner.fulfilReservationsDrawer.scanReservedModelsToFulfil")}
             </p>
           </div>
         </div>
@@ -684,6 +689,7 @@ function FulfilHeader({
  * scanning a matching QR.
  */
 function PendingModelRow({ assetModelName }: { assetModelName: string }) {
+  const { t } = useTranslation();
   return (
     <Tr skipEntrance>
       <td className="w-full p-0 md:p-0">
@@ -700,13 +706,15 @@ function PendingModelRow({ assetModelName }: { assetModelName: string }) {
                 {assetModelName}
               </span>
               <div className="flex flex-wrap items-center gap-1">
-                <span className={assetTypePillClass}>model</span>
+                <span className={assetTypePillClass}>
+                  {t("scanner.fulfilReservationsDrawer.model")}
+                </span>
                 <Badge
                   color={BADGE_COLORS.gray.bg}
                   textColor={BADGE_COLORS.gray.text}
                   withDot={false}
                 >
-                  Pending
+                  {t("scanner.fulfilReservationsDrawer.pending")}
                 </Badge>
               </div>
             </div>
@@ -750,11 +758,12 @@ function ScannedAssetRowBody({
   viaKitName?: string;
   claimedModelName?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2">
       <ImageWithPreview
         thumbnailUrl={asset.thumbnailImage || asset.mainImage}
-        alt={asset.title || "Asset"}
+        alt={asset.title || t("scanner.fulfilReservationsDrawer.asset2")}
         className="size-[54px] rounded-[2px]"
       />
       <div className="flex min-w-0 flex-col gap-1">
@@ -762,14 +771,16 @@ function ScannedAssetRowBody({
           {asset.title}
         </span>
         <div className="flex flex-wrap items-center gap-1">
-          <span className={assetTypePillClass}>asset</span>
+          <span className={assetTypePillClass}>
+            {t("scanner.fulfilReservationsDrawer.asset")}
+          </span>
           {bucket === "matched" ? (
             <Badge
               color={BADGE_COLORS.green.bg}
               textColor={BADGE_COLORS.green.text}
               withDot={false}
             >
-              Ready
+              {t("scanner.fulfilReservationsDrawer.ready")}
             </Badge>
           ) : bucket === "viaKit" ? (
             <Badge
@@ -780,7 +791,7 @@ function ScannedAssetRowBody({
             >
               {viaKitName
                 ? `Arrives with ${viaKitName}`
-                : "Arrives with its kit"}
+                : t("scanner.fulfilReservationsDrawer.arrivesWithItsKit")}
             </Badge>
           ) : bucket === "claimed" ? (
             <Badge
@@ -791,7 +802,7 @@ function ScannedAssetRowBody({
             >
               {claimedModelName
                 ? `Already here, now counts toward ${claimedModelName}`
-                : "Already here, now counts"}
+                : t("scanner.fulfilReservationsDrawer.alreadyHereNowCounts")}
             </Badge>
           ) : bucket === "included" ? (
             <Badge
@@ -799,7 +810,7 @@ function ScannedAssetRowBody({
               textColor={BADGE_COLORS.green.text}
               withDot={false}
             >
-              Ready to check out
+              {t("scanner.fulfilReservationsDrawer.readyToCheckOut")}
             </Badge>
           ) : bucket === "duplicate" ? (
             <Badge
@@ -808,7 +819,7 @@ function ScannedAssetRowBody({
               withDot={false}
               className="max-w-full"
             >
-              Already on this booking — remove this scan
+              {t("scanner.fulfilReservationsDrawer.alreadyOnThisBookingRemove")}
             </Badge>
           ) : (
             <Badge
@@ -817,7 +828,7 @@ function ScannedAssetRowBody({
               withDot={false}
               className="max-w-full"
             >
-              Will be added to booking and checked out
+              {t("scanner.fulfilReservationsDrawer.willBeAddedToBooking")}
             </Badge>
           )}
         </div>
@@ -847,17 +858,22 @@ function ScannedKitRowBody({
   kit: KitFromQr;
   matchedMemberCount: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <span className="word-break whitespace-break-spaces font-medium text-gray-800">
         {kit.name}
         <span className="ml-1.5 text-xs font-medium text-gray-500">
           {kit._count.assetKits}{" "}
-          {kit._count.assetKits === 1 ? "asset" : "assets"}
+          {kit._count.assetKits === 1
+            ? t("scanner.fulfilReservationsDrawer.asset")
+            : t("scanner.fulfilReservationsDrawer.assets")}
         </span>
       </span>
       <div className="flex flex-wrap items-center gap-1">
-        <span className={assetTypePillClass}>kit</span>
+        <span className={assetTypePillClass}>
+          {t("scanner.fulfilReservationsDrawer.kit")}
+        </span>
         {matchedMemberCount > 0 ? (
           <Badge
             color={BADGE_COLORS.green.bg}
@@ -866,7 +882,7 @@ function ScannedKitRowBody({
             className="max-w-full"
           >
             {matchedMemberCount === 1
-              ? "Assigns 1 reserved unit"
+              ? t("scanner.fulfilReservationsDrawer.assigns1ReservedUnit")
               : `Assigns ${matchedMemberCount} reserved units`}
           </Badge>
         ) : (
@@ -876,7 +892,7 @@ function ScannedKitRowBody({
             withDot={false}
             className="max-w-full"
           >
-            Will be added to booking and checked out
+            {t("scanner.fulfilReservationsDrawer.willBeAddedToBooking")}
           </Badge>
         )}
       </div>
@@ -898,6 +914,7 @@ function AlreadyIncludedRows({
 }: {
   assets: Exclude<FulfilSessionInfo, null>["alreadyIncluded"];
 }) {
+  const { t } = useTranslation();
   return (
     <>
       {assets.map((asset) => (
@@ -907,7 +924,9 @@ function AlreadyIncludedRows({
               <div className="flex items-center gap-2">
                 <ImageWithPreview
                   thumbnailUrl={asset.thumbnailImage || asset.mainImage}
-                  alt={asset.title || "Asset"}
+                  alt={
+                    asset.title || t("scanner.fulfilReservationsDrawer.asset2")
+                  }
                   className="size-[54px] rounded-[2px]"
                 />
                 <div className="flex flex-col gap-1">
@@ -927,13 +946,15 @@ function AlreadyIncludedRows({
                     ) : null}
                   </span>
                   <div className="flex flex-wrap items-center gap-1">
-                    <span className={assetTypePillClass}>asset</span>
+                    <span className={assetTypePillClass}>
+                      {t("scanner.fulfilReservationsDrawer.asset")}
+                    </span>
                     <Badge
                       color={BADGE_COLORS.green.bg}
                       textColor={BADGE_COLORS.green.text}
                       withDot={false}
                     >
-                      Already included
+                      {t("scanner.fulfilReservationsDrawer.alreadyIncluded")}
                     </Badge>
                   </div>
                 </div>
@@ -1007,6 +1028,7 @@ function FulfilCheckoutForm({
   suppressEarlyCheckoutPrompt,
   sourceQuestions,
 }: FulfilCheckoutFormProps) {
+  const { t } = useTranslation();
   /**
    * Form DOM node ref — used as the portal container for the
    * `CheckoutDialog` alert so its submit buttons render inside this
@@ -1056,7 +1078,7 @@ function FulfilCheckoutForm({
         ) : null}
 
         <Button type="button" variant="secondary" to="..">
-          Cancel
+          {t("scanner.fulfilReservationsDrawer.cancel")}
         </Button>
 
         <CheckoutDialog

@@ -11,6 +11,7 @@
  */
 import type { Booking } from "@prisma/client";
 import { Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDisabled } from "~/hooks/use-disabled";
 import { isBookingEarlyCheckin } from "~/modules/booking/helpers";
 import { tw } from "~/utils/tw";
@@ -82,6 +83,7 @@ export default function CheckinDialog({
   specificAssetIds,
   fullWidth = false,
 }: CheckinDialogProps) {
+  const { t } = useTranslation();
   const isEarlyCheckin = isBookingEarlyCheckin(booking.to);
   const isNavigating = useDisabled();
   const isDisabled = disabled || isNavigating;
@@ -128,7 +130,9 @@ export default function CheckinDialog({
 
       <AlertDialogContent portalProps={{ container: portalContainer }}>
         <AlertDialogHeader>
-          <AlertDialogTitle>Check in booking</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("bookings.checkinDialog.checkInBooking")}
+          </AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogDescription>
           This checks in {scopeLabel} of{" "}
@@ -174,7 +178,7 @@ export default function CheckinDialog({
               type="button"
               className={asksDateChoice ? "" : "flex-1"}
             >
-              Cancel
+              {t("bookings.checkinDialog.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -202,7 +206,7 @@ export default function CheckinDialog({
                 name="checkinIntentChoice"
                 value={CheckinIntentEnum["without-adjusted-date"]}
               >
-                Don't Adjust Date
+                {t("bookings.checkinDialog.dontAdjustDate")}
               </Button>
               <Button
                 disabled={isDisabled}
@@ -213,7 +217,7 @@ export default function CheckinDialog({
                 name="checkinIntentChoice"
                 value={CheckinIntentEnum["with-adjusted-date"]}
               >
-                Adjust Date
+                {t("bookings.checkinDialog.adjustDate")}
               </Button>
             </>
           ) : (
@@ -230,7 +234,7 @@ export default function CheckinDialog({
                 value: CheckinIntentEnum["without-adjusted-date"],
               })}
             >
-              Check in
+              {t("bookings.checkinDialog.checkIn")}
             </Button>
           )}
         </AlertDialogFooter>

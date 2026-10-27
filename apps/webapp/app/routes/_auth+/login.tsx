@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -21,6 +22,7 @@ import { Button } from "~/components/shared/button";
 import { config } from "~/config/shelf.config";
 import { useSearchParams } from "~/hooks/search-params";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
+import { getServerT } from "~/i18n/i18n.server";
 import { ContinueWithEmailForm } from "~/modules/auth/components/continue-with-email-form";
 import {
   INVALID_CREDENTIALS_MESSAGE,
@@ -51,14 +53,15 @@ import {
 } from "~/utils/http.server";
 import { validEmail } from "~/utils/misc";
 
-export function loader({ context }: LoaderFunctionArgs) {
-  const title = "Log in";
-  const subHeading = "Welcome back! Enter your details below to log in.";
-  const { disableSignup, disableSSO } = config;
-
+export async function loader({ context }: LoaderFunctionArgs) {
   if (context.isAuthenticated) {
     return redirect("/");
   }
+
+  const t = await getServerT(context);
+  const title = t("auth.pages.login.title");
+  const subHeading = t("auth.pages.login.subHeading");
+  const { disableSignup, disableSSO } = config;
 
   return data(payload({ title, subHeading, disableSignup, disableSSO }));
 }
@@ -195,6 +198,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function IndexLoginForm() {
+  const { t } = useTranslation();
   const { disableSignup, disableSSO } = useLoaderData<typeof loader>();
   const zo = useZorm("NewQuestionWizardScreen", LoginFormSchema);
   const [searchParams] = useSearchParams();
@@ -218,22 +222,19 @@ export default function IndexLoginForm() {
     <div className="w-full max-w-md">
       {acceptedInvite ? (
         <div className="mb-8 text-center text-success-600">
-          Successfully accepted workspace invite. Please login to see your new
-          workspace.
+          {t("auth.login.successfullyAcceptedWorkspaceInvitePleas")}
         </div>
       ) : null}
 
       {passwordReset ? (
         <div className="mb-8 text-center text-success-600">
-          You have successfully reset your password. You can now use your new
-          password to login.
+          {t("auth.login.youHaveSuccessfullyResetYour")}
         </div>
       ) : null}
 
       {ssoRequired ? (
         <div role="alert" className="mb-8 text-center text-error-600">
-          This email address signs in with single sign-on. Please use Login with
-          SSO.
+          {t("auth.login.thisEmailAddressSignsIn")}
         </div>
       ) : null}
       <Form ref={zo.ref} method="post" replace className="flex flex-col gap-5">
@@ -241,7 +242,7 @@ export default function IndexLoginForm() {
           <Input
             ref={emailInputRef}
             data-test-id="email"
-            label="Email address"
+            label={t("auth.login.emailAddress")}
             placeholder="zaans@huisje.com"
             required
             name={zo.fields.email()}
@@ -253,7 +254,7 @@ export default function IndexLoginForm() {
           />
         </div>
         <PasswordInput
-          label="Password"
+          label={t("auth.login.password")}
           placeholder="**********"
           data-test-id="password"
           name={zo.fields.password()}
@@ -265,9 +266,9 @@ export default function IndexLoginForm() {
         <input type="hidden" name={zo.fields.redirectTo()} value={redirectTo} />
         {ssoDomainHint ? (
           <p role="status" className="text-sm text-gray-600">
-            If your organization uses single sign-on, use{" "}
+            {t("auth.login.ifYourOrganizationUsesSingle")}{" "}
             <Button variant="link" to="/sso-login">
-              Login with SSO
+              {t("auth.login.loginWithSso")}
             </Button>
             .
           </p>
@@ -278,11 +279,11 @@ export default function IndexLoginForm() {
           data-test-id="login"
           disabled={disabled}
         >
-          Log In
+          {t("auth.login.logIn")}
         </Button>
         <div className="flex flex-col items-center justify-center">
           <div className="text-center text-sm text-gray-500">
-            Don't remember your password?{" "}
+            {t("auth.login.dontRememberYourPassword")}{" "}
             <Button
               variant="link"
               to={{
@@ -290,7 +291,7 @@ export default function IndexLoginForm() {
                 search: searchParams.toString(),
               }}
             >
-              Reset password
+              {t("auth.login.resetPassword")}
             </Button>
           </div>
         </div>
@@ -298,7 +299,7 @@ export default function IndexLoginForm() {
       {!disableSSO && (
         <div className="mt-6 text-center">
           <Button variant="link" to="/sso-login">
-            Login with SSO
+            {t("auth.login.loginWithSso")}
           </Button>
         </div>
       )}
@@ -310,9 +311,9 @@ export default function IndexLoginForm() {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="bg-white px-2 text-gray-500">
-              Or use a{" "}
-              <strong title="One Time Password (OTP) is the most secure way to login. We will send you a code to your email.">
-                One Time Password
+              {t("auth.login.orUseA")}{" "}
+              <strong title={t("auth.login.oneTimePasswordOtpIs")}>
+                {t("auth.login.oneTimePassword")}
               </strong>
             </span>
           </div>
@@ -322,7 +323,7 @@ export default function IndexLoginForm() {
         </div>
         {disableSignup ? null : (
           <div className="mt-6 text-center text-sm text-gray-500">
-            Don't have an account?{" "}
+            {t("auth.login.dontHaveAnAccount")}{" "}
             <Button
               variant="link"
               data-test-id="signupButton"
@@ -331,7 +332,7 @@ export default function IndexLoginForm() {
                 search: searchParams.toString(),
               }}
             >
-              Sign up
+              {t("auth.login.signUp")}
             </Button>
           </div>
         )}

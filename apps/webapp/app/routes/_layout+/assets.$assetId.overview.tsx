@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { RenderableTreeNode } from "@markdoc/markdoc";
 import { AssetStatus, CustomFieldType } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type {
   MetaFunction,
   ActionFunctionArgs,
@@ -802,6 +803,7 @@ async function handleMoveUnitsIntent({
 
 // react-doctor:no-giant-component — deferred for follow-up refactor
 export default function AssetOverview() {
+  const { t } = useTranslation();
   const {
     asset,
     locale,
@@ -915,7 +917,7 @@ export default function AssetOverview() {
               {asset?.sequentialId ? (
                 <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                   <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                    Asset ID
+                    {t("assets.assetsAssetidOverview.assetId")}
                   </span>
                   <div className="mt-1 w-3/5 text-gray-600 md:mt-0">
                     {asset.sequentialId}
@@ -925,7 +927,7 @@ export default function AssetOverview() {
               {asset?.qrCodes?.[0] ? (
                 <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                   <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                    Shelf QR ID
+                    {t("assets.assetsAssetidOverview.shelfQrId")}
                   </span>
                   <div className="mt-1 w-3/5 text-gray-600 md:mt-0">
                     {asset.qrCodes[0].id}
@@ -934,7 +936,7 @@ export default function AssetOverview() {
               ) : null}
               <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                 <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                  Created
+                  {t("assets.assetsAssetidOverview.created")}
                 </span>
                 <div className="mt-1 w-3/5 text-gray-600 md:mt-0">
                   <DateS date={asset.createdAt} includeTime />
@@ -943,14 +945,15 @@ export default function AssetOverview() {
 
               <InlineEditableField
                 fieldName="category"
-                label="Category"
+                label={t("assets.assetsAssetidOverview.category")}
                 canEdit={canEditAsset}
                 renderDisplay={() => (
                   <Badge
                     color={asset.category?.color ?? "#808080"}
                     withDot={false}
                   >
-                    {asset.category?.name ?? "Uncategorized"}
+                    {asset.category?.name ??
+                      t("assets.assetsAssetidOverview.uncategorized")}
                   </Badge>
                 )}
                 renderEditor={() => (
@@ -958,8 +961,10 @@ export default function AssetOverview() {
                     fieldName="fieldValue"
                     defaultValue={asset.category?.id ?? undefined}
                     model={{ name: "category", queryKey: "name" }}
-                    contentLabel="Categories"
-                    placeholder="Select category"
+                    contentLabel={t("assets.assetsAssetidOverview.categories")}
+                    placeholder={t(
+                      "assets.assetsAssetidOverview.selectCategory"
+                    )}
                     initialDataKey="categories"
                     countKey="totalCategories"
                     closeOnSelect
@@ -982,7 +987,7 @@ export default function AssetOverview() {
                  */
                 <li className="group/field w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                   <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                    Location
+                    {t("assets.assetsAssetidOverview.location")}
                   </span>
                   <div className="relative mt-1 flex items-start gap-2 md:mt-0 md:w-3/5">
                     <div className="min-w-0 flex-1">
@@ -1017,7 +1022,9 @@ export default function AssetOverview() {
                                           target="_blank"
                                           className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 no-underline hover:bg-blue-100 hover:text-blue-800"
                                         >
-                                          via kit
+                                          {t(
+                                            "assets.assetsAssetidOverview.viaKit"
+                                          )}
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent
@@ -1028,17 +1035,18 @@ export default function AssetOverview() {
                                           {viaKit.name}
                                         </p>
                                         <p className="mt-1 text-xs text-gray-500">
-                                          These units are at this location
-                                          because the asset is in this kit.
-                                          Change the kit&apos;s location to move
-                                          them.
+                                          {t(
+                                            "assets.assetsAssetidOverview.theseUnitsAreAtThis"
+                                          )}
                                         </p>
                                       </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 ) : null}
                                 <span className="shrink-0 text-xs tabular-nums text-gray-500">
-                                  {al.quantity} {asset.unitOfMeasure || "units"}
+                                  {al.quantity}{" "}
+                                  {asset.unitOfMeasure ||
+                                    t("assets.assetsAssetidOverview.units")}
                                 </span>
                               </li>
                             );
@@ -1046,8 +1054,15 @@ export default function AssetOverview() {
                         </ul>
                       ) : (
                         <span className="text-gray-600">
-                          No locations · {asset.quantity ?? 0}{" "}
-                          {asset.unitOfMeasure || "units"} unplaced
+                          {t(
+                            "assets.assetsAssetidOverview.noLocationsUnplaced",
+                            {
+                              quantity: asset.quantity ?? 0,
+                              unit:
+                                asset.unitOfMeasure ||
+                                t("assets.assetsAssetidOverview.units"),
+                            }
+                          )}
                         </span>
                       )}
                     </div>
@@ -1059,8 +1074,12 @@ export default function AssetOverview() {
                         // because it's mounted from the parent route.
                         to="manage-placements"
                         variant="link"
-                        aria-label="Manage placements"
-                        title="Manage placements"
+                        aria-label={t(
+                          "assets.assetsAssetidOverview.managePlacements"
+                        )}
+                        title={t(
+                          "assets.assetsAssetidOverview.managePlacements"
+                        )}
                         className="hidden shrink-0 rounded p-1 text-gray-500 transition-opacity hover:bg-gray-100 hover:text-gray-700 md:inline-flex md:opacity-0 md:group-hover/field:opacity-100 md:focus-visible:opacity-100"
                       >
                         <Icon icon="pen" />
@@ -1071,7 +1090,7 @@ export default function AssetOverview() {
               ) : (
                 <InlineEditableField
                   fieldName="location"
-                  label="Location"
+                  label={t("assets.assetsAssetidOverview.location")}
                   canEdit={canEditAsset}
                   isEmpty={!location}
                   renderDisplay={() =>
@@ -1087,7 +1106,9 @@ export default function AssetOverview() {
                         />
                       </div>
                     ) : (
-                      <span className="text-gray-600">No location</span>
+                      <span className="text-gray-600">
+                        {t("assets.assetsAssetidOverview.noLocation")}
+                      </span>
                     )
                   }
                   renderEditor={() => (
@@ -1105,18 +1126,19 @@ export default function AssetOverview() {
 
               <InlineEditableField
                 fieldName="description"
-                label="Description"
+                label={t("assets.assetsAssetidOverview.description")}
                 canEdit={canEditAsset}
                 isEmpty={!asset.description}
                 renderDisplay={() => (
                   <div className="whitespace-pre-wrap text-gray-600">
-                    {asset.description || "No description"}
+                    {asset.description ||
+                      t("assets.assetsAssetidOverview.noDescription")}
                   </div>
                 )}
                 renderEditor={() => (
                   <div>
                     <Input
-                      label="Description"
+                      label={t("assets.assetsAssetidOverview.description")}
                       hideLabel
                       inputType="textarea"
                       name="fieldValue"
@@ -1133,7 +1155,7 @@ export default function AssetOverview() {
                   DynamicSelect variant for compact inline contexts). */}
               <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                 <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                  Tags
+                  {t("assets.assetsAssetidOverview.tags")}
                 </span>
                 <div className="mt-1 text-gray-600 md:mt-0 md:w-3/5">
                   {asset.tags?.length > 0 ? (
@@ -1150,14 +1172,16 @@ export default function AssetOverview() {
                       ))}
                     </div>
                   ) : (
-                    <span className="text-gray-600">No tags</span>
+                    <span className="text-gray-600">
+                      {t("assets.assetsAssetidOverview.noTags")}
+                    </span>
                   )}
                 </div>
               </li>
 
               <InlineEditableField
                 fieldName="valuation"
-                label="Value"
+                label={t("assets.assetsAssetidOverview.value")}
                 canEdit={canEditAsset}
                 isEmpty={asset.valuation == null}
                 renderDisplay={() => (
@@ -1168,7 +1192,7 @@ export default function AssetOverview() {
                           locale,
                           currency: asset.organization.currency,
                         })
-                      : "No value"}
+                      : t("assets.assetsAssetidOverview.noValue")}
                   </div>
                 )}
                 renderEditor={() => (
@@ -1189,7 +1213,7 @@ export default function AssetOverview() {
                    * the numeric keypad.
                    */
                   <Input
-                    label="Value"
+                    label={t("assets.assetsAssetidOverview.value")}
                     hideLabel
                     type="text"
                     inputMode="decimal"
@@ -1214,7 +1238,7 @@ export default function AssetOverview() {
                     return (
                       <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                         <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                          Total value
+                          {t("assets.assetsAssetidOverview.totalValue")}
                         </span>
                         <div className="mt-1 text-gray-600 md:mt-0 md:w-3/5">
                           {breakdown.total}
@@ -1233,7 +1257,7 @@ export default function AssetOverview() {
               {asset?.assetModel ? (
                 <li className="w-full border-b-[1.1px] border-b-gray-100 p-4 last:border-b-0 md:flex">
                   <span className="w-1/4 text-[14px] font-medium text-gray-900">
-                    Asset Model
+                    {t("assets.assetsAssetidOverview.assetModel")}
                   </span>
                   <div className="mt-1 text-gray-600 md:mt-0 md:w-3/5">
                     {userHasPermission({
@@ -1259,8 +1283,9 @@ export default function AssetOverview() {
                     */}
                     <When truthy={!asset.mainImage && !!assetModelImage}>
                       <div className="mt-1 text-[12px] text-gray-500">
-                        Image shown for this asset comes from its model. Upload
-                        an image on the asset to override it.
+                        {t(
+                          "assets.assetsAssetidOverview.imageShownForThisAsset"
+                        )}
                       </div>
                     </When>
                   </div>
@@ -1280,22 +1305,31 @@ export default function AssetOverview() {
                   return (
                     <li className="w-full max-w-full p-4 last:border-b-0 md:block">
                       <span className="mb-3 flex items-center gap-1 text-[14px] font-medium text-gray-900">
-                        Barcodes ({assetWithBarcodes.barcodes.length})
+                        {t("assets.assetsAssetidOverview.barcodes", {
+                          barcodesCount: assetWithBarcodes.barcodes.length,
+                        })}
                         <InfoTooltip
                           iconClassName="size-4"
                           content={
                             <>
-                              <h6>Barcodes support</h6>
+                              <h6>
+                                {t(
+                                  "assets.assetsAssetidOverview.barcodesSupport"
+                                )}
+                              </h6>
                               {BARCODES_KB_URL ? (
                                 <p>
-                                  Want to know more about barcodes? Check out
-                                  our knowledge base article on{" "}
+                                  {t(
+                                    "assets.assetsAssetidOverview.wantToKnowMoreAbout"
+                                  )}{" "}
                                   <Button
                                     variant="link"
                                     target="_blank"
                                     to={BARCODES_KB_URL}
                                   >
-                                    barcode support
+                                    {t(
+                                      "assets.assetsAssetidOverview.barcodeSupport"
+                                    )}
                                   </Button>
                                 </p>
                               ) : null}
@@ -1316,7 +1350,9 @@ export default function AssetOverview() {
                 return (
                   <li className="w-full max-w-full p-4 last:border-b-0 md:block">
                     <span className="mb-3 flex items-center gap-1 text-[14px] font-medium text-gray-900">
-                      Barcodes ({barcodeCount})
+                      {t("assets.assetsAssetidOverview.barcodes2", {
+                        barcodeCount,
+                      })}
                     </span>
                     <div className="flex flex-wrap gap-3">
                       {Array.from({ length: barcodeCount }).map((_, i) => (
@@ -1326,7 +1362,9 @@ export default function AssetOverview() {
                         >
                           <div className="flex flex-col items-center gap-1 text-gray-400">
                             <Icon icon="lock" />
-                            <span className="text-xs">Hidden</span>
+                            <span className="text-xs">
+                              {t("assets.assetsAssetidOverview.hidden")}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -1345,7 +1383,7 @@ export default function AssetOverview() {
           (canEditAsset && allCustomFields.length > 0) ? (
             <>
               <TextualDivider
-                text="Custom fields"
+                text={t("assets.assetsAssetidOverview.customFields")}
                 className="mb-8 pt-3 lg:hidden"
               />
               <Card className="my-3 px-[-4] py-[-5] md:border">
@@ -1420,7 +1458,9 @@ export default function AssetOverview() {
                               )}
                             </div>
                           ) : (
-                            <span className="text-gray-400">Not set</span>
+                            <span className="text-gray-400">
+                              {t("assets.assetsAssetidOverview.notSet")}
+                            </span>
                           )
                         }
                         renderEditor={() => {
@@ -1467,7 +1507,11 @@ export default function AssetOverview() {
                                   defaultValue={rawValue}
                                   className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                                 >
-                                  <option value="">Select an option</option>
+                                  <option value="">
+                                    {t(
+                                      "assets.assetsAssetidOverview.selectAnOption"
+                                    )}
+                                  </option>
                                   {(def.options as string[] | null)
                                     ?.filter(
                                       (o: string) => o !== null && o !== ""
@@ -1528,7 +1572,7 @@ export default function AssetOverview() {
                 <div className="flex justify-between gap-3">
                   <div>
                     <p className="text-[14px] font-medium text-gray-700">
-                      Available for bookings
+                      {t("assets.assetsAssetidOverview.availableForBookings")}
                     </p>
                     <p className="text-[12px] text-gray-600">
                       {/* An archived asset can't be booked whatever this says.
@@ -1538,7 +1582,9 @@ export default function AssetOverview() {
                         ? `Archived assets can't be booked. When reinstated, it will be ${
                             asset.availableToBook ? "available" : "unavailable"
                           } for bookings again.`
-                        : "Asset is available for being used in bookings"}
+                        : t(
+                            "assets.assetsAssetidOverview.assetIsAvailableForBeing"
+                          )}
                     </p>
                   </div>
                   <Switch
@@ -1558,10 +1604,12 @@ export default function AssetOverview() {
                     required
                     title={
                       asset?.archivedAt
-                        ? "This asset is archived. Reinstate it to change availability."
+                        ? t(
+                            "assets.assetsAssetidOverview.thisAssetIsArchivedReinstate"
+                          )
                         : !canUpdateAvailability
-                        ? "You do not have the permissions to change availability"
-                        : "Toggle availability"
+                        ? t("assets.assetsAssetidOverview.youDoNotHaveThe")
+                        : t("assets.assetsAssetidOverview.toggleAvailability")
                     }
                   />
                   <input type="hidden" value="toggle" name="intent" />
@@ -1609,8 +1657,8 @@ export default function AssetOverview() {
                   <div className="min-w-0 flex-1">
                     <h3 className="mb-1 text-sm font-semibold">
                       {memberships.length > 1
-                        ? "Included in kits"
-                        : "Included in kit"}
+                        ? t("assets.assetsAssetidOverview.includedInKits")
+                        : t("assets.assetsAssetidOverview.includedInKit")}
                     </h3>
                     <ul className="space-y-1">
                       {memberships.map((m) => (
@@ -1660,7 +1708,7 @@ export default function AssetOverview() {
                                     variant="link"
                                     className="text-xs font-normal text-gray-500 underline hover:text-gray-700"
                                   >
-                                    Move
+                                    {t("assets.assetsAssetidOverview.move")}
                                   </Button>
                                 }
                               />
@@ -1733,8 +1781,8 @@ export default function AssetOverview() {
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <h3 className="text-sm font-semibold">
                         {placements.length > 1
-                          ? "Placed at locations"
-                          : "Placed at location"}
+                          ? t("assets.assetsAssetidOverview.placedAtLocations")
+                          : t("assets.assetsAssetidOverview.placedAtLocation")}
                       </h3>
                       {isQty && canEditAsset ? (
                         <Button
@@ -1742,7 +1790,7 @@ export default function AssetOverview() {
                           variant="link"
                           className="shrink-0 text-xs font-normal text-gray-500 underline hover:text-gray-700"
                         >
-                          Edit placements
+                          {t("assets.assetsAssetidOverview.editPlacements")}
                         </Button>
                       ) : null}
                     </div>
@@ -1773,7 +1821,7 @@ export default function AssetOverview() {
                                       target="_blank"
                                       className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 no-underline hover:bg-blue-100 hover:text-blue-800"
                                     >
-                                      via kit
+                                      {t("assets.assetsAssetidOverview.viaKit")}
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent
@@ -1784,9 +1832,9 @@ export default function AssetOverview() {
                                       {p.viaKit.name}
                                     </p>
                                     <p className="mt-1 text-xs text-gray-500">
-                                      These units are at this location because
-                                      the asset is in this kit. Change the
-                                      kit&apos;s location to move them.
+                                      {t(
+                                        "assets.assetsAssetidOverview.theseUnitsAreAtThis"
+                                      )}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -1839,7 +1887,7 @@ export default function AssetOverview() {
                                     variant="link"
                                     className="text-xs font-normal text-gray-500 underline hover:text-gray-700"
                                   >
-                                    Move
+                                    {t("assets.assetsAssetidOverview.move")}
                                   </Button>
                                 }
                               />
@@ -1905,9 +1953,11 @@ export default function AssetOverview() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs text-gray-600">
                   <span className="font-semibold text-gray-900">
-                    {unplacedQuantity} {asset.unitOfMeasure || "units"}
+                    {unplacedQuantity}{" "}
+                    {asset.unitOfMeasure ||
+                      t("assets.assetsAssetidOverview.units")}
                   </span>{" "}
-                  currently unplaced.
+                  {t("assets.assetsAssetidOverview.currentlyUnplaced")}
                 </p>
                 <MoveUnitsDialog
                   axis="place-unplaced"
@@ -1923,7 +1973,7 @@ export default function AssetOverview() {
                       variant="secondary"
                       className="py-1 text-xs"
                     >
-                      Place them
+                      {t("assets.assetsAssetidOverview.placeThem")}
                     </Button>
                   }
                 />
@@ -2005,6 +2055,7 @@ function PlacementCount({
   unit: string;
   inCustody: number;
 }) {
+  const { t } = useTranslation();
   if (inCustody <= 0) {
     return (
       <span className="text-xs tabular-nums text-gray-500">
@@ -2017,7 +2068,9 @@ function PlacementCount({
       <span>
         {quantity} {unit}
       </span>
-      <span className="text-gray-400">{inCustody} in custody</span>
+      <span className="text-gray-400">
+        {t("assets.assetsAssetidOverview.inCustody", { inCustody })}
+      </span>
     </span>
   );
 }
@@ -2039,6 +2092,7 @@ function BooleanCustomFieldEditor({
   initialChecked: boolean;
   initialIsUnset?: boolean;
 }) {
+  const { t } = useTranslation();
   const [isUnset, setIsUnset] = useState(initialIsUnset);
   const [checked, setChecked] = useState(initialChecked);
   return (
@@ -2072,7 +2126,7 @@ function BooleanCustomFieldEditor({
           onClick={() => setIsUnset(true)}
           className="text-xs text-gray-400 underline hover:text-gray-600"
         >
-          Clear
+          {t("assets.assetsAssetidOverview.clear")}
         </button>
       )}
     </div>

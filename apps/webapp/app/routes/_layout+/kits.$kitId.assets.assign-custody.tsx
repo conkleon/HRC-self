@@ -6,6 +6,7 @@ import {
   NoteType,
 } from "@prisma/client";
 import { kitWithoutActiveAssetsReason } from "@shelf/labels";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -501,6 +502,7 @@ export function links() {
 }
 
 export default function GiveKitCustody() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const disabled = isFormProcessing(navigation.state);
   const actionData = useActionData<typeof action>();
@@ -522,11 +524,16 @@ export default function GiveKitCustody() {
         </div>
 
         <div className="mb-5">
-          <h4>{assignsSelfOnly ? "Take" : "Assign"} custody of kit</h4>
+          <h4>
+            {assignsSelfOnly
+              ? t("kits.kitsKitidAssetsAssignCustody.take")
+              : t("kits.kitsKitidAssetsAssignCustody.assign")}{" "}
+            {t("kits.kitsKitidAssetsAssignCustody.custodyOfKit")}
+          </h4>
           <p>
-            This kit is currently available. You're about to assign custody to{" "}
-            {assignsSelfOnly ? "yourself" : "one of your team members"}. All the
-            assets in this kit will also be assigned the same custody.
+            {assignsSelfOnly
+              ? t("kits.kitsKitidAssetsAssignCustody.aboutToAssignSelf")
+              : t("kits.kitsKitidAssetsAssignCustody.aboutToAssignMember")}
           </p>
         </div>
 
@@ -553,10 +560,12 @@ export default function GiveKitCustody() {
               custodyPurpose: "custody-assignment",
             }}
             fieldName="custodian"
-            contentLabel="Team members"
+            contentLabel={t("kits.kitsKitidAssetsAssignCustody.teamMembers")}
             initialDataKey="teamMembers"
             countKey="totalTeamMembers"
-            placeholder="Select a team member"
+            placeholder={t(
+              "kits.kitsKitidAssetsAssignCustody.selectATeamMember"
+            )}
             closeOnSelect
             transformItem={toCustodyAssignmentItem}
             extraContent={({ onItemCreated, closePopover }) => (
@@ -576,23 +585,25 @@ export default function GiveKitCustody() {
         {hasBookings ? (
           <WarningBox className="-mt-4 mb-8">
             <>
-              Kit is part of an{" "}
-              <Link
-                to={`/bookings/${kit.assetKits[0]?.asset.bookingAssets[0]?.booking.id}`}
-                className="underline"
-                target="_blank"
-              >
-                upcoming booking
-              </Link>
-              . You will not be able to check-out your booking if this kit has
-              custody.
+              <Trans
+                t={t}
+                i18nKey="kits.kitsKitidAssetsAssignCustody.kitIsPartOfAn"
+                components={[
+                  <Link
+                    key="slot0"
+                    to={`/bookings/${kit.assetKits[0]?.asset.bookingAssets[0]?.booking.id}`}
+                    className="underline"
+                    target="_blank"
+                  />,
+                ]}
+              />
             </>
           </WarningBox>
         ) : null}
 
         <div className="flex gap-3">
           <Button to=".." variant="secondary" width="full" disabled={disabled}>
-            Cancel
+            {t("kits.kitsKitidAssetsAssignCustody.cancel")}
           </Button>
           <Button
             variant="primary"
@@ -600,7 +611,7 @@ export default function GiveKitCustody() {
             type="submit"
             disabled={disabled}
           >
-            Confirm
+            {t("kits.kitsKitidAssetsAssignCustody.confirm")}
           </Button>
         </div>
       </div>

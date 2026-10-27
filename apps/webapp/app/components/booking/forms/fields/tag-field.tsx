@@ -1,4 +1,5 @@
 import type { Tag } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import FormRow from "~/components/forms/form-row";
 import MultiSelect from "~/components/multi-select/multi-select";
@@ -19,6 +20,7 @@ export default function TagField({
   required = false,
   error,
 }: TagFieldProps) {
+  const { t } = useTranslation();
   const { tags } = useLoaderData<{ tags: Tag[] }>();
 
   const tagsSuggestions = tags.map((tag) => ({
@@ -28,12 +30,12 @@ export default function TagField({
 
   return (
     <FormRow
-      rowLabel="Tags"
+      rowLabel={t("bookings.tagField.tags")}
       className={tw("mobile-styling-only border-b-0 p-0", className)}
     >
       <MultiSelect
         className="w-full"
-        label="Tags"
+        label={t("bookings.tagField.tags")}
         items={tagsSuggestions}
         defaultSelected={existingTags.map((tag) => ({
           label: tag.name,

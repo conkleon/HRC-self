@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { CircleX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import {
   clearScannedItemsAtom,
@@ -67,6 +68,7 @@ export default function UpdateLocationDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   // Get the scanned items from jotai
   const items = useAtomValue(scannedItemsAtom);
   const clearList = useSetAtom(clearScannedItemsAtom);
@@ -111,7 +113,7 @@ export default function UpdateLocationDrawer({
       schema={BulkLocationUpdateSchema}
       items={items}
       onClearItems={clearList}
-      title="Items scanned"
+      title={t("scanner.updateLocationDrawer.itemsScanned")}
       isLoading={isLoading}
       renderItem={renderItemRow}
       Blockers={Blockers}
@@ -124,6 +126,7 @@ export default function UpdateLocationDrawer({
 }
 
 function AddToLocationForm({ disableSubmit }: { disableSubmit: boolean }) {
+  const { t } = useTranslation();
   const { assetIds, idsTotalCount, kitIds } = useAtomValue(scannedItemIdsAtom);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [locationState, setLocationState] = useState<LocationState>({
@@ -236,11 +239,13 @@ function AddToLocationForm({ disableSubmit }: { disableSubmit: boolean }) {
 
         <div className="px-4 md:pl-0">
           <div className="relative z-50 mb-3 mt-2">
-            <h5 className="mb-1">Update location:</h5>
+            <h5 className="mb-1">
+              {t("scanner.updateLocationDrawer.updateLocation")}
+            </h5>
             <LocationSelect
               isBulk
               hideClearButton
-              placeholder="Select location"
+              placeholder={t("scanner.updateLocationDrawer.selectLocation")}
             />
             {zo.errors.newLocationId()?.message ? (
               <p className="text-sm text-error-500">
@@ -256,7 +261,7 @@ function AddToLocationForm({ disableSubmit }: { disableSubmit: boolean }) {
               width="full"
               disabled={disabled || disableSubmit || idsTotalCount === 0}
             >
-              Update location
+              {t("scanner.updateLocationDrawer.updateLocation2")}
             </Button>
           </div>
         </div>
@@ -267,6 +272,7 @@ function AddToLocationForm({ disableSubmit }: { disableSubmit: boolean }) {
 
 // Implement item renderers
 export function AssetRow({ asset }: { asset: AssetFromQr }) {
+  const { t } = useTranslation();
   const primaryLocation = getPrimaryLocation(asset);
 
   // Use predefined presets to create label configurations for asset rows
@@ -308,7 +314,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          asset
+          {t("scanner.updateLocationDrawer.asset")}
         </span>
         <AssetAvailabilityLabels />
       </div>
@@ -317,12 +323,15 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-1">
       <p className="word-break whitespace-break-spaces font-medium">
         {kit.name}{" "}
         <span className="text-[12px] font-normal text-gray-700">
-          ({kit._count.assetKits} assets)
+          {t("scanner.updateLocationDrawer.assets", {
+            assetKits: kit._count.assetKits,
+          })}
         </span>
       </p>
 
@@ -334,7 +343,7 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.updateLocationDrawer.kit")}
         </span>
       </div>
     </div>
@@ -352,6 +361,7 @@ function SubmittingDialog({
   locationState: LocationState;
   cleanupState: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <AlertDialog
       open={open}
@@ -362,7 +372,9 @@ function SubmittingDialog({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Adding to location</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("scanner.updateLocationDrawer.addingToLocation")}
+          </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="flex flex-col gap-4">
               <SubmissionState
@@ -377,7 +389,7 @@ function SubmittingDialog({
           <div className="flex justify-center gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary">
-                Done
+                {t("scanner.updateLocationDrawer.done")}
               </Button>
             </AlertDialogCancel>
           </div>
@@ -394,11 +406,14 @@ function SubmissionState({
   status: "processing" | "success" | "error";
   errorMessage?: string;
 }) {
+  const { t } = useTranslation();
   if (status === "processing") {
     return (
       <div className="flex flex-row gap-2">
         <Spinner />
-        <TextLoader text="Adding assets/kit to location" />
+        <TextLoader
+          text={t("scanner.updateLocationDrawer.addingAssetsKitToLocation")}
+        />
       </div>
     );
   } else if (status === "success") {
@@ -408,7 +423,7 @@ function SubmissionState({
           <CheckmarkIcon />
         </span>
         <div className="font-mono">
-          Assets/kit successfully added to location
+          {t("scanner.updateLocationDrawer.assetsKitSuccessfullyAddedTo")}
         </div>
       </div>
     );
@@ -417,11 +432,14 @@ function SubmissionState({
       <div>
         <div className="flex flex-row items-center gap-2 text-left">
           <CircleX className="size-[18px] text-error-500" />
-          <div className="font-mono">Failed to add assets/kit to location</div>
+          <div className="font-mono">
+            {t("scanner.updateLocationDrawer.failedToAddAssetsKit")}
+          </div>
         </div>
         {errorMessage && (
           <span className="text-[12px] text-error-500">
-            <strong>Error:</strong> {errorMessage}
+            <strong>{t("scanner.updateLocationDrawer.error")}</strong>{" "}
+            {errorMessage}
           </span>
         )}
       </div>

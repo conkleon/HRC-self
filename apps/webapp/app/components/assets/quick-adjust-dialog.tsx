@@ -19,6 +19,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
@@ -85,6 +86,7 @@ export function QuickAdjustDialog({
   onOpenChange: controlledOnOpenChange,
   sources,
 }: QuickAdjustDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
@@ -205,10 +207,11 @@ export function QuickAdjustDialog({
 
       <AlertDialogContent onEscapeKeyDown={() => setOpen(false)}>
         <AlertDialogHeader>
-          <AlertDialogTitle>Adjust Quantity</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("assets.quickAdjustDialog.adjustQuantity")}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Add or remove stock for this asset. Enter the number of {unitLabel}{" "}
-            to adjust.
+            {t("assets.quickAdjustDialog.addOrRemoveStockFor", { unitLabel })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -224,8 +227,8 @@ export function QuickAdjustDialog({
               ref={quantityInputRef}
               name="quantity"
               type="number"
-              label={`Quantity (${unitLabel})`}
-              placeholder="Enter quantity"
+              label={t("assets.quickAdjustDialog.quantity", { unitLabel })}
+              placeholder={t("assets.quickAdjustDialog.enterQuantity")}
               min={1}
               step={1}
               required
@@ -237,7 +240,7 @@ export function QuickAdjustDialog({
             {showLocation ? (
               <CustodySourceSelect
                 id={`adjust-quantity-location-${assetId}`}
-                label="At location"
+                label={t("assets.quickAdjustDialog.atLocation")}
                 options={locationOptions}
                 value={locationValue}
                 onChange={setPickedLocation}
@@ -249,8 +252,8 @@ export function QuickAdjustDialog({
             <Input
               name="note"
               inputType="textarea"
-              label="Note (optional)"
-              placeholder="Reason for adjustment..."
+              label={t("assets.quickAdjustDialog.noteOptional")}
+              placeholder={t("assets.quickAdjustDialog.reasonForAdjustment")}
               rows={3}
             />
           </div>
@@ -259,7 +262,7 @@ export function QuickAdjustDialog({
         <AlertDialogFooter className="mt-4 ">
           <AlertDialogCancel asChild>
             <Button type="button" variant="secondary" disabled={isSubmitting}>
-              Cancel
+              {t("assets.quickAdjustDialog.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -269,7 +272,9 @@ export function QuickAdjustDialog({
             onClick={() => handleSubmit("subtract")}
             disabled={disabled}
           >
-            {isSubmitting ? "Removing..." : "Remove"}
+            {isSubmitting
+              ? "Removing..."
+              : t("assets.quickAdjustDialog.remove")}
           </Button>
 
           <Button
@@ -278,7 +283,7 @@ export function QuickAdjustDialog({
             onClick={() => handleSubmit("add")}
             disabled={disabled}
           >
-            {isSubmitting ? "Adding..." : "Add"}
+            {isSubmitting ? "Adding..." : t("assets.quickAdjustDialog.add")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

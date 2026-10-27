@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { Barcode, Kit } from "@prisma/client";
 import { useAtom, useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useActionData, useLocation } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -106,6 +107,7 @@ function KitsFormInner({
   /** Focus the Name field on mount; false after a Discard. */
   autoFocusName: boolean;
 }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const { canUseBarcodes } = useBarcodePermissions();
   const barcodesInputRef = useRef<BarcodesInputRef>(null);
@@ -195,10 +197,14 @@ function KitsFormInner({
           referer={referer}
         />
 
-        <FormRow rowLabel="Name" className="border-b-0 pb-[10px]" required>
+        <FormRow
+          rowLabel={t("kits.form.name")}
+          className="border-b-0 pb-[10px]"
+          required
+        >
           <Input
             ref={nameInputRef}
-            label="Name"
+            label={t("kits.form.name")}
             hideLabel
             name={zo.fields.name()}
             disabled={disabled}
@@ -211,24 +217,19 @@ function KitsFormInner({
         </FormRow>
 
         <FormRow
-          rowLabel="Description"
-          subHeading={
-            <p>
-              Briefly describe what is included and/or what is will be used for.
-              It will be shown on the kit’s overview page.
-            </p>
-          }
+          rowLabel={t("kits.form.description")}
+          subHeading={<p>{t("kits.form.brieflyDescribeWhatIsIncluded")}</p>}
           className="border-b-0"
           required={zodFieldIsRequired(NewKitFormSchema.shape.description)}
         >
           <Input
             inputType="textarea"
             maxLength={1000}
-            label={"Description"}
+            label={t("kits.form.description")}
             name={zo.fields.description()}
             defaultValue={description || ""}
             hideLabel
-            placeholder="Write your description here..."
+            placeholder={t("kits.form.writeYourDescriptionHere")}
             disabled={disabled}
             className="w-full"
             required={zodFieldIsRequired(NewKitFormSchema.shape.description)}
@@ -236,18 +237,17 @@ function KitsFormInner({
         </FormRow>
 
         <FormRow
-          rowLabel="Category"
+          rowLabel={t("kits.form.category")}
           subHeading={
             <p>
-              Make it unique. Each kit can have 1 category. It will show on your
-              index.{" "}
+              {t("kits.form.makeItUniqueEachKit")}{" "}
               <Button
                 to="/categories/new"
                 variant="link-gray"
                 className="text-gray-600 underline"
                 target="_blank"
               >
-                Create categories
+                {t("kits.form.createCategories")}
               </Button>
             </p>
           }
@@ -259,8 +259,8 @@ function KitsFormInner({
             defaultValue={categoryId ?? undefined}
             model={{ name: "category", queryKey: "name" }}
             triggerWrapperClassName="flex flex-col !gap-0 justify-start items-start [&_.inner-label]:w-full [&_.inner-label]:text-left "
-            contentLabel="Categories"
-            label="Category"
+            contentLabel={t("kits.form.categories")}
+            label={t("kits.form.category")}
             hideLabel
             initialDataKey="categories"
             countKey="totalCategories"
@@ -270,8 +270,8 @@ function KitsFormInner({
             extraContent={({ onItemCreated, closePopover }) => (
               <InlineEntityCreationDialog
                 type="category"
-                title="Create new category"
-                buttonLabel="Create new category"
+                title={t("kits.form.createNewCategory")}
+                buttonLabel={t("kits.form.createNewCategory")}
                 onCreated={(created) => {
                   if (created?.type !== "category") return;
                   const category = created.entity;
@@ -289,18 +289,17 @@ function KitsFormInner({
         </FormRow>
 
         <FormRow
-          rowLabel="Location"
+          rowLabel={t("kits.form.location")}
           subHeading={
             <p>
-              A location is a place where an item is supposed to be located.
-              This is different than the last scanned location{" "}
+              {t("kits.form.aLocationIsAPlace")}{" "}
               <Button
                 to="/locations/new"
                 className="text-gray-600 underline"
                 target="_blank"
                 variant="link-gray"
               >
-                Create locations
+                {t("kits.form.createLocations")}
               </Button>
             </p>
           }
@@ -313,8 +312,8 @@ function KitsFormInner({
             triggerWrapperClassName="flex flex-col !gap-0 justify-start items-start [&_.inner-label]:w-full [&_.inner-label]:text-left "
             defaultValue={locationId ?? undefined}
             model={{ name: "location", queryKey: "name" }}
-            contentLabel="Locations"
-            label="Location"
+            contentLabel={t("kits.form.locations")}
+            label={t("kits.form.location")}
             hideLabel
             initialDataKey="locations"
             countKey="totalLocations"
@@ -323,8 +322,8 @@ function KitsFormInner({
             extraContent={({ onItemCreated, closePopover }) => (
               <InlineEntityCreationDialog
                 type="location"
-                title="Create new location"
-                buttonLabel="Create new location"
+                title={t("kits.form.createNewLocation")}
+                buttonLabel={t("kits.form.createNewLocation")}
                 onCreated={(created) => {
                   if (created?.type !== "location") return;
                   const location = created.entity;
@@ -352,10 +351,13 @@ function KitsFormInner({
           />
         </FormRow>
 
-        <FormRow rowLabel="Image" className="border-b-0 pt-[10px]">
+        <FormRow
+          rowLabel={t("kits.form.image")}
+          className="border-b-0 pt-[10px]"
+        >
           <ImageFileField
             name="image"
-            label="Image"
+            label={t("kits.form.image")}
             currentImage={
               // Same picture as the kits list: the saved image (its signed
               // URL refreshed when expired) or the placeholder.
@@ -369,7 +371,7 @@ function KitsFormInner({
                 className={IMAGE_FIELD_PICTURE_CLASSES}
               />
             }
-            previewAlt="Kit image"
+            previewAlt={t("kits.form.kitImage")}
             validateFileAtom={assetImageValidateFileAtom}
             hint={IMAGE_HINT_8MB}
             error={imageError}
@@ -379,9 +381,9 @@ function KitsFormInner({
 
         <When truthy={canUseBarcodes}>
           <FormRow
-            rowLabel={"Barcodes"}
+            rowLabel={t("kits.form.barcodes")}
             className="border-b-0"
-            subHeading="Add additional barcodes to this kit (Code 128, Code 39, or Data Matrix). Note: Each kit automatically gets a default Shelf QR code for tracking."
+            subHeading={t("kits.form.addAdditionalBarcodesToThis")}
           >
             <BarcodesInput
               ref={barcodesInputRef}
@@ -397,10 +399,10 @@ function KitsFormInner({
         <FormRow className="border-y-0 pb-0 pt-5" rowLabel="">
           <div className="ml-auto flex gap-2">
             <Button to={cancelTo} variant="secondary" disabled={disabled}>
-              Cancel
+              {t("kits.form.cancel")}
             </Button>
             <Button type="submit" disabled={disabled}>
-              {disabled ? "Saving..." : "Save"}
+              {disabled ? "Saving..." : t("kits.form.save")}
             </Button>
           </div>
         </FormRow>

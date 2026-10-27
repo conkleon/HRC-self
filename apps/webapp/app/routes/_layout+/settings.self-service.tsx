@@ -20,6 +20,7 @@
  * @see {@link file://./../self-service+/$token.tsx}
  */
 import { OrganizationType } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -227,6 +228,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 export const ErrorBoundary = () => <ErrorContent />;
 
 export default function SelfServiceSettings() {
+  const { t } = useTranslation();
   const { settings, tags, locations, browseUrl, browseQr } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<DataOrErrorResponse>();
@@ -243,13 +245,11 @@ export default function SelfServiceSettings() {
   return (
     <div className="flex flex-col gap-6">
       <section className="rounded-md border border-gray-200 bg-white p-6">
-        <h2 className="mb-1 text-lg font-semibold">Self-service custody</h2>
+        <h2 className="mb-1 text-lg font-semibold">
+          {t("custody.settingsSelfService.selfServiceCustody")}
+        </h2>
         <p className="mb-4 max-w-2xl text-gray-600">
-          Let volunteers without an account take an item into their custody, or
-          return it, by scanning its QR code on their own phone. They enter the
-          workspace PIN, then pick their name from your non-registered members
-          or add it. Owners, Administrators and Managers are emailed about every
-          take and return.
+          {t("custody.settingsSelfService.letVolunteersWithoutAnAccount")}
         </p>
 
         {formError ? (
@@ -264,35 +264,43 @@ export default function SelfServiceSettings() {
             <input type="hidden" name="enabled" value="on" />
           )}
           <p className="text-gray-700">
-            Status: <strong>{settings.enabled ? "On" : "Off"}</strong>
+            {t("custody.settingsSelfService.status")}{" "}
+            <strong>
+              {settings.enabled
+                ? t("custody.settingsSelfService.on")
+                : t("custody.settingsSelfService.off")}
+            </strong>
           </p>
           <Button
             type="submit"
             variant={settings.enabled ? "secondary" : "primary"}
             disabled={disabled || (!settings.enabled && !settings.hasPin)}
           >
-            {settings.enabled ? "Turn off" : "Turn on"}
+            {settings.enabled
+              ? t("custody.settingsSelfService.turnOff")
+              : t("custody.settingsSelfService.turnOn")}
           </Button>
         </Form>
         {!settings.hasPin ? (
           <p className="mt-2 text-sm text-gray-600">
-            Set a PIN below before turning self-service on.
+            {t("custody.settingsSelfService.setAPinBelowBefore")}
           </p>
         ) : null}
       </section>
 
       <section className="rounded-md border border-gray-200 bg-white p-6">
         <h2 className="mb-1 text-lg font-semibold">
-          {settings.hasPin ? "Change the PIN" : "Set the PIN"}
+          {settings.hasPin
+            ? t("custody.settingsSelfService.changeThePin")
+            : t("custody.settingsSelfService.setThePin")}
         </h2>
         <p className="mb-4 max-w-2xl text-gray-600">
-          4 to 8 digits, shared with volunteers at their briefing. Changing it
-          signs every volunteer phone out, so they need the new PIN on their
-          next scan.
+          {t("custody.settingsSelfService.text4To8DigitsShared")}
           {settings.pinUpdatedAt ? (
             <>
               {" "}
-              Last changed <DateS date={settings.pinUpdatedAt} includeTime />.
+              {t("custody.settingsSelfService.lastChanged")}{" "}
+              <DateS date={settings.pinUpdatedAt} includeTime />.
             </>
           ) : null}
         </p>
@@ -304,7 +312,7 @@ export default function SelfServiceSettings() {
         >
           <input type="hidden" name="intent" value="set-pin" />
           <Input
-            label="New PIN"
+            label={t("custody.settingsSelfService.newPin")}
             name={zo.fields.pin()}
             type="password"
             inputMode="numeric"
@@ -313,7 +321,7 @@ export default function SelfServiceSettings() {
             error={validationErrors?.pin?.message || zo.errors.pin()?.message}
           />
           <Input
-            label="Repeat the PIN"
+            label={t("custody.settingsSelfService.repeatThePin")}
             name={zo.fields.confirmPin()}
             type="password"
             inputMode="numeric"
@@ -326,7 +334,9 @@ export default function SelfServiceSettings() {
           />
           <div>
             <Button type="submit" disabled={disabled}>
-              {disabled ? "Saving..." : "Save PIN"}
+              {disabled
+                ? "Saving..."
+                : t("custody.settingsSelfService.savePin")}
             </Button>
           </div>
         </Form>
@@ -370,22 +380,22 @@ function BrowseListSection({
   browseUrl: string | null;
   browseQr: string | null;
 }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const chosenLocations = new Set(locationIds);
   return (
     <section className="rounded-md border border-gray-200 bg-white p-6">
-      <h2 className="mb-1 text-lg font-semibold">Browse list</h2>
+      <h2 className="mb-1 text-lg font-semibold">
+        {t("custody.settingsSelfService.browseList")}
+      </h2>
       <p className="mb-4 max-w-2xl text-gray-600">
-        For items whose QR label is missing or hard to reach. Volunteers open
-        the link below, enter the PIN and say who they are. They can take any
-        available item that has the chosen tag or is stored in one of the chosen
-        locations, and return items they hold themselves.
+        {t("custody.settingsSelfService.forItemsWhoseQrLabel")}
       </p>
 
       <Form method="post" className="mb-6 flex max-w-sm flex-col gap-2">
         <input type="hidden" name="intent" value="set-offer" />
         <label htmlFor="self-service-tag" className="font-medium text-gray-700">
-          Items with this tag are listed
+          {t("custody.settingsSelfService.itemsWithThisTagAre")}
         </label>
         <select
           id="self-service-tag"
@@ -394,7 +404,7 @@ function BrowseListSection({
           aria-describedby="self-service-tag-hint"
           className="rounded-md border border-gray-300 px-3 py-2"
         >
-          <option value="">No tag</option>
+          <option value="">{t("custody.settingsSelfService.noTag")}</option>
           {tags.map((tag) => (
             <option key={tag.id} value={tag.id}>
               {tag.name}
@@ -402,7 +412,7 @@ function BrowseListSection({
           ))}
         </select>
         <p id="self-service-tag-hint" className="text-sm text-gray-600">
-          Add the tag to items from the asset list, one by one or in bulk.
+          {t("custody.settingsSelfService.addTheTagToItems")}
         </p>
 
         <fieldset
@@ -410,7 +420,7 @@ function BrowseListSection({
           aria-describedby="self-service-locations-hint"
         >
           <legend className="mb-2 font-medium text-gray-700">
-            Items in these locations are listed
+            {t("custody.settingsSelfService.itemsInTheseLocationsAre")}
           </legend>
           {locations.length > 0 ? (
             <div className="max-h-64 overflow-y-auto rounded-md border border-gray-300 px-3 py-2">
@@ -434,19 +444,17 @@ function BrowseListSection({
             </div>
           ) : (
             <p className="text-sm text-gray-600">
-              This workspace has no locations yet.
+              {t("custody.settingsSelfService.thisWorkspaceHasNoLocations")}
             </p>
           )}
           <p id="self-service-locations-hint" className="text-sm text-gray-600">
-            Choosing a location includes all its sub-locations. An item is
-            listed when it has the tag or is in one of these locations. With no
-            tag and no location, the list offers nothing.
+            {t("custody.settingsSelfService.choosingALocationIncludesAll")}
           </p>
         </fieldset>
 
         <div>
           <Button type="submit" disabled={disabled}>
-            Save
+            {t("custody.settingsSelfService.save")}
           </Button>
         </div>
       </Form>
@@ -455,7 +463,7 @@ function BrowseListSection({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <img
             src={browseQr}
-            alt="QR code that opens the self-service browse list"
+            alt={t("custody.settingsSelfService.qrCodeThatOpensThe")}
             className="size-40 rounded border border-gray-200"
           />
           <div className="flex min-w-0 flex-col gap-3">
@@ -466,17 +474,17 @@ function BrowseListSection({
                 download="self-service-list-qr.png"
                 className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
               >
-                Download QR code
+                {t("custody.settingsSelfService.downloadQrCode")}
               </a>
               <Form method="post">
                 <input type="hidden" name="intent" value="rotate-link" />
                 <Button type="submit" variant="secondary" disabled={disabled}>
-                  Replace link
+                  {t("custody.settingsSelfService.replaceLink")}
                 </Button>
               </Form>
             </div>
             <p className="text-sm text-gray-600">
-              Replacing the link stops the old one and every printed copy.
+              {t("custody.settingsSelfService.replacingTheLinkStopsThe")}
             </p>
           </div>
         </div>
@@ -484,7 +492,7 @@ function BrowseListSection({
         <Form method="post">
           <input type="hidden" name="intent" value="rotate-link" />
           <Button type="submit" disabled={disabled}>
-            Create link
+            {t("custody.settingsSelfService.createLink")}
           </Button>
         </Form>
       )}

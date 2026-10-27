@@ -14,6 +14,7 @@
 import { memo, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { Currency } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type { AssetModelBucket } from "~/modules/asset-model/bucket";
 import type { AssetModelRollupRow } from "~/modules/asset-model/rollup.server";
 import { BADGE_COLORS } from "~/utils/badge-colors";
@@ -58,18 +59,27 @@ const NO_MODEL_LABEL = "No model";
  * is never added into a total.
  */
 function StatusSplit({ item }: { item: AssetModelRollupRow }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-start gap-1 text-sm">
-      <span className="font-medium text-gray-900">{item.available} in</span>
-      <span className="text-gray-500">{item.checkedOut} out</span>
-      <span className="text-gray-500">{item.inCustody} in custody</span>
+      <span className="font-medium text-gray-900">
+        {t("assets.assetModelRow.in", { available: item.available })}
+      </span>
+      <span className="text-gray-500">
+        {t("assets.assetModelRow.out", { checkedOut: item.checkedOut })}
+      </span>
+      <span className="text-gray-500">
+        {t("assets.assetModelRow.inCustody", { inCustody: item.inCustody })}
+      </span>
       {item.notBookable > 0 ? (
         <Badge
           color={BADGE_COLORS.orange.bg}
           textColor={BADGE_COLORS.orange.text}
           withDot={false}
         >
-          {item.notBookable} not bookable
+          {t("assets.assetModelRow.notBookable", {
+            notBookable: item.notBookable,
+          })}
         </Badge>
       ) : null}
     </div>
@@ -102,6 +112,7 @@ export const AssetModelRow = memo(function AssetModelRow({
   extraProps?: { locale?: string; currency?: Currency };
   bulkActions?: ReactNode;
 }) {
+  const { t } = useTranslation();
   const isNoModel = item.assetModelId === null;
   const locale = extraProps?.locale ?? "en-US";
   const currency = extraProps?.currency ?? "USD";
@@ -146,7 +157,7 @@ export const AssetModelRow = memo(function AssetModelRow({
           ) : (
             <ImageWithPreview
               thumbnailUrl={item.thumbnailImage ?? item.image ?? undefined}
-              alt={item.name ?? "Asset model"}
+              alt={item.name ?? t("assets.assetModelRow.assetModel")}
               className="size-12 shrink-0 rounded border object-cover"
             />
           )}
@@ -189,7 +200,11 @@ export const AssetModelRow = memo(function AssetModelRow({
             units, then Update asset model. */}
         <AssetModelAssetsSheet
           bucket={bucket}
-          title={isNoModel ? NO_MODEL_LABEL : item.name ?? "Asset model"}
+          title={
+            isNoModel
+              ? NO_MODEL_LABEL
+              : item.name ?? t("assets.assetModelRow.assetModel")
+          }
           matchingAssets={item.matchingAssets}
         />
       </Td>

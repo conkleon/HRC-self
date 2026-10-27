@@ -20,6 +20,8 @@ export interface UpdateUserPayload {
   weekStart?: User["weekStart"];
   /** IANA time-zone name; null → not yet detected. */
   timeZone?: User["timeZone"];
+  /** UI language from SUPPORTED_LOCALES; null follows DEFAULT_LOCALE. */
+  locale?: User["locale"];
 }
 
 export interface UpdateUserResponse {

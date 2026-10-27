@@ -20,6 +20,7 @@
  */
 
 import { PackageCheckIcon } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import {
   Tooltip,
@@ -52,6 +53,7 @@ const BADGE_STYLE = {
  * @param props.modelName - The reserved model this row answered.
  */
 export function FulfilsModelBadge({ modelName }: { modelName: string }) {
+  const { t } = useTranslation();
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -61,18 +63,20 @@ export function FulfilsModelBadge({ modelName }: { modelName: string }) {
           className="inline-flex cursor-help items-center gap-1 rounded-2xl px-2 py-[2px] text-xs font-medium"
         >
           <PackageCheckIcon aria-hidden="true" className="size-3" />
-          Fulfils {modelName}
+          {t("bookings.fulfilsModelBadge.fulfils", { modelName })}
         </TooltipTrigger>
         <TooltipContent side="bottom" align="start">
           <div className="max-w-[260px] text-left sm:max-w-[320px]">
             <h6 className="mb-1 text-xs font-semibold text-gray-700">
-              Answers a reserved unit
+              {t("bookings.fulfilsModelBadge.answersAReservedUnit")}
             </h6>
             <div className="whitespace-normal text-xs font-medium text-gray-500">
-              This booking reserved units of <strong>{modelName}</strong>{" "}
-              without naming them. This asset is one of the units that answered
-              that reservation, so it counts toward it instead of adding to the
-              booking on its own.
+              <Trans
+                t={t}
+                i18nKey="bookings.fulfilsModelBadge.thisBookingReservedUnitsOf"
+                values={{ modelName }}
+                components={[<strong key="slot0" />]}
+              />
             </div>
           </div>
         </TooltipContent>

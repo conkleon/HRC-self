@@ -6,6 +6,7 @@ import {
 } from "@shelf/labels";
 import { useAtom } from "jotai";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 import { useActionData, useLoaderData, useNavigation } from "react-router";
 import { useZorm } from "react-zorm";
 import { updateDynamicTitleAtom } from "~/atoms/dynamic-title-atom";
@@ -77,6 +78,7 @@ export function UnavailableAssetsReason({
 }: {
   assets: UnavailableAssetRow[];
 }) {
+  const { t } = useTranslation();
   const named = assets.slice(0, MAX_NAMED_UNAVAILABLE_ASSETS);
   const remaining = assets.length - named.length;
 
@@ -89,14 +91,21 @@ export function UnavailableAssetsReason({
             <li key={asset.id}>
               {asset.title}
               {asset.kitName ? (
-                <span className="text-gray-500"> in kit {asset.kitName}</span>
+                <span className="text-gray-500">
+                  {" "}
+                  {t("bookings.editBookingForm.inKit", {
+                    kitName: asset.kitName,
+                  })}
+                </span>
               ) : null}
             </li>
           ))}
         </ul>
       ) : null}
       {remaining > 0 ? (
-        <div className="mt-1 text-gray-500">and {remaining} more</div>
+        <div className="mt-1 text-gray-500">
+          {t("bookings.editBookingForm.andMore", { remaining })}
+        </div>
       ) : null}
     </>
   );
@@ -189,6 +198,7 @@ function EditBookingFormInner({
   /** Focus the Name field on mount; false after a Discard. */
   autoFocusName: boolean;
 }) {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const {
     id,
@@ -467,7 +477,7 @@ function EditBookingFormInner({
                   className="grow"
                   size="sm"
                 >
-                  Save
+                  {t("bookings.editBookingForm.save")}
                 </Button>
               </>
             ) : null}
@@ -510,7 +520,9 @@ function EditBookingFormInner({
                 className="grow whitespace-nowrap"
                 size="sm"
               >
-                {reservationIsRequest ? "Request reservation" : "Reserve"}
+                {reservationIsRequest
+                  ? t("bookings.editBookingForm.requestReservation")
+                  : t("bookings.editBookingForm.reserve")}
               </Button>
             ) : null}
 
@@ -576,7 +588,7 @@ function EditBookingFormInner({
                       className="grow"
                       size="sm"
                     >
-                      Check Out
+                      {t("bookings.editBookingForm.checkOut")}
                     </Button>
                   );
                 }
@@ -646,7 +658,7 @@ function EditBookingFormInner({
           {id ? (
             <input type="hidden" name="id" defaultValue={id} key={id} />
           ) : null}
-          <h3>Booking details</h3>
+          <h3>{t("bookings.editBookingForm.bookingDetails")}</h3>
           <div
             className={tw(
               "flex flex-col gap-3 lg:flex-row",

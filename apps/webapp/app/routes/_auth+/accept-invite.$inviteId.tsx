@@ -1,4 +1,5 @@
 import { InviteStatuses } from "@prisma/client";
+import { Trans, useTranslation } from "react-i18next";
 import type { LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -286,6 +287,7 @@ function splitIntoStableLines(message: string) {
 }
 
 export default function AcceptInvite() {
+  const { t } = useTranslation();
   const { inviter, workspace } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const disabled = useDisabled();
@@ -311,15 +313,19 @@ export default function AcceptInvite() {
               ))}
             </p>
             <Button to="/" variant={"secondary"}>
-              Back to home
+              {t("auth.acceptInviteInviteid.backToHome")}
             </Button>
           </div>
         ) : (
           <div>
-            <h2>Accept invite</h2>
+            <h2>{t("auth.acceptInviteInviteid.acceptInvite")}</h2>
             <p className="mt-2">
-              <strong>{inviter}</strong> invites you to join {getAppName()} as a
-              member of <strong>{workspace}’s</strong> workspace.
+              <Trans
+                t={t}
+                i18nKey="auth.acceptInvite.invitation"
+                values={{ inviter, appName: getAppName(), workspace }}
+                components={{ bold: <strong /> }}
+              />
             </p>
             <Form method="post" className="my-3">
               <input
@@ -329,7 +335,9 @@ export default function AcceptInvite() {
               />
 
               <Button type="submit" disabled={disabled || error}>
-                {disabled ? "Validating token..." : "Accept invite"}
+                {disabled
+                  ? t("auth.acceptInviteInviteid.validatingToken")
+                  : t("auth.acceptInviteInviteid.acceptInvite")}
               </Button>
             </Form>
           </div>
@@ -337,8 +345,7 @@ export default function AcceptInvite() {
       </div>
       <div className=" mx-4 mt-20 flex flex-col items-center text-center text-gray-600 md:mx-[-200px]">
         <p>
-          If you have any questions or need assistance, please don't hesitate to
-          contact our support team at{" "}
+          {t("auth.acceptInviteInviteid.ifYouHaveAnyQuestions")}{" "}
           <Button variant={"link-gray"} to={`mailto:${SUPPORT_EMAIL}`}>
             {SUPPORT_EMAIL}
           </Button>

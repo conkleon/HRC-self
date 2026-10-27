@@ -10,6 +10,7 @@
  * @see {@link file://./../../../routes/api+/assets.$assetId.audit-history.ts}
  */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import type { AuditHistoryListItem } from "~/components/audit/asset-audit-history-list";
 import { AssetAuditHistoryList } from "~/components/audit/asset-audit-history-list";
@@ -44,21 +45,30 @@ function HistoryBody({
   data: AuditHistoryData | undefined;
   failed: boolean;
 }) {
+  const { t } = useTranslation();
   if (failed || (data && (data.error || !data.recent || !data.upcoming))) {
-    return <p className="text-sm text-gray-600">Could not load audits.</p>;
+    return (
+      <p className="text-sm text-gray-600">
+        {t("assets.lastAuditDateCell.couldNotLoadAudits")}
+      </p>
+    );
   }
 
   if (!data || !data.recent || !data.upcoming) {
     return (
       <p className="text-sm text-gray-600" role="status">
-        Loading audits...
+        {t("assets.lastAuditDateCell.loadingAudits")}
       </p>
     );
   }
 
   const { recent, upcoming } = data;
   if (recent.length === 0 && upcoming.length === 0) {
-    return <p className="text-sm text-gray-600">No audits for this asset.</p>;
+    return (
+      <p className="text-sm text-gray-600">
+        {t("assets.lastAuditDateCell.noAuditsForThisAsset")}
+      </p>
+    );
   }
 
   return (
@@ -86,6 +96,7 @@ export function LastAuditDateCell({
   lastAuditDate: string | null | undefined;
   access: LastAuditDateAccess;
 }) {
+  const { t } = useTranslation();
   /** Load once per mount: set when the card first opens, never reset. */
   const [requested, setRequested] = useState(false);
   const { data, error } = useApiQuery<AuditHistoryData>({
@@ -102,7 +113,7 @@ export function LastAuditDateCell({
           to="/audits"
           className="text-sm font-medium text-primary-700 hover:underline"
         >
-          Unlock audits
+          {t("assets.lastAuditDateCell.unlockAudits")}
         </Link>
       </Td>
     );
@@ -124,7 +135,11 @@ export function LastAuditDateCell({
               !lastAuditDate && "text-gray-500"
             )}
           >
-            {lastAuditDate ? <DateS date={lastAuditDate} /> : "Never audited"}
+            {lastAuditDate ? (
+              <DateS date={lastAuditDate} />
+            ) : (
+              t("assets.lastAuditDateCell.neverAudited")
+            )}
           </button>
         </HoverCardTrigger>
         <HoverCardContent className="w-80 p-4" align="start">

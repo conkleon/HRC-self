@@ -77,6 +77,10 @@ model User {
   weekStart  WeekStartPreference?  // null → not yet detected
   timeZone   String?               // IANA name; null → not yet detected
 
+  // UI language as a BCP-47 code from SUPPORTED_LOCALES (~/i18n/config).
+  // Null follows the instance's DEFAULT_LOCALE.
+  locale String?
+
   // Relationships
   assets             Asset[]
   categories         Category[]

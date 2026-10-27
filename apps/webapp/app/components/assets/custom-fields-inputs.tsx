@@ -9,6 +9,7 @@ import {
   PopoverContent,
 } from "@radix-ui/react-popover";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData, useNavigation } from "react-router";
 import { useDateFormatter } from "~/hooks/use-date-formatter";
 import type { ShelfAssetCustomFieldValueType } from "~/modules/asset/types";
@@ -32,6 +33,7 @@ export default function AssetCustomFields({
   currency: Currency;
   fieldErrors: Record<string, string | undefined>;
 }) {
+  const { t } = useTranslation();
   const { customFields, asset } = useLoaderData<typeof loader>();
 
   const customFieldsValues =
@@ -206,21 +208,23 @@ export default function AssetCustomFields({
   return (
     <div className="border-b pb-6">
       <div className=" border-t py-5">
-        <h2 className="mb-1 text-[18px] font-semibold">Custom Fields</h2>
+        <h2 className="mb-1 text-[18px] font-semibold">
+          {t("assets.customFieldsInputs.customFields")}
+        </h2>
         <Button
           to="/settings/custom-fields"
           className="font-medium text-primary-600"
           target="_blank"
           variant="link"
         >
-          Manage custom fields
+          {t("assets.customFieldsInputs.manageCustomFields")}
         </Button>
       </div>
       {customFields.length > 0 ? (
         <>
           {requiredFields.length > 0 && (
             <div className="border-t pt-4">
-              <h5>Required Fields</h5>
+              <h5>{t("assets.customFieldsInputs.requiredFields")}</h5>
               {requiredFields.map((field, index) => (
                 <FormRow
                   key={field.id + index}
@@ -251,7 +255,7 @@ export default function AssetCustomFields({
           )}
           {optionalFields.length > 0 && (
             <div className="border-t pt-4">
-              <h5>Optional Fields</h5>
+              <h5>{t("assets.customFieldsInputs.optionalFields")}</h5>
               {optionalFields.map((field, index) => (
                 <FormRow
                   key={field.id + index}
@@ -288,9 +292,11 @@ export default function AssetCustomFields({
               <div className="mb-4 inline-flex items-center justify-center rounded-full border-8 border-solid border-gray-50 bg-gray-100 p-2 text-gray-600">
                 <SearchIcon />
               </div>
-              <h4 className="mb-6 text-base">No active custom fields</h4>
+              <h4 className="mb-6 text-base">
+                {t("assets.customFieldsInputs.noActiveCustomFields")}
+              </h4>
               <Button to="/settings/custom-fields/new" variant="primary">
-                Create custom fields
+                {t("assets.customFieldsInputs.createCustomFields")}
               </Button>
             </div>
           </div>
@@ -319,6 +325,7 @@ function OptionSelect({
   getCustomFieldVal: (id: string) => string;
   error?: string;
 }) {
+  const { t } = useTranslation();
   // State for popover, search, selection
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [value, setValue] = useState(getCustomFieldVal(field.id) || "");
@@ -425,7 +432,9 @@ function OptionSelect({
               <Search className="ml-4 size-4 text-gray-500" />
               <input
                 ref={searchInputRef}
-                placeholder={`Search ${field.name}...`}
+                placeholder={t("assets.customFieldsInputs.search", {
+                  name: field.name,
+                })}
                 className="border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -435,7 +444,9 @@ function OptionSelect({
 
             {/* Options list */}
             {filteredOptions.length === 0 ? (
-              <div className="max-w-[400px] p-4">No options found</div>
+              <div className="max-w-[400px] p-4">
+                {t("assets.customFieldsInputs.noOptionsFound")}
+              </div>
             ) : (
               filteredOptions.map((option, index) => {
                 const isSelected = value === option;

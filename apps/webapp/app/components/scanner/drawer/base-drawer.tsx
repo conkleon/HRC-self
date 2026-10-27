@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { m } from "framer-motion";
 import { ChevronUpIcon } from "lucide-react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { useRouteLoaderData } from "react-router";
 import { Button } from "~/components/shared/button";
 import { useViewportHeight } from "~/hooks/use-viewport-height";
@@ -59,6 +60,7 @@ export default function BaseDrawer({
   footer,
   collapsedHeight = 170,
 }: BaseDrawerProps) {
+  const { t } = useTranslation();
   // The scanner's global mode owns whether the drawer is open. Hardware-
   // scanner mode has no viewfinder to watch, so the scanned list is what the
   // operator needs on screen; camera mode keeps the drawer low so the
@@ -275,7 +277,7 @@ export default function BaseDrawer({
                   onClick={onClear}
                   className="text-[12px] font-normal text-gray-500"
                 >
-                  Clear list
+                  {t("scanner.baseDrawer.clearList")}
                 </Button>
               )}
             </div>

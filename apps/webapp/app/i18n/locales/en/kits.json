@@ -1,0 +1,250 @@
+{
+  "kitsKitidAssetsAddToExistingBooking": {
+    "addToExistingBooking": "Add to Existing Booking",
+    "youCanAddAKit": "You can add a kit to Draft, Reserved, Ongoing or Overdue bookings. Kits added to an ongoing booking stay available until you check them out.",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "existingBookings": "Existing Bookings",
+    "selectABooking": "Select a Booking",
+    "text0Draft01Reserved": "<0>Draft</0>, <1>Reserved</1>, <2>Ongoing</2> and <3>Overdue</3> bookings are visible"
+  },
+  "kitsKitidAssetsAssignCustody": {
+    "custodyOfKit": "custody of kit",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "teamMembers": "Team members",
+    "selectATeamMember": "Select a team member",
+    "take": "Take",
+    "assign": "Assign",
+    "kitIsPartOfAn": "Kit is part of an <0>upcoming booking</0>. You will not be able to check-out your booking if this kit has custody.",
+    "aboutToAssignSelf": "This kit is currently available. You're about to assign custody to yourself. All the assets in this kit will also be assigned the same custody.",
+    "aboutToAssignMember": "This kit is currently available. You're about to assign custody to one of your team members. All the assets in this kit will also be assigned the same custody."
+  },
+  "kitsKitidAssetsManageAssets": {
+    "categories": "Categories",
+    "tags": "Tags",
+    "locations": "Locations",
+    "kit": "Kit",
+    "category": "Category",
+    "location": "Location",
+    "selected": "selected",
+    "close": "Close",
+    "confirm": "Confirm",
+    "addAssetsToKit": "Add Assets to kit?",
+    "quantityChangeNotice": "Quantity change notice:",
+    "addingAssetsToThisKit": "Adding assets to this kit will automatically update their location to",
+    "locationUpdateNotice": "Location Update Notice:",
+    "addingAssetsToThisKit2": "Adding assets to this kit will remove their current location since this kit has no location assigned.",
+    "areYouSureYouWant": "Are you sure you want to continue?",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "available": "· {{maxAllowedForThisKit}} available",
+    "alsoIn": "Also in:",
+    "inCustody": "In custody",
+    "assetIsInCustody": "Asset is in custody",
+    "checkedOut": "Checked out",
+    "assetIsCheckedOut": "Asset is checked out",
+    "partOfKit": "Part of kit",
+    "assetIsAlreadyPartOf": "Asset is already part of this kit",
+    "assetIsCurrentlyInChecked": "Asset is currently in checked out via a booking and is already part of this kit.",
+    "qty": "Qty:",
+    "was": "was {{initialInThisKit}}",
+    "filterByKit": "Filter by kit",
+    "filterByCategory": "Filter by category",
+    "filterByTags": "Filter by tags",
+    "filterByLocation": "Filter by Location",
+    "imageOf": "Image of {{title}}",
+    "quantityFor": "Quantity for {{title}}",
+    "units": "units",
+    "assetIsCurrentlyInCustody": "Asset is currently in custody of a team member. <0></0> Make sure the asset has an Available status in order to add it to this kit.",
+    "assetIsCurrentlyInChecked2": "Asset is currently in checked out via a booking. <0></0> Make sure the asset has an Available status in order to add it to this kit.",
+    "kitInCustodyInherit": "This kit is currently in custody. Any assets you add will automatically inherit the kit's status.",
+    "kitCheckedOutInherit": "This kit is currently checked out. Any assets you add will automatically inherit the kit's status.",
+    "qtyChangedInKit_one": "You changed the quantity for 1 asset already in this kit. The custodian's allocation will be adjusted by the same amount when you confirm.",
+    "qtyChangedInKit_other": "You changed the quantity for {{count}} assets already in this kit. The custodian's allocation will be adjusted by the same amount when you confirm."
+  },
+  "kitsKitidAssetsReleaseCustody": {
+    "releaseCustodyOfKit": "Release custody of kit",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "confirmOwn": "Are you sure you want to release your custody over <bold>{{kit}}</bold>?",
+    "confirmOther": "Are you sure you want to release <bold>{{custodian}}’s</bold> custody over <bold>{{kit}}</bold>?"
+  },
+  "kitsKitidAssets": {
+    "scan": "Scan",
+    "addAssets": "Add assets",
+    "category": "Category",
+    "location": "Location",
+    "tags": "Tags",
+    "inKit": "· {{inKit}} {{unit}} in kit",
+    "imageOf": "Image of {{title}}"
+  },
+  "kitsKitidAssetsUpdateLocation": {
+    "updateLocation": "Update location",
+    "adjustTheLocationOf": "Adjust the location of",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "alsoUpdatesAssets_one": "<bold>Note:</bold> This will also update the location of all <em>{{count}} asset</em> within this kit.",
+    "alsoUpdatesAssets_other": "<bold>Note:</bold> This will also update the location of all <em>{{count}} assets</em> within this kit."
+  },
+  "kitsKitidOverview": {
+    "shelfQrId": "Shelf QR ID",
+    "created": "Created",
+    "description": "Description",
+    "category": "Category",
+    "location": "Location",
+    "totalValue": "Total value",
+    "aSumOfAllAssets": "A sum of all assets' values in this kit. If no assets are present, this will be zero.",
+    "barcodes": "Barcodes ({{barcodesCount}})",
+    "barcodesSupport": "Barcodes support",
+    "wantToKnowMoreAbout": "Want to know more about barcodes? Check out our knowledge base article on",
+    "barcodeSupport": "barcode support"
+  },
+  "kitsIndex": {
+    "newKit": "New kit",
+    "custodian": "Custodian",
+    "category": "Category",
+    "location": "Location",
+    "description": "Description",
+    "assets": "Assets",
+    "assetCustody": "Asset custody",
+    "actions": "Actions",
+    "newKit2": "new kit",
+    "filterByCustodian": "Filter by custodian",
+    "searchTeamMembers": "Search team members",
+    "thisColumnShowsIfA": "This column shows if a user has custody of the asset either via direct assignment or via a booking. If you see <0>private</0> that means you don't have the permissions to see who has custody of the asset."
+  },
+  "kitsNew": {
+    "untitledKit": "Untitled kit"
+  },
+  "bulkStartAuditDialog": {
+    "auditingAssetsIn": "Auditing assets in",
+    "viewList": "View list",
+    "selectedKits": "Selected kits ({{count}})",
+    "matching": "matching",
+    "startAnAudit": "Start an audit",
+    "setUpAnAuditFor": "Set up an audit for the assets in the kits you selected.",
+    "untitledKit": "Untitled kit",
+    "allKits_one": "all {{count}} kit",
+    "allKits_other": "all {{count}} kits",
+    "kitCount_one": "{{count}} kit",
+    "kitCount_other": "{{count}} kits",
+    "assetCount_one": "{{count}} asset",
+    "assetCount_other": "{{count}} assets",
+    "includesEveryAsset_one": "The audit will include every asset currently in the selected kit.",
+    "includesEveryAsset_other": "The audit will include every asset currently in the selected kits."
+  },
+  "kitQuickActions": {
+    "editKitInformation": "Edit kit information",
+    "showKitCodes": "Show kit codes",
+    "deleteKit": "Delete kit"
+  },
+  "bulkLocationUpdateDialog": {
+    "changingKitLocationsWillAlso": "Changing kit locations will also automatically update the location of all assets within those kits.",
+    "locationUpdateNotice": "Location Update Notice:",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "bookingActionsDropdown": {
+    "book": "Book"
+  },
+  "kitImage": {
+    "text1ImageS": "1 image(s)",
+    "editImageS": "Edit image(s)",
+    "close": "Close"
+  },
+  "bulkActionsDropdown": {
+    "actions": "Actions",
+    "close": "Close",
+    "createAudit": "Create audit",
+    "releaseCustody": "Release custody",
+    "delete": "Delete",
+    "takeCustody": "Take custody",
+    "assignCustody": "Assign custody"
+  },
+  "kitSelector": {
+    "loadingKits": "Loading kits...",
+    "searchKits": "Search kits...",
+    "noKitsFound": "No kits found",
+    "noKitsAvailable": "No kits available"
+  },
+  "assetRowActionsDropdown": {
+    "actionsTrigger": "Actions Trigger"
+  },
+  "bulkAssignCustodyDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "teamMembers": "Team members",
+    "selectATeamMember": "Select a team member"
+  },
+  "removeAssetFromKit": {
+    "remove": "Remove",
+    "removeFromKit": "Remove \"{{title}}\" from kit",
+    "areYouSureYouWant": "Are you sure you want to remove this asset from the kit? Asset will lose any status that is inherited by the kit.",
+    "cancel": "Cancel"
+  },
+  "actionsDropdown": {
+    "actions": "Actions",
+    "releaseCustody": "Release custody",
+    "custody": "custody",
+    "createAudit": "Create audit",
+    "updateLocation": "Update location",
+    "relinkQrCode": "Relink QR Code",
+    "edit": "Edit",
+    "someActionsAreDisabledDue": "Some actions are disabled due to asset(s) not being Available.",
+    "actionsTrigger": "Actions Trigger",
+    "releaseCustody2": "Release Custody",
+    "assignTakeCustody": "Assign/Take Custody",
+    "take": "Take",
+    "assign": "Assign"
+  },
+  "deleteKit": {
+    "delete": "Delete",
+    "delete2": "Delete {{name}}",
+    "thisPermanentlyDeletesTheKit": "This permanently deletes the kit. Its assets stay in your workspace and keep their location, but leave the draft and reserved bookings the kit was on. Custody of the kit is released and its QR code is unlinked. This cannot be undone.",
+    "cancel": "Cancel"
+  },
+  "form": {
+    "brieflyDescribeWhatIsIncluded": "Briefly describe what is included and/or what is will be used for. It will be shown on the kit’s overview page.",
+    "makeItUniqueEachKit": "Make it unique. Each kit can have 1 category. It will show on your index.",
+    "createCategories": "Create categories",
+    "aLocationIsAPlace": "A location is a place where an item is supposed to be located. This is different than the last scanned location",
+    "createLocations": "Create locations",
+    "cancel": "Cancel",
+    "name": "Name",
+    "description": "Description",
+    "writeYourDescriptionHere": "Write your description here...",
+    "category": "Category",
+    "categories": "Categories",
+    "createNewCategory": "Create new category",
+    "location": "Location",
+    "locations": "Locations",
+    "createNewLocation": "Create new location",
+    "image": "Image",
+    "kitImage": "Kit image",
+    "barcodes": "Barcodes",
+    "addAdditionalBarcodesToThis": "Add additional barcodes to this kit (Code 128, Code 39, or Data Matrix). Note: Each kit automatically gets a default Shelf QR code for tracking.",
+    "save": "Save"
+  },
+  "bulkReleaseCustodyDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "releaseCustodyOverKits": "Release custody over kits",
+    "areYouSureYouWant": "Are you sure you want to release custody of all selected kits?"
+  },
+  "bookingRemovalNotice": {
+    "reservedBookingNotice": "Reserved booking notice:",
+    "inProgressBookingNotice": "In-progress booking notice:",
+    "reservedOneAsset_one": "Removing this asset from the kit also removes it from {{count}} reserved booking: {{names}}. Nothing has been checked out yet, so that booking follows the kit's contents.",
+    "reservedOneAsset_other": "Removing this asset from the kit also removes it from {{count}} reserved bookings: {{names}}. Nothing has been checked out yet, so those bookings follow the kit's contents.",
+    "reservedManyAssets_one": "Removing these {{assetCount}} assets from the kit also removes them from {{count}} reserved booking: {{names}}. Nothing has been checked out yet, so that booking follows the kit's contents.",
+    "reservedManyAssets_other": "Removing these {{assetCount}} assets from the kit also removes them from {{count}} reserved bookings: {{names}}. Nothing has been checked out yet, so those bookings follow the kit's contents.",
+    "inProgressOneAsset_one": "This asset is on {{count}} booking already in progress: {{names}}. It stays on that booking, marked as removed from the kit, so the record of what was booked is preserved.",
+    "inProgressOneAsset_other": "This asset is on {{count}} bookings already in progress: {{names}}. It stays on those bookings, marked as removed from the kit, so the record of what was booked is preserved.",
+    "inProgressManyAssets_one": "These {{assetCount}} assets are on {{count}} booking already in progress: {{names}}. They stay on that booking, marked as removed from the kit, so the record of what was booked is preserved.",
+    "inProgressManyAssets_other": "These {{assetCount}} assets are on {{count}} bookings already in progress: {{names}}. They stay on those bookings, marked as removed from the kit, so the record of what was booked is preserved."
+  },
+  "kitStatusBadge": {
+    "unavailableTitle": "This kit is not available for bookings because some of its assets are marked as unavailable"
+  }
+}

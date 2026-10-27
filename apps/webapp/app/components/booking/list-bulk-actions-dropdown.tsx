@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
 import { ChevronRight, PackageCheck, PackageMinus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { selectedBulkItemsAtom } from "~/atoms/list";
@@ -32,13 +33,15 @@ import {
 import { MobileDropdownStyles } from "../shared/mobile-dropdown-styles";
 
 export default function ListBulkActionsDropdown() {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button variant="secondary" to="#">
         <span className="flex items-center gap-2">
-          Actions <ChevronRight className="chev rotate-90" />
+          {t("bookings.listBulkActionsDropdown.actions")}{" "}
+          <ChevronRight className="chev rotate-90" />
         </span>
       </Button>
     );
@@ -52,6 +55,7 @@ export default function ListBulkActionsDropdown() {
 }
 
 function ConditionalDropdown() {
+  const { t } = useTranslation();
   const selectedItems = useAtomValue(selectedBulkItemsAtom);
   const {
     booking,
@@ -214,7 +218,9 @@ function ConditionalDropdown() {
           disabled={actionsButtonDisabled}
         >
           <Button type="button" variant="secondary">
-            <span className="flex items-center gap-2">Actions</span>
+            <span className="flex items-center gap-2">
+              {t("bookings.listBulkActionsDropdown.actions")}
+            </span>
           </Button>
         </DropdownMenuTrigger>
 
@@ -226,7 +232,9 @@ function ConditionalDropdown() {
           disabled={actionsButtonDisabled}
           type="button"
         >
-          <span className="flex items-center gap-2">Actions</span>
+          <span className="flex items-center gap-2">
+            {t("bookings.listBulkActionsDropdown.actions")}
+          </span>
         </Button>
 
         <MobileDropdownStyles open={open} />
@@ -259,7 +267,11 @@ function ConditionalDropdown() {
                   disabled={partialCheckoutDisabled}
                 >
                   <PackageMinus className="mr-2 inline size-5" />
-                  <span>Check out selected items</span>
+                  <span>
+                    {t(
+                      "bookings.listBulkActionsDropdown.checkOutSelectedItems"
+                    )}
+                  </span>
                 </Button>
               </DropdownMenuItem>
             )}
@@ -283,7 +295,9 @@ function ConditionalDropdown() {
                   disabled={partialCheckinDisabled}
                 >
                   <PackageCheck className="mr-2 inline size-5" />
-                  <span>Check in selected items</span>
+                  <span>
+                    {t("bookings.listBulkActionsDropdown.checkInSelectedItems")}
+                  </span>
                 </Button>
               </DropdownMenuItem>
             )}
@@ -296,7 +310,7 @@ function ConditionalDropdown() {
               >
                 <BulkUpdateDialogTrigger
                   type="trash"
-                  label="Remove assets/kits"
+                  label={t("bookings.listBulkActionsDropdown.removeAssetsKits")}
                   onClick={closeMenu}
                   disabled={removeDisabled}
                 />

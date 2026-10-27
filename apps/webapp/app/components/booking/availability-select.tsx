@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "~/hooks/search-params";
 
 import {
@@ -10,6 +11,7 @@ import {
 } from "../forms/select";
 
 export function AvailabilitySelect({ label = "assets" }: { label?: string }) {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const hideUnavailable = searchParams.get("hideUnavailable");
 
@@ -38,9 +40,11 @@ export function AvailabilitySelect({ label = "assets" }: { label?: string }) {
     >
       <SelectTrigger
         className="text-left text-base text-gray-500 md:mt-0 md:max-w-fit"
-        aria-label="Select availability"
+        aria-label={t("bookings.availabilitySelect.selectAvailability")}
       >
-        <SelectValue placeholder="Select availability" />
+        <SelectValue
+          placeholder={t("bookings.availabilitySelect.selectAvailability")}
+        />
       </SelectTrigger>
 
       <SelectContent
@@ -56,7 +60,7 @@ export function AvailabilitySelect({ label = "assets" }: { label?: string }) {
             className="rounded-none border-b border-gray-200 px-6 py-4 pr-[5px]"
           >
             <span className="mr-4 block lowercase text-gray-700 first-letter:uppercase">
-              All {label}
+              {t("bookings.availabilitySelect.all", { label })}
             </span>
           </SelectItem>
           <SelectItem
@@ -65,7 +69,7 @@ export function AvailabilitySelect({ label = "assets" }: { label?: string }) {
             className="rounded-none border-b border-gray-200 px-6 py-4 pr-[5px]"
           >
             <span className="mr-4 block lowercase text-gray-700 first-letter:uppercase">
-              Hide unavailable
+              {t("bookings.availabilitySelect.hideUnavailable")}
             </span>
           </SelectItem>
         </div>

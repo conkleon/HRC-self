@@ -2,6 +2,7 @@ import * as React from "react";
 import type { ComponentPropsWithoutRef, ElementRef } from "react";
 import { OTPInput, OTPInputContext } from "input-otp";
 import { Minus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { tw } from "~/utils/tw";
 import { InnerLabel } from "./inner-label";
 
@@ -74,10 +75,11 @@ function ShelfOTP({
   error?: string;
   onComplete?: (otp: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <label className={tw("relative flex flex-col")} htmlFor={"otp"}>
-        <InnerLabel required>Code</InnerLabel>
+        <InnerLabel required>{t("auth.otpInput.code")}</InnerLabel>
         <InputOTP maxLength={6} name="otp" required onComplete={onComplete}>
           <InputOTPGroup className="w-full">
             <InputOTPSlot index={0} />

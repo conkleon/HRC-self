@@ -1,6 +1,7 @@
 import { Close } from "@radix-ui/react-dialog";
 import type { LucideIcon } from "lucide-react";
 import { ArrowLeft, ArrowRight, ClockIcon, InfoIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { tw } from "~/utils/tw";
 import { XIcon } from "../icons/library";
 import { Button } from "../shared/button";
@@ -56,13 +57,14 @@ const ITEMS: Array<ProcessItem> = [
 export default function BookingProcessSidebar({
   className,
 }: BookingProcessSidebarProps) {
+  const { t } = useTranslation();
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button type="button" variant="block-link-gray" className={"mt-0"}>
           <div className="flex items-center gap-2">
             <InfoIcon className="size-4" />
-            How bookings work
+            {t("bookings.bookingProcessSidebar.howBookingsWork")}
           </div>
         </Button>
       </SheetTrigger>
@@ -74,20 +76,20 @@ export default function BookingProcessSidebar({
         <div className="flex items-center justify-between bg-blue-500 p-4 text-white">
           <div className="flex items-center gap-2 text-lg font-bold">
             <InfoIcon className="size-4" />
-            Booking Process
+            {t("bookings.bookingProcessSidebar.bookingProcess")}
           </div>
 
           <Close className="opacity-70 transition-opacity hover:opacity-100">
             <XIcon className="size-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">
+              {t("bookings.bookingProcessSidebar.close")}
+            </span>
           </Close>
         </div>
 
         <div className="p-4">
           <p className="mb-8 border-b-2 border-blue-500 bg-blue-50 p-2 text-blue-500">
-            Base users reserve bookings that require approval and can be
-            cancelled at any time if there are conflicts with other bookings.
-            Administrators and managers handle equipment check-out and check-in.
+            {t("bookings.bookingProcessSidebar.baseUsersReserveBookingsThat")}
           </p>
 
           <div className="mb-8 flex flex-col gap-4">
@@ -114,20 +116,19 @@ export default function BookingProcessSidebar({
           </div>
 
           <div className="rounded-md bg-gray-50 p-4">
-            <h3 className="mb-1">Important Notes</h3>
+            <h3 className="mb-1">
+              {t("bookings.bookingProcessSidebar.importantNotes")}
+            </h3>
 
             <ul className="list-inside list-disc">
               <li>
-                Equipment must be returned in the same condition it was checked
-                out.
+                {t("bookings.bookingProcessSidebar.equipmentMustBeReturnedIn")}
               </li>
+              <li>{t("bookings.bookingProcessSidebar.ifYouNeedToExtend")}</li>
               <li>
-                If you need to extend your booking, contact an administrator or
-                manager before your booking end date.
-              </li>
-              <li>
-                Administrators and managers have final say on booking approvals
-                based on equipment availability and priorities.
+                {t(
+                  "bookings.bookingProcessSidebar.administratorsAndManagersHaveFinal"
+                )}
               </li>
             </ul>
           </div>

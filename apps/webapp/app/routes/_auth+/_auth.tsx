@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link, useMatches, Outlet } from "react-router";
 import { ErrorContent } from "~/components/errors";
 import { ShelfSymbolLogo } from "~/components/marketing/logos";
@@ -11,6 +12,7 @@ export const loader = () => null;
 export const meta = () => [{ title: appendToMetaTitle("Authentication") }];
 
 export default function App() {
+  const { t } = useTranslation();
   const matches = useMatches();
   /** Find the title and subHeading from current route */
   const data = matches[matches.length - 1].data as {
@@ -69,7 +71,7 @@ export default function App() {
             <img
               className="absolute inset-0 size-full max-w-none object-cover"
               src="/static/images/auth-cover.webp"
-              alt="John Singer Sargent - A Corner of the Library in Venice, 1904/1907 "
+              alt={t("auth.auth.johnSingerSargentACorner")}
             />
           </>
         )}

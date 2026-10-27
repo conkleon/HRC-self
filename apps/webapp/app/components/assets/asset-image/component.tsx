@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useState, useCallback, useRef } from "react";
 
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogPortal } from "~/components/layout/dialog";
 import { Button } from "~/components/shared/button";
 import { Spinner } from "~/components/shared/spinner";
@@ -145,6 +146,7 @@ export const AssetImage = ({
   alt,
   ...rest
 }: AssetImageProps) => {
+  const { t } = useTranslation();
   const [state, dispatch] = useReducer(
     assetImageReducer,
     INITIAL_ASSET_IMAGE_STATE
@@ -523,7 +525,7 @@ export const AssetImage = ({
               <div>
                 <div className="text-lg font-semibold text-gray-900">{alt}</div>
                 <div className="text-sm font-normal text-gray-600">
-                  1 image(s)
+                  {t("assets.component.text1ImageS")}
                 </div>
               </div>
             }
@@ -539,14 +541,14 @@ export const AssetImage = ({
               </div>
               <div className="flex w-full justify-center gap-3 px-6 py-3 md:justify-end">
                 <Button to={`/assets/${assetId}/edit`} variant="secondary">
-                  Edit image(s)
+                  {t("assets.component.editImageS")}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={handleCloseDialog}
                 >
-                  Close
+                  {t("assets.component.close")}
                 </Button>
               </div>
             </div>

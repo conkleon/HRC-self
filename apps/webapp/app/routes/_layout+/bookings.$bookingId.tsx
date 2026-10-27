@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import {
   redirect,
@@ -185,6 +186,7 @@ const AddToCalendar = ({
   /** Only the booking status is needed to decide if the action is allowed. */
   booking: { status: BookingStatus };
 }) => {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const isArchived = booking.status === BookingStatus.ARCHIVED;
   return (
@@ -201,16 +203,16 @@ const AddToCalendar = ({
               icon="calendar"
               className={"whitespace-nowrap"}
             >
-              Add to calendar
+              {t("bookings.bookingsBookingid.addToCalendar")}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">
             <p className="text-xs">
               {isArchived
-                ? "Archived bookings can't be added to a calendar"
+                ? t("bookings.bookingsBookingid.archivedBookingsCantBeAdded")
                 : disabled
-                ? "Not possible to add to calendar due to booking status"
-                : "Download this booking as a calendar event"}
+                ? t("bookings.bookingsBookingid.notPossibleToAddTo")
+                : t("bookings.bookingsBookingid.downloadThisBookingAsA")}
             </p>
           </TooltipContent>
         </Tooltip>

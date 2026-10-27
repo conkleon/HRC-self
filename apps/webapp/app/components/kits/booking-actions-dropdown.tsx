@@ -1,4 +1,5 @@
 import { kitWithoutActiveAssetsReason } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import type { BookLink } from "~/components/shared/generic-add-to-bookings-actions-dropdown";
 import { GenericBookActionsDropdown } from "~/components/shared/generic-add-to-bookings-actions-dropdown";
@@ -7,6 +8,7 @@ import type { loader } from "~/routes/_layout+/kits.$kitId";
 import { isPersonalOrg } from "~/utils/organization";
 
 export default function BookingActionsDropdown() {
+  const { t } = useTranslation();
   const { kit, archivedMemberCount } = useLoaderData<typeof loader>();
   const organization = useCurrentOrganization();
 
@@ -60,7 +62,7 @@ export default function BookingActionsDropdown() {
       <GenericBookActionsDropdown
         links={links}
         key={"kit"}
-        label={"Book"}
+        label={t("kits.bookingActionsDropdown.book")}
         disabledTrigger={disabledTrigger}
       />
     </div>

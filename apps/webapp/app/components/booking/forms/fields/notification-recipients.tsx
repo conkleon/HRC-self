@@ -17,6 +17,7 @@
  */
 import { useCallback, useMemo, useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import DynamicDropdown from "~/components/dynamic-dropdown/dynamic-dropdown";
 import FormRow from "~/components/forms/form-row";
 import { useBookingSettings } from "~/hooks/use-booking-settings";
@@ -66,6 +67,7 @@ export function NotificationRecipientsField({
   creatorName,
   adminCount,
 }: NotificationRecipientsFieldProps) {
+  const { t } = useTranslation();
   const canManageRecipients =
     useRoleAccess().policy.notifications.manageBookingRecipients;
   const bookingSettings = useBookingSettings();
@@ -184,7 +186,7 @@ export function NotificationRecipientsField({
 
   return (
     <FormRow
-      rowLabel="Notifications"
+      rowLabel={t("bookings.notificationRecipients.notifications")}
       className="mobile-styling-only border-b-0 p-0"
     >
       <div className="w-full">
@@ -233,11 +235,13 @@ export function NotificationRecipientsField({
           defaultValues={selectedIds}
           onSelectionChange={handleSelectionChange}
           renderItem={renderItem}
-          label="Notification recipients"
-          placeholder="Search team members..."
+          label={t("bookings.notificationRecipients.notificationRecipients")}
+          placeholder={t("bookings.notificationRecipients.searchTeamMembers")}
         />
         <p className="mt-1.5 text-[13px] text-gray-500">
-          Only {PICKABLE_RECIPIENT_AUDIENCE} can be added.
+          {t("bookings.notificationRecipients.onlyCanBeAdded", {
+            PICKABLE_RECIPIENT_AUDIENCE,
+          })}
         </p>
 
         {/* Hidden input for form submission — comma-separated team member IDs */}
@@ -248,7 +252,7 @@ export function NotificationRecipientsField({
         />
 
         <p className="mt-2 text-[14px] text-gray-600">
-          These users will receive all email notifications for this booking.
+          {t("bookings.notificationRecipients.theseUsersWillReceiveAll")}
         </p>
         <NotificationPreview
           recipients={previewRecipients}

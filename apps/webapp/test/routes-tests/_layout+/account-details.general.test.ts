@@ -125,6 +125,44 @@ describe("account-details.general action — updateFormatPrefs", () => {
   });
 });
 
+describe("account-details.general action - updateFormatPrefs language", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  /** POSTs the language & region form with the given language. */
+  async function saveWithLocale(locale: string) {
+    const body = new URLSearchParams({
+      intent: "updateFormatPrefs",
+      type: "updateFormatPrefs",
+      locale,
+      dateFormat: "DD_MM_YYYY",
+      timeFormat: "H24",
+      weekStart: "MONDAY",
+      timeZone: "Europe/Athens",
+    });
+    const request = new Request("http://localhost/account-details/general", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+    const context = {
+      getSession: () => ({ userId: "user-1", email: "u@example.com" }),
+    };
+    return action(createActionArgs({ request, context: context as never }));
+  }
+
+  it("saves a supported language", async () => {
+    await saveWithLocale("el");
+    expect(userService.updateUser).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "user-1", locale: "el" })
+    );
+  });
+
+  it("refuses a language the app does not ship", async () => {
+    await saveWithLocale("fr");
+    expect(userService.updateUser).not.toHaveBeenCalled();
+  });
+});
+
 describe("account-details.general action — deleteUser recipients", () => {
   /**
    * The confirmation email used `parsedData.email` — a form field validated

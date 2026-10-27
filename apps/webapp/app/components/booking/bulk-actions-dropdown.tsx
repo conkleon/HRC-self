@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useNavigation } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { selectedBulkItemsAtom } from "~/atoms/list";
@@ -29,13 +30,15 @@ import {
 import { MobileDropdownStyles } from "../shared/mobile-dropdown-styles";
 
 export default function BulkActionsDropdown() {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button variant="secondary" to="#">
         <span className="flex items-center gap-2">
-          Actions <ChevronRight className="chev rotate-90" />
+          {t("bookings.bulkActionsDropdown.actions")}{" "}
+          <ChevronRight className="chev rotate-90" />
         </span>
       </Button>
     );
@@ -49,6 +52,7 @@ export default function BulkActionsDropdown() {
 }
 
 function ConditionalDropdown() {
+  const { t } = useTranslation();
   const selectedBookings = useAtomValue(selectedBulkItemsAtom);
 
   const everyBookingInDraft = selectedBookings.every(
@@ -136,7 +140,9 @@ function ConditionalDropdown() {
           disabled={disabled}
         >
           <Button type="button" variant="secondary">
-            <span className="flex items-center gap-2">Actions</span>
+            <span className="flex items-center gap-2">
+              {t("bookings.bulkActionsDropdown.actions")}
+            </span>
           </Button>
         </DropdownMenuTrigger>
 
@@ -148,7 +154,9 @@ function ConditionalDropdown() {
           disabled={disabled}
           type="button"
         >
-          <span className="flex items-center gap-2">Actions</span>
+          <span className="flex items-center gap-2">
+            {t("bookings.bulkActionsDropdown.actions")}
+          </span>
         </Button>
 
         <MobileDropdownStyles open={open} />
@@ -169,7 +177,7 @@ function ConditionalDropdown() {
             >
               <BulkUpdateDialogTrigger
                 type="cancel"
-                label="Cancel"
+                label={t("bookings.bulkActionsDropdown.cancel")}
                 onClick={closeMenu}
                 disabled={
                   cancelIsDisabled
@@ -190,7 +198,7 @@ function ConditionalDropdown() {
             >
               <BulkUpdateDialogTrigger
                 type="archive"
-                label="Archive"
+                label={t("bookings.bulkActionsDropdown.archive")}
                 disabled={
                   archiveDisabled
                     ? {
@@ -211,7 +219,7 @@ function ConditionalDropdown() {
             >
               <BulkUpdateDialogTrigger
                 type="trash"
-                label="Delete"
+                label={t("bookings.bulkActionsDropdown.delete")}
                 onClick={closeMenu}
                 disabled={
                   deleteDisabled

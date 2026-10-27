@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { AssetStatus } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { LocationBadge } from "~/components/location/location-badge";
 import { useBookingBulkActions } from "~/hooks/use-booking-bulk-actions";
@@ -77,6 +78,7 @@ export default function ListAssetContent({
   partialCheckoutDetails,
   shouldShowCheckoutColumns,
 }: ListAssetContentProps) {
+  const { t } = useTranslation();
   const { category, tags } = item;
   /**
    * `availableUnitsByAsset` is the workspace-availability map shipped by
@@ -327,7 +329,9 @@ export default function ListAssetContent({
                   mainImageExpiration: item.mainImageExpiration,
                   assetModel: item.assetModel,
                 }}
-                alt={`Image of ${item.title}`}
+                alt={t("bookings.listAssetContent.imageOf", {
+                  title: item.title,
+                })}
                 className={tw(
                   "size-full rounded-[4px] border object-cover",
                   isKitAsset ? "border-gray-300" : ""
@@ -409,7 +413,9 @@ export default function ListAssetContent({
                     picked by default is never a silent guess. */}
                 {item.sourceLocation ? (
                   <span className="text-xs text-gray-500">
-                    from {item.sourceLocation.name}
+                    {t("bookings.listAssetContent.from", {
+                      name: item.sourceLocation.name,
+                    })}
                   </span>
                 ) : null}
               </div>
@@ -451,11 +457,13 @@ export default function ListAssetContent({
                   <div className="flex flex-col gap-1 text-xs">
                     <div className="font-semibold text-gray-900">
                       {qtyRemaining === 0
-                        ? "All units checked in"
-                        : "Partially checked in"}
+                        ? t("bookings.listAssetContent.allUnitsCheckedIn")
+                        : t("bookings.listAssetContent.partiallyCheckedIn")}
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-gray-600">Booked</span>
+                      <span className="text-gray-600">
+                        {t("bookings.listAssetContent.booked")}
+                      </span>
                       <span className="tabular-nums text-gray-900">
                         {qtyBooked}
                       </span>
@@ -466,7 +474,9 @@ export default function ListAssetContent({
                         vice versa. */}
                     {qtyBreakdown.returned > 0 ? (
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-600">Returned</span>
+                        <span className="text-gray-600">
+                          {t("bookings.listAssetContent.returned")}
+                        </span>
                         <span className="tabular-nums text-emerald-700">
                           {qtyBreakdown.returned}
                         </span>
@@ -474,7 +484,9 @@ export default function ListAssetContent({
                     ) : null}
                     {qtyBreakdown.consumed > 0 ? (
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-600">Consumed</span>
+                        <span className="text-gray-600">
+                          {t("bookings.listAssetContent.consumed")}
+                        </span>
                         <span className="tabular-nums text-gray-900">
                           {qtyBreakdown.consumed}
                         </span>
@@ -482,7 +494,9 @@ export default function ListAssetContent({
                     ) : null}
                     {qtyBreakdown.lost > 0 ? (
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-600">Lost</span>
+                        <span className="text-gray-600">
+                          {t("bookings.listAssetContent.lost")}
+                        </span>
                         <span className="tabular-nums text-rose-700">
                           {qtyBreakdown.lost}
                         </span>
@@ -490,7 +504,9 @@ export default function ListAssetContent({
                     ) : null}
                     {qtyBreakdown.damaged > 0 ? (
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-600">Damaged</span>
+                        <span className="text-gray-600">
+                          {t("bookings.listAssetContent.damaged")}
+                        </span>
                         <span className="tabular-nums text-amber-700">
                           {qtyBreakdown.damaged}
                         </span>
@@ -499,7 +515,9 @@ export default function ListAssetContent({
                     {/* Summary row kept at the bottom as a total so
                         operators can sanity-check the split adds up. */}
                     <div className="mt-1 flex items-center justify-between gap-3 border-t border-gray-100 pt-1">
-                      <span className="text-gray-600">Remaining</span>
+                      <span className="text-gray-600">
+                        {t("bookings.listAssetContent.remaining")}
+                      </span>
                       <span
                         className={tw(
                           "tabular-nums",
@@ -538,10 +556,12 @@ export default function ListAssetContent({
                 <TooltipContent side="top" align="center" className="max-w-xs">
                   <div className="flex flex-col gap-1 text-xs">
                     <div className="font-semibold text-gray-900">
-                      Partially checked out
+                      {t("bookings.listAssetContent.partiallyCheckedOut")}
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-gray-600">Checked out</span>
+                      <span className="text-gray-600">
+                        {t("bookings.listAssetContent.checkedOut")}
+                      </span>
                       <span className="tabular-nums text-amber-700">
                         {qtyCheckedOut} / {qtyBooked}
                       </span>
@@ -549,7 +569,7 @@ export default function ListAssetContent({
                     {qtyOutstandingCheckout > 0 ? (
                       <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-1">
                         <span className="text-gray-600">
-                          Still to check out
+                          {t("bookings.listAssetContent.stillToCheckOut")}
                         </span>
                         <span className="font-medium tabular-nums text-gray-900">
                           {qtyOutstandingCheckout}

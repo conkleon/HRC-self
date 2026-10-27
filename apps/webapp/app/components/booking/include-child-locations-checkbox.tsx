@@ -16,6 +16,7 @@
  * @see {@link file://./../../modules/location/child-locations-filter.ts}
  * @see {@link file://./../../modules/location/child-locations-filter.server.ts}
  */
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigation } from "react-router";
 import { useSearchParams } from "~/hooks/search-params";
 import {
@@ -38,6 +39,7 @@ export function IncludeChildLocationsCheckbox({
 }: {
   className?: string;
 }) {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { pathname } = useLocation();
   const navigation = useNavigation();
@@ -89,7 +91,11 @@ export function IncludeChildLocationsCheckbox({
         onChange={(event) => handleChange(event.target.checked)}
         className="rounded-sm checked:bg-primary focus-within:ring-primary checked:hover:bg-primary checked:focus:bg-primary"
       />
-      <span>Include assets from child locations</span>
+      <span>
+        {t(
+          "bookings.includeChildLocationsCheckbox.includeAssetsFromChildLocations"
+        )}
+      </span>
     </label>
   );
 }

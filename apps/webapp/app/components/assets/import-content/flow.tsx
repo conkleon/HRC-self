@@ -16,6 +16,7 @@
  */
 import type { ChangeEvent } from "react";
 import { useEffect, useReducer, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useDisabled } from "~/hooks/use-disabled";
 import useFetcherWithReset from "~/hooks/use-fetcher-with-reset";
 import type { ContentImportPreview } from "~/modules/asset-import/types";
@@ -87,6 +88,7 @@ type ContentImportFlowProps = {
 export function ContentImportFlow({
   uploadBlocked = false,
 }: ContentImportFlowProps) {
+  const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   /** Set by "Choose a different file", so the upload stage takes focus back. */
@@ -149,7 +151,7 @@ export function ContentImportFlow({
           ref={fileInputRef}
           type="file"
           name="file"
-          label="Select a csv file"
+          label={t("assets.flow.selectACsvFile")}
           required
           onChange={handleFileSelect}
           accept=".csv"
@@ -168,7 +170,9 @@ export function ContentImportFlow({
           className="my-4"
           disabled={!selectedFile || isPreviewLoading || uploadBlocked}
         >
-          {isPreviewLoading ? "Checking file..." : "Preview import"}
+          {isPreviewLoading
+            ? t("assets.flow.checkingFile")
+            : t("assets.flow.previewImport")}
         </Button>
       </previewFetcher.Form>
 

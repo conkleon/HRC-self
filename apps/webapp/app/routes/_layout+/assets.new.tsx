@@ -1,5 +1,6 @@
 import { TagUseFor } from "@prisma/client";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { data, redirect, redirectDocument, useLoaderData } from "react-router";
 import { dynamicTitleAtom } from "~/atoms/dynamic-title-atom";
@@ -360,6 +361,7 @@ export async function action({ context, request }: LoaderFunctionArgs) {
 }
 
 export default function NewAssetPage() {
+  const { t } = useTranslation();
   const title = useAtomValue(dynamicTitleAtom);
   const { nextSequentialId, referer } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
@@ -378,7 +380,11 @@ export default function NewAssetPage() {
     <div className="relative">
       <Header
         title={
-          title ? title : bulkMode ? "Bulk create assets" : "Untitled Asset"
+          title
+            ? title
+            : bulkMode
+            ? t("assets.assetsNew.bulkCreateAssets")
+            : t("assets.assetsNew.untitledAsset")
         }
       />
       <div>

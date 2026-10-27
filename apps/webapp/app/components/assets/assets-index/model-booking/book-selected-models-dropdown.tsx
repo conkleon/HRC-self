@@ -34,6 +34,7 @@ import {
 } from "@radix-ui/react-popover";
 import { useAtomValue } from "jotai";
 import { ChevronRightIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { selectedBulkItemsAtom } from "~/atoms/list";
 import { BulkUpdateDialogTrigger } from "~/components/bulk-update-dialog/bulk-update-dialog";
@@ -58,13 +59,15 @@ import CreateBookingForModelsDialog from "./create-booking-for-models-dialog";
  * @returns A placeholder button before hydration, the live control after
  */
 export default function BookSelectedModelsDropdown() {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button type="button" variant="secondary">
         <span className="flex items-center gap-2">
-          Book <ChevronRightIcon className="chev size-4" />
+          {t("assets.bookSelectedModelsDropdown.book")}{" "}
+          <ChevronRightIcon className="chev size-4" />
         </span>
       </Button>
     );
@@ -98,6 +101,7 @@ function PanelRow({ children }: { children: ReactNode }) {
  * @returns The trigger, the panel, and both booking dialogs
  */
 function ConditionalActionsDropdown() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const organization = useCurrentOrganization();
   const selectedModels = useAtomValue(selectedBulkItemsAtom);
@@ -193,7 +197,7 @@ function ConditionalActionsDropdown() {
             // gap from the viewport edge.
             sideOffset={4}
             collisionPadding={16}
-            aria-label="Book selection"
+            aria-label={t("assets.bookSelectedModelsDropdown.bookSelection")}
             asChild
             className={tw(
               "z-50 w-screen overflow-y-auto rounded-t border border-gray-300 bg-white text-right shadow-md md:static md:w-56",
@@ -211,7 +215,9 @@ function ConditionalActionsDropdown() {
                 <PanelRow>
                   <BulkUpdateDialogTrigger
                     type="model-bookings"
-                    label="Create new booking"
+                    label={t(
+                      "assets.bookSelectedModelsDropdown.createNewBooking"
+                    )}
                     onClick={closeMenu}
                     disabled={disabledReason}
                   />
@@ -221,7 +227,7 @@ function ConditionalActionsDropdown() {
                 <PanelRow>
                   <BulkUpdateDialogTrigger
                     type="model-booking-exist"
-                    label="Add to existing"
+                    label={t("assets.bookSelectedModelsDropdown.addToExisting")}
                     onClick={closeMenu}
                     disabled={disabledReason}
                   />

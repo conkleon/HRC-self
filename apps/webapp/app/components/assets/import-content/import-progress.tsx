@@ -12,6 +12,7 @@
  * @see {@link file://./../../../modules/asset-import/types.ts} Payload types
  */
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher, useRevalidator } from "react-router";
 import useApiQuery from "~/hooks/use-api-query";
 import { useDisabled } from "~/hooks/use-disabled";
@@ -171,6 +172,7 @@ export function ImportProgress({
   initial,
   warnings,
 }: ImportProgressProps) {
+  const { t } = useTranslation();
   const status = useAssetImportStatus(importId, initial);
   const { revalidate } = useRevalidator();
   const resumeFetcher = useFetcher<{ error?: { message?: string } | null }>();
@@ -194,7 +196,7 @@ export function ImportProgress({
 
   return (
     <div className="mx-auto w-full max-w-screen-sm text-left">
-      <h3>{status.fileName ?? "Asset import"}</h3>
+      <h3>{status.fileName ?? t("assets.importProgress.assetImport")}</h3>
 
       {/* One region, always mounted, so its text changes are announced. */}
       <p
@@ -212,7 +214,11 @@ export function ImportProgress({
 
       {status.status === "QUEUED" ? (
         <div>
-          <Progress className="mt-2" value={0} aria-label="Import progress" />
+          <Progress
+            className="mt-2"
+            value={0}
+            aria-label={t("assets.importProgress.importProgress")}
+          />
         </div>
       ) : null}
 
@@ -221,14 +227,14 @@ export function ImportProgress({
           <Progress
             className="mt-2"
             value={percent}
-            aria-label="Import progress"
+            aria-label={t("assets.importProgress.importProgress")}
           />
           <p className="mt-2 text-sm text-gray-700">
             Imported {formatCount(status.processedRows)} of{" "}
             {formatAssetCount(status.totalRows)}
           </p>
           <p className="mt-2 text-sm text-gray-600">
-            You can leave this page. We will email you when it is done.
+            {t("assets.importProgress.youCanLeaveThisPage")}
           </p>
         </div>
       ) : null}
@@ -236,16 +242,19 @@ export function ImportProgress({
       {status.status === "COMPLETED" ? (
         <div>
           <div className="mt-4 flex gap-3">
-            <Button to="/assets">View assets</Button>
+            <Button to="/assets">
+              {t("assets.importProgress.viewAssets")}
+            </Button>
             <Button to="/assets/import" variant="secondary">
-              Import another file
+              {t("assets.importProgress.importAnotherFile")}
             </Button>
           </div>
           {status.warningCount > 0 ? (
             <div className="mt-6">
-              <h4>Warnings</h4>
+              <h4>{t("assets.importProgress.warnings")}</h4>
               <p className="text-sm text-gray-600">
-                {formatRowCount(status.warningCount)} imported with a warning
+                {formatRowCount(status.warningCount)}{" "}
+                {t("assets.importProgress.importedWithAWarning")}
               </p>
               <ImportRowErrorsTable
                 tone="warning"
@@ -271,7 +280,9 @@ export function ImportProgress({
           <resumeFetcher.Form method="post" className="mt-4">
             <input type="hidden" name="intent" value="resume" />
             <Button type="submit" disabled={resuming}>
-              {resuming ? "Resuming..." : "Resume import"}
+              {resuming
+                ? "Resuming..."
+                : t("assets.importProgress.resumeImport")}
             </Button>
           </resumeFetcher.Form>
         </div>

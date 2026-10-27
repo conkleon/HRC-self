@@ -28,6 +28,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
@@ -81,6 +82,7 @@ export function AdjustModelReservationDialog({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: AdjustModelReservationDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
@@ -210,10 +212,13 @@ export function AdjustModelReservationDialog({
 
       <AlertDialogContent onEscapeKeyDown={() => setOpen(false)}>
         <AlertDialogHeader>
-          <AlertDialogTitle>Adjust reservation</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("bookings.adjustModelReservationDialog.adjustReservation")}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Set how many units of "{modelName}" this booking reserves. Units you
-            release go back to the pool for other bookings in this window.
+            {t("bookings.adjustModelReservationDialog.setHowManyUnitsOf", {
+              modelName,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -235,7 +240,7 @@ export function AdjustModelReservationDialog({
               ref={quantityInputRef}
               name="quantity"
               type="number"
-              label="Reserved units"
+              label={t("bookings.adjustModelReservationDialog.reservedUnits")}
               min={floor}
               step={1}
               required
@@ -249,10 +254,17 @@ export function AdjustModelReservationDialog({
 
             <div className="-mt-2 flex flex-col gap-1">
               <p className="text-xs text-gray-500">
-                {fulfilledQuantity} of {quantity}{" "}
-                {quantity === 1 ? "unit" : "units"} assigned so far.
+                {t("bookings.adjustModelReservationDialog.assignedSoFar", {
+                  count: quantity,
+                  fulfilled: fulfilledQuantity,
+                })}
                 {fulfilledQuantity > 0
-                  ? ` This reservation can't go below ${fulfilledQuantity}.`
+                  ? ` ${t(
+                      "bookings.adjustModelReservationDialog.cannotGoBelow",
+                      {
+                        fulfilled: fulfilledQuantity,
+                      }
+                    )}`
                   : null}
               </p>
 
@@ -266,8 +278,12 @@ export function AdjustModelReservationDialog({
                     setClientError(null);
                   }}
                 >
-                  Release the {unassigned} {unassigned === 1 ? "unit" : "units"}{" "}
-                  still unassigned
+                  {t(
+                    "bookings.adjustModelReservationDialog.releaseUnassigned",
+                    {
+                      count: unassigned,
+                    }
+                  )}
                 </Button>
               ) : null}
             </div>
@@ -277,7 +293,7 @@ export function AdjustModelReservationDialog({
         <AlertDialogFooter className="mt-4 gap-2">
           <AlertDialogCancel asChild>
             <Button type="button" variant="secondary" disabled={isSubmitting}>
-              Cancel
+              {t("bookings.adjustModelReservationDialog.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -287,7 +303,9 @@ export function AdjustModelReservationDialog({
             onClick={handleSubmit}
             disabled={disabled}
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting
+              ? "Saving..."
+              : t("bookings.adjustModelReservationDialog.save")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

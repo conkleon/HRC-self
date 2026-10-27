@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { selectedBulkItemsAtom } from "~/atoms/list";
@@ -27,6 +28,7 @@ import { getValidationErrors } from "~/utils/http";
 import { userCanViewSpecificCustody } from "~/utils/permissions/custody-and-bookings-permissions.validator.client";
 
 export default function CreateBookingForSelectedAssetsDialog() {
+  const { t } = useTranslation();
   const { currentOrganization, teamMembers, teamMembersForForm, tagsData } =
     useLoaderData<AssetIndexLoaderData>();
   const tagsSuggestions = tagsData.tags.map((tag) => ({
@@ -94,8 +96,11 @@ export default function CreateBookingForSelectedAssetsDialog() {
       ref={zo.ref}
       type="bookings"
       arrayFieldId="assetIds"
-      title="Create booking"
-      description={`Create a new booking with selected(${selectedAssets.length}) assets`}
+      title={t("assets.createBookingForSelectedAssetsDialog.createBooking")}
+      description={t(
+        "assets.createBookingForSelectedAssetsDialog.createANewBookingWith",
+        { selectedAssetsCount: selectedAssets.length }
+      )}
       actionUrl="/bookings/new"
       className="lg:w-[600px]"
       // No `allowBodyOverflow` despite the TagsAutocomplete below: this dialog
@@ -197,7 +202,7 @@ export default function CreateBookingForSelectedAssetsDialog() {
                 disabled={disabled}
                 onClick={handleCloseDialog}
               >
-                Cancel
+                {t("assets.createBookingForSelectedAssetsDialog.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -205,7 +210,7 @@ export default function CreateBookingForSelectedAssetsDialog() {
                 width="full"
                 disabled={disabled}
               >
-                Confirm
+                {t("assets.createBookingForSelectedAssetsDialog.confirm")}
               </Button>
             </div>
           </div>

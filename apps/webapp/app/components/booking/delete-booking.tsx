@@ -11,6 +11,7 @@
 import { useId } from "react";
 import type { Booking } from "@prisma/client";
 import { DELETE_CONSEQUENCE_LABELS } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 
 import {
@@ -39,6 +40,7 @@ export const DeleteBooking = ({
     name: Booking["name"];
   };
 }) => {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const confirm = useTypeToConfirm(booking.name);
   // The field sits outside the form that submits; this links the two.
@@ -59,7 +61,7 @@ export const DeleteBooking = ({
           className="justify-start rounded-sm px-2 py-1.5 text-sm font-medium text-gray-700 outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-slate-100 hover:text-gray-700"
           width="full"
         >
-          Delete
+          {t("bookings.deleteBooking.delete")}
         </Button>
       </AlertDialogTrigger>
 
@@ -70,7 +72,9 @@ export const DeleteBooking = ({
               <TrashIcon />
             </span>
           </div>
-          <AlertDialogTitle>Delete {booking.name}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("bookings.deleteBooking.delete2", { name: booking.name })}
+          </AlertDialogTitle>
           <AlertDialogDescription>
             {DELETE_CONSEQUENCE_LABELS.BOOKING}
           </AlertDialogDescription>
@@ -87,7 +91,7 @@ export const DeleteBooking = ({
           <div className="flex justify-center gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary" disabled={disabled}>
-                Cancel
+                {t("bookings.deleteBooking.cancel")}
               </Button>
             </AlertDialogCancel>
 
@@ -102,7 +106,7 @@ export const DeleteBooking = ({
                 value="delete"
                 disabled={disabled || !confirm.isConfirmed}
               >
-                {disabled ? "Deleting..." : "Delete"}
+                {disabled ? "Deleting..." : t("bookings.deleteBooking.delete")}
               </Button>
             </Form>
           </div>

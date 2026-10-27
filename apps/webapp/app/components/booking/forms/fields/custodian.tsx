@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { useLoaderData } from "react-router";
 import DynamicSelect from "~/components/dynamic-select/dynamic-select";
 import FormRow from "~/components/forms/form-row";
@@ -40,16 +41,19 @@ export function CustodianField({
   isNewBooking?: boolean;
   error?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <FormRow
-      rowLabel="Description"
+      rowLabel={t("bookings.custodian.description")}
       className="mobile-styling-only border-b-0 p-0"
     >
       <label
         className="mb-2.5 block font-medium text-gray-700"
         htmlFor="custodian"
       >
-        <span className="required-input-label">Custodian</span>
+        <span className="required-input-label">
+          {t("bookings.custodian.custodian")}
+        </span>
       </label>
       <DynamicSelect
         defaultValue={
@@ -74,10 +78,10 @@ export function CustodianField({
           custodyPurpose: "booking-custodian",
         }}
         fieldName="custodian"
-        contentLabel="Team members"
+        contentLabel={t("bookings.custodian.teamMembers")}
         initialDataKey="teamMembersForForm"
         countKey="totalTeamMembers"
-        placeholder="Select a team member"
+        placeholder={t("bookings.custodian.selectATeamMember")}
         allowClear
         closeOnSelect
         transformItem={toCustodianItem}
@@ -97,8 +101,7 @@ export function CustodianField({
 
       {error ? <div className="text-sm text-error-500">{error}</div> : null}
       <p className="mt-2 text-[14px] text-gray-600">
-        The person that will be in custody of or responsible for the assets
-        during the duration of the booking period.
+        {t("bookings.custodian.thePersonThatWillBe")}
       </p>
     </FormRow>
   );

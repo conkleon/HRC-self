@@ -14,6 +14,7 @@
  * @see {@link file://./../../routes/api+/assets.bulk-update-asset-model.ts} action
  */
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -28,6 +29,7 @@ const BulkAssetModelRemoveSchema = z.object({
 });
 
 export default function BulkAssetModelRemoveDialog() {
+  const { t } = useTranslation();
   const { totalItems } = useLoaderData<AssetIndexLoaderData>();
   const zo = useZorm("BulkAssetModelRemove", BulkAssetModelRemoveSchema);
 
@@ -49,8 +51,12 @@ export default function BulkAssetModelRemoveDialog() {
        * `/api/assets/bulk-update-asset-model-remove`, which does not exist.
        */
       actionUrl="/api/assets/bulk-update-asset-model"
-      title={`Remove (${totalSelected}) assets from their asset model`}
-      description="The assets keep everything else. Only the link to their asset model is removed."
+      title={t("assets.bulkAssetModelRemoveDialog.removeAssetsFromTheirAsset", {
+        totalSelected,
+      })}
+      description={t(
+        "assets.bulkAssetModelRemoveDialog.theAssetsKeepEverythingElse"
+      )}
     >
       {({ disabled, handleCloseDialog, fetcherError }) => (
         <div>
@@ -71,7 +77,7 @@ export default function BulkAssetModelRemoveDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkAssetModelRemoveDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -79,7 +85,7 @@ export default function BulkAssetModelRemoveDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkAssetModelRemoveDialog.confirm")}
             </Button>
           </div>
         </div>

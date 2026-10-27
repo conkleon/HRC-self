@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { AssetStatus, AssetType } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
 import { CircleX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import {
@@ -93,6 +94,7 @@ export default function ReleaseCustodyDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   // Get the scanned items from jotai
   const items = useAtomValue(scannedItemsAtom);
   const clearList = useSetAtom(clearScannedItemsAtom);
@@ -139,7 +141,7 @@ export default function ReleaseCustodyDrawer({
       schema={ReleaseCustodyFromScannedItemsSchema}
       items={items}
       onClearItems={clearList}
-      title="Items scanned"
+      title={t("scanner.releaseCustodyDrawer.itemsScanned")}
       isLoading={isLoading}
       renderItem={renderItemRow}
       Blockers={Blockers}
@@ -152,6 +154,7 @@ export default function ReleaseCustodyDrawer({
 }
 
 function ReleaseCustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
+  const { t } = useTranslation();
   const { assetIds, kitIds, idsTotalCount } = useAtomValue(scannedItemIdsAtom);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [custodyState, setCustodyState] = useState<CustodyState>({
@@ -312,7 +315,7 @@ function ReleaseCustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
               width="full"
               disabled={disabled || disableSubmit || idsTotalCount === 0}
             >
-              Release custody
+              {t("scanner.releaseCustodyDrawer.releaseCustody")}
             </Button>
           </div>
         </div>
@@ -323,6 +326,7 @@ function ReleaseCustodyForm({ disableSubmit }: { disableSubmit: boolean }) {
 
 // Implement item renderers if they're not already defined elsewhere
 export function AssetRow({ asset }: { asset: AssetFromQr }) {
+  const { t } = useTranslation();
   const qtyTracked = isQuantityTracked(asset);
   const inCustody = releasableUnits(asset);
   /**
@@ -391,7 +395,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
               "text-xs text-gray-700"
             )}
           >
-            asset
+            {t("scanner.releaseCustodyDrawer.asset")}
           </span>
           <AssetAvailabilityLabels />
         </div>
@@ -411,6 +415,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   // Use predefined presets to create label configurations appropriate for release custody
   const availabilityConfigs = [
     {
@@ -445,7 +450,9 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
       <p className="word-break whitespace-break-spaces font-medium">
         {kit.name}{" "}
         <span className="text-[12px] font-normal text-gray-700">
-          ({kit._count.assetKits} assets)
+          {t("scanner.releaseCustodyDrawer.assets", {
+            assetKits: kit._count.assetKits,
+          })}
         </span>
       </p>
 
@@ -457,7 +464,7 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.releaseCustodyDrawer.kit")}
         </span>
         <KitAvailabilityLabels />
       </div>
@@ -476,6 +483,7 @@ function SubmittingDialog({
   custodyState: CustodyState;
   cleanupState: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <AlertDialog
       open={open}
@@ -486,7 +494,9 @@ function SubmittingDialog({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Releasing custody</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("scanner.releaseCustodyDrawer.releasingCustody")}
+          </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="flex flex-col gap-4">
               <SubmissionState
@@ -507,7 +517,7 @@ function SubmittingDialog({
           <div className="flex justify-center gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary">
-                Done
+                {t("scanner.releaseCustodyDrawer.done")}
               </Button>
             </AlertDialogCancel>
           </div>
@@ -526,6 +536,7 @@ function SubmissionState({
   status: "processing" | "success" | "error" | "skipped";
   errorMessage?: string;
 }) {
+  const { t } = useTranslation();
   // Return null for skipped status to hide the component entirely
   if (status === "skipped") {
     return null;
@@ -535,7 +546,11 @@ function SubmissionState({
     return (
       <div className="flex flex-row gap-2">
         <Spinner />
-        <TextLoader text={`Releasing custody from ${type}s`} />
+        <TextLoader
+          text={t("scanner.releaseCustodyDrawer.releasingCustodyFromS", {
+            type,
+          })}
+        />
       </div>
     );
   } else if (status === "success") {
@@ -545,7 +560,10 @@ function SubmissionState({
           <CheckmarkIcon />
         </span>
         <div className="font-mono">
-          {type === "asset" ? "Assets" : "Kits"} have been released from custody
+          {type === "asset"
+            ? t("scanner.releaseCustodyDrawer.assets2")
+            : t("scanner.releaseCustodyDrawer.kits")}{" "}
+          {t("scanner.releaseCustodyDrawer.haveBeenReleasedFromCustody")}
         </div>
       </div>
     );
@@ -555,12 +573,15 @@ function SubmissionState({
         <div className="flex flex-row items-center gap-2 text-left">
           <CircleX className="size-[18px] text-error-500" />
           <div className="font-mono">
-            Failed to release custody from {type}s.
+            {t("scanner.releaseCustodyDrawer.failedToReleaseCustodyFrom", {
+              type,
+            })}
           </div>
         </div>
         {errorMessage && (
           <span className="text-[12px] text-error-500">
-            <strong>Error:</strong> {errorMessage}
+            <strong>{t("scanner.releaseCustodyDrawer.error")}</strong>{" "}
+            {errorMessage}
           </span>
         )}
       </div>

@@ -17,6 +17,7 @@
  */
 
 import { AssetStatus, AssetType } from "@prisma/client";
+import { Trans } from "react-i18next";
 import type { ScanListItems } from "~/atoms/qr-scanner";
 import {
   assignableUnits,
@@ -170,13 +171,15 @@ export function buildAssignCustodyBlockers({
       condition: qtyAssetsWithNothingFree.length > 0,
       count: qtyAssetsWithNothingFree.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s have" : " has"}`}</strong> no
-          units available.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.qtyNothingFree.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Every unit is already in custody, allocated to a kit, or out on a booking.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.qtyNothingFree.description" />
+      ),
       onResolve: () => removeAssetsFromList(qtyAssetsWithNothingFree),
     },
     {
@@ -184,12 +187,15 @@ export function buildAssignCustodyBlockers({
       condition: qtyAssetsWithEmptySource.length > 0,
       count: qtyAssetsWithEmptySource.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s have" : " has"}`}</strong> no
-          units left at the chosen location.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.qtySourceEmpty.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Pick another location for them, or remove them.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.qtySourceEmpty.description" />
+      ),
       onResolve: () => removeAssetsFromList(qtyAssetsWithEmptySource),
     },
     {
@@ -197,10 +203,11 @@ export function buildAssignCustodyBlockers({
       condition: assetsAlreadyInCustody.length > 0,
       count: assetsAlreadyInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already <strong>in custody</strong>.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.assetsAlreadyInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(assetsAlreadyInCustody),
     },
@@ -209,12 +216,15 @@ export function buildAssignCustodyBlockers({
       condition: assetsAreCheckedOut.length > 0,
       count: assetsAreCheckedOut.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          checked out.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.assetsCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Note: Checked out assets cannot be assigned custody.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.assetsCheckedOut.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsAreCheckedOut),
     },
     {
@@ -222,12 +232,15 @@ export function buildAssignCustodyBlockers({
       condition: assetsArePartOfKit.length > 0,
       count: assetsArePartOfKit.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s" : ""} `}</strong> are part
-          of a kit.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.assetsPartOfKit.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Note: Scan Kit QR to add the full kit",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.assetsPartOfKit.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsArePartOfKit),
     },
     {
@@ -235,10 +248,11 @@ export function buildAssignCustodyBlockers({
       condition: qrIdsOfKitsInCustody.length > 0,
       count: qrIdsOfKitsInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong>{" "}
-          already <strong>in custody</strong>.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.kitsInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsInCustody),
     },
@@ -247,10 +261,11 @@ export function buildAssignCustodyBlockers({
       condition: qrIdsOfKitsWithAssetsInCustody.length > 0,
       count: qrIdsOfKitsWithAssetsInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong>{" "}
-          already have assets <strong>in custody</strong>.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.kitsWithAssetsInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsWithAssetsInCustody),
     },
@@ -259,12 +274,15 @@ export function buildAssignCustodyBlockers({
       condition: qrIdsOfKitsCheckedOut.length > 0,
       count: qrIdsOfKitsCheckedOut.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong>{" "}
-          checked out.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.kitsCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Note: Checked out kits cannot be assigned custody.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.kitsCheckedOut.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsCheckedOut),
     },
     archivedAssetsBlocker(
@@ -365,12 +383,15 @@ export function buildReleaseCustodyBlockers({
       condition: qtyAssetsHeldViaKitOnly.length > 0,
       count: qtyAssetsHeldViaKitOnly.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong> held
-          through a kit.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.qtyHeldViaKit.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Scan the kit's QR to release the whole kit from custody.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.qtyHeldViaKit.description" />
+      ),
       onResolve: () => removeAssetsFromList(qtyAssetsHeldViaKitOnly),
     },
     {
@@ -378,12 +399,15 @@ export function buildReleaseCustodyBlockers({
       condition: qtyAssetsWithNothingHeld.length > 0,
       count: qtyAssetsWithNothingHeld.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s have" : " has"}`}</strong> no
-          units in custody.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.qtyNothingHeld.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "There is nothing to release for them.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.qtyNothingHeld.description" />
+      ),
       onResolve: () => removeAssetsFromList(qtyAssetsWithNothingHeld),
     },
     {
@@ -391,13 +415,15 @@ export function buildReleaseCustodyBlockers({
       condition: qtyAssetsWithSeveralHolders.length > 0,
       count: qtyAssetsWithSeveralHolders.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong> held
-          by more than one person.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.qtySeveralHolders.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Release these from the asset's custody list, where each holder is listed separately.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.qtySeveralHolders.description" />
+      ),
       onResolve: () => removeAssetsFromList(qtyAssetsWithSeveralHolders),
     },
     {
@@ -405,12 +431,15 @@ export function buildReleaseCustodyBlockers({
       condition: assetsNotInCustody.length > 0,
       count: assetsNotInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong> not
-          in custody.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.assetsNotInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Only assets in custody can be released.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.assetsNotInCustody.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsNotInCustody),
     },
     {
@@ -418,12 +447,15 @@ export function buildReleaseCustodyBlockers({
       condition: assetsArePartOfKit.length > 0,
       count: assetsArePartOfKit.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s" : ""} `}</strong> are part
-          of a kit.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.assetsPartOfKitRelease.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Note: Scan Kit QR to release the full kit from custody",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.assetsPartOfKitRelease.description" />
+      ),
       onResolve: () => removeAssetsFromList(assetsArePartOfKit),
     },
     {
@@ -431,12 +463,15 @@ export function buildReleaseCustodyBlockers({
       condition: qrIdsOfKitsNotInCustody.length > 0,
       count: qrIdsOfKitsNotInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong> not
-          in custody.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.custodyBlockers.kitsNotInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Only kits in custody can be released.",
+      description: (
+        <Trans i18nKey="scanner.blockers.custodyBlockers.kitsNotInCustody.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsNotInCustody),
     },
     invalidCodesBlocker(errorQrIds, removeItemsFromList),

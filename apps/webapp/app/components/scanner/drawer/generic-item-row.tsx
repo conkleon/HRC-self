@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import type { Prisma } from "@prisma/client";
 import { m } from "framer-motion";
 import { useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import type { ScanListItem } from "~/atoms/qr-scanner";
 import { updateScannedItemAtom } from "~/atoms/qr-scanner";
 import { Button } from "~/components/shared/button";
@@ -108,6 +109,7 @@ export function GenericItemRow<T>({
   rejectItemType,
   rejectItemMessage,
 }: GenericItemRowProps<T>) {
+  const { t } = useTranslation();
   const setItem = useSetAtom(updateScannedItemAtom);
 
   // Track if item had data on initial mount (restored from DB)
@@ -249,7 +251,7 @@ export function GenericItemRow<T>({
               ? `Remove scanned item: ${item.data.title}`
               : item?.data && "name" in item.data
               ? `Remove scanned item: ${item.data.name}`
-              : "Remove scanned item"
+              : t("scanner.genericItemRow.removeScannedItem")
           }
         />
       </Td>
@@ -327,16 +329,18 @@ export function DefaultLoadingState({
   qrId: string;
   error?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="max-w-full">
       <p>
-        Code: <span className="font-semibold">{qrId}</span>
+        {t("scanner.genericItemRow.code")}{" "}
+        <span className="font-semibold">{qrId}</span>
       </p>{" "}
       {error ? (
         <p className="whitespace-normal text-[12px] text-error-500">{error}</p>
       ) : (
         <TextLoader
-          text="Fetching item"
+          text={t("scanner.genericItemRow.fetchingItem")}
           className="text-[10px] text-gray-500"
         />
       )}

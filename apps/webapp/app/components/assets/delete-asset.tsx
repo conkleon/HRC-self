@@ -13,6 +13,7 @@ import type { ReactElement } from "react";
 import { cloneElement, forwardRef, useId } from "react";
 import type { Asset } from "@prisma/client";
 import { DELETE_CONSEQUENCE_LABELS } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 
 import {
@@ -43,6 +44,7 @@ type DeleteAssetProps = {
 
 export const DeleteAsset = forwardRef<HTMLButtonElement, DeleteAssetProps>(
   function ({ asset, trigger }, ref) {
+    const { t } = useTranslation();
     const disabled = useDisabled();
     const confirm = useTypeToConfirm(asset.title);
     // The field sits outside the form that submits; this links the two.
@@ -67,7 +69,9 @@ export const DeleteAsset = forwardRef<HTMLButtonElement, DeleteAssetProps>(
                 <TrashIcon />
               </span>
             </div>
-            <AlertDialogTitle>Delete {asset.title}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("assets.deleteAsset.delete", { title: asset.title })}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {DELETE_CONSEQUENCE_LABELS.ASSET}
             </AlertDialogDescription>
@@ -85,7 +89,7 @@ export const DeleteAsset = forwardRef<HTMLButtonElement, DeleteAssetProps>(
             <div className="flex justify-center gap-2">
               <AlertDialogCancel asChild>
                 <Button type="button" variant="secondary" disabled={disabled}>
-                  Cancel
+                  {t("assets.deleteAsset.cancel")}
                 </Button>
               </AlertDialogCancel>
 
@@ -97,7 +101,7 @@ export const DeleteAsset = forwardRef<HTMLButtonElement, DeleteAssetProps>(
                   data-test-id="confirmdeleteAssetButton"
                   disabled={disabled || !confirm.isConfirmed}
                 >
-                  {disabled ? "Deleting..." : "Delete"}
+                  {disabled ? "Deleting..." : t("assets.deleteAsset.delete2")}
                 </Button>
               </Form>
             </div>

@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { Pencil, Trash2, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { Spinner } from "~/components/shared/spinner";
 import type { Column } from "~/modules/asset-index-settings/helpers";
@@ -48,6 +49,7 @@ export function PresetListItem({
   onApply: (preset: NormalizedPreset) => void;
   onRename: (preset: NormalizedPreset) => void;
 }) {
+  const { t } = useTranslation();
   // Use unique fetcher key per preset to allow concurrent delete requests
   const deleteFetcher = useFetcher({ key: `delete-preset-${preset.id}` });
 
@@ -83,7 +85,10 @@ export function PresetListItem({
           <span className="truncate">{preset.name}</span>
           {/* Loading indicator when applying preset */}
           {isApplying && (
-            <div className="shrink-0" title="Applying preset...">
+            <div
+              className="shrink-0"
+              title={t("assets.presetListItem.applyingPreset")}
+            >
               <Spinner className="size-4" />
             </div>
           )}
@@ -91,7 +96,7 @@ export function PresetListItem({
           {isActive && !isApplying && (
             <div
               className="flex size-4 shrink-0 items-center justify-center rounded-full bg-gray-100"
-              title="Currently active"
+              title={t("assets.presetListItem.currentlyActive")}
             >
               <Check className="size-3 text-gray-600" />
             </div>
@@ -113,7 +118,7 @@ export function PresetListItem({
             onRename(preset);
           }}
           className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-          title="Rename"
+          title={t("assets.presetListItem.rename")}
         >
           <Pencil className="size-3.5" />
         </button>
@@ -129,7 +134,7 @@ export function PresetListItem({
               }
             }}
             className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
-            title="Delete"
+            title={t("assets.presetListItem.delete")}
           >
             <Trash2 className="size-3.5" />
           </button>

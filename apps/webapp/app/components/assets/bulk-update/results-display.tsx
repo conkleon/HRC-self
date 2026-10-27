@@ -5,6 +5,7 @@
  *
  * @see {@link file://./form.tsx} Parent orchestration component
  */
+import { useTranslation } from "react-i18next";
 import { CSV_CONTENT_TYPE, withUtf8Bom } from "~/utils/csv-utf8";
 import type { BulkUpdateResult } from "~/utils/import-update.server";
 import { escapeCsvValue } from "./helpers";
@@ -28,6 +29,7 @@ export function ResultsDisplay({
   result: BulkUpdateResult;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const handleDownloadReport = () => {
     const lines: string[] = ["Status,Row,Asset ID,Asset Name,Details"];
 
@@ -76,25 +78,29 @@ export function ResultsDisplay({
 
   return (
     <div className="mt-4 w-full">
-      <h4 className="mb-3">Update complete</h4>
+      <h4 className="mb-3">{t("assets.resultsDisplay.updateComplete")}</h4>
 
       {/* Summary */}
       <div className="mb-4 flex gap-4 rounded-md border bg-gray-50 p-4 text-sm">
         <SummaryPill
           count={result.summary.updated}
-          label="updated"
+          label={t("assets.resultsDisplay.updated")}
           color="green"
         />
         <SummaryPill
           count={result.summary.skipped}
-          label="unchanged"
+          label={t("assets.resultsDisplay.unchanged")}
           color="gray"
         />
-        <SummaryPill count={result.summary.failed} label="failed" color="red" />
+        <SummaryPill
+          count={result.summary.failed}
+          label={t("assets.resultsDisplay.failed")}
+          color="red"
+        />
         {result.warnings.length > 0 ? (
           <SummaryPill
             count={result.warnings.length}
-            label="warnings"
+            label={t("assets.resultsDisplay.warnings")}
             color="yellow"
           />
         ) : null}
@@ -111,8 +117,8 @@ export function ResultsDisplay({
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-green-50">
                 <Tr>
-                  <Th>Asset</Th>
-                  <Th>Fields changed</Th>
+                  <Th>{t("assets.resultsDisplay.asset")}</Th>
+                  <Th>{t("assets.resultsDisplay.fieldsChanged")}</Th>
                 </Tr>
               </thead>
               <tbody>
@@ -139,8 +145,8 @@ export function ResultsDisplay({
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-gray-50">
                 <Tr>
-                  <Th>Asset</Th>
-                  <Th>Reason</Th>
+                  <Th>{t("assets.resultsDisplay.asset")}</Th>
+                  <Th>{t("assets.resultsDisplay.reason")}</Th>
                 </Tr>
               </thead>
               <tbody>
@@ -164,23 +170,25 @@ export function ResultsDisplay({
       {result.warnings.length > 0 && (
         <details className="mb-3" open>
           <summary className="cursor-pointer font-medium text-yellow-700">
-            {result.warnings.length} warning
+            {t("assets.resultsDisplay.warning", {
+              warningsCount: result.warnings.length,
+            })}
             {result.warnings.length !== 1 ? "s" : ""}
           </summary>
           <div className="mt-2 max-h-[200px] overflow-y-auto rounded-md border border-yellow-200">
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-yellow-50">
                 <Tr>
-                  <Th>Row</Th>
-                  <Th>Asset</Th>
-                  <Th>Warning</Th>
+                  <Th>{t("assets.resultsDisplay.row")}</Th>
+                  <Th>{t("assets.resultsDisplay.asset")}</Th>
+                  <Th>{t("assets.resultsDisplay.warning2")}</Th>
                 </Tr>
               </thead>
               <tbody>
                 {result.warnings.map((warning) => (
                   <Tr key={`${warning.rowNumber}-${warning.id}`}>
                     <Td>{warning.rowNumber}</Td>
-                    <Td>{warning.id || "(unknown)"}</Td>
+                    <Td>{warning.id || t("assets.resultsDisplay.unknown")}</Td>
                     <Td className="text-yellow-700">{warning.message}</Td>
                   </Tr>
                 ))}
@@ -201,16 +209,20 @@ export function ResultsDisplay({
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-red-50">
                 <Tr>
-                  <Th>Row</Th>
-                  <Th>Asset</Th>
-                  <Th>Error</Th>
+                  <Th>{t("assets.resultsDisplay.row")}</Th>
+                  <Th>{t("assets.resultsDisplay.asset")}</Th>
+                  <Th>{t("assets.resultsDisplay.error")}</Th>
                 </Tr>
               </thead>
               <tbody>
                 {result.failed.map((row) => (
                   <Tr key={`${row.rowNumber}-${row.id}`}>
                     <Td>{row.rowNumber}</Td>
-                    <Td>{row.title || row.id || "(unknown)"}</Td>
+                    <Td>
+                      {row.title ||
+                        row.id ||
+                        t("assets.resultsDisplay.unknown")}
+                    </Td>
                     <Td className="text-red-600">{row.error}</Td>
                   </Tr>
                 ))}
@@ -223,16 +235,16 @@ export function ResultsDisplay({
       {/* Actions */}
       <div className="mt-4 flex gap-2">
         <Button type="button" variant="secondary" onClick={onReset}>
-          Import another file
+          {t("assets.resultsDisplay.importAnotherFile")}
         </Button>
         <Button
           type="button"
           variant="secondary"
           onClick={handleDownloadReport}
         >
-          Download report
+          {t("assets.resultsDisplay.downloadReport")}
         </Button>
-        <Button to="/assets">View assets</Button>
+        <Button to="/assets">{t("assets.resultsDisplay.viewAssets")}</Button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { data, redirect, useActionData, useLoaderData } from "react-router";
 import { z } from "zod";
@@ -171,6 +172,7 @@ export function links() {
 }
 
 export default function Custody() {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const {
     asset,
@@ -207,8 +209,14 @@ export default function Custody() {
             <LocationMarkerIcon />
           </div>
           <div className="mb-5">
-            <h4>Update location</h4>
-            <p>Adjust the location of this asset.</p>
+            <h4>
+              {t("assets.assetsAssetidOverviewUpdateLocation.updateLocation")}
+            </h4>
+            <p>
+              {t(
+                "assets.assetsAssetidOverviewUpdateLocation.adjustTheLocationOfThis"
+              )}
+            </p>
           </div>
           <div className=" relative z-50 mb-8">
             <LocationSelect
@@ -223,7 +231,9 @@ export default function Custody() {
                 htmlFor="newLocationQuantity"
                 className="mb-1 block text-sm font-medium text-gray-700"
               >
-                Quantity to place at this location
+                {t(
+                  "assets.assetsAssetidOverviewUpdateLocation.quantityToPlaceAtThis"
+                )}
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -247,24 +257,30 @@ export default function Custody() {
                   id="newLocationQuantity-hint"
                   className="text-xs text-gray-500"
                 >
-                  of {max} {unitOfMeasure || "units"}
+                  {t("assets.assetsAssetidOverviewUpdateLocation.of", { max })}{" "}
+                  {unitOfMeasure ||
+                    t("assets.assetsAssetidOverviewUpdateLocation.units")}
                 </span>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Units not placed at any location stay in the unplaced pool. Use
-                the location&apos;s manage-assets picker to spread across
-                multiple locations.
+                {t(
+                  "assets.assetsAssetidOverviewUpdateLocation.unitsNotPlacedAtAny"
+                )}
               </p>
             </div>
           ) : null}
 
           {showMultiPlacementWarning ? (
             <div className="mb-6 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800">
-              <strong>Multi-placement notice:</strong> This asset is currently
-              placed at {placementCount} locations. Saving will replace all
-              placements with a single placement at the selected location. Use
-              the location&apos;s manage-assets picker if you want to keep
-              multiple placements.
+              <strong>
+                {t(
+                  "assets.assetsAssetidOverviewUpdateLocation.multiPlacementNotice"
+                )}
+              </strong>{" "}
+              {t(
+                "assets.assetsAssetidOverviewUpdateLocation.thisAssetIsCurrentlyPlaced",
+                { placementCount }
+              )}
             </div>
           ) : null}
 
@@ -281,7 +297,7 @@ export default function Custody() {
               width="full"
               disabled={disabled}
             >
-              Cancel
+              {t("assets.assetsAssetidOverviewUpdateLocation.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -289,7 +305,7 @@ export default function Custody() {
               type="submit"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.assetsAssetidOverviewUpdateLocation.confirm")}
             </Button>
           </div>
         </div>

@@ -22,6 +22,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import type { BarcodeType, QrIdDisplayPreference } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { AssetCodeBadge } from "~/components/assets/asset-code-badge";
 import { labelForPreference } from "~/modules/barcode/display";
 import { tw } from "~/utils/tw";
@@ -101,6 +102,7 @@ export function PreferredBarcodeSelector({
   defaultValue,
   workspacePreference,
 }: PreferredBarcodeSelectorProps) {
+  const { t } = useTranslation();
   // Controlled selection: a single source of truth for both the row
   // highlighting (the parent `<label>` className conditional) and the
   // underlying radio inputs' `checked` state. Previously the radios used
@@ -147,9 +149,9 @@ export function PreferredBarcodeSelector({
     );
     return (
       <p className="text-sm text-gray-500">
-        This asset has no barcodes yet, so there's nothing to override.{" "}
-        {emptyStateSecondary} Add a barcode in the section above and save the
-        asset — it will become selectable here on your next edit.
+        {t("assets.preferredBarcodeSelector.thisAssetHasNoBarcodes", {
+          emptyStateSecondary,
+        })}
       </p>
     );
   }
@@ -175,7 +177,9 @@ export function PreferredBarcodeSelector({
     <div
       className="flex flex-col gap-2"
       role="radiogroup"
-      aria-label="Preferred display code for this asset"
+      aria-label={t(
+        "assets.preferredBarcodeSelector.preferredDisplayCodeForThis"
+      )}
     >
       <Option
         name={name}

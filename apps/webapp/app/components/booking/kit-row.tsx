@@ -16,6 +16,7 @@
 import React from "react";
 import type { Barcode, BookingStatus, Category, Kit } from "@prisma/client";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { LocationBadge } from "~/components/location/location-badge";
 import { useBookingBulkActions } from "~/hooks/use-booking-bulk-actions";
 import { useBookingStatusHelpers } from "~/hooks/use-booking-status";
@@ -99,6 +100,7 @@ export default function KitRow({
   partialCheckoutDetails,
   shouldShowCheckoutColumns,
 }: KitRowProps) {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const roleAccess = useRoleAccess();
   const { hasAny: hasAnyBulkAction } = useBookingBulkActions();
@@ -218,7 +220,7 @@ export default function KitRow({
                 className="font-medium text-gray-900 hover:text-gray-700"
                 target={"_blank"}
                 onlyNewTabIconOnHover={true}
-                aria-label="Go to kit"
+                aria-label={t("bookings.kitRow.goToKit")}
               >
                 <div className="">{kit.name}</div>
               </Button>
@@ -243,9 +245,13 @@ export default function KitRow({
                     />
                     <When truthy={!isBookable}>
                       <AvailabilityBadge
-                        badgeText="Unavailable"
-                        tooltipTitle="Kit is unavailable for bookings"
-                        tooltipContent="An administrator has marked one of this kit's assets as unavailable for bookings. Remove it from the booking, or make it available again, before reserving."
+                        badgeText={t("bookings.kitRow.unavailable")}
+                        tooltipTitle={t(
+                          "bookings.kitRow.kitIsUnavailableForBookings"
+                        )}
+                        tooltipContent={t(
+                          "bookings.kitRow.anAdministratorHasMarkedOne"
+                        )}
                       />
                     </When>
                   </>
@@ -276,9 +282,9 @@ export default function KitRow({
         <Td>
           <When truthy={isOverlapping && !isInProgress}>
             <AvailabilityBadge
-              badgeText="Already booked"
-              tooltipTitle="Kit is already booked"
-              tooltipContent="This kit is already added to a booking that is overlapping the selected time period."
+              badgeText={t("bookings.kitRow.alreadyBooked")}
+              tooltipTitle={t("bookings.kitRow.kitIsAlreadyBooked")}
+              tooltipContent={t("bookings.kitRow.thisKitIsAlreadyAdded")}
             />
           </When>
           {/*
@@ -288,7 +294,9 @@ export default function KitRow({
             via `BookingAsset.sourceKitId`) would print a count that
             contradicts the rows listed directly beneath it.
           */}
-          <div className="text-sm text-gray-600">{assets.length} assets</div>
+          <div className="text-sm text-gray-600">
+            {t("bookings.kitRow.assets", { assetsCount: assets.length })}
+          </div>
         </Td>
 
         <Td>
@@ -354,7 +362,7 @@ export default function KitRow({
               }}
               variant="link"
               className="text-center font-bold text-gray-600 hover:text-gray-900"
-              aria-label="Toggle kit expand"
+              aria-label={t("bookings.kitRow.toggleKitExpand")}
             >
               <ChevronDownIcon
                 className={tw(`size-6 ${!isExpanded ? "rotate-180" : ""}`)}

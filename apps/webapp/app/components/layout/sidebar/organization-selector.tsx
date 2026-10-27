@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { useTranslation } from "react-i18next";
 import { Form, useLoaderData } from "react-router";
 import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/button";
@@ -24,6 +25,7 @@ import {
 } from "./sidebar";
 
 export default function OrganizationSelector() {
+  const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSwitchingOrg, setIsSwitchingOrg] = useState(false);
 
@@ -171,7 +173,7 @@ export default function OrganizationSelector() {
               className=" w-full select-none justify-start rounded p-2 text-left font-medium text-gray-900 outline-none  hover:bg-gray-50 hover:text-gray-800 "
               onClick={closeDropdown}
             >
-              Manage workspaces
+              {t("nav.organizationSelector.manageWorkspaces")}
             </Button>
             {/**
              * Personal workspaces can't invite anyone, whatever the user pays.
@@ -188,7 +190,7 @@ export default function OrganizationSelector() {
                 className=" w-full select-none justify-start rounded p-2 text-left font-medium text-gray-900 outline-none  hover:bg-gray-50 hover:text-gray-800 "
                 onClick={closeDropdown}
               >
-                Invite your team
+                {t("nav.organizationSelector.inviteYourTeam")}
               </Button>
             ) : null}
           </DropdownMenuContent>

@@ -22,6 +22,7 @@
  * @see {@link file://./asset-model-form-row.tsx} the single-asset equivalent
  */
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -61,6 +62,7 @@ export const BulkAssetModelUpdateSchema = BulkAssetModelActionSchema.extend({
 });
 
 export default function BulkAssetModelUpdateDialog() {
+  const { t } = useTranslation();
   const { totalItems } = useLoaderData<AssetIndexLoaderData>();
   const zo = useZorm("BulkAssetModelUpdate", BulkAssetModelUpdateSchema);
 
@@ -98,8 +100,12 @@ export default function BulkAssetModelUpdateDialog() {
       ref={zo.ref}
       type="asset-model"
       arrayFieldId="assetIds"
-      title={`Group (${totalSelected}) assets into an asset model`}
-      description="Pick the model these assets belong to. Their category, value and custody are not changed."
+      title={t("assets.bulkAssetModelUpdateDialog.groupAssetsIntoAnAsset", {
+        totalSelected,
+      })}
+      description={t(
+        "assets.bulkAssetModelUpdateDialog.pickTheModelTheseAssets"
+      )}
     >
       {({ disabled, handleCloseDialog, fetcherError }) => (
         <div>
@@ -108,10 +114,11 @@ export default function BulkAssetModelUpdateDialog() {
               <WarningBox>
                 <span>
                   {isSelectingAll
-                    ? "Any quantity-tracked assets in your selection will be skipped."
+                    ? t(
+                        "assets.bulkAssetModelUpdateDialog.anyQuantityTrackedAssetsIn"
+                      )
                     : `${quantityTrackedCount} quantity-tracked asset(s) in your selection will be skipped.`}{" "}
-                  Asset models can only be linked to individually tracked
-                  assets.
+                  {t("assets.bulkAssetModelUpdateDialog.assetModelsCanOnlyBe")}
                 </span>
               </WarningBox>
             </div>
@@ -128,17 +135,23 @@ export default function BulkAssetModelUpdateDialog() {
                */
               error={zo.errors.assetModelId()?.message}
               model={{ name: "assetModel", queryKey: "name" }}
-              placeholder="Select asset model"
+              placeholder={t(
+                "assets.bulkAssetModelUpdateDialog.selectAssetModel"
+              )}
               initialDataKey="assetModels"
               countKey="totalAssetModels"
               fieldName="assetModelId"
-              contentLabel="Asset models"
+              contentLabel={t("assets.bulkAssetModelUpdateDialog.assetModels")}
               closeOnSelect
               extraContent={({ onItemCreated, closePopover }) => (
                 <InlineEntityCreationDialog
                   type="assetModel"
-                  title="Create new asset model"
-                  buttonLabel="Create new asset model"
+                  title={t(
+                    "assets.bulkAssetModelUpdateDialog.createNewAssetModel"
+                  )}
+                  buttonLabel={t(
+                    "assets.bulkAssetModelUpdateDialog.createNewAssetModel"
+                  )}
                   onCreated={(created) => {
                     if (created?.type !== "assetModel") return;
                     const assetModel = created.entity;
@@ -169,7 +182,7 @@ export default function BulkAssetModelUpdateDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkAssetModelUpdateDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -177,7 +190,7 @@ export default function BulkAssetModelUpdateDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkAssetModelUpdateDialog.confirm")}
             </Button>
           </div>
         </div>

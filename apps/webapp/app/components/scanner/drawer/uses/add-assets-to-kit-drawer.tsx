@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { AssetStatus } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { z } from "zod";
 import {
@@ -70,6 +71,7 @@ export default function AddAssetsToKitDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   const { kit } = useLoaderData<typeof loader>();
   // The kit's members as this page loaded. Used only for the "already in this
   // kit" blocker: it may be slightly behind, and the write does not depend on
@@ -168,7 +170,7 @@ export default function AddAssetsToKitDrawer({
       }}
       items={items}
       onClearItems={clearList}
-      title="Items scanned"
+      title={t("scanner.addAssetsToKitDrawer.itemsScanned")}
       isLoading={isLoading}
       renderItem={renderItemRow}
       Blockers={Blockers}
@@ -189,6 +191,7 @@ export function AssetRow({
   asset: AssetFromQrWithKit;
   kit: { id: string; assetKits: Array<{ asset: { id: string } }> };
 }) {
+  const { t } = useTranslation();
   const assetKitLink = asset.assetKits[0];
   const assetKitId = assetKitLink?.kitId;
   const assetKit = assetKitLink?.kit;
@@ -270,10 +273,13 @@ export function AssetRow({
           {asset.title}
           {qtyTracked ? (
             <span className="ml-2 text-xs font-normal text-gray-500">
-              · {totalQty} {asset.unitOfMeasure || "units"}
+              · {totalQty}{" "}
+              {asset.unitOfMeasure || t("scanner.addAssetsToKitDrawer.units")}
               {pickerMeta && pickerMeta.maxAllowed < totalQty ? (
                 <span className="ml-1 text-warning-700">
-                  · {pickerMeta.maxAllowed} available
+                  {t("scanner.addAssetsToKitDrawer.available", {
+                    maxAllowed: pickerMeta.maxAllowed,
+                  })}
                 </span>
               ) : null}
             </span>
@@ -288,7 +294,7 @@ export function AssetRow({
               "text-xs text-gray-700"
             )}
           >
-            asset
+            {t("scanner.addAssetsToKitDrawer.asset")}
           </span>
           <AssetAvailabilityLabels />
         </div>
@@ -306,6 +312,7 @@ export function AssetRow({
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   // Use preset configurations to define the availability labels
   const availabilityConfigs = [
     {
@@ -328,7 +335,9 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
       <p className="word-break whitespace-break-spaces font-medium">
         {kit.name}{" "}
         <span className="text-[12px] font-normal text-gray-700">
-          ({kit._count.assetKits} assets)
+          {t("scanner.addAssetsToKitDrawer.assets", {
+            assetKits: kit._count.assetKits,
+          })}
         </span>
       </p>
 
@@ -340,7 +349,7 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.addAssetsToKitDrawer.kit")}
         </span>
         <KitAvailabilityLabels />
       </div>

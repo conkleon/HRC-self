@@ -11,6 +11,7 @@
  */
 
 import type { Booking } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { BookingStatusBadge } from "~/components/booking/booking-status-badge";
 import { Button } from "~/components/shared/button";
 import { DateS } from "~/components/shared/date";
@@ -38,6 +39,7 @@ export function ScanBookingHeader({
 }: {
   booking: ScanBookingHeaderBooking;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border border-b-0 bg-gray-50 px-3 py-2 text-sm">
       <div className="flex min-w-0 items-center gap-2">
@@ -55,12 +57,12 @@ export function ScanBookingHeader({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 text-gray-600">
-        <span className="sr-only">From</span>
+        <span className="sr-only">{t("scanner.scanBookingHeader.from")}</span>
         <span className="font-medium text-gray-900">
           <DateS date={booking.from} includeTime />
         </span>
         <span aria-hidden="true">→</span>
-        <span className="sr-only">to</span>
+        <span className="sr-only">{t("scanner.scanBookingHeader.to")}</span>
         <span className="font-medium text-gray-900">
           <DateS date={booking.to} includeTime />
         </span>

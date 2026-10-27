@@ -12,6 +12,7 @@
  *
  * @see {@link file://./../../modules/booking/utils.server.ts}
  */
+import { useTranslation } from "react-i18next";
 import type { BookingLifecycleProgress as Progress } from "~/modules/booking/utils.server";
 import { tw } from "~/utils/tw";
 import { InfoTooltip } from "../shared/info-tooltip";
@@ -43,6 +44,7 @@ function LegendItem({
  * @param progress - Result of `calculateBookingLifecycleProgress`.
  */
 export function BookingLifecycleProgress({ progress }: { progress: Progress }) {
+  const { t } = useTranslation();
   const {
     totalUnits,
     bookedCount,
@@ -76,13 +78,20 @@ export function BookingLifecycleProgress({ progress }: { progress: Progress }) {
             content={
               <>
                 {countMode === "units" ? (
-                  <p>Kits count as one item.</p>
+                  <p>
+                    {t("bookings.bookingLifecycleProgress.kitsCountAsOneItem")}
+                  </p>
                 ) : (
-                  <p>All assets inside kits are counted individually.</p>
+                  <p>
+                    {t(
+                      "bookings.bookingLifecycleProgress.allAssetsInsideKitsAre"
+                    )}
+                  </p>
                 )}
                 <p>
-                  Partial means a quantity-tracked asset has some, but not all,
-                  units out.
+                  {t(
+                    "bookings.bookingLifecycleProgress.partialMeansAQuantityTracked"
+                  )}
                 </p>
               </>
             }
@@ -95,7 +104,16 @@ export function BookingLifecycleProgress({ progress }: { progress: Progress }) {
 
       <div
         role="img"
-        aria-label={`${bookedCount} booked, ${partialCount} partial, ${checkedOutCount} checked out, ${returnedCount} returned, out of ${totalUnits}`}
+        aria-label={t(
+          "bookings.bookingLifecycleProgress.bookedPartialCheckedOutReturned",
+          {
+            bookedCount,
+            partialCount,
+            checkedOutCount,
+            returnedCount,
+            totalUnits,
+          }
+        )}
         className="flex h-2 w-full overflow-hidden rounded-full bg-gray-200"
       >
         <div
@@ -123,22 +141,22 @@ export function BookingLifecycleProgress({ progress }: { progress: Progress }) {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <LegendItem
           colorClassName="bg-gray-300"
-          label="Booked"
+          label={t("bookings.bookingLifecycleProgress.booked")}
           count={bookedCount}
         />
         <LegendItem
           colorClassName="bg-amber-500"
-          label="Partial"
+          label={t("bookings.bookingLifecycleProgress.partial")}
           count={partialCount}
         />
         <LegendItem
           colorClassName="bg-violet-600"
-          label="Fully out"
+          label={t("bookings.bookingLifecycleProgress.fullyOut")}
           count={checkedOutCount}
         />
         <LegendItem
           colorClassName="bg-green-500"
-          label="Returned"
+          label={t("bookings.bookingLifecycleProgress.returned")}
           count={returnedCount}
         />
       </div>

@@ -21,6 +21,7 @@
  * @see {@link file://./assets-list.tsx}
  */
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { Th } from "~/components/table";
 import { useSearchParams } from "~/hooks/search-params";
@@ -63,6 +64,7 @@ export function AssetModelSortHeader({
   className?: string;
   columnName?: string;
 }) {
+  const { t } = useTranslation();
   const { modelSortBy, modelSortDirection } =
     useLoaderData<AssetIndexLoaderData>();
   const [, setSearchParams] = useSearchParams();
@@ -105,7 +107,11 @@ export function AssetModelSortHeader({
         className="group/sort inline-flex items-center gap-1 rounded font-normal text-gray-600 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1"
       >
         {label}
-        {sortsBy ? <span className="sr-only">, sorts by {sortsBy}</span> : null}
+        {sortsBy ? (
+          <span className="sr-only">
+            {t("assets.assetModelSortHeader.sortsBy", { sortsBy })}
+          </span>
+        ) : null}
         <SortGlyph ariaSort={ariaSort} />
       </button>
     </Th>

@@ -1,0 +1,436 @@
+{
+  "scanner": {
+    "qrCodeScanner": "Σαρωτής κωδικών QR"
+  },
+  "cameraSelector": {
+    "switchCamera": "Αλλαγή κάμερας",
+    "cameraSelection": "Επιλογή κάμερας"
+  },
+  "codeScanner": {
+    "scanner": "Σαρωτής",
+    "camera": "Κάμερα",
+    "scanAgain": "Νέα σάρωση",
+    "codeDetected": "Εντοπίστηκε κωδικός",
+    "scannerPaused": "Ο σαρωτής σε παύση",
+    "scanWithYourBarcodeScanner": "Σαρώστε με τον σαρωτή γραμμωτού κώδικα ή πληκτρολογήστε έναν κωδικό και πατήστε Enter.",
+    "ifTheIssuePersistsPlease": "Αν το πρόβλημα παραμένει, επικοινωνήστε με την υποστήριξη.",
+    "reloadPage": "Επαναφόρτωση σελίδας",
+    "reloadPage2": "Επαναφόρτωση σελίδας",
+    "submitScannedCode": "Υποβολή σαρωμένου κωδικού: {{inputValue}}",
+    "unsupportedBarcodeDetected": "Εντοπίστηκε μη υποστηριζόμενος γραμμωτός κώδικας",
+    "waitingForScan": "Αναμονή για σάρωση...",
+    "pleaseClickOnTheText": "Κάντε κλικ στο πεδίο κειμένου πριν τη σάρωση",
+    "cameraInitializationIsTakingLonger": "Η ενεργοποίηση της κάμερας καθυστερεί περισσότερο από το αναμενόμενο. Επαναφορτώστε τη σελίδα",
+    "initializingCamera": "Ενεργοποίηση κάμερας..."
+  },
+  "scannedAssetQuantityInput": {
+    "qty": "Ποσ.",
+    "quantity": "Ποσότητα"
+  },
+  "genericItemRow": {
+    "code": "Κωδικός:",
+    "fetchingItem": "Φόρτωση στοιχείου",
+    "removeScannedItem": "Αφαίρεση σαρωμένου στοιχείου"
+  },
+  "actionSwitcher": {
+    "action": "Ενέργεια:",
+    "noColumnsFound": "Δεν βρέθηκαν στήλες",
+    "searchAction": "Αναζήτηση ενέργειας..."
+  },
+  "configurableDrawer": {
+    "listIsEmpty": "Η λίστα είναι κενή",
+    "fillListByScanningCodes": "Γεμίστε τη λίστα σαρώνοντας κωδικούς...",
+    "cancel": "Ακύρωση",
+    "scannedThisSession": "Σαρώθηκαν σε αυτή τη συνεδρία"
+  },
+  "scanBookingHeader": {
+    "from": "Από",
+    "to": "σε"
+  },
+  "baseDrawer": {
+    "clearList": "Καθαρισμός λίστας"
+  },
+  "blockersFactory": {
+    "resolveAll": "Επίλυση όλων ({{total}})",
+    "removeFromList": "Αφαίρεση από τη λίστα",
+    "needsAttention": "Χρειάζεται προσοχή",
+    "removesAllConflictingItemsFrom": "Αφαιρεί όλα τα στοιχεία που συγκρούονται από τη λίστα",
+    "resolveIssues_one": "Επιλύστε {{count}} ζήτημα παραπάνω για να συνεχίσετε.",
+    "resolveIssues_other": "Επιλύστε {{count}} ζητήματα παραπάνω για να συνεχίσετε."
+  },
+  "addAssetsToBookingDrawer": {
+    "pending": "Σε εκκρεμότητα",
+    "available": "· {{maxAllowed}} διαθέσιμες",
+    "asset": "αντικείμενο",
+    "assets": "({{assetKits}} αντικείμενα)",
+    "kit": "σετ",
+    "itemsScanned": "Σαρωμένα στοιχεία",
+    "units": "μονάδες"
+  },
+  "releaseCustodyDrawer": {
+    "releaseCustody": "Αποχρέωση",
+    "asset": "αντικείμενο",
+    "assets": "({{assetKits}} αντικείμενα)",
+    "kit": "σετ",
+    "releasingCustody": "Αποχρέωση",
+    "done": "Τέλος",
+    "haveBeenReleasedFromCustody": "αποχρεώθηκαν",
+    "failedToReleaseCustodyFrom": "Αποτυχία αποχρέωσης ({{type}}).",
+    "error": "Σφάλμα:",
+    "itemsScanned": "Σαρωμένα στοιχεία",
+    "releasingCustodyFromS": "Αποχρέωση ({{type}})",
+    "assets2": "Αντικείμενα",
+    "kits": "Σετ"
+  },
+  "addAssetsToKitDrawer": {
+    "available": "· {{maxAllowed}} διαθέσιμες",
+    "asset": "αντικείμενο",
+    "assets": "({{assetKits}} αντικείμενα)",
+    "kit": "σετ",
+    "itemsScanned": "Σαρωμένα στοιχεία",
+    "units": "μονάδες"
+  },
+  "assignCustodyDrawer": {
+    "assignCustodyTo": "Χρέωση σε:",
+    "assignCustody": "Χρέωση σε μέλος",
+    "asset": "αντικείμενο",
+    "noneLeftHere": "Δεν απομένει κανένα εδώ",
+    "assets": "({{assetKits}} αντικείμενα)",
+    "kit": "σετ",
+    "assigningCustody": "Χρέωση",
+    "done": "Τέλος",
+    "areNowInCustodyOf": "είναι πλέον σε χρέωση του/της {{custodianName}}",
+    "failedToAssignCustodyTo": "Αποτυχία χρέωσης ({{type}}).",
+    "error": "Σφάλμα:",
+    "itemsScanned": "Σαρωμένα στοιχεία",
+    "teamMembers": "Μέλη ομάδας",
+    "selectATeamMember": "Επιλέξτε μέλος ομάδας",
+    "fromLocation": "Από τοποθεσία",
+    "assigningCustodyToS": "Χρέωση ({{type}})",
+    "assets2": "Αντικείμενα",
+    "kits": "Σετ"
+  },
+  "pendingItemsList": {
+    "kit": "Σετ",
+    "kit2": "σετ",
+    "asset": "αντικείμενο",
+    "pending": "Σε εκκρεμότητα",
+    "pendingKit": "Σετ σε εκκρεμότητα",
+    "reconciled": "{{reconciled}}/{{booked}} διευθετήθηκαν",
+    "partiallyReconciled": "Μερικώς διευθετημένο",
+    "someUnitsWereAlreadyReconciled": "Ορισμένες μονάδες διευθετήθηκαν σε προηγούμενη επιστροφή. Οι υπόλοιπες μπορούν να επιστραφούν παρακάτω.",
+    "pendingCheckIn": "Σε αναμονή επιστροφής",
+    "needs": "χρειάζονται {{remaining}}",
+    "skipScanEnterDispositionInline": "Παράλειψη σάρωσης: ορίστε την κατάσταση παρακάτω.",
+    "assets": "αντικείμενα",
+    "asset2": "Αντικείμενο"
+  },
+  "updateLocationDrawer": {
+    "updateLocation": "Ενημέρωση τοποθεσίας:",
+    "updateLocation2": "Ενημέρωση τοποθεσίας",
+    "asset": "αντικείμενο",
+    "assets": "({{assetKits}} αντικείμενα)",
+    "kit": "σετ",
+    "addingToLocation": "Προσθήκη στην τοποθεσία",
+    "done": "Τέλος",
+    "assetsKitSuccessfullyAddedTo": "Τα αντικείμενα/σετ προστέθηκαν στην τοποθεσία",
+    "failedToAddAssetsKit": "Αποτυχία προσθήκης αντικειμένων/σετ στην τοποθεσία",
+    "error": "Σφάλμα:",
+    "itemsScanned": "Σαρωμένα στοιχεία",
+    "selectLocation": "Επιλέξτε τοποθεσία",
+    "addingAssetsKitToLocation": "Προσθήκη αντικειμένων/σετ στην τοποθεσία"
+  },
+  "addAssetsToLocationDrawer": {
+    "available": "· {{maxAllowed}} διαθέσιμες",
+    "asset": "αντικείμενο",
+    "assets": "({{assetKits}} αντικείμενα)",
+    "kit": "σετ",
+    "itemsScanned": "Σαρωμένα στοιχεία",
+    "units": "μονάδες"
+  },
+  "partialCheckoutDrawer": {
+    "assetsScanned": "{{submittedAssetIdsCount}}/{{remainingBookedAssets}} αντικείμενα σαρώθηκαν",
+    "allAssetsInsideKitsAre": "Όλα τα αντικείμενα μέσα σε σετ μετρούν μεμονωμένα",
+    "asset": "αντικείμενο",
+    "checkOut": "Παράδοση",
+    "of": "από {{remaining}}",
+    "kit": "σετ",
+    "cancel": "Ακύρωση",
+    "checkOutAssets": "Παράδοση αντικειμένων",
+    "ofAssetsToBeChecked": "({{uncheckedKitAssetsInBookingCount}} από {{totalKitAssetsInBooking}} αντικείμενα για παράδοση)",
+    "ofAssetsRemaining": "({{remainingKitAssetsInBookingCount}} από {{totalKitAssetsInBooking}} αντικείμενα απομένουν)",
+    "scannedThisSession": "Σαρώθηκαν σε αυτή τη συνεδρία",
+    "pending": "Σε εκκρεμότητα",
+    "checkOutQuantity": "Ποσότητα παράδοσης"
+  },
+  "partialCheckinDrawer": {
+    "kit": "Σετ",
+    "kit2": "σετ",
+    "asset": "αντικείμενο",
+    "booked": "Κρατήθηκαν",
+    "returned": "Επιστράφηκε",
+    "consumed": "Καταναλώθηκαν",
+    "lost": "Χάθηκαν",
+    "damaged": "Με ζημιά",
+    "remaining": "Απομένουν",
+    "of": "από {{remaining}}",
+    "pending": "σε εκκρεμότητα",
+    "cancel": "Ακύρωση",
+    "checkInAssets": "Επιστροφή αντικειμένων",
+    "notPartOfThisBooking": "δεν ανήκουν σε αυτή την κράτηση.",
+    "alreadyBeenCheckedInFor": "έχουν ήδη επιστραφεί για αυτή την κράτηση.",
+    "beenCheckedOutYetAnd": "δεν έχουν παραδοθεί ακόμη και δεν μπορούν να επιστραφούν.",
+    "alreadyCoveredByScannedKit": "καλύπτονται ήδη από σαρωμένους κωδικούς QR σετ.",
+    "noQuantityEntered": "δεν έχει οριστεί ποσότητα.",
+    "theRemainingQuantityOnThis": "την υπόλοιπη ποσότητα αυτής της κράτησης.",
+    "ofAssetsToBeChecked": "({{uncheckedKitAssetsInBookingCount}} από {{totalKitAssetsInBooking}} αντικείμενα για επιστροφή)",
+    "ofAssetsRemaining": "({{remainingKitAssetsInBookingCount}} από {{totalKitAssetsInBooking}} αντικείμενα απομένουν)",
+    "scannedThisSession": "Σαρώθηκαν σε αυτή τη συνεδρία",
+    "pending2": "Σε εκκρεμότητα",
+    "alreadyCheckedIn": "Έχει ήδη επιστραφεί",
+    "checkedIn": "Επιστράφηκε",
+    "allOfThisKitsAssets": "Όλα τα αντικείμενα αυτού του σετ στην κράτηση έχουν διευθετηθεί.",
+    "quantity": "Ποσότητα: {{primaryLabel}}",
+    "returnedQuantity": "Ποσότητα που επιστράφηκε",
+    "lostQuantity": "Ποσότητα που χάθηκε",
+    "damagedQuantity": "Ποσότητα με ζημιά",
+    "unitsLeftForAFuture": "Μονάδες για μελλοντική επιστροφή",
+    "fromKit": "Από σετ",
+    "quantityTrackedKitMember": "Μέλος σετ με παρακολούθηση ποσότητας",
+    "thisQuantityTrackedAssetIs": "Αυτό το αντικείμενο με παρακολούθηση ποσότητας ανήκει στο σαρωμένο σετ. Ορίστε πώς επιστρέφονται / καταναλώνονται / χάνονται / έχουν ζημιά οι μονάδες του.",
+    "noAssetsInThisBooking": "Δεν υπάρχουν αντικείμενα σε αυτή την κράτηση",
+    "assets": "αντικείμενα",
+    "asset2": "Αντικείμενο",
+    "allBookedUnitsForThis": "Όλες οι κρατημένες μονάδες αυτού του αντικειμένου έχουν ήδη διευθετηθεί σε αυτή την κράτηση.",
+    "thisAssetWasAlreadyChecked": "Αυτό το αντικείμενο επιστράφηκε ήδη σε προηγούμενη συνεδρία.",
+    "allUnitsCheckedIn": "Όλες οι μονάδες επιστράφηκαν",
+    "partiallyCheckedIn": "Μερικώς επιστραμμένη"
+  },
+  "fulfilReservationsDrawer": {
+    "scanReservedModelsToFulfil": "Σαρώστε τα δεσμευμένα μοντέλα για να καλύψετε αυτή την κράτηση. Σαρώσεις άλλων μοντέλων γίνονται δεκτές με προειδοποίηση.",
+    "model": "μοντέλο",
+    "pending": "Σε εκκρεμότητα",
+    "asset": "αντικείμενο",
+    "ready": "Έτοιμο",
+    "readyToCheckOut": "Έτοιμο για παράδοση",
+    "alreadyOnThisBookingRemove": "Ήδη σε αυτή την κράτηση· αφαιρέστε αυτή τη σάρωση",
+    "willBeAddedToBooking": "Θα προστεθεί στην κράτηση και θα παραδοθεί",
+    "kit": "σετ",
+    "alreadyIncluded": "Ήδη περιλαμβάνεται",
+    "cancel": "Ακύρωση",
+    "scannedThisSession": "Σαρώθηκαν σε αυτή τη συνεδρία",
+    "fulfilReservationsCheckOut": "Κάλυψη δεσμεύσεων και παράδοση",
+    "asset2": "Αντικείμενο",
+    "arrivesWithItsKit": "Έρχεται με το σετ του",
+    "alreadyHereNowCounts": "Ήδη εδώ, μετρά τώρα",
+    "assets": "αντικείμενα",
+    "assigns1ReservedUnit": "Καλύπτει 1 δεσμευμένη μονάδα"
+  },
+  "blockers": {
+    "custodyBlockers": {
+      "qtyNothingFree": {
+        "description": "Κάθε μονάδα είναι ήδη σε χρέωση, κατανεμημένη σε σετ ή εκτός σε κράτηση.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν έχει διαθέσιμες μονάδες.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν έχουν διαθέσιμες μονάδες."
+      },
+      "qtySourceEmpty": {
+        "description": "Επιλέξτε άλλη τοποθεσία για αυτά ή αφαιρέστε τα.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν έχει μονάδες στην επιλεγμένη τοποθεσία.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν έχουν μονάδες στην επιλεγμένη τοποθεσία."
+      },
+      "assetsCheckedOut": {
+        "description": "Σημείωση: Τα αντικείμενα σε παράδοση δεν μπορούν να χρεωθούν.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι σε παράδοση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι σε παράδοση."
+      },
+      "assetsPartOfKit": {
+        "description": "Σημείωση: Σαρώστε τον κωδικό QR του σετ για να προσθέσετε ολόκληρο το σετ",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> ανήκει σε σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> ανήκουν σε σετ."
+      },
+      "kitsCheckedOut": {
+        "description": "Σημείωση: Τα σετ σε παράδοση δεν μπορούν να χρεωθούν.",
+        "message_one": "<bold>{{count}} σετ</bold> είναι σε παράδοση.",
+        "message_other": "<bold>{{count}} σετ</bold> είναι σε παράδοση."
+      },
+      "qtyHeldViaKit": {
+        "description": "Σαρώστε τον κωδικό QR του σετ για να αποχρεώσετε ολόκληρο το σετ.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι σε χρέωση μέσω σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι σε χρέωση μέσω σετ."
+      },
+      "qtyNothingHeld": {
+        "description": "Δεν υπάρχει κάτι για αποχρέωση σε αυτά.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν έχει μονάδες σε χρέωση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν έχουν μονάδες σε χρέωση."
+      },
+      "qtySeveralHolders": {
+        "description": "Αποχρεώστε τα από τη λίστα χρεώσεων του αντικειμένου, όπου κάθε κάτοχος εμφανίζεται χωριστά.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι σε χρέωση σε περισσότερα από ένα άτομα.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι σε χρέωση σε περισσότερα από ένα άτομα."
+      },
+      "assetsNotInCustody": {
+        "description": "Μόνο αντικείμενα σε χρέωση μπορούν να αποχρεωθούν.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν είναι σε χρέωση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν είναι σε χρέωση."
+      },
+      "kitsNotInCustody": {
+        "description": "Μόνο σετ σε χρέωση μπορούν να αποχρεωθούν.",
+        "message_one": "<bold>{{count}} σετ</bold> δεν είναι σε χρέωση.",
+        "message_other": "<bold>{{count}} σετ</bold> δεν είναι σε χρέωση."
+      },
+      "assetsAlreadyInCustody": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι ήδη <bold>σε χρέωση</bold>.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι ήδη <bold>σε χρέωση</bold>."
+      },
+      "kitsInCustody": {
+        "message_one": "<bold>{{count}} σετ</bold> είναι ήδη <bold>σε χρέωση</bold>.",
+        "message_other": "<bold>{{count}} σετ</bold> είναι ήδη <bold>σε χρέωση</bold>."
+      },
+      "kitsWithAssetsInCustody": {
+        "message_one": "<bold>{{count}} σετ</bold> έχει ήδη αντικείμενα <bold>σε χρέωση</bold>.",
+        "message_other": "<bold>{{count}} σετ</bold> έχουν ήδη αντικείμενα <bold>σε χρέωση</bold>."
+      },
+      "assetsPartOfKitRelease": {
+        "description": "Σημείωση: Σαρώστε τον κωδικό QR του σετ για να αποχρεώσετε ολόκληρο το σετ",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> ανήκει σε σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> ανήκουν σε σετ."
+      }
+    },
+    "kitScanBlockers": {
+      "assetsWithCustody": {
+        "description": "Τα αντικείμενα σε χρέωση δεν μπορούν να προστεθούν σε σετ. Αποχρεώστε τα πρώτα.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν είναι διαθέσιμο για προσθήκη σε σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν είναι διαθέσιμα για προσθήκη σε σετ."
+      },
+      "assetsCheckedOut": {
+        "description": "Τα αντικείμενα σε παράδοση δεν μπορούν να προστεθούν σε σετ. Επιστρέψτε τα πρώτα.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι σε παράδοση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι σε παράδοση."
+      },
+      "kitsNotAllowed": {
+        "description": "Σημείωση: Μόνο μεμονωμένα αντικείμενα μπορούν να προστεθούν σε σετ.",
+        "message_one": "Εντοπίστηκε <bold>{{count}} σετ</bold>. Τα σετ δεν μπορούν να προστεθούν σε άλλα σετ.",
+        "message_other": "Εντοπίστηκαν <bold>{{count}} σετ</bold>. Τα σετ δεν μπορούν να προστεθούν σε άλλα σετ."
+      },
+      "assetsAlreadyAdded": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> έχει ήδη προστεθεί σε αυτό το σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> έχουν ήδη προστεθεί σε αυτό το σετ."
+      }
+    },
+    "partialCheckoutBlockers": {
+      "assetsAlreadyCheckedOut": {
+        "description": "Αυτά τα αντικείμενα δεν μπορούν να παραδοθούν ξανά",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> έχει ήδη παραδοθεί για αυτή την κράτηση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> έχουν ήδη παραδοθεί για αυτή την κράτηση."
+      },
+      "assetsInCustody": {
+        "description": "Αποχρεώστε αυτά τα αντικείμενα πριν τα παραδώσετε",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι σε χρέωση. Αποχρεώστε το πρώτα.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι σε χρέωση. Αποχρεώστε τα πρώτα."
+      },
+      "kitsAlreadyCheckedOut": {
+        "description": "Όλα τα αντικείμενα αυτών των σετ έχουν ήδη παραδοθεί",
+        "message_one": "<bold>{{count}} σετ</bold> έχει ήδη παραδοθεί για αυτή την κράτηση.",
+        "message_other": "<bold>{{count}} σετ</bold> έχουν ήδη παραδοθεί για αυτή την κράτηση."
+      },
+      "kitInCustody": {
+        "description": "Αποχρεώστε το σετ πριν το παραδώσετε σε κράτηση.",
+        "message_one": "<bold>{{count}} σετ</bold> είναι αυτή τη στιγμή <bold>σε χρέωση</bold>.",
+        "message_other": "<bold>{{count}} σετ</bold> είναι αυτή τη στιγμή <bold>σε χρέωση</bold>."
+      },
+      "kitsBookedElsewhere": {
+        "description": "Άλλη κράτηση δεσμεύει αυτό το σετ για επικαλυπτόμενη περίοδο ή δεν έχει επιστραφεί από εκπρόθεσμη κράτηση.",
+        "message_one": "<bold>{{count}} σετ</bold> είναι ήδη κρατημένο ή σε παράδοση σε άλλη κράτηση.",
+        "message_other": "<bold>{{count}} σετ</bold> είναι ήδη κρατημένα ή σε παράδοση σε άλλη κράτηση."
+      },
+      "kitAssetsBookedElsewhere": {
+        "description": "Το σετ στο οποίο ανήκουν αυτά τα αντικείμενα σε αυτή την κράτηση δεσμεύεται από άλλη κράτηση.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> ανήκει σε σετ που είναι κρατημένο ή σε παράδοση σε άλλη κράτηση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> ανήκουν σε σετ που είναι κρατημένο ή σε παράδοση σε άλλη κράτηση."
+      },
+      "redundantKitAssets": {
+        "description": "Οι κωδικοί QR των σετ περιλαμβάνουν αυτόματα όλα τα αντικείμενα του σετ",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> καλύπτεται ήδη από σαρωμένους κωδικούς QR σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> καλύπτονται ήδη από σαρωμένους κωδικούς QR σετ."
+      },
+      "assetsNotInBooking": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν ανήκει σε αυτή την κράτηση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν ανήκουν σε αυτή την κράτηση."
+      },
+      "kitsNotInBooking": {
+        "message_one": "<bold>{{count}} σετ</bold> δεν ανήκει σε αυτή την κράτηση.",
+        "message_other": "<bold>{{count}} σετ</bold> δεν ανήκουν σε αυτή την κράτηση."
+      },
+      "invalidCodes": {
+        "message_one": "<bold>{{count}} κωδικός QR</bold> δεν είναι έγκυρος.",
+        "message_other": "<bold>{{count}} κωδικοί QR</bold> δεν είναι έγκυροι."
+      }
+    },
+    "fulfilReservationsDrawer": {
+      "kitMembers": {
+        "description": "Σαρώστε το σετ για να το πάρετε ολόκληρο ή σαρώστε άλλη μονάδα του ίδιου μοντέλου. Αν βγει μόνο ένα μέλος του, το σετ θα διασπαστεί.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> ανήκει σε σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> ανήκουν σε σετ."
+      },
+      "invalidCodes": {
+        "message_one": "<bold>{{count}} κωδικός QR</bold> δεν είναι έγκυρος.",
+        "message_other": "<bold>{{count}} κωδικοί QR</bold> δεν είναι έγκυροι."
+      }
+    },
+    "bookingScanBlockers": {
+      "assetsPartOfKit": {
+        "description": "Σημείωση: Σαρώστε τον κωδικό QR του σετ για να τα προσθέσετε. Το σετ καλύπτει όσες δεσμευμένες μονάδες αντιστοιχούν στα αντικείμενά του.",
+        "message_one": "<bold>{{count}} αντικείμενο</bold> ανήκει σε σετ.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> ανήκουν σε σετ."
+      },
+      "assetsCheckedOut": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> έχει ήδη παραδοθεί.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> έχουν ήδη παραδοθεί."
+      },
+      "qtyNoUnits": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> δεν έχει διαθέσιμες μονάδες.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> δεν έχουν διαθέσιμες μονάδες."
+      },
+      "kitsCheckedOut": {
+        "message_one": "<bold>{{count}} σετ</bold> έχει ήδη παραδοθεί.",
+        "message_other": "<bold>{{count}} σετ</bold> έχουν ήδη παραδοθεί."
+      },
+      "assetsUnavailable": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> έχει σημειωθεί ως <bold>μη διαθέσιμο</bold>.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> έχουν σημειωθεί ως <bold>μη διαθέσιμα</bold>."
+      },
+      "assetsAlreadyAdded": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> έχει ήδη προστεθεί στην κράτηση.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> έχουν ήδη προστεθεί στην κράτηση."
+      },
+      "kitsWithUnavailableAssets": {
+        "message_one": "<bold>{{count}} σετ</bold> περιέχει μη διαθέσιμα αντικείμενα.",
+        "message_other": "<bold>{{count}} σετ</bold> περιέχουν μη διαθέσιμα αντικείμενα."
+      }
+    },
+    "scanBlockerHelpers": {
+      "invalidCodes": {
+        "message_one": "<bold>{{count}} κωδικός QR</bold> δεν είναι έγκυρος.",
+        "message_other": "<bold>{{count}} κωδικοί QR</bold> δεν είναι έγκυροι."
+      },
+      "assetsArchived": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> είναι αρχειοθετημένο.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> είναι αρχειοθετημένα."
+      },
+      "kitsOnlyArchived": {
+        "message_one": "<bold>{{count}} σετ</bold> περιέχει μόνο αρχειοθετημένα αντικείμενα.",
+        "message_other": "<bold>{{count}} σετ</bold> περιέχουν μόνο αρχειοθετημένα αντικείμενα."
+      }
+    },
+    "locationScanBlockers": {
+      "assetsAlreadyAdded": {
+        "message_one": "<bold>{{count}} αντικείμενο</bold> έχει ήδη προστεθεί σε αυτή την τοποθεσία.",
+        "message_other": "<bold>{{count}} αντικείμενα</bold> έχουν ήδη προστεθεί σε αυτή την τοποθεσία."
+      },
+      "kitsAlreadyAdded": {
+        "message_one": "<bold>{{count}} σετ</bold> έχει ήδη προστεθεί σε αυτή την τοποθεσία.",
+        "message_other": "<bold>{{count}} σετ</bold> έχουν ήδη προστεθεί σε αυτή την τοποθεσία."
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useAtomValue } from "jotai";
 import { ChevronRightIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { selectedBulkItemsAtom } from "~/atoms/list";
 import { BulkUpdateDialogTrigger } from "~/components/bulk-update-dialog/bulk-update-dialog";
@@ -31,13 +32,15 @@ import AddAssetsToExistingBookingDialog from "./add-assets-to-existing-booking-d
 import CreateBookingForSelectedAssetsDialog from "./create-booking-for-selected-assets-dialog";
 
 export default function BookSelectedAssetsDropdown() {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button type="button" variant="secondary">
         <span className="flex items-center gap-2">
-          Book <ChevronRightIcon className="chev size-4" />
+          {t("assets.bookSelectedAssetsDropdown.book")}{" "}
+          <ChevronRightIcon className="chev size-4" />
         </span>
       </Button>
     );
@@ -47,6 +50,7 @@ export default function BookSelectedAssetsDropdown() {
 }
 
 function ConditionalActionsDropdown() {
+  const { t } = useTranslation();
   const {
     ref: dropdownRef,
     onOpenChange,
@@ -219,7 +223,9 @@ function ConditionalActionsDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="bookings"
-                  label="Create new booking"
+                  label={t(
+                    "assets.bookSelectedAssetsDropdown.createNewBooking"
+                  )}
                   onClick={closeMenu}
                   disabled={disabledReason}
                 />
@@ -235,7 +241,7 @@ function ConditionalActionsDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="booking-exist"
-                  label="Add to existing"
+                  label={t("assets.bookSelectedAssetsDropdown.addToExisting")}
                   onClick={closeMenu}
                   disabled={disabledReason}
                 />

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { data, redirect, useLoaderData, useNavigation } from "react-router";
 import { z } from "zod";
@@ -249,6 +250,7 @@ export function links() {
 }
 
 export default function Custody() {
+  const { t } = useTranslation();
   const { custody, asset } = useLoaderData<typeof loader>();
   const transition = useNavigation();
   const disabled = isFormProcessing(transition.state);
@@ -262,23 +264,35 @@ export default function Custody() {
           <UserXIcon />
         </div>
         <div className="mb-5">
-          <h4>Release custody of asset</h4>
+          <h4>
+            {t(
+              "assets.assetsAssetidOverviewReleaseCustody.releaseCustodyOfAsset"
+            )}
+          </h4>
           <p>
-            Are you sure you want to release{" "}
             {assignsSelfOnly ? (
-              "your"
+              <Trans
+                t={t}
+                i18nKey="assets.assetsAssetidOverviewReleaseCustody.confirmOwn"
+                values={{ asset: asset.title }}
+                components={{ bold: <span className="font-medium" /> }}
+              />
             ) : (
-              <span className="font-medium">
-                {custody?.custodian
-                  ? resolveTeamMemberName({
-                      name: custody.custodian.name,
-                      user: custody.custodian.user,
-                    })
-                  : ""}
-                's'
-              </span>
-            )}{" "}
-            custody over <span className="font-medium">{asset.title}</span>?
+              <Trans
+                t={t}
+                i18nKey="assets.assetsAssetidOverviewReleaseCustody.confirmOther"
+                values={{
+                  asset: asset.title,
+                  custodian: custody?.custodian
+                    ? resolveTeamMemberName({
+                        name: custody.custodian.name,
+                        user: custody.custodian.user,
+                      })
+                    : "",
+                }}
+                components={{ bold: <span className="font-medium" /> }}
+              />
+            )}
           </p>
         </div>
         <div className="">
@@ -301,7 +315,7 @@ export default function Custody() {
               width="full"
               disabled={disabled}
             >
-              Cancel
+              {t("assets.assetsAssetidOverviewReleaseCustody.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -309,7 +323,7 @@ export default function Custody() {
               type="submit"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.assetsAssetidOverviewReleaseCustody.confirm")}
             </Button>
           </Form>
         </div>

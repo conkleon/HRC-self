@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { Search, BookMarked, BookOpen, Save } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   useActionData,
   useLoaderData,
@@ -196,6 +197,7 @@ function presetsUIReducer(
  */
 // react-doctor:no-giant-component — deferred for follow-up refactor
 export function SavedFilterPresetsControls() {
+  const { t } = useTranslation();
   const loaderData = useLoaderData<LoaderData>();
   const {
     savedFilterPresets: loaderPresets = [],
@@ -485,7 +487,7 @@ export function SavedFilterPresetsControls() {
               <span className="hidden whitespace-nowrap md:inline">
                 {presets.length > 0
                   ? `Saved Filters (${presets.length})`
-                  : "Saved Filters"}
+                  : t("assets.savedFilterPresets.savedFilters")}
               </span>
             </div>
           </Button>
@@ -503,12 +505,12 @@ export function SavedFilterPresetsControls() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-gray-900">
-                    No saved filters yet
+                    {t("assets.savedFilterPresets.noSavedFiltersYet")}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Save your current filter configuration to quickly access it
-                    later. Apply filters, then click Save in the filters menu to
-                    create your first preset.
+                    {t(
+                      "assets.savedFilterPresets.saveYourCurrentFilterConfiguration"
+                    )}
                   </p>
                   {hasActiveFilters && (
                     <Button
@@ -520,7 +522,7 @@ export function SavedFilterPresetsControls() {
                     >
                       <div className="flex items-center gap-2">
                         <Save className="size-4" />
-                        Save Filter
+                        {t("assets.savedFilterPresets.saveFilter")}
                       </div>
                     </Button>
                   )}
@@ -533,7 +535,7 @@ export function SavedFilterPresetsControls() {
                   <Search className="ml-4 size-4 text-gray-500" />
                   <input
                     ref={searchInputRef}
-                    placeholder="Search presets..."
+                    placeholder={t("assets.savedFilterPresets.searchPresets")}
                     className="w-full border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
                     value={searchQuery}
                     onChange={handleSearch}
@@ -543,7 +545,7 @@ export function SavedFilterPresetsControls() {
 
                 {allFilteredPresets.length === 0 ? (
                   <div className="px-3 py-6 text-center text-sm text-gray-500">
-                    No presets found
+                    {t("assets.savedFilterPresets.noPresetsFound")}
                   </div>
                 ) : (
                   <div className="max-h-[400px] space-y-3 overflow-y-auto p-3">
@@ -551,7 +553,7 @@ export function SavedFilterPresetsControls() {
                     {filteredStarredPresets.length > 0 && (
                       <div>
                         <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                          Starred
+                          {t("assets.savedFilterPresets.starred")}
                         </div>
                         <div className="space-y-1">
                           {filteredStarredPresets.map((preset, index) => (
@@ -588,7 +590,7 @@ export function SavedFilterPresetsControls() {
                       <div>
                         {filteredStarredPresets.length > 0 && (
                           <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            All presets
+                            {t("assets.savedFilterPresets.allPresets")}
                           </div>
                         )}
                         <div className="space-y-1">

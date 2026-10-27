@@ -1,5 +1,6 @@
 import { useAtomValue } from "jotai";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -37,6 +38,7 @@ export const BulkStartAuditSchema = BaseAuditSchema.extend({
 );
 
 export default function BulkStartAuditDialog() {
+  const { t } = useTranslation();
   const { totalItems } = useLoaderData<IndexResponse>();
   const selectedItems = useAtomValue(selectedBulkItemsAtom);
   const selectedCount = useAtomValue(selectedBulkItemsCountAtom);
@@ -60,10 +62,10 @@ export default function BulkStartAuditDialog() {
       ref={zo.ref}
       type="start-audit"
       className="md:w-[800px]"
-      title="Start an audit"
-      description={`You're about to start an audit for ${displayCount} asset${
-        displayCount === 1 ? "" : "s"
-      }.`}
+      title={t("assets.bulkStartAuditDialog.startAnAudit")}
+      description={t("assets.bulkStartAuditDialog.description", {
+        count: displayCount,
+      })}
       actionUrl="/api/audits/start"
       arrayFieldId="assetIds"
       formClassName="px-0"

@@ -18,6 +18,7 @@ import {
   CalendarCheck2Icon,
   CalendarX2Icon,
 } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { useFetcher, useLoaderData } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { ChevronRight } from "~/components/icons/library";
@@ -66,6 +67,7 @@ import When from "../when/when";
 
 // react-doctor:no-giant-component — deferred for follow-up refactor
 const ConditionalActionsDropdown = () => {
+  const { t } = useTranslation();
   const { asset, custodySources } = useLoaderData<typeof loader>();
   const [isRelinkQrDialogOpen, setIsRelinkQrDialogOpen] = useState(false);
   const [isSetReminderDialogOpen, setIsSetReminderDialogOpen] = useState(false);
@@ -219,7 +221,8 @@ const ConditionalActionsDropdown = () => {
             className="asset-actions hidden md:flex"
           >
             <span className="flex items-center gap-2">
-              Actions <ChevronRight className="chev" />
+              {t("assets.actionsDropdown.actions")}{" "}
+              <ChevronRight className="chev" />
             </span>
           </Button>
         </PopoverTrigger>
@@ -233,7 +236,8 @@ const ConditionalActionsDropdown = () => {
           onClick={() => setOpen(true)}
         >
           <span className="flex items-center gap-2">
-            Actions <ChevronRight className="chev" />
+            {t("assets.actionsDropdown.actions")}{" "}
+            <ChevronRight className="chev" />
           </span>
         </Button>
 
@@ -266,7 +270,8 @@ const ConditionalActionsDropdown = () => {
                     }}
                   >
                     <span className="flex items-center gap-2">
-                      <ArrowUpDownIcon className="size-5" /> Adjust quantity
+                      <ArrowUpDownIcon className="size-5" />{" "}
+                      {t("assets.actionsDropdown.adjustQuantity")}
                     </span>
                   </Button>
                 </div>
@@ -305,7 +310,10 @@ const ConditionalActionsDropdown = () => {
                     >
                       <span className="flex items-center gap-2">
                         <Icon icon="assign-custody" />{" "}
-                        {assignsSelfOnly ? "Take" : "Assign"} custody
+                        {assignsSelfOnly
+                          ? t("assets.actionsDropdown.take")
+                          : t("assets.actionsDropdown.assign")}{" "}
+                        {t("assets.actionsDropdown.custody")}
                       </span>
                     </Button>
                   ) : assetCanBeReleased ? (
@@ -324,7 +332,8 @@ const ConditionalActionsDropdown = () => {
                       }
                     >
                       <span className="flex items-center gap-1">
-                        <Icon icon="release-custody" /> Release custody
+                        <Icon icon="release-custody" />{" "}
+                        {t("assets.actionsDropdown.releaseCustody")}
                       </span>
                     </Button>
                   ) : (
@@ -345,7 +354,10 @@ const ConditionalActionsDropdown = () => {
                     >
                       <span className="flex items-center gap-2">
                         <Icon icon="assign-custody" />{" "}
-                        {assignsSelfOnly ? "Take" : "Assign"} custody
+                        {assignsSelfOnly
+                          ? t("assets.actionsDropdown.take")
+                          : t("assets.actionsDropdown.assign")}{" "}
+                        {t("assets.actionsDropdown.custody")}
                       </span>
                     </Button>
                   )}
@@ -386,10 +398,12 @@ const ConditionalActionsDropdown = () => {
                         ? {
                             reason: (
                               <>
-                                This asset's location is managed by its parent
-                                kit{" "}
-                                <strong>"{assetKitMembership?.name}"</strong>.
-                                Update the kit's location instead.
+                                <Trans
+                                  t={t}
+                                  i18nKey="assets.actionsDropdown.thisAssetsLocationIsManaged"
+                                  values={{ name: assetKitMembership?.name }}
+                                  components={[<strong key="slot0" />]}
+                                />
                               </>
                             ),
                           }
@@ -398,7 +412,9 @@ const ConditionalActionsDropdown = () => {
                   >
                     <span className="flex items-center gap-2">
                       <Icon icon="location" />{" "}
-                      {isQtyTracked ? "Manage placements" : "Update location"}
+                      {isQtyTracked
+                        ? t("assets.actionsDropdown.managePlacements")
+                        : t("assets.actionsDropdown.updateLocation")}
                     </span>
                   </Button>
                 </div>
@@ -425,7 +441,7 @@ const ConditionalActionsDropdown = () => {
                   >
                     <span className="flex items-center gap-2">
                       <Icon icon="barcode" />
-                      Relink QR Code
+                      {t("assets.actionsDropdown.relinkQrCode")}
                     </span>
                   </Button>
                 </div>
@@ -463,8 +479,8 @@ const ConditionalActionsDropdown = () => {
                         <CalendarCheck2Icon className="size-5" />
                       )}
                       {isAvailableToBook
-                        ? "Mark as unavailable"
-                        : "Mark as available"}
+                        ? t("assets.actionsDropdown.markAsUnavailable")
+                        : t("assets.actionsDropdown.markAsAvailable")}
                     </span>
                   </Button>
                 </div>
@@ -487,7 +503,7 @@ const ConditionalActionsDropdown = () => {
                   >
                     <span className="flex items-center gap-2">
                       <AlarmClockIcon className="size-5" />
-                      Set reminder
+                      {t("assets.actionsDropdown.setReminder")}
                     </span>
                   </Button>
                 </div>
@@ -504,7 +520,7 @@ const ConditionalActionsDropdown = () => {
                     disabled={archivedActionDisabled}
                   >
                     <span className="flex items-center gap-2">
-                      <Icon icon="pen" /> Edit
+                      <Icon icon="pen" /> {t("assets.actionsDropdown.edit")}
                     </span>
                   </Button>
                 </div>
@@ -519,7 +535,8 @@ const ConditionalActionsDropdown = () => {
                     disabled={archivedActionDisabled}
                   >
                     <span className="flex items-center gap-2">
-                      <Icon icon="duplicate" /> Duplicate
+                      <Icon icon="duplicate" />{" "}
+                      {t("assets.actionsDropdown.duplicate")}
                     </span>
                   </Button>
                 </div>
@@ -559,7 +576,9 @@ const ConditionalActionsDropdown = () => {
                         ) : (
                           <ArchiveIcon className="size-5" />
                         )}
-                        {isArchived ? "Reinstate" : "Archive"}
+                        {isArchived
+                          ? t("assets.actionsDropdown.reinstate")
+                          : t("assets.actionsDropdown.archive")}
                       </span>
                     </Button>
                   </div>
@@ -586,7 +605,7 @@ const ConditionalActionsDropdown = () => {
                           assetIsCheckedOut || assetIsPartOfUnavailableKit
                         }
                       >
-                        Delete
+                        {t("assets.actionsDropdown.delete")}
                       </Button>
                     }
                   />
@@ -604,18 +623,17 @@ const ConditionalActionsDropdown = () => {
                   width="full"
                   onClick={handleMenuClose}
                 >
-                  Close
+                  {t("assets.actionsDropdown.close")}
                 </Button>
               </div>
               {assetIsCheckedOut ? (
                 <div className=" border-t p-2 text-left text-xs">
-                  Some actions are disabled due to the asset being checked out.
+                  {t("assets.actionsDropdown.someActionsAreDisabledDue")}
                 </div>
               ) : null}
               {assetIsPartOfUnavailableKit ? (
                 <div className=" border-t p-2 text-left text-xs">
-                  Some actions are disabled due to the asset being part of a
-                  kit.
+                  {t("assets.actionsDropdown.someActionsAreDisabledDue2")}
                 </div>
               ) : null}
             </div>
@@ -631,7 +649,9 @@ const ConditionalActionsDropdown = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Model reservations affected</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("assets.actionsDropdown.modelReservationsAffected")}
+            </AlertDialogTitle>
             <AlertDialogDescription>{shortfallWarning}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -642,7 +662,7 @@ const ConditionalActionsDropdown = () => {
                   variant="secondary"
                   disabled={isArchiveSubmitting}
                 >
-                  Cancel
+                  {t("assets.actionsDropdown.cancel")}
                 </Button>
               </AlertDialogCancel>
               <Button
@@ -658,7 +678,7 @@ const ConditionalActionsDropdown = () => {
                   );
                 }}
               >
-                Archive anyway
+                {t("assets.actionsDropdown.archiveAnyway")}
               </Button>
             </div>
           </AlertDialogFooter>
@@ -716,13 +736,15 @@ const ConditionalActionsDropdown = () => {
 };
 
 const ActionsDropdown = () => {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated)
     return (
       <Button variant="secondary" to="#" data-test-id="assetActionsButton">
         <span className="flex items-center gap-2">
-          Actions <ChevronRight className="chev rotate-90" />
+          {t("assets.actionsDropdown.actions")}{" "}
+          <ChevronRight className="chev rotate-90" />
         </span>
       </Button>
     );

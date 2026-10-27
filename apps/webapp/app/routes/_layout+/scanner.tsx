@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAtom, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import type {
   LinksFunction,
   LoaderFunctionArgs,
@@ -159,6 +160,7 @@ export const meta: MetaFunction<typeof loader> = () => [
 const MIN_SCANNER_HEIGHT = 400;
 
 const QRScanner = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [paused, setPaused] = useState<boolean>(false);
   const [scanMessage, setScanMessage] = useState<string>(
@@ -319,7 +321,11 @@ const QRScanner = () => {
 
   return (
     <>
-      <Header title="QR code scanner" hidePageDescription hideBreadcrumbs />
+      <Header
+        title={t("scanner.scanner.qrCodeScanner")}
+        hidePageDescription
+        hideBreadcrumbs
+      />
       <div
         ref={scannerContainerRef}
         className="-mx-4 flex flex-col overflow-hidden"

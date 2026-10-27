@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { useAtomValue } from "jotai";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -69,6 +70,7 @@ function BookingSelect({
   /** Zorm/server validation message for the `id` field. */
   errorMessage?: string;
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
@@ -140,7 +142,7 @@ function BookingSelect({
           >
             <div className="flex items-center justify-between p-3">
               <div className="text-xs font-semibold text-gray-700">
-                Existing bookings
+                {t("assets.addAssetsToExistingBookingDialog.existingBookings")}
               </div>
               <When truthy={Boolean(selectedBooking)}>
                 <Button
@@ -150,7 +152,7 @@ function BookingSelect({
                   className="whitespace-nowrap text-xs font-normal text-gray-500 hover:text-gray-600"
                   onClick={() => setSelectedId(undefined)}
                 >
-                  Clear selection
+                  {t("assets.addAssetsToExistingBookingDialog.clearSelection")}
                 </Button>
               </When>
             </div>
@@ -159,8 +161,12 @@ function BookingSelect({
               <Input
                 ref={searchInputRef}
                 type="text"
-                label="Search bookings"
-                placeholder="Search bookings"
+                label={t(
+                  "assets.addAssetsToExistingBookingDialog.searchBookings"
+                )}
+                placeholder={t(
+                  "assets.addAssetsToExistingBookingDialog.searchBookings"
+                )}
                 hideLabel
                 className="text-gray-500"
                 icon="search"
@@ -172,15 +178,23 @@ function BookingSelect({
             <div
               className="max-h-[320px] divide-y overflow-y-auto"
               role="listbox"
-              aria-label="Existing bookings"
+              aria-label={t(
+                "assets.addAssetsToExistingBookingDialog.existingBookings"
+              )}
             >
               {filteredBookings.length === 0 ? (
                 <div className="p-4 text-center text-sm text-gray-500">
                   {isLoading
-                    ? "Fetching bookings..."
+                    ? t(
+                        "assets.addAssetsToExistingBookingDialog.fetchingBookings"
+                      )
                     : searchQuery
-                    ? "No bookings found"
-                    : "No open bookings available"}
+                    ? t(
+                        "assets.addAssetsToExistingBookingDialog.noBookingsFound"
+                      )
+                    : t(
+                        "assets.addAssetsToExistingBookingDialog.noOpenBookingsAvailable"
+                      )}
                 </div>
               ) : (
                 filteredBookings.map((booking) => (
@@ -232,6 +246,7 @@ function BookingSelect({
 }
 
 export default function AddAssetsToExistingBookingDialog() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const zo = useZorm(
@@ -274,8 +289,11 @@ export default function AddAssetsToExistingBookingDialog() {
       ref={zo.ref}
       type="booking-exist"
       arrayFieldId="assetsIds"
-      title="Add to existing booking"
-      description={`Add selected(${selectedAssets.length}) assets to existing booking.`}
+      title={t("assets.addAssetsToExistingBookingDialog.addToExistingBooking")}
+      description={t(
+        "assets.addAssetsToExistingBookingDialog.addSelectedAssetsToExisting",
+        { selectedAssetsCount: selectedAssets.length }
+      )}
       actionUrl="/api/assets/add-to-booking"
       className="lg:w-[600px]"
       skipCloseOnSuccess
@@ -301,19 +319,24 @@ export default function AddAssetsToExistingBookingDialog() {
                 errorMessage={zo.errors.id()?.message}
               />
               <div className="mb-4 mt-2 text-gray-500">
-                <span className="font-medium text-gray-600">Draft</span>,{" "}
-                <span className="font-medium text-gray-600">Reserved</span>,{" "}
-                <span className="font-medium text-gray-600">Ongoing</span> and{" "}
-                <span className="font-medium text-gray-600">Overdue</span>{" "}
-                bookings are shown. Assets added to an ongoing booking stay
-                available until you check them out.
+                <Trans
+                  t={t}
+                  i18nKey="assets.addAssetsToExistingBookingDialog.text0Draft01Reserved"
+                  components={[
+                    <span key="slot0" className="font-medium text-gray-600" />,
+                    <span key="slot1" className="font-medium text-gray-600" />,
+                    <span key="slot2" className="font-medium text-gray-600" />,
+                    <span key="slot3" className="font-medium text-gray-600" />,
+                  ]}
+                />
               </div>
 
               <When truthy={!isFetchingBookings && bookings.length === 0}>
                 <div className="mb-4 rounded-md border border-gray-300 bg-gray-25 p-2">
                   <p className="text-sm text-gray-600">
-                    No open bookings found. Create a new booking first to add
-                    assets to it.
+                    {t(
+                      "assets.addAssetsToExistingBookingDialog.noOpenBookingsFoundCreate"
+                    )}
                   </p>
                 </div>
               </When>
@@ -330,7 +353,11 @@ export default function AddAssetsToExistingBookingDialog() {
                     }
                   >
                     <div className="mt-4">
-                      <p>Already added assets are : </p>
+                      <p>
+                        {t(
+                          "assets.addAssetsToExistingBookingDialog.alreadyAddedAssetsAre"
+                        )}{" "}
+                      </p>
                       <ul className="mb-2 list-inside list-disc">
                         {fetcherErrorAdditionalData?.alreadyAddedAssets?.map(
                           (asset: Pick<Asset, "id" | "title">) => (
@@ -353,7 +380,9 @@ export default function AddAssetsToExistingBookingDialog() {
                           className="w-full"
                           variant="secondary"
                         >
-                          Add only the rest of the assets
+                          {t(
+                            "assets.addAssetsToExistingBookingDialog.addOnlyTheRestOf"
+                          )}
                         </Button>
                       </When>
                     </div>
@@ -369,7 +398,7 @@ export default function AddAssetsToExistingBookingDialog() {
                   disabled={disabled}
                   onClick={handleCloseDialog}
                 >
-                  Cancel
+                  {t("assets.addAssetsToExistingBookingDialog.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -377,7 +406,7 @@ export default function AddAssetsToExistingBookingDialog() {
                   width="full"
                   disabled={disabled}
                 >
-                  Confirm
+                  {t("assets.addAssetsToExistingBookingDialog.confirm")}
                 </Button>
               </div>
             </div>
@@ -387,10 +416,13 @@ export default function AddAssetsToExistingBookingDialog() {
           <When truthy={!!fetcherData?.success}>
             <div>
               <div className="mb-4 rounded-md border border-success-500 p-2 text-success-500">
-                <h5 className="text-success-500">Booking updated</h5>
+                <h5 className="text-success-500">
+                  {t("assets.addAssetsToExistingBookingDialog.bookingUpdated")}
+                </h5>
                 <p>
-                  The assets you selected have been added to the booking. Do you
-                  want to add more or view the booking?
+                  {t(
+                    "assets.addAssetsToExistingBookingDialog.theAssetsYouSelectedHave"
+                  )}
                 </p>
               </div>
 
@@ -402,7 +434,7 @@ export default function AddAssetsToExistingBookingDialog() {
                   disabled={disabled}
                   onClick={handleCloseDialog}
                 >
-                  Add more
+                  {t("assets.addAssetsToExistingBookingDialog.addMore")}
                 </Button>
                 <Button
                   type="button"
@@ -413,7 +445,7 @@ export default function AddAssetsToExistingBookingDialog() {
                     void navigate(`/bookings/${fetcherData?.bookingId}`);
                   }}
                 >
-                  View booking
+                  {t("assets.addAssetsToExistingBookingDialog.viewBooking")}
                 </Button>
               </div>
             </div>

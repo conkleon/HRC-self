@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { archivedAssetsLeftOut } from "@shelf/labels";
 import { CalendarCheck } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -317,6 +318,7 @@ export function links() {
 }
 
 export default function ExistingBooking() {
+  const { t } = useTranslation();
   const { ids } = useLoaderData<typeof loader>();
 
   const actionData = useActionData<typeof action>();
@@ -329,11 +331,11 @@ export default function ExistingBooking() {
           <CalendarCheck />
         </div>
         <div className="mb-5">
-          <h3>Add to Existing Booking</h3>
+          <h3>
+            {t("kits.kitsKitidAssetsAddToExistingBooking.addToExistingBooking")}
+          </h3>
           <div>
-            You can add a kit to Draft, Reserved, Ongoing or Overdue bookings.
-            Kits added to an ongoing booking stay available until you check them
-            out.
+            {t("kits.kitsKitidAssetsAddToExistingBooking.youCanAddAKit")}
           </div>
         </div>
         {ids?.map((item, i) => (
@@ -351,10 +353,14 @@ export default function ExistingBooking() {
               status: ADDABLE_BOOKING_STATUSES.join(","),
             }}
             fieldName="bookingId"
-            contentLabel=" Existing Bookings"
+            contentLabel={t(
+              "kits.kitsKitidAssetsAddToExistingBooking.existingBookings"
+            )}
             initialDataKey="bookings"
             countKey="bookingCount"
-            placeholder="Select a Booking"
+            placeholder={t(
+              "kits.kitsKitidAssetsAddToExistingBooking.selectABooking"
+            )}
             allowClear
             closeOnSelect
             required={true}
@@ -376,11 +382,16 @@ export default function ExistingBooking() {
             }
           />
           <div className="mt-2 text-gray-500">
-            <span className="font-medium text-gray-600">Draft</span>,{" "}
-            <span className="font-medium text-gray-600">Reserved</span>,{" "}
-            <span className="font-medium text-gray-600">Ongoing</span> and{" "}
-            <span className="font-medium text-gray-600">Overdue</span> bookings
-            are visible
+            <Trans
+              t={t}
+              i18nKey="kits.kitsKitidAssetsAddToExistingBooking.text0Draft01Reserved"
+              components={[
+                <span key="slot0" className="font-medium text-gray-600" />,
+                <span key="slot1" className="font-medium text-gray-600" />,
+                <span key="slot2" className="font-medium text-gray-600" />,
+                <span key="slot3" className="font-medium text-gray-600" />,
+              ]}
+            />
           </div>
         </div>
         {actionData?.error && (
@@ -394,7 +405,7 @@ export default function ExistingBooking() {
         <div className="mb-8"></div>
         <div className="flex gap-3">
           <Button to=".." variant="secondary" width="full" disabled={disabled}>
-            Cancel
+            {t("kits.kitsKitidAssetsAddToExistingBooking.cancel")}
           </Button>
           <Button
             type="submit"
@@ -402,7 +413,7 @@ export default function ExistingBooking() {
             width="full"
             disabled={disabled}
           >
-            Confirm
+            {t("kits.kitsKitidAssetsAddToExistingBooking.confirm")}
           </Button>
         </div>
       </div>

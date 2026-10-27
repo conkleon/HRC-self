@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useFetcher, useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { updateDynamicTitleAtom } from "~/atoms/dynamic-title-atom";
@@ -51,6 +52,7 @@ type NewBookingFormData = {
 };
 
 export function NewBookingForm({ booking, action }: NewBookingFormData) {
+  const { t } = useTranslation();
   const fetcher = useFetcher<NewBookingActionReturnType>();
   const { custodianRef, assetIds, kitId } = booking;
 
@@ -231,7 +233,7 @@ export function NewBookingForm({ booking, action }: NewBookingFormData) {
                 name="intent"
                 width={"full"}
               >
-                Scan QR codes
+                {t("bookings.newBookingForm.scanQrCodes")}
               </Button>
             ) : null}
             <Button
@@ -243,7 +245,9 @@ export function NewBookingForm({ booking, action }: NewBookingFormData) {
               disabled={disabled}
               width={"full"}
             >
-              {assetIds ? "Create Booking" : "View assets list"}
+              {assetIds
+                ? t("bookings.newBookingForm.createBooking")
+                : t("bookings.newBookingForm.viewAssetsList")}
             </Button>
             <hr />
             <Button
@@ -253,7 +257,7 @@ export function NewBookingForm({ booking, action }: NewBookingFormData) {
               disabled={disabled}
               className="cancellation-button whitespace-nowrap"
             >
-              Cancel
+              {t("bookings.newBookingForm.cancel")}
             </Button>
           </div>
           <div className="h-3" />

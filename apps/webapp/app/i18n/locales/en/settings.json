@@ -1,0 +1,17 @@
+{
+  "languageRegion": {
+    "title": "Language & region",
+    "description": "Choose the language of the app and how dates, times, and calendars appear for your account.",
+    "language": "Language",
+    "languageOptions": "Language options",
+    "languageDescriptions": {
+      "en": "Show the app in English",
+      "el": "Show the app in Greek"
+    },
+    "dateFormat": "Date format",
+    "timeFormat": "Time format",
+    "weekStart": "Week starts on",
+    "timeZone": "Time zone",
+    "preview": "Dates will look like:"
+  }
+}

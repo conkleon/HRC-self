@@ -20,6 +20,7 @@ import {
   UsersRoundIcon,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { UpgradeMessage } from "~/components/marketing/upgrade-message";
 import When from "~/components/when/when";
@@ -63,6 +64,11 @@ type LabelNavItem = Omit<BaseNavItem, "Icon"> & {
 
 type ButtonNavItem = BaseNavItem & {
   type: "button";
+  /**
+   * Buttons the sidebar renders with their own component. Matched by id, never
+   * by `title`, because titles are translated.
+   */
+  id?: "updates" | "feedback";
   onClick: () => void;
 };
 
@@ -81,6 +87,7 @@ export type NavItem =
  * @returns The top and bottom menu items, hidden entries already removed
  */
 export function useSidebarNavItems() {
+  const { t } = useTranslation();
   const { isAdmin, canUseBookings, subscription, unreadUpdatesCount } =
     useLoaderData<typeof loader>();
   const roles = useOrganizationRoles();
@@ -92,15 +99,15 @@ export function useSidebarNavItems() {
   const settingsTabs = visibleSettingsTabs({
     roles,
     isPersonalOrg: isPersonalOrganization,
-  }).map((t) => t.to);
+  }).map((tab) => tab.to);
   // The Team entries are listed even in personal workspaces (disabled with an
   // upgrade reason), so their visibility ignores the personal-workspace rule.
   const teamTabsAnyWorkspace = visibleTeamTabs({
     roles,
     isPersonalOrg: false,
-  }).map((t) => t.to);
+  }).map((tab) => tab.to);
   const showTeam = teamTabsAnyWorkspace.length > 0;
-  const showWorkspaceSettings = settingsTabs.some((t) => t !== "team");
+  const showWorkspaceSettings = settingsTabs.some((tab) => tab !== "team");
 
   const bookingDisabled = useMemo(() => {
     if (canUseBookings) {
@@ -110,18 +117,16 @@ export function useSidebarNavItems() {
     return {
       reason: (
         <div>
-          <h5>Disabled</h5>
-          <p>
-            Booking is a premium feature only available for Team workspaces.
-          </p>
+          <h5>{t("nav.useSidebarNavItems.disabled")}</h5>
+          <p>{t("nav.useSidebarNavItems.bookingIsAPremiumFeature")}</p>
 
           <When truthy={!!subscription} fallback={<UpgradeMessage />}>
-            <p>Please switch to your team workspace to access this feature.</p>
+            <p>{t("nav.useSidebarNavItems.pleaseSwitchToYourTeam")}</p>
           </When>
         </div>
       ),
     };
-  }, [canUseBookings, subscription]);
+  }, [canUseBookings, subscription, t]);
 
   /**
    * Personal workspaces can't invite registered users. Rather than hide the
@@ -133,81 +138,81 @@ export function useSidebarNavItems() {
       return false;
     }
 
-    return { reason: "Inviting users is available on Team workspaces" };
-  }, [isPersonalOrganization]);
+    return { reason: t("nav.useSidebarNavItems.invitingUsersTeamOnly") };
+  }, [isPersonalOrganization, t]);
 
   const topMenuItems: NavItem[] = [
     {
       type: "child",
-      title: "Admin Dashboard",
+      title: t("nav.useSidebarNavItems.adminDashboard"),
       to: "/admin-dashboard/users",
       Icon: ChartLineIcon,
       hidden: !isAdmin,
     },
     {
       type: "label",
-      title: "Asset management",
+      title: t("nav.useSidebarNavItems.assetManagement"),
     },
     {
       type: "child",
-      title: "Home",
+      title: t("nav.useSidebarNavItems.home"),
       to: "/home",
       Icon: HomeIcon,
       hidden: !can("home"),
     },
     {
       type: "child",
-      title: "Assets",
+      title: t("nav.useSidebarNavItems.assets"),
       to: "/assets",
       Icon: PackageOpenIcon,
     },
     {
       type: "child",
-      title: "Kits",
+      title: t("nav.useSidebarNavItems.kits"),
       to: "/kits",
       Icon: Package,
     },
     {
       type: "child",
-      title: "Categories",
+      title: t("nav.useSidebarNavItems.categories"),
       to: "/categories",
       Icon: BoxesIcon,
       hidden: !can("categories"),
     },
     {
       type: "child",
-      title: "Tags",
+      title: t("nav.useSidebarNavItems.tags"),
       to: "/tags",
       Icon: TagsIcon,
       hidden: !can("tags"),
     },
     {
       type: "child",
-      title: "Locations",
+      title: t("nav.useSidebarNavItems.locations"),
       to: "/locations",
       Icon: MapPinIcon,
       hidden: !can("locations"),
     },
     {
       type: "child",
-      title: "Audits",
+      title: t("nav.useSidebarNavItems.audits"),
       to: "/audits",
       Icon: ClipboardCheckIcon,
       hidden: !can("audits"),
     },
     {
       type: "parent",
-      title: "Bookings",
+      title: t("nav.useSidebarNavItems.bookings"),
       Icon: CalendarRangeIcon,
       disabled: bookingDisabled,
       children: [
         {
-          title: "View Bookings",
+          title: t("nav.useSidebarNavItems.viewBookings"),
           to: "/bookings",
           disabled: bookingDisabled,
         },
         {
-          title: "Calendar",
+          title: t("nav.useSidebarNavItems.calendar"),
           to: "/calendar",
           disabled: bookingDisabled,
         },
@@ -215,43 +220,43 @@ export function useSidebarNavItems() {
     },
     {
       type: "child",
-      title: "Reminders",
+      title: t("nav.useSidebarNavItems.reminders"),
       Icon: AlarmClockIcon,
       hidden: !can("reminders"),
       to: "/reminders",
     },
     {
       type: "child",
-      title: "Reports",
+      title: t("nav.useSidebarNavItems.reports"),
       Icon: FileBarChartIcon,
       hidden: !can("reports"),
       to: "/reports",
     },
     {
       type: "label",
-      title: "Organization",
+      title: t("nav.useSidebarNavItems.organization"),
       hidden: !(showTeam || showWorkspaceSettings),
     },
     {
       type: "parent",
-      title: "Team",
+      title: t("nav.useSidebarNavItems.team"),
       Icon: UsersRoundIcon,
       hidden: !showTeam,
       children: [
         {
-          title: "Users",
+          title: t("nav.useSidebarNavItems.users"),
           to: "/settings/team/users",
           disabled: teamInviteDisabled,
           hidden: !teamTabsAnyWorkspace.includes("users"),
         },
         {
-          title: "Pending invites",
+          title: t("nav.useSidebarNavItems.pendingInvites"),
           to: "/settings/team/invites",
           disabled: teamInviteDisabled,
           hidden: !teamTabsAnyWorkspace.includes("invites"),
         },
         {
-          title: "Non-registered members",
+          title: t("nav.useSidebarNavItems.nonRegisteredMembers"),
           to: "/settings/team/nrm",
           hidden: !teamTabsAnyWorkspace.includes("nrm"),
         },
@@ -259,28 +264,28 @@ export function useSidebarNavItems() {
     },
     {
       type: "parent",
-      title: "Workspace settings",
+      title: t("nav.useSidebarNavItems.workspaceSettings"),
       Icon: SettingsIcon,
       hidden: !showWorkspaceSettings,
       children: [
         {
-          title: "General",
+          title: t("nav.useSidebarNavItems.general"),
           to: "/settings/general",
           hidden: !settingsTabs.includes("general"),
         },
         {
-          title: "Bookings",
+          title: t("nav.useSidebarNavItems.bookings"),
           to: "/settings/bookings",
           // Team-workspace only: the tab list already drops it in a personal one.
           hidden: !settingsTabs.includes("bookings"),
         },
         {
-          title: "Custom fields",
+          title: t("nav.useSidebarNavItems.customFields"),
           to: "/settings/custom-fields",
           hidden: !settingsTabs.includes("custom-fields"),
         },
         {
-          title: "Asset models",
+          title: t("nav.useSidebarNavItems.assetModels"),
           to: "/settings/asset-models",
           hidden: !settingsTabs.includes("asset-models"),
         },
@@ -291,7 +296,7 @@ export function useSidebarNavItems() {
   const bottomMenuItems: NavItem[] = [
     {
       type: "child",
-      title: "Asset labels",
+      title: t("nav.useSidebarNavItems.assetLabels"),
       to: LABEL_STORE_URL?.trim() ?? "",
       hidden: !LABEL_STORE_URL?.trim(),
       Icon: QrCodeIcon,
@@ -299,13 +304,14 @@ export function useSidebarNavItems() {
     },
     {
       type: "child",
-      title: "QR Scanner",
+      title: t("nav.useSidebarNavItems.qrScanner"),
       to: "/scanner",
       Icon: ScanBarcodeIcon,
     },
     {
       type: "button",
-      title: "Updates",
+      id: "updates",
+      title: t("nav.useSidebarNavItems.updates"),
       Icon: BellIcon,
       badge: {
         show: (unreadUpdatesCount || 0) > 0,
@@ -317,7 +323,8 @@ export function useSidebarNavItems() {
     },
     {
       type: "button",
-      title: "Questions/Feedback",
+      id: "feedback",
+      title: t("nav.useSidebarNavItems.questionsFeedback"),
       Icon: MessageCircleIcon,
       onClick: () => {
         // Handled by FeedbackNavItem in sidebar-nav.tsx

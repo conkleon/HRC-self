@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   data,
   useLoaderData,
@@ -197,6 +198,7 @@ export async function loader({ context, request, params }: LoaderFunctionArgs) {
 }
 
 export default function KitAssets() {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const canViewArchivedAssets = useCanViewArchivedAssets();
   const archivedView = useArchivedView(canViewArchivedAssets);
@@ -242,7 +244,7 @@ export default function KitAssets() {
                 to="../scan-assets"
                 width={"full"}
               >
-                Scan
+                {t("kits.kitsKitidAssets.scan")}
               </Button>
               <Button
                 to="manage-assets?status=AVAILABLE"
@@ -250,7 +252,7 @@ export default function KitAssets() {
                 width="full"
                 className="whitespace-nowrap"
               >
-                Add assets
+                {t("kits.kitsKitidAssets.addAssets")}
               </Button>
             </div>
           </When>
@@ -283,9 +285,9 @@ export default function KitAssets() {
           }
           headerChildren={
             <>
-              <Th>Category</Th>
-              <Th>Location</Th>
-              <Th>Tags</Th>
+              <Th>{t("kits.kitsKitidAssets.category")}</Th>
+              <Th>{t("kits.kitsKitidAssets.location")}</Th>
+              <Th>{t("kits.kitsKitidAssets.tags")}</Th>
             </>
           }
         />
@@ -295,6 +297,7 @@ export default function KitAssets() {
 }
 
 function ListContent({ item }: { item: ListItemForKitPage }) {
+  const { t } = useTranslation();
   const { category, tags } = item;
   // Bookings this asset is on THROUGH this kit — reserved ones lose their slice
   // when it's removed, checked-out ones keep it flagged as removed from the
@@ -334,7 +337,7 @@ function ListContent({ item }: { item: ListItemForKitPage }) {
                   mainImageExpiration: item.mainImageExpiration,
                   assetModel: item.assetModel ?? null,
                 }}
-                alt={`Image of ${item.title}`}
+                alt={t("kits.kitsKitidAssets.imageOf", { title: item.title })}
                 className="size-full rounded-[4px] border object-cover"
                 withPreview
               />
@@ -371,7 +374,7 @@ function ListContent({ item }: { item: ListItemForKitPage }) {
                           ?.quantity ?? 0;
                       return (
                         <span className="ml-2 text-xs text-gray-500">
-                          · {inKit} {unit} in kit
+                          {t("kits.kitsKitidAssets.inKit", { inKit, unit })}
                         </span>
                       );
                     })()

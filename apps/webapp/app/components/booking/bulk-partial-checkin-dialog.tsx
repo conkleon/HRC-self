@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useActionData, useLoaderData } from "react-router";
 import z from "zod";
 import {
@@ -39,6 +40,7 @@ export default function BulkPartialCheckinDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const totalSelectedItems = useAtomValue(selectedBulkItemsCountAtom);
   const { booking, partialCheckinProgress, partialCheckinDetails } =
@@ -192,9 +194,11 @@ export default function BulkPartialCheckinDialog({
         title={
           <div className="w-full">
             <div className={tw("mb-2")}>
-              <h4>Check in selected items</h4>
+              <h4>
+                {t("bookings.bulkPartialCheckinDialog.checkInSelectedItems")}
+              </h4>
               <p>
-                The following items will be checked in and marked as Available.
+                {t("bookings.bulkPartialCheckinDialog.theFollowingItemsWillBe")}
               </p>
             </div>
           </div>
@@ -224,9 +228,9 @@ export default function BulkPartialCheckinDialog({
 
           {skippedCount > 0 && (
             <p className="mb-3 rounded border border-warning-200 bg-warning-50 p-2 text-xs text-warning-800">
-              {skippedCount} selected item{skippedCount === 1 ? "" : "s"}{" "}
-              {skippedCount === 1 ? "is" : "are"} not eligible for check-in and
-              will be skipped.
+              {t("bookings.bulkPartialCheckinDialog.skippedItems", {
+                count: skippedCount,
+              })}
             </p>
           )}
 
@@ -272,7 +276,9 @@ export default function BulkPartialCheckinDialog({
                         />
                         <span className="text-sm font-medium">{kit.name}</span>
                         <span className="text-xs text-gray-500">
-                          ({kitAssets.length} assets)
+                          {t("bookings.bulkPartialCheckinDialog.assets", {
+                            kitAssetsCount: kitAssets.length,
+                          })}
                         </span>
                         <span className="rounded bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">
                           KIT
@@ -295,7 +301,10 @@ export default function BulkPartialCheckinDialog({
                                 mainImageExpiration: asset.mainImageExpiration,
                                 assetModel: asset.assetModel ?? null,
                               }}
-                              alt={`${asset.title} main image`}
+                              alt={t(
+                                "bookings.bulkPartialCheckinDialog.mainImage",
+                                { title: asset.title }
+                              )}
                             />
                             <span className="font-medium">{asset.title}</span>
                             {asset.category && (
@@ -327,7 +336,10 @@ export default function BulkPartialCheckinDialog({
                               mainImageExpiration: asset.mainImageExpiration,
                               assetModel: asset.assetModel ?? null,
                             }}
-                            alt={`${asset.title} main image`}
+                            alt={t(
+                              "bookings.bulkPartialCheckinDialog.mainImage",
+                              { title: asset.title }
+                            )}
                           />
                           <span className="font-medium">{asset.title}</span>
                           {asset.category && (
@@ -357,7 +369,7 @@ export default function BulkPartialCheckinDialog({
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("bookings.bulkPartialCheckinDialog.cancel")}
             </Button>
 
             {/* Submit button: a confirming CheckinDialog for an early final
@@ -394,7 +406,7 @@ export default function BulkPartialCheckinDialog({
                 name="intent"
                 value="partial-checkin"
               >
-                Check in items
+                {t("bookings.bulkPartialCheckinDialog.checkInItems")}
               </Button>
             )}
           </div>

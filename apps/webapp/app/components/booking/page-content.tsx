@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import { archivedAssetsRefusal } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useCanArchiveAssets } from "~/hooks/use-can-archive-assets";
 import { formatBookingDuration } from "~/modules/booking/helpers";
@@ -14,6 +15,7 @@ import { EditBookingForm } from "./forms/edit-booking-form";
 import { Card } from "../shared/card";
 
 export function BookingPageContent() {
+  const { t } = useTranslation();
   const {
     booking,
     teamMembers,
@@ -51,7 +53,9 @@ export function BookingPageContent() {
       {booking.status === BookingStatus.CANCELLED &&
         booking.cancellationReason && (
           <div className="mb-4 rounded-lg border border-warning-200 bg-warning-25 p-4">
-            <p className="mb-1 text-sm font-semibold ">Cancellation reason</p>
+            <p className="mb-1 text-sm font-semibold ">
+              {t("bookings.pageContent.cancellationReason")}
+            </p>
             <p className="text-sm ">{booking.cancellationReason}</p>
           </div>
         )}
@@ -61,7 +65,7 @@ export function BookingPageContent() {
           className="mb-4 rounded-lg border border-warning-200 bg-warning-25 p-4"
         >
           <p className="mb-1 text-sm font-semibold">
-            This booking holds archived assets
+            {t("bookings.pageContent.thisBookingHoldsArchivedAssets")}
           </p>
           <p className="text-sm">
             {archivedAssetsRefusal({
@@ -69,7 +73,7 @@ export function BookingPageContent() {
               fix: "remove-from-booking",
               canReinstate,
             })}{" "}
-            Until then it can&apos;t be reserved or checked out.
+            {t("bookings.pageContent.untilThenItCantBe")}
           </p>
         </div>
       ) : null}

@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useMatches } from "react-router";
 import { useCurrentOrganization } from "~/hooks/use-current-organization";
 import { useOrganizationRoles } from "~/hooks/use-organization-roles";
@@ -28,6 +29,7 @@ export default function BookingFilters({
   className,
   hideSortBy = false,
 }: BookingFiltersProps) {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const organization = useCurrentOrganization();
   const matches = useMatches();
@@ -64,7 +66,8 @@ export default function BookingFilters({
         <DynamicDropdown
           trigger={
             <div className="my-2 flex cursor-pointer items-center gap-2 md:my-0">
-              Custodian <ChevronRight className="hidden rotate-90 md:inline" />
+              {t("bookings.bookingFilters.custodian")}{" "}
+              <ChevronRight className="hidden rotate-90 md:inline" />
             </div>
           }
           model={{
@@ -77,8 +80,8 @@ export default function BookingFilters({
             custodyPurpose: "custody-filter",
           }}
           renderItem={(item) => resolveTeamMemberName(item, true)}
-          label="Filter by custodian"
-          placeholder="Search team members"
+          label={t("bookings.bookingFilters.filterByCustodian")}
+          placeholder={t("bookings.bookingFilters.searchTeamMembers")}
           initialDataKey="teamMembers"
           countKey="totalTeamMembers"
         />
@@ -87,11 +90,12 @@ export default function BookingFilters({
       <DynamicDropdown
         trigger={
           <div className="flex cursor-pointer items-center gap-2">
-            Tags <ChevronRight className="hidden rotate-90 md:inline" />
+            {t("bookings.bookingFilters.tags")}{" "}
+            <ChevronRight className="hidden rotate-90 md:inline" />
           </div>
         }
         model={{ name: "tag", queryKey: "name" }}
-        label="Filter by tag"
+        label={t("bookings.bookingFilters.filterByTag")}
         initialDataKey="tags"
         countKey="totalTags"
         withoutValueItem={{

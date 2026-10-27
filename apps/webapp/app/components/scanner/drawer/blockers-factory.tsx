@@ -14,6 +14,7 @@
  */
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import { ScanItemGroup } from "./scan-item-group";
 
@@ -66,9 +67,10 @@ function BlockersCard({
   total: number;
   onResolveAll: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <ScanItemGroup
-      label="Needs attention"
+      label={t("scanner.blockersFactory.needsAttention")}
       count={total}
       tone="attention"
       openWhenCountGrows
@@ -79,9 +81,9 @@ function BlockersCard({
           size="xs"
           className="whitespace-nowrap text-[12px] leading-3"
           onClick={onResolveAll}
-          title="Removes all conflicting items from the list"
+          title={t("scanner.blockersFactory.removesAllConflictingItemsFrom")}
         >
-          Resolve all ({total})
+          {t("scanner.blockersFactory.resolveAll", { total })}
         </Button>
       }
     >
@@ -101,7 +103,7 @@ function BlockersCard({
               className="inline text-[12px] font-normal text-gray-700 underline"
               onClick={blocker.onResolve}
             >
-              Remove from list
+              {t("scanner.blockersFactory.removeFromList")}
             </Button>
             {blocker.description ? (
               <p className="text-[11px] text-gray-500">{blocker.description}</p>
@@ -144,12 +146,13 @@ export function createBlockers({ blockerConfigs }: CreateBlockersArgs) {
   };
 
   function Blockers({ variant = "card" }: { variant?: BlockersVariant } = {}) {
+    const { t } = useTranslation();
     if (!hasBlockers) return null;
 
     if (variant === "note") {
       return (
         <p className="px-3 pt-2 text-[12px] text-warning-700">
-          Resolve {total} {total === 1 ? "issue" : "issues"} above to continue.
+          {t("scanner.blockersFactory.resolveIssues", { count: total })}
         </p>
       );
     }

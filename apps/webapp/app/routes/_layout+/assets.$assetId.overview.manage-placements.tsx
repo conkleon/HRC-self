@@ -21,6 +21,7 @@
  * @see {@link file://./../../modules/asset/service.server.ts} — `replaceAssetPlacements`
  * @see {@link file://./assets.$assetId.overview.update-location.tsx} — single-placement quick-set dialog
  */
+import { useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { data, redirect, useActionData, useLoaderData } from "react-router";
 import { z } from "zod";
@@ -250,6 +251,7 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
 }
 
 export default function ManagePlacementsRoute() {
+  const { t } = useTranslation();
   const {
     isQty,
     assetQuantity,
@@ -270,11 +272,17 @@ export default function ManagePlacementsRoute() {
         <LocationMarkerIcon />
       </div>
       <div className="mb-5">
-        <h4>Manage placements</h4>
+        <h4>
+          {t("assets.assetsAssetidOverviewManagePlacements.managePlacements")}
+        </h4>
         <p className="text-sm text-gray-600">
           {isQty
-            ? "Spread this asset across one or more locations. Units not placed anywhere stay in the unplaced pool."
-            : "Set the single location this asset sits at."}
+            ? t(
+                "assets.assetsAssetidOverviewManagePlacements.spreadThisAssetAcrossOne"
+              )
+            : t(
+                "assets.assetsAssetidOverviewManagePlacements.setTheSingleLocationThis"
+              )}
         </p>
       </div>
       <ManagePlacementsForm

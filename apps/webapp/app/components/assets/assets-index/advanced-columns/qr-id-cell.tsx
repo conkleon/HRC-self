@@ -12,6 +12,7 @@
  */
 
 import type { QrIdDisplayPreference } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { AssetCodeBadge } from "~/components/assets/asset-code-badge";
 import { CodePreviewDialog } from "~/components/code-preview/code-preview-dialog";
 import type { AdvancedIndexAsset } from "~/modules/asset/types";
@@ -24,6 +25,7 @@ type QrIdCellProps = {
 
 /** Renders the QR ID column cell with the shared chip + preview dialog. */
 export function QrIdCell({ item, workspacePreference }: QrIdCellProps) {
+  const { t } = useTranslation();
   return (
     <CodePreviewDialog
       item={{
@@ -44,7 +46,9 @@ export function QrIdCell({ item, workspacePreference }: QrIdCellProps) {
           */}
           <button
             type="button"
-            aria-label={`Show code preview for ${item.title}`}
+            aria-label={t("assets.qrIdCell.showCodePreviewFor", {
+              title: item.title,
+            })}
             className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1"
           >
             <AssetCodeBadge

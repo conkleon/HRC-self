@@ -2,6 +2,7 @@
 // 15x15 viewBox with hairline paths; a lucide icon is 24x24 with a 2px
 // stroke, so at the same rendered size it reads markedly bolder beside one.
 import { CalendarIcon, CubeIcon } from "@radix-ui/react-icons";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import { ButtonGroup } from "~/components/shared/button-group";
 import { useAssetIndexView } from "~/hooks/use-asset-index-view";
@@ -18,6 +19,7 @@ export function AvailabilityViewToggle({
 }: {
   modeIsSimple?: boolean;
 }) {
+  const { t } = useTranslation();
   const { view, shouldShowAvailabilityView, shouldShowModelView, setView } =
     useAssetIndexView();
 
@@ -43,9 +45,9 @@ export function AvailabilityViewToggle({
           disabled={view === "table"}
           type="button"
           onClick={() => setView("table")}
-          title="Switch to list view"
-          tooltip="List view"
-          aria-label="Switch to list view"
+          title={t("assets.viewToggle.switchToListView")}
+          tooltip={t("assets.viewToggle.listView")}
+          aria-label={t("assets.viewToggle.switchToListView")}
           icon="sort"
         />
         <Button
@@ -54,9 +56,9 @@ export function AvailabilityViewToggle({
           disabled={view === "availability"}
           type="button"
           onClick={() => setView("availability")}
-          title="Switch to availability view"
-          tooltip="Availability view"
-          aria-label="Switch to availability view"
+          title={t("assets.viewToggle.switchToAvailabilityView")}
+          tooltip={t("assets.viewToggle.availabilityView")}
+          aria-label={t("assets.viewToggle.switchToAvailabilityView")}
         >
           <CalendarIcon className="size-5" />
         </Button>
@@ -67,9 +69,9 @@ export function AvailabilityViewToggle({
             disabled={view === "models"}
             type="button"
             onClick={() => setView("models")}
-            title="Switch to asset model view"
-            tooltip="Asset model view"
-            aria-label="Switch to asset model view"
+            title={t("assets.viewToggle.switchToAssetModelView")}
+            tooltip={t("assets.viewToggle.assetModelView")}
+            aria-label={t("assets.viewToggle.switchToAssetModelView")}
           >
             <CubeIcon className="size-5" />
           </Button>

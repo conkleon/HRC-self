@@ -1,4 +1,5 @@
 import { archivedAssetBlockedReason } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -179,6 +180,7 @@ export function links() {
  * action are shown below the buttons.
  */
 export default function DuplicateAsset() {
+  const { t } = useTranslation();
   const zo = useZorm("DuplicateAsset", DuplicateAssetSchema);
   const { asset } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
@@ -211,7 +213,9 @@ export default function DuplicateAsset() {
                   mainImageExpiration: asset.mainImageExpiration,
                   assetModel: asset.assetModel ?? null,
                 }}
-                alt={`Image of ${asset.title}`}
+                alt={t("assets.assetsAssetidOverviewDuplicate.imageOf", {
+                  title: asset.title,
+                })}
                 className="size-full rounded-[4px] border object-cover"
               />
             </div>
@@ -233,10 +237,14 @@ export default function DuplicateAsset() {
 
           <Input
             type="number"
-            label="Amount of duplicates"
+            label={t(
+              "assets.assetsAssetidOverviewDuplicate.amountOfDuplicates"
+            )}
             name={zo.fields.amountOfDuplicates()}
             defaultValue={1}
-            placeholder="How many duplicates assets you want to create for this asset ?"
+            placeholder={t(
+              "assets.assetsAssetidOverviewDuplicate.howManyDuplicatesAssetsYou"
+            )}
             className="w-full"
             disabled={disabled}
             required
@@ -254,7 +262,9 @@ export default function DuplicateAsset() {
               id="duplicate-archived"
               className="w-full rounded border border-warning-300 bg-warning-25 p-4 text-sm text-warning-700"
             >
-              <span className="block font-medium">Asset is archived</span>
+              <span className="block font-medium">
+                {t("assets.assetsAssetidOverviewDuplicate.assetIsArchived")}
+              </span>
               {archivedAssetBlockedReason({ canReinstate })}
             </p>
           ) : null}
@@ -264,10 +274,10 @@ export default function DuplicateAsset() {
               id="duplicate-no-units"
               className="w-full rounded border border-warning-300 bg-warning-25 p-4 text-sm text-warning-700"
             >
-              <span className="block font-medium">No units to copy</span>
-              This asset has no units in stock, and a quantity-tracked asset
-              needs at least 1. Add stock with Adjust quantity, then duplicate
-              it.
+              <span className="block font-medium">
+                {t("assets.assetsAssetidOverviewDuplicate.noUnitsToCopy")}
+              </span>
+              {t("assets.assetsAssetidOverviewDuplicate.thisAssetHasNoUnits")}
             </p>
           )}
         </div>
@@ -278,7 +288,7 @@ export default function DuplicateAsset() {
             width="full"
             disabled={isProcessing}
           >
-            Cancel
+            {t("assets.assetsAssetidOverviewDuplicate.cancel")}
           </Button>
           <Button
             variant="primary"
@@ -293,7 +303,11 @@ export default function DuplicateAsset() {
                 : "duplicate-no-units"
             }
           >
-            {isProcessing ? <Spinner /> : "Duplicate"}
+            {isProcessing ? (
+              <Spinner />
+            ) : (
+              t("assets.assetsAssetidOverviewDuplicate.duplicate")
+            )}
           </Button>
         </div>
         {actionData?.error ? (

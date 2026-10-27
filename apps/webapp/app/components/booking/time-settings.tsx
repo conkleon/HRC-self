@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useActionData } from "react-router";
 import { useZorm } from "react-zorm";
 import z from "zod";
@@ -41,6 +42,7 @@ export function TimeSettings({
   defaultMaxLengthValue: number | null;
   defaultMaxBookingLengthSkipClosedDays: boolean;
 }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const zo = useZorm("EnableWorkingHoursForm", TimeSettingsSchema);
   const maxBookingLengthSkipClosedDaysRef = useRef<HTMLInputElement>(null);
@@ -60,27 +62,28 @@ export function TimeSettings({
       <div>
         <Form ref={zo.ref} method="post">
           <FormRow
-            rowLabel={`Minimum advance notice (hours)`}
+            rowLabel={t("bookings.timeSettings.minimumAdvanceNoticeHours")}
             subHeading={
               <div>
-                Users must book at least this many hours ahead of their booking
-                start time. Enter 0 to allow immediate bookings. This limitation
-                is only valid for <strong>Self service</strong> &{" "}
-                <strong>Base</strong> users.
+                <Trans
+                  t={t}
+                  i18nKey="bookings.timeSettings.usersMustBookAtLeast"
+                  components={[<strong key="slot0" />, <strong key="slot1" />]}
+                />
               </div>
             }
             className="border-b-0 pb-[10px] pt-0"
             required
           >
             <Input
-              label="Minimum advance notice (hours)"
+              label={t("bookings.timeSettings.minimumAdvanceNoticeHours")}
               hideLabel
               type="number"
               name={zo.fields.bufferStartTime()}
               disabled={disabled}
               defaultValue={defaultBufferValue}
               required
-              title={"Minimum advance notice (hours)"}
+              title={t("bookings.timeSettings.minimumAdvanceNoticeHours")}
               min={0}
               max={168}
               step={1}
@@ -93,25 +96,22 @@ export function TimeSettings({
           </FormRow>
 
           <FormRow
-            rowLabel={`Maximum booking length (hours)`}
+            rowLabel={t("bookings.timeSettings.maximumBookingLengthHours")}
             subHeading={
-              <div>
-                Set the maximum duration for a single booking. Leave empty for
-                no limit. This helps prevent excessively long bookings.
-              </div>
+              <div>{t("bookings.timeSettings.setTheMaximumDurationFor")}</div>
             }
             className="border-b-0 pb-[10px]"
           >
             <div className="flex flex-col">
               <Input
-                label="Maximum booking length (hours)"
+                label={t("bookings.timeSettings.maximumBookingLengthHours")}
                 hideLabel
                 type="number"
                 name={zo.fields.maxBookingLength()}
                 disabled={disabled}
                 defaultValue={defaultMaxLengthValue || ""}
-                placeholder="No limit"
-                title={"Maximum booking length (hours)"}
+                placeholder={t("bookings.timeSettings.noLimit")}
+                title={t("bookings.timeSettings.maximumBookingLengthHours")}
                 min={1}
                 max={8760}
                 step={1}
@@ -124,7 +124,7 @@ export function TimeSettings({
               <div className="mt-2 flex items-center gap-2">
                 <Input
                   id="maxBookingLengthSkipClosedDays"
-                  label="Skip closed days"
+                  label={t("bookings.timeSettings.skipClosedDays")}
                   hideLabel
                   type="checkbox"
                   name={zo.fields.maxBookingLengthSkipClosedDays()}
@@ -132,7 +132,7 @@ export function TimeSettings({
                   defaultChecked={
                     defaultMaxBookingLengthSkipClosedDays || false
                   }
-                  title={"Skip closed days"}
+                  title={t("bookings.timeSettings.skipClosedDays")}
                   error={
                     validationErrors?.maxBookingLengthSkipClosedDays?.message ||
                     zo.errors.maxBookingLengthSkipClosedDays()?.message
@@ -156,11 +156,11 @@ export function TimeSettings({
                   })}
                   className="cursor-default"
                 >
-                  Skip closed days
+                  {t("bookings.timeSettings.skipClosedDays")}
                 </span>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Closed days will not be considered for calculations.
+                {t("bookings.timeSettings.closedDaysWillNotBe")}
               </p>
             </div>
           </FormRow>
@@ -172,7 +172,7 @@ export function TimeSettings({
               value="updateTimeSettings"
               name="intent"
             >
-              {disabled ? <Spinner /> : "Save settings"}
+              {disabled ? <Spinner /> : t("bookings.timeSettings.saveSettings")}
             </Button>
           </div>
         </Form>

@@ -9,6 +9,7 @@
  * @see {@link file://./../import-content-file-form.tsx} Admin upload dialog consumer
  * @see {@link file://./../../../utils/import-row-errors.ts} Row error shape
  */
+import { useTranslation } from "react-i18next";
 import type { DuplicateBarcode } from "~/modules/barcode/service.server";
 import type { QRCodePerImportedAsset } from "~/modules/qr/service.server";
 import { readImportRowErrors } from "~/utils/import-row-errors";
@@ -43,6 +44,7 @@ type ImportErrorDetailsProps = {
  * @returns The error block, ending with the "fix your CSV" footer
  */
 export function ImportErrorDetails({ error }: ImportErrorDetailsProps) {
+  const { t } = useTranslation();
   const additionalData =
     error.additionalData && typeof error.additionalData === "object"
       ? (error.additionalData as Record<string, unknown>)
@@ -55,25 +57,25 @@ export function ImportErrorDetails({ error }: ImportErrorDetailsProps) {
       <p className="text-red-500">{error.message}</p>
       {additionalData.duplicateCodes ? (
         <BrokenQrCodesTable
-          title="Duplicate codes"
+          title={t("assets.importErrorDetails.duplicateCodes")}
           data={additionalData.duplicateCodes as QRCodePerImportedAsset[]}
         />
       ) : null}
       {additionalData.nonExistentCodes ? (
         <BrokenQrCodesTable
-          title="Non existent codes"
+          title={t("assets.importErrorDetails.nonExistentCodes")}
           data={additionalData.nonExistentCodes as QRCodePerImportedAsset[]}
         />
       ) : null}
       {additionalData.linkedCodes ? (
         <BrokenQrCodesTable
-          title="Already linked codes"
+          title={t("assets.importErrorDetails.alreadyLinkedCodes")}
           data={additionalData.linkedCodes as QRCodePerImportedAsset[]}
         />
       ) : null}
       {additionalData.connectedToOtherOrgs ? (
         <BrokenQrCodesTable
-          title="Some codes do not belong to this workspace"
+          title={t("assets.importErrorDetails.someCodesDoNotBelong")}
           data={additionalData.connectedToOtherOrgs as QRCodePerImportedAsset[]}
         />
       ) : null}
@@ -89,16 +91,16 @@ export function ImportErrorDetails({ error }: ImportErrorDetailsProps) {
           <thead className="bg-error-100 text-xs">
             <tr>
               <th scope="col" className="px-2 py-1">
-                Asset
+                {t("assets.importErrorDetails.asset")}
               </th>
               <th scope="col" className="px-2 py-1">
-                Custodian
+                {t("assets.importErrorDetails.custodian")}
               </th>
               <th scope="col" className="px-2 py-1">
-                Kit
+                {t("assets.importErrorDetails.kit")}
               </th>
               <th scope="col" className="px-2 py-1">
-                Issue
+                {t("assets.importErrorDetails.issue")}
               </th>
             </tr>
           </thead>
@@ -128,10 +130,10 @@ export function ImportErrorDetails({ error }: ImportErrorDetailsProps) {
           <thead className="bg-error-100 text-xs">
             <tr>
               <th scope="col" className="px-2 py-1">
-                Incorrect Header
+                {t("assets.importErrorDetails.incorrectHeader")}
               </th>
               <th scope="col" className="px-2 py-1">
-                Error
+                {t("assets.importErrorDetails.error")}
               </th>
             </tr>
           </thead>
@@ -156,8 +158,7 @@ export function ImportErrorDetails({ error }: ImportErrorDetailsProps) {
       ) : null}
 
       <p className="mt-2">
-        Please fix your CSV file and try again. If the issue persists, don't
-        hesitate to get in touch with us.
+        {t("assets.importErrorDetails.pleaseFixYourCsvFile")}
       </p>
     </div>
   );
@@ -176,14 +177,15 @@ function BrokenQrCodesTable({
   title: string;
   data: QRCodePerImportedAsset[];
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-3">
       <h5>{title}</h5>
       <Table className="mt-1 [&_td]:p-1 [&_th]:p-1">
         <thead>
           <Tr>
-            <Th>Asset title</Th>
-            <Th>QR ID</Th>
+            <Th>{t("assets.importErrorDetails.assetTitle")}</Th>
+            <Th>{t("assets.importErrorDetails.qrId")}</Th>
           </Tr>
         </thead>
         <tbody>
@@ -207,14 +209,15 @@ function BrokenQrCodesTable({
  * @param props.data - Each duplicated barcode with the rows that use it
  */
 function DuplicateBarcodesTable({ data }: { data: DuplicateBarcode[] }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-3">
-      <h5>Duplicate barcodes</h5>
+      <h5>{t("assets.importErrorDetails.duplicateBarcodes")}</h5>
       <Table className="mt-1 [&_td]:p-1 [&_th]:p-1">
         <thead>
           <Tr>
-            <Th>Barcode</Th>
-            <Th>Used by assets</Th>
+            <Th>{t("assets.importErrorDetails.barcode")}</Th>
+            <Th>{t("assets.importErrorDetails.usedByAssets")}</Th>
           </Tr>
         </thead>
         <tbody>
@@ -228,7 +231,11 @@ function DuplicateBarcodesTable({ data }: { data: DuplicateBarcode[] }) {
                     // one error payload; title and type guard the case where
                     // the same row surfaces under several barcodes.
                     <li key={`${asset.row}-${asset.type}-${asset.title}`}>
-                      {asset.title} ({asset.type}): Line {asset.row}
+                      {t("assets.importErrorDetails.line", {
+                        title: asset.title,
+                        type: asset.type,
+                        row: asset.row,
+                      })}
                     </li>
                   ))}
                 </ul>

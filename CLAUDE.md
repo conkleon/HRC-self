@@ -248,6 +248,16 @@ All HTML emails must follow the design established in
 - **Send wrapper function** with `try/catch` + `Logger.error` + `ShelfError`
 - **Closing**: `The Shelf Team`
 
+### Translations (Required)
+
+The webapp ships English and Greek. Every user-facing string goes through `t()`
+or `<Trans>` from `react-i18next`, as a whole sentence, with the English in
+`app/i18n/locales/en/<area>.json` and the Greek in `locales/el/` (the parity
+test fails until both exist). Server-built text uses `getServerT(context)`.
+
+- 📖 Full guide: [apps/docs/translations.md](./apps/docs/translations.md)
+- Rule: [.claude/rules/user-facing-text-goes-through-t.md](./.claude/rules/user-facing-text-goes-through-t.md)
+
 ### Button Type Prop (Required)
 
 Every `<Button>` that renders as a native `<button>` element **must** have an explicit `type` prop. This is enforced by the `local-rules/require-button-type` ESLint rule.

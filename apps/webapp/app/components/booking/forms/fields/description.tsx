@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import FormRow from "~/components/forms/form-row";
 import Input from "~/components/forms/input";
 
@@ -12,13 +13,14 @@ export function DescriptionField({
   disabled: boolean;
   error?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <FormRow
-      rowLabel="Description"
+      rowLabel={t("bookings.description.description")}
       className="mobile-styling-only h-full border-b-0 p-0"
     >
       <Input
-        label="Description"
+        label={t("bookings.description.description")}
         inputType="textarea"
         hideLabel
         name={fieldName}
@@ -26,7 +28,7 @@ export function DescriptionField({
         error={error}
         className="mobile-styling-only w-full p-0"
         defaultValue={description || undefined}
-        placeholder="Add a description..."
+        placeholder={t("bookings.description.addADescription")}
       />
     </FormRow>
   );

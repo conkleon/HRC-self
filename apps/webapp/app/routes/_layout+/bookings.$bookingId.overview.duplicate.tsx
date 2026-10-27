@@ -20,6 +20,7 @@
  */
 import { useRef, useState } from "react";
 import { AssetType } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -247,6 +248,7 @@ function formatDriftAssetLabel(item: {
  * kit-membership changes before confirming.
  */
 export default function DuplicateBooking() {
+  const { t } = useTranslation();
   const { booking, kitDrift } = useLoaderData<typeof loader>();
   const actionData = useActionData<DataOrErrorResponse>();
 
@@ -305,17 +307,23 @@ export default function DuplicateBooking() {
 
   return (
     <div>
-      <h3 className="mb-2">Duplicate Booking: {booking.name}</h3>
+      <h3 className="mb-2">
+        {t("bookings.bookingsBookingidOverviewDuplicate.duplicateBooking", {
+          name: booking.name,
+        })}
+      </h3>
 
       <div className="mb-4 text-sm text-gray-500">
         <p className="mb-2">
-          You're about to duplicate the booking{" "}
+          {t(
+            "bookings.bookingsBookingidOverviewDuplicate.youreAboutToDuplicateThe"
+          )}{" "}
           <strong className="text-black">{booking.name}</strong>.
         </p>
         <p>
-          All current booking details will be copied. Choose the start and end
-          dates for the new booking below — you can review and edit everything
-          else later.
+          {t(
+            "bookings.bookingsBookingidOverviewDuplicate.allCurrentBookingDetailsWill"
+          )}
         </p>
       </div>
 
@@ -325,8 +333,9 @@ export default function DuplicateBooking() {
               info-box treatment so the modal feels consistent with other
               acknowledge-and-confirm surfaces. */}
           <p className="mb-3 rounded border border-warning-200 bg-warning-50 p-2 text-xs text-warning-800">
-            Kit changes since the original booking — these will be applied to
-            the duplicate. The original booking is unchanged.
+            {t(
+              "bookings.bookingsBookingidOverviewDuplicate.kitChangesSinceTheOriginal"
+            )}
           </p>
 
           <div className="space-y-3">
@@ -342,7 +351,9 @@ export default function DuplicateBooking() {
                 {kit.added.length > 0 && (
                   <div className="mb-2">
                     <p className="text-xs font-medium text-gray-500">
-                      Added since the original
+                      {t(
+                        "bookings.bookingsBookingidOverviewDuplicate.addedSinceTheOriginal"
+                      )}
                     </p>
                     <ul className="mt-1 space-y-1">
                       {kit.added.map((item) => (
@@ -366,7 +377,9 @@ export default function DuplicateBooking() {
                 {kit.removed.length > 0 && (
                   <div>
                     <p className="text-xs font-medium text-gray-500">
-                      Removed since the original
+                      {t(
+                        "bookings.bookingsBookingidOverviewDuplicate.removedSinceTheOriginal"
+                      )}
                     </p>
                     <ul className="mt-1 space-y-1">
                       {kit.removed.map((item) => (
@@ -429,11 +442,11 @@ export default function DuplicateBooking() {
             disabled={disabled}
             to=".."
           >
-            Cancel
+            {t("bookings.bookingsBookingidOverviewDuplicate.cancel")}
           </Button>
 
           <Button type="submit" className="flex-1" disabled={disabled}>
-            Confirm
+            {t("bookings.bookingsBookingidOverviewDuplicate.confirm")}
           </Button>
         </div>
       </Form>

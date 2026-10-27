@@ -19,6 +19,7 @@
 import { useEffect, useId, useState } from "react";
 import { SmartphoneIcon } from "lucide-react";
 
+import { Trans, useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 
 /**
@@ -63,20 +64,28 @@ function isRunningAsShortcut() {
 
 /** The manual steps for each platform. */
 function ShortcutSteps({ platform }: { platform: ShortcutPlatform }) {
+  const { t } = useTranslation();
   if (platform === "ios") {
     return (
       <>
         <ol className="list-inside list-decimal space-y-1">
           <li>
-            Tap the <b>Share</b> button (the square with an arrow pointing up).
+            <Trans
+              t={t}
+              i18nKey="custody.addShortcut.iosStep1"
+              components={{ bold: <b /> }}
+            />
           </li>
           <li>
-            Choose <b>Add to Home Screen</b>, then <b>Add</b>.
+            <Trans
+              t={t}
+              i18nKey="custody.addShortcut.iosStep2"
+              components={{ bold: <b /> }}
+            />
           </li>
         </ol>
         <p className="mt-2 text-gray-600">
-          The first time you open the shortcut, you may need to enter the PIN
-          again.
+          {t("custody.addShortcut.theFirstTimeYouOpen")}
         </p>
       </>
     );
@@ -84,25 +93,31 @@ function ShortcutSteps({ platform }: { platform: ShortcutPlatform }) {
   if (platform === "android") {
     return (
       <ol className="list-inside list-decimal space-y-1">
+        <li>{t("custody.addShortcut.openYourBrowsersMenuThe")}</li>
         <li>
-          Open your browser's menu (the three dots, usually at the top right).
-        </li>
-        <li>
-          Choose <b>Add to Home screen</b> or <b>Install app</b>.
+          <Trans
+            t={t}
+            i18nKey="custody.addShortcut.androidStep2"
+            components={{ bold: <b /> }}
+          />
         </li>
       </ol>
     );
   }
   return (
     <p>
-      Bookmark this page with <b>Ctrl+D</b> (<b>Cmd+D</b> on a Mac), or install
-      it from your browser's menu.
+      <Trans
+        t={t}
+        i18nKey="custody.addShortcut.desktop"
+        components={{ bold: <b /> }}
+      />
     </p>
   );
 }
 
 /** "Add as shortcut" button, with manual steps where no prompt exists. */
 export function AddShortcutButton() {
+  const { t } = useTranslation();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [hidden, setHidden] = useState(false);
@@ -161,7 +176,7 @@ export function AddShortcutButton() {
       >
         <span className="inline-flex items-center gap-2">
           <SmartphoneIcon className="size-3.5" aria-hidden="true" />
-          Add as shortcut
+          {t("custody.addShortcut.addAsShortcut")}
         </span>
       </Button>
       {platform ? (
@@ -170,7 +185,7 @@ export function AddShortcutButton() {
           className="mt-3 w-full max-w-md rounded-md border border-gray-200 bg-white p-4 text-left text-sm text-gray-700"
         >
           <p className="mb-2 font-medium text-gray-900">
-            Keep this workspace on your home screen:
+            {t("custody.addShortcut.keepThisWorkspaceOnYour")}
           </p>
           <ShortcutSteps platform={platform} />
         </div>

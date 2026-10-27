@@ -12,6 +12,7 @@
 import type { ImgHTMLAttributes } from "react";
 import { useEffect, useState } from "react";
 import type { Kit } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import type { action } from "~/routes/api+/kit.refresh-image";
 import { DIALOG_CLOSE_SHORTCUT } from "~/utils/constants";
@@ -44,6 +45,7 @@ export default function KitImage({
   withPreview = false,
   ...rest
 }: KitImageProps) {
+  const { t } = useTranslation();
   const fetcher = useFetcher<typeof action>();
 
   const { kitId, image, imageExpiration, alt } = kit;
@@ -170,7 +172,7 @@ export default function KitImage({
                   {kit.alt}
                 </div>
                 <div className="text-sm font-normal text-gray-600">
-                  1 image(s)
+                  {t("kits.kitImage.text1ImageS")}
                 </div>
               </div>
             }
@@ -185,14 +187,14 @@ export default function KitImage({
               </div>
               <div className="flex w-full justify-center gap-3 px-6 py-3 md:justify-end">
                 <Button to={`/kits/${kitId}/edit`} variant="secondary">
-                  Edit image(s)
+                  {t("kits.kitImage.editImageS")}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={handleCloseDialog}
                 >
-                  Close
+                  {t("kits.kitImage.close")}
                 </Button>
               </div>
             </div>

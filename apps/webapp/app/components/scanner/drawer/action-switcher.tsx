@@ -8,6 +8,7 @@ import {
 } from "@radix-ui/react-popover";
 import { useAtom } from "jotai";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { ChevronRight } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
 import When from "~/components/when/when";
@@ -52,6 +53,7 @@ const ACTION_CONFIGS = [
 export type ActionType = (typeof ACTION_CONFIGS)[number]["id"];
 
 export function ActionSwitcher() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [action, setAction] = useAtom(scannerActionAtom);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -154,7 +156,9 @@ export function ActionSwitcher() {
             )}
           >
             <ChevronRight className="ml-[2px] inline-block rotate-90" />
-            <span className="ml-2">Action: {action.toLowerCase()}</span>
+            <span className="ml-2">
+              {t("scanner.actionSwitcher.action")} {action.toLowerCase()}
+            </span>
           </Button>
         </PopoverTrigger>
         <PopoverPortal>
@@ -168,7 +172,7 @@ export function ActionSwitcher() {
               <Search className="ml-4 size-4 text-gray-500" />
               <input
                 ref={searchInputRef}
-                placeholder="Search action..."
+                placeholder={t("scanner.actionSwitcher.searchAction")}
                 className="border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
                 value={searchQuery}
                 onChange={handleSearch}
@@ -207,7 +211,7 @@ export function ActionSwitcher() {
             ))}
             {filteredActions.length === 0 && (
               <div className="px-4 py-2 text-[14px] text-gray-500">
-                No columns found
+                {t("scanner.actionSwitcher.noColumnsFound")}
               </div>
             )}
           </PopoverContent>

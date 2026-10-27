@@ -13,6 +13,7 @@
  */
 import { useState } from "react";
 import { ScanQrCode } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 
 import { Dialog, DialogPortal } from "~/components/layout/dialog";
@@ -26,6 +27,7 @@ import { scanSearchParams } from "./scanned-item";
  * The camera runs only while the dialog is open.
  */
 export function ScanCodeButton() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -36,14 +38,14 @@ export function ScanCodeButton() {
       >
         <span className="inline-flex items-center justify-center gap-2">
           <ScanQrCode className="size-5" aria-hidden="true" />
-          Scan a code
+          {t("custody.scanCode.scanACode")}
         </span>
       </Button>
       <DialogPortal>
         <Dialog
           open={open}
           onClose={() => setOpen(false)}
-          title={<h3>Scan an item or kit</h3>}
+          title={<h3>{t("custody.scanCode.scanAnItemOrKit")}</h3>}
           className="sm:max-w-xl"
         >
           {open ? <ScanBody onDone={() => setOpen(false)} /> : null}
@@ -58,6 +60,7 @@ export function ScanCodeButton() {
  * refusal from an earlier opening is never shown again.
  */
 function ScanBody({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation();
   const [paused, setPaused] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // The page is public: the app's search-params hook reads the signed-in
@@ -104,7 +107,7 @@ function ScanBody({ onDone }: { onDone: () => void }) {
       />
       <div className="mt-4 flex justify-end">
         <Button type="button" variant="secondary" onClick={onDone}>
-          Cancel
+          {t("custody.scanCode.cancel")}
         </Button>
       </div>
     </div>

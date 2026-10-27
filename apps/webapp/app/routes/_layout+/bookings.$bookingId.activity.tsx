@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   LoaderFunctionArgs,
   ActionFunctionArgs,
@@ -245,6 +246,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function BookingActivity() {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const canReadBookingNotes = userHasPermission({
     roles,
@@ -256,7 +258,10 @@ export default function BookingActivity() {
     <div className="w-full">
       {canReadBookingNotes ? (
         <>
-          <TextualDivider text="Notes" className="mb-8 lg:hidden" />
+          <TextualDivider
+            text={t("bookings.bookingsBookingidActivity.notes")}
+            className="mb-8 lg:hidden"
+          />
           <BookingNotes />
         </>
       ) : (
@@ -265,8 +270,10 @@ export default function BookingActivity() {
             <div className="mb-4 inline-flex size-8 items-center justify-center  rounded-full bg-primary-100 p-2 text-primary-600">
               <NoPermissionsIcon />
             </div>
-            <h5>Insufficient permissions</h5>
-            <p>You are not allowed to view booking notes</p>
+            <h5>
+              {t("bookings.bookingsBookingidActivity.insufficientPermissions")}
+            </h5>
+            <p>{t("bookings.bookingsBookingidActivity.youAreNotAllowedTo")}</p>
           </div>
         </div>
       )}

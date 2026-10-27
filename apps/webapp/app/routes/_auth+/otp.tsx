@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -18,6 +19,7 @@ import { ShelfOTP } from "~/components/forms/otp-input";
 import { Button } from "~/components/shared/button";
 import { useSearchParams } from "~/hooks/search-params";
 import { useDisabled } from "~/hooks/use-disabled";
+import { getServerT } from "~/i18n/i18n.server";
 import { verifyOtpAndSignin } from "~/modules/auth/service.server";
 import { isSsoDomainEmail } from "~/modules/auth/sso-enforcement.server";
 import {
@@ -43,14 +45,15 @@ import {
   safeRedirect,
 } from "~/utils/http.server";
 import { validEmail } from "~/utils/misc";
-import { getOtpPageData, type OtpVerifyMode } from "~/utils/otp";
+import { getOtpPageData, OtpSubHeading, type OtpVerifyMode } from "~/utils/otp";
 import { tw } from "~/utils/tw";
 import type { action as resendOtpAction } from "./resend-otp";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get("mode") as OtpVerifyMode;
-  const title = getOtpPageData(mode).title;
+  const t = await getServerT(context);
+  const title = t(getOtpPageData(mode).titleKey);
 
   if (context.isAuthenticated) {
     return redirect("/");
@@ -196,6 +199,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 type resendAction = typeof resendOtpAction;
 
 export default function OtpPage() {
+  const { t } = useTranslation();
   const [message, setMessage] = useState<{
     message: string;
     type: "success" | "error";
@@ -233,7 +237,7 @@ export default function OtpPage() {
       });
     } catch {
       setMessage({
-        message: "Something went wrong. Please try again.",
+        message: t("auth.otpPage.resendFailed"),
         type: "error",
       });
     }
@@ -249,16 +253,16 @@ export default function OtpPage() {
         });
       } else {
         setMessage({
-          message: "Email sent successfully. Please check your inbox.",
+          message: t("auth.otpPage.resendSent"),
           type: "success",
         });
       }
     }
-  }, [fetcher]);
+  }, [fetcher, t]);
 
   return (
     <>
-      <pageData.SubHeading email={email} />
+      <OtpSubHeading mode={mode} email={email} />
 
       <div className="mt-2 flex min-h-full flex-col justify-center">
         <div className="mx-auto w-full max-w-md px-8">
@@ -276,12 +280,13 @@ export default function OtpPage() {
 
             {ssoDomainHint ? (
               <p className="text-sm text-gray-600">
-                If your organization uses single sign-on, you may not receive a
-                code. Use{" "}
-                <Button variant="link" to="/sso-login">
-                  Login with SSO
-                </Button>{" "}
-                instead.
+                <Trans
+                  t={t}
+                  i18nKey="auth.otpPage.ssoHint"
+                  components={{
+                    ssoLink: <Button variant="link" to="/sso-login" />,
+                  }}
+                />
               </p>
             ) : null}
 
@@ -304,7 +309,7 @@ export default function OtpPage() {
               className="w-full "
               disabled={fetcherDisabled || disabled}
             >
-              {pageData.buttonTitle}
+              {t(pageData.buttonKey)}
             </Button>
           </Form>
 
@@ -312,9 +317,11 @@ export default function OtpPage() {
             className="mt-6 w-full text-center text-sm font-semibold"
             onClick={handleResendOtp}
           >
-            Did not receive a code?{" "}
+            {t("auth.otp.didNotReceiveACode")}{" "}
             <span className="text-primary-500">
-              {fetcherDisabled ? "Sending code..." : "Send again"}
+              {fetcherDisabled
+                ? t("auth.otp.sendingCode")
+                : t("auth.otp.sendAgain")}
             </span>
           </button>
         </div>

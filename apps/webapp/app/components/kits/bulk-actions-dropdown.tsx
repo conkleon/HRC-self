@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useNavigation } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { selectedBulkItemsAtom } from "~/atoms/list";
@@ -33,13 +34,15 @@ import { MobileDropdownStyles } from "../shared/mobile-dropdown-styles";
 import When from "../when/when";
 
 export default function BulkActionsDropdown() {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button variant="secondary" to="#">
         <span className="flex items-center gap-2">
-          Actions <ChevronRight className="chev rotate-90" />
+          {t("kits.bulkActionsDropdown.actions")}{" "}
+          <ChevronRight className="chev rotate-90" />
         </span>
       </Button>
     );
@@ -53,6 +56,7 @@ export default function BulkActionsDropdown() {
 }
 
 function ConditionalDropdown() {
+  const { t } = useTranslation();
   const {
     ref: dropdownRef,
     onOpenChange,
@@ -159,7 +163,9 @@ function ConditionalDropdown() {
           disabled={disabled}
         >
           <Button type="button" variant="secondary">
-            <span className="flex items-center gap-2">Actions</span>
+            <span className="flex items-center gap-2">
+              {t("kits.bulkActionsDropdown.actions")}
+            </span>
           </Button>
         </DropdownMenuTrigger>
 
@@ -171,7 +177,9 @@ function ConditionalDropdown() {
           disabled={disabled}
           type="button"
         >
-          <span className="flex items-center gap-2">Actions</span>
+          <span className="flex items-center gap-2">
+            {t("kits.bulkActionsDropdown.actions")}
+          </span>
         </Button>
 
         <MobileDropdownStyles open={open} />
@@ -199,7 +207,7 @@ function ConditionalDropdown() {
               >
                 <BulkUpdateDialogTrigger
                   type="start-audit"
-                  label="Create audit"
+                  label={t("kits.bulkActionsDropdown.createAudit")}
                   onClick={closeMenu}
                 />
               </DropdownMenuItem>
@@ -215,7 +223,7 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="release-custody"
-                  label="Release custody"
+                  label={t("kits.bulkActionsDropdown.releaseCustody")}
                   onClick={closeMenu}
                   disabled={
                     !allKitsInCustody || disableReleaseCustody
@@ -231,7 +239,11 @@ function ConditionalDropdown() {
               <DropdownMenuItem className="border-b py-1 lg:p-0">
                 <BulkUpdateDialogTrigger
                   type="assign-custody"
-                  label={assignsSelfOnly ? "Take custody" : "Assign custody"}
+                  label={
+                    assignsSelfOnly
+                      ? t("kits.bulkActionsDropdown.takeCustody")
+                      : t("kits.bulkActionsDropdown.assignCustody")
+                  }
                   onClick={closeMenu}
                   disabled={
                     !allKitsAvailable ||
@@ -270,7 +282,7 @@ function ConditionalDropdown() {
               >
                 <BulkUpdateDialogTrigger
                   type="trash"
-                  label="Delete"
+                  label={t("kits.bulkActionsDropdown.delete")}
                   onClick={closeMenu}
                   disabled={
                     someKitsCheckedOut
@@ -293,7 +305,7 @@ function ConditionalDropdown() {
                 width="full"
                 onClick={closeMenu}
               >
-                Close
+                {t("kits.bulkActionsDropdown.close")}
               </Button>
             </DropdownMenuItem>
           </div>

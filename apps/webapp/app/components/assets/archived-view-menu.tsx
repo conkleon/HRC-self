@@ -27,6 +27,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { Check, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "~/hooks/search-params";
 import { tw } from "~/utils/tw";
 
@@ -95,6 +96,7 @@ export function archivedViewTitle(view: ArchivedFilter, plural: string) {
  * @param props.plural - The list's noun in lower case, e.g. "assets"
  */
 export function ArchivedViewMenu({ plural }: { plural: string }) {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const current = toArchivedView(searchParams.get("archived"));
@@ -142,7 +144,7 @@ export function ArchivedViewMenu({ plural }: { plural: string }) {
           sideOffset={6}
           className="z-[999999] w-48 rounded border border-gray-200 bg-white py-1 shadow-lg"
         >
-          <div role="group" aria-label="Asset view">
+          <div role="group" aria-label={t("assets.archivedViewMenu.assetView")}>
             {ARCHIVED_VIEWS.map((view) => {
               const isSelected = view.value === current;
               return (

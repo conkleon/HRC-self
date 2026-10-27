@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { RESERVATION_AUDIENCE } from "~/utils/permissions/role-audience";
 
 /** A single recipient entry for the notification preview. */
@@ -47,6 +48,7 @@ export function NotificationPreview({
   notifyAdminsOnNewBooking,
   onRemoveRecipient,
 }: NotificationPreviewProps) {
+  const { t } = useTranslation();
   if (recipients.length === 0 && adminCount === 0) {
     return null;
   }
@@ -54,7 +56,7 @@ export function NotificationPreview({
   return (
     <div className="mt-3 rounded border border-gray-200 bg-gray-50 p-3">
       <p className="mb-2 text-[14px] font-medium text-gray-700">
-        Who will be notified
+        {t("bookings.notificationPreview.whoWillBeNotified")}
       </p>
       <ul className="space-y-1">
         {recipients.map((r) => (
@@ -76,7 +78,9 @@ export function NotificationPreview({
                 type="button"
                 className="ml-2 inline-flex size-4 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600"
                 onClick={() => onRemoveRecipient(r.id!)}
-                aria-label={`Remove ${r.name}`}
+                aria-label={t("bookings.notificationPreview.remove", {
+                  name: r.name,
+                })}
               >
                 <svg
                   className="size-3"

@@ -1,4 +1,5 @@
 import type { Booking, TeamMember, User } from "@prisma/client";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useOrganizationRoles } from "~/hooks/use-organization-roles";
 import { getPrimaryCustody } from "~/modules/custody/utils";
@@ -52,6 +53,7 @@ export function CustodyCard({
     | null;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const canViewTeamMemberUsers = userHasPermission({
     roles,
@@ -86,7 +88,7 @@ export function CustodyCard({
           />
           <div>
             <p className="">
-              In custody of{" "}
+              {t("assets.assetCustodyCard.inCustodyOf")}{" "}
               {canViewTeamMemberUsers && primaryCustody?.custodian?.userId ? (
                 <Button
                   to={`/settings/team/users/${primaryCustody.custodian.userId}/assets`}
@@ -105,7 +107,8 @@ export function CustodyCard({
               <span className="font-semibold">{}</span>
             </p>
             <span>
-              Since <DateS date={primaryCustody.createdAt} includeTime />
+              {t("assets.assetCustodyCard.since")}{" "}
+              <DateS date={primaryCustody.createdAt} includeTime />
             </span>
           </div>
         </div>
@@ -131,16 +134,20 @@ export function CustodyCard({
           />
           <div>
             <p className="">
-              In custody of{" "}
-              <span className="font-semibold">{teamMemberName} </span>
-              via
+              <Trans
+                t={t}
+                i18nKey="assets.assetCustodyCard.inCustodyOf00"
+                values={{ teamMemberName }}
+                components={[<span key="slot0" className="font-semibold" />]}
+              />
             </p>
             <Link to={`/bookings/${booking.id}`} className="underline">
               {booking.name}
             </Link>
             <span>
               {" "}
-              Since <DateS date={booking.from} includeTime />
+              {t("assets.assetCustodyCard.since")}{" "}
+              <DateS date={booking.from} includeTime />
             </span>
           </div>
         </div>

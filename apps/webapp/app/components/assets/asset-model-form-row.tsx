@@ -22,6 +22,7 @@
  *
  * @see {@link file://./form.tsx} consumer
  */
+import { useTranslation } from "react-i18next";
 import DynamicSelect from "../dynamic-select/dynamic-select";
 import FormRow from "../forms/form-row";
 import InlineEntityCreationDialog from "../inline-entity-creation-dialog/inline-entity-creation-dialog";
@@ -55,20 +56,21 @@ export function AssetModelFormRow({
   onChange,
   error,
 }: AssetModelFormRowProps) {
+  const { t } = useTranslation();
   return (
     <FormRow
-      rowLabel="Asset Model"
+      rowLabel={t("assets.assetModelFormRow.assetModel")}
       required={required}
       subHeading={
         <p>
-          Assign a model to group similar assets together.{" "}
+          {t("assets.assetModelFormRow.assignAModelToGroup")}{" "}
           <Button
             to="/settings/asset-models/new"
             variant="link-gray"
             className="text-gray-600 underline"
             target="_blank"
           >
-            Create asset models
+            {t("assets.assetModelFormRow.createAssetModels")}
           </Button>
         </p>
       }
@@ -81,9 +83,9 @@ export function AssetModelFormRow({
           fieldName="assetModelId"
           model={{ name: "assetModel", queryKey: "name" }}
           triggerWrapperClassName="flex flex-col !gap-0 justify-start items-start [&_.inner-label]:w-full [&_.inner-label]:text-left "
-          placeholder="Select asset model"
-          contentLabel="Asset Models"
-          label="Asset Model"
+          placeholder={t("assets.assetModelFormRow.selectAssetModel")}
+          contentLabel={t("assets.assetModelFormRow.assetModels")}
+          label={t("assets.assetModelFormRow.assetModel")}
           hideLabel
           initialDataKey="assetModels"
           countKey="totalAssetModels"
@@ -93,9 +95,9 @@ export function AssetModelFormRow({
           onChange={onChange}
           extraContent={({ onItemCreated, closePopover }) => (
             <InlineEntityCreationDialog
-              title="Create new asset model"
+              title={t("assets.assetModelFormRow.createNewAssetModel")}
               type="assetModel"
-              buttonLabel="Create new asset model"
+              buttonLabel={t("assets.assetModelFormRow.createNewAssetModel")}
               onCreated={(created) => {
                 if (created?.type !== "assetModel") return;
                 const model = created.entity;

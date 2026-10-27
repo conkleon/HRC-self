@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode, FormEvent } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Form } from "react-router";
 import { useZorm } from "react-zorm";
 import type { z } from "zod";
@@ -112,6 +113,7 @@ export default function ConfigurableDrawer<T>({
   renderGroups,
   collapsedHeight,
 }: ConfigurableDrawerProps<T>) {
+  const { t } = useTranslation();
   const zo = useZorm(formName, schema);
   const itemsLength = Object.keys(items).length;
   const hasItems = itemsLength > 0;
@@ -139,10 +141,12 @@ export default function ConfigurableDrawer<T>({
       <div>
         {expanded && (
           <div className="text-base font-semibold text-gray-900">
-            List is empty
+            {t("scanner.configurableDrawer.listIsEmpty")}
           </div>
         )}
-        <p className="text-sm text-gray-600">Fill list by scanning codes...</p>
+        <p className="text-sm text-gray-600">
+          {t("scanner.configurableDrawer.fillListByScanningCodes")}
+        </p>
       </div>
     </>
   );
@@ -207,7 +211,7 @@ export default function ConfigurableDrawer<T>({
                     to={".."}
                     className={"ml-auto"}
                   >
-                    Cancel
+                    {t("scanner.configurableDrawer.cancel")}
                   </Button>
                   {/* Submit button */}
                   <Button
@@ -234,7 +238,7 @@ export default function ConfigurableDrawer<T>({
             renderGroups()
           ) : rowsInCard ? (
             <ScanItemGroup
-              label="Scanned this session"
+              label={t("scanner.configurableDrawer.scannedThisSession")}
               count={itemsLength}
               tone="active"
               openWhenCountGrows

@@ -1,4 +1,5 @@
 import { TagUseFor } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type {
   MetaFunction,
   LoaderFunctionArgs,
@@ -285,6 +286,7 @@ export default function BookingsIndexPage({
   className?: string;
   disableBulkActions?: boolean;
 }) {
+  const { t } = useTranslation();
   const matches = useMatches();
   const roleAccess = useRoleAccess();
 
@@ -334,11 +336,11 @@ export default function BookingsIndexPage({
             trigger={
               <Button
                 type="button"
-                aria-label="new booking"
+                aria-label={t("bookings.bookingsIndex.newBooking2")}
                 data-test-id="createNewBooking"
                 prefetch="none"
               >
-                New booking
+                {t("bookings.bookingsIndex.newBooking")}
               </Button>
             }
           />
@@ -364,14 +366,14 @@ export default function BookingsIndexPage({
           headerChildren={
             <>
               <Th />
-              <Th>Assets</Th>
-              <Th>Description</Th>
+              <Th>{t("bookings.bookingsIndex.assets")}</Th>
+              <Th>{t("bookings.bookingsIndex.description")}</Th>
 
-              <Th>From</Th>
-              <Th>To</Th>
-              <Th>Tags</Th>
-              <Th>Custodian</Th>
-              <Th>Created by</Th>
+              <Th>{t("bookings.bookingsIndex.from")}</Th>
+              <Th>{t("bookings.bookingsIndex.to")}</Th>
+              <Th>{t("bookings.bookingsIndex.tags")}</Th>
+              <Th>{t("bookings.bookingsIndex.custodian")}</Th>
+              <Th>{t("bookings.bookingsIndex.createdBy")}</Th>
             </>
           }
           headerExtraContent={

@@ -19,6 +19,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { ChevronDownIcon } from "lucide-react";
 
+import { useTranslation } from "react-i18next";
 import type { BookingExpectedAsset } from "~/atoms/qr-scanner";
 import { AvailabilityBadge } from "~/components/booking/availability-label";
 import ImageWithPreview from "~/components/image-with-preview/image-with-preview";
@@ -127,6 +128,7 @@ function PendingKitGroup({
   onQuickAction: (asset: QtyExpectedAsset) => void;
   copy: ModeCopy;
 }) {
+  const { t } = useTranslation();
   // Collapsed by default — a pending kit is N rows of noise while the
   // operator is still scanning; a single summary row with a count is
   // enough to know it's there. Expanding lets them audit which
@@ -159,7 +161,7 @@ function PendingKitGroup({
               {kit.mainImage ? (
                 <ImageWithPreview
                   thumbnailUrl={kit.mainImage}
-                  alt={kit.name || "Kit"}
+                  alt={kit.name || t("scanner.pendingItemsList.kit")}
                   className="size-[54px] rounded-[2px]"
                 />
               ) : (
@@ -167,7 +169,7 @@ function PendingKitGroup({
                   {/* Placeholder for image-less kits — the chevron on
                       the left is still the primary fold affordance. */}
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                    Kit
+                    {t("scanner.pendingItemsList.kit")}
                   </span>
                 </div>
               )}
@@ -175,14 +177,20 @@ function PendingKitGroup({
                 <span className="word-break whitespace-break-spaces font-medium text-gray-800">
                   {kit.name}
                   <span className="ml-1 text-xs font-normal text-gray-500">
-                    ({assets.length} {assets.length === 1 ? "asset" : "assets"})
+                    ({assets.length}{" "}
+                    {assets.length === 1
+                      ? t("scanner.pendingItemsList.asset")
+                      : t("scanner.pendingItemsList.assets")}
+                    )
                   </span>
                 </span>
                 <div className="flex flex-wrap items-center gap-1">
-                  <span className={assetTypePillClass}>kit</span>
+                  <span className={assetTypePillClass}>
+                    {t("scanner.pendingItemsList.kit2")}
+                  </span>
                   <AvailabilityBadge
-                    badgeText="Pending"
-                    tooltipTitle="Pending kit"
+                    badgeText={t("scanner.pendingItemsList.pending")}
+                    tooltipTitle={t("scanner.pendingItemsList.pendingKit")}
                     tooltipContent={copy.pendingKitTooltipBody}
                     className="border-gray-200 bg-gray-50 text-gray-600"
                   />
@@ -217,7 +225,9 @@ function PendingKitGroup({
                     <div className="flex items-center gap-2">
                       <ImageWithPreview
                         thumbnailUrl={asset.thumbnailImage || asset.mainImage}
-                        alt={asset.title || "Asset"}
+                        alt={
+                          asset.title || t("scanner.pendingItemsList.asset2")
+                        }
                         className="size-[40px] rounded-[2px]"
                       />
                       <div className="flex flex-col gap-1">
@@ -225,7 +235,9 @@ function PendingKitGroup({
                           {asset.title}
                         </span>
                         <div className="flex flex-wrap items-center gap-1">
-                          <span className={assetTypePillClass}>asset</span>
+                          <span className={assetTypePillClass}>
+                            {t("scanner.pendingItemsList.asset")}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -257,6 +269,7 @@ function PendingKitQtyChild({
   onQuickAction: () => void;
   copy: ModeCopy;
 }) {
+  const { t } = useTranslation();
   const reconciled = Math.max(0, asset.booked - asset.remaining);
   const isPartial = asset.logged > 0 && reconciled > 0;
 
@@ -270,7 +283,7 @@ function PendingKitQtyChild({
           <div className="flex min-w-0 items-center gap-2">
             <ImageWithPreview
               thumbnailUrl={asset.thumbnailImage || asset.mainImage}
-              alt={asset.title || "Asset"}
+              alt={asset.title || t("scanner.pendingItemsList.asset2")}
               className="size-[40px] shrink-0 rounded-[2px]"
             />
             <div className="flex min-w-0 flex-col gap-1">
@@ -278,24 +291,35 @@ function PendingKitQtyChild({
                 {asset.title}
               </span>
               <div className="flex flex-wrap items-center gap-1">
-                <span className={assetTypePillClass}>asset</span>
+                <span className={assetTypePillClass}>
+                  {t("scanner.pendingItemsList.asset")}
+                </span>
                 {isPartial ? (
                   <AvailabilityBadge
-                    badgeText={`${reconciled}/${asset.booked} reconciled`}
-                    tooltipTitle="Partially reconciled"
-                    tooltipContent="Some units were already reconciled in a previous check-in. The remainder can still be checked in below."
+                    badgeText={t("scanner.pendingItemsList.reconciled", {
+                      reconciled,
+                      booked: asset.booked,
+                    })}
+                    tooltipTitle={t(
+                      "scanner.pendingItemsList.partiallyReconciled"
+                    )}
+                    tooltipContent={t(
+                      "scanner.pendingItemsList.someUnitsWereAlreadyReconciled"
+                    )}
                     className="border-amber-200 bg-amber-50 text-amber-700"
                   />
                 ) : (
                   <AvailabilityBadge
-                    badgeText="Pending"
-                    tooltipTitle="Pending check-in"
+                    badgeText={t("scanner.pendingItemsList.pending")}
+                    tooltipTitle={t("scanner.pendingItemsList.pendingCheckIn")}
                     tooltipContent={copy.pendingQtyTooltipBody}
                     className="border-gray-200 bg-gray-50 text-gray-600"
                   />
                 )}
                 <AvailabilityBadge
-                  badgeText={`needs ${asset.remaining}`}
+                  badgeText={t("scanner.pendingItemsList.needs", {
+                    remaining: asset.remaining,
+                  })}
                   tooltipTitle={copy.needsTooltipTitle}
                   tooltipContent={copy.needsTooltipBody(asset.remaining)}
                   className="border-blue-200 bg-blue-50 text-blue-700"
@@ -309,7 +333,7 @@ function PendingKitQtyChild({
             variant="secondary"
             size="xs"
             onClick={onQuickAction}
-            title="Skip scan — enter disposition inline below."
+            title={t("scanner.pendingItemsList.skipScanEnterDispositionInline")}
             className="w-full sm:w-auto sm:shrink-0"
           >
             {copy.quickActionButton}

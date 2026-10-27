@@ -17,6 +17,7 @@
 import type { ReactNode, RefObject } from "react";
 import { useRef, useState } from "react";
 import type { Booking, BookingStatus } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { useReactToPrint } from "react-to-print";
 import { Button } from "~/components/shared/button";
@@ -97,6 +98,7 @@ export const BookingCheckinReceiptPDF = ({
   hasDispositionedUnits: boolean;
   timeStamp: number;
 }) => {
+  const { t } = useTranslation();
   const componentRef = useRef<HTMLDivElement>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const fetcher = useFetcher<CheckinReceiptApiResponse>();
@@ -172,7 +174,7 @@ export const BookingCheckinReceiptPDF = ({
         onClick={handleOpenDialog}
         disabled={disabled}
       >
-        Generate check-in receipt
+        {t("bookings.bookingCheckinReceiptPdf.generateCheckInReceipt")}
       </Button>
       <DialogPortal>
         <Dialog
@@ -181,15 +183,19 @@ export const BookingCheckinReceiptPDF = ({
           className="h-dvh w-full md:h-[calc(100vh-4rem)] md:w-[90%] md:py-0"
           title={
             <div className="mx-auto w-full max-w-[210mm] border p-4 text-center">
-              <h3>Generate check-in receipt for "{booking?.name}"</h3>
+              <h3>
+                {t(
+                  "bookings.bookingCheckinReceiptPdf.generateCheckInReceiptFor",
+                  { name: booking?.name }
+                )}
+              </h3>
               <p>
-                You can either preview or download the PDF. It lists every
-                booked item and what came back.
+                {t("bookings.bookingCheckinReceiptPdf.youCanEitherPreviewOr")}
               </p>
               {!isFetchingReceipt && (
                 <div className="mt-4">
                   <Button type="button" onClick={handlePrint}>
-                    Download PDF
+                    {t("bookings.bookingCheckinReceiptPdf.downloadPdf")}
                   </Button>
                 </div>
               )}
@@ -200,7 +206,11 @@ export const BookingCheckinReceiptPDF = ({
             <div className="grow">
               {isFetchingReceipt ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2">
-                  <div>Generating receipt preview...</div>
+                  <div>
+                    {t(
+                      "bookings.bookingCheckinReceiptPdf.generatingReceiptPreview"
+                    )}
+                  </div>
                   <div>
                     <Spinner />
                   </div>
@@ -220,7 +230,7 @@ export const BookingCheckinReceiptPDF = ({
                 variant="secondary"
                 onClick={handleCloseDialog}
               >
-                Cancel
+                {t("bookings.bookingCheckinReceiptPdf.cancel")}
               </Button>
             </div>
           </div>
@@ -237,7 +247,7 @@ export const BookingCheckinReceiptPDF = ({
         disabled={disabled}
         onClick={handleOpenDialog}
       >
-        Generate check-in receipt
+        {t("bookings.bookingCheckinReceiptPdf.generateCheckInReceipt")}
       </Button>
     </>
   );
@@ -275,15 +285,24 @@ function DispositionPill({
  * tints above, and the sheet is read on paper.
  */
 function ReturnedCell({ row }: { row: CheckinReceiptViewRow }) {
+  const { t } = useTranslation();
   if (row.state === "NEVER_CHECKED_OUT") {
-    return <span className="text-gray-500">Never checked out</span>;
+    return (
+      <span className="text-gray-500">
+        {t("bookings.bookingCheckinReceiptPdf.neverCheckedOut")}
+      </span>
+    );
   }
 
   if (!row.isQuantityTracked) {
     return row.state === "RETURNED" ? (
-      <DispositionPill tone="returned">Returned</DispositionPill>
+      <DispositionPill tone="returned">
+        {t("bookings.bookingCheckinReceiptPdf.returned")}
+      </DispositionPill>
     ) : (
-      <DispositionPill tone="out">Still out</DispositionPill>
+      <DispositionPill tone="out">
+        {t("bookings.bookingCheckinReceiptPdf.stillOut")}
+      </DispositionPill>
     );
   }
 
@@ -291,22 +310,36 @@ function ReturnedCell({ row }: { row: CheckinReceiptViewRow }) {
     <div className="flex flex-wrap gap-1">
       <When truthy={row.returned > 0}>
         <DispositionPill tone="returned">
-          {row.returned} returned
+          {t("bookings.bookingCheckinReceiptPdf.returned2", {
+            returned: row.returned,
+          })}
         </DispositionPill>
       </When>
       <When truthy={row.consumed > 0}>
         <DispositionPill tone="consumed">
-          {row.consumed} consumed
+          {t("bookings.bookingCheckinReceiptPdf.consumed", {
+            consumed: row.consumed,
+          })}
         </DispositionPill>
       </When>
       <When truthy={row.lost > 0}>
-        <DispositionPill tone="lost">{row.lost} lost</DispositionPill>
+        <DispositionPill tone="lost">
+          {t("bookings.bookingCheckinReceiptPdf.lost", { lost: row.lost })}
+        </DispositionPill>
       </When>
       <When truthy={row.damaged > 0}>
-        <DispositionPill tone="damaged">{row.damaged} damaged</DispositionPill>
+        <DispositionPill tone="damaged">
+          {t("bookings.bookingCheckinReceiptPdf.damaged", {
+            damaged: row.damaged,
+          })}
+        </DispositionPill>
       </When>
       <When truthy={row.stillOut > 0}>
-        <DispositionPill tone="out">{row.stillOut} still out</DispositionPill>
+        <DispositionPill tone="out">
+          {t("bookings.bookingCheckinReceiptPdf.stillOut2", {
+            stillOut: row.stillOut,
+          })}
+        </DispositionPill>
       </When>
     </div>
   );
@@ -372,6 +405,7 @@ export const BookingCheckinReceiptPreview = ({
   componentRef: RefObject<HTMLDivElement | null>;
   pdfMeta: CheckinReceiptView | null;
 }) => {
+  const { t } = useTranslation();
   if (!pdfMeta) return null;
 
   const { booking, organization, rows, totals } = pdfMeta;
@@ -421,7 +455,9 @@ export const BookingCheckinReceiptPreview = ({
               <h3 className="m-0 p-0 text-gray-600">{organization?.name}</h3>
             </div>
             <h1 className="mt-0.5 text-xl font-medium">
-              Check-in receipt for {booking?.name}
+              {t("bookings.bookingCheckinReceiptPdf.checkInReceiptFor", {
+                name: booking?.name,
+              })}
             </h1>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2">
@@ -430,18 +466,29 @@ export const BookingCheckinReceiptPreview = ({
               {pdfMeta.stamp}
             </span>
             <div className="text-sm text-gray-500">
-              Printed <DateS date={new Date()} />
+              {t("bookings.bookingCheckinReceiptPdf.printed")}{" "}
+              <DateS date={new Date()} />
             </div>
           </div>
         </div>
 
         <section className="mb-5 mt-2.5 border border-gray-300">
-          <ReceiptFact label="Booking">{booking?.name}</ReceiptFact>
-          <ReceiptFact label="Custodian">{custodianName}</ReceiptFact>
-          <ReceiptFact label="Planned period">{plannedPeriod}</ReceiptFact>
+          <ReceiptFact label={t("bookings.bookingCheckinReceiptPdf.booking")}>
+            {booking?.name}
+          </ReceiptFact>
+          <ReceiptFact label={t("bookings.bookingCheckinReceiptPdf.custodian")}>
+            {custodianName}
+          </ReceiptFact>
+          <ReceiptFact
+            label={t("bookings.bookingCheckinReceiptPdf.plannedPeriod")}
+          >
+            {plannedPeriod}
+          </ReceiptFact>
 
           <When truthy={!!pdfMeta.checkedOutAt}>
-            <ReceiptFact label="Checked out">
+            <ReceiptFact
+              label={t("bookings.bookingCheckinReceiptPdf.checkedOut")}
+            >
               {pdfMeta.checkedOutAt}
               <When truthy={!!pdfMeta.checkedOutByName}>
                 {` by ${pdfMeta.checkedOutByName}`}
@@ -454,7 +501,13 @@ export const BookingCheckinReceiptPreview = ({
                 actually came back: a booking whose every unit was written off
                 as consumed, lost or damaged closed at this moment without
                 anything being returned, and the row must not say otherwise. */}
-            <ReceiptFact label={anyReturned ? "Returned" : "Accounted for"}>
+            <ReceiptFact
+              label={
+                anyReturned
+                  ? t("bookings.bookingCheckinReceiptPdf.returned")
+                  : t("bookings.bookingCheckinReceiptPdf.accountedFor")
+              }
+            >
               {pdfMeta.returnedAt}
               <When truthy={!!pdfMeta.latenessNote}>
                 {" · "}
@@ -470,7 +523,9 @@ export const BookingCheckinReceiptPreview = ({
           </When>
 
           <When truthy={pdfMeta.checkedInByNames.length > 0}>
-            <ReceiptFact label="Checked in by">
+            <ReceiptFact
+              label={t("bookings.bookingCheckinReceiptPdf.checkedInBy")}
+            >
               {pdfMeta.checkedInByNames.join(", ")}
             </ReceiptFact>
           </When>
@@ -479,18 +534,26 @@ export const BookingCheckinReceiptPreview = ({
               mixed return says it per row instead. Nothing when no row
               recorded a method. */}
           <When truthy={!!pdfMeta.checkedInHow}>
-            <ReceiptFact label="Check-in method">
+            <ReceiptFact
+              label={t("bookings.bookingCheckinReceiptPdf.checkInMethod")}
+            >
               {pdfMeta.checkedInHow}
             </ReceiptFact>
           </When>
 
           <When truthy={!!booking.description}>
-            <ReceiptFact label="Description">{booking.description}</ReceiptFact>
+            <ReceiptFact
+              label={t("bookings.bookingCheckinReceiptPdf.description")}
+            >
+              {booking.description}
+            </ReceiptFact>
           </When>
 
           <When truthy={booking.tags.length > 0}>
             <div className="flex items-center border-b border-gray-300 p-2 last:border-b-0">
-              <span className="min-w-[150px] text-sm font-medium">Tags</span>
+              <span className="min-w-[150px] text-sm font-medium">
+                {t("bookings.bookingCheckinReceiptPdf.tags")}
+              </span>
               <div className="flex flex-wrap items-center gap-2">
                 {booking.tags.map((tag) => (
                   <GrayBadge key={tag.id}>{tag.name}</GrayBadge>
@@ -508,25 +571,25 @@ export const BookingCheckinReceiptPreview = ({
                 #
               </th>
               <th className="border-b border-r border-gray-300 p-2.5 text-left text-xs font-medium">
-                Name
+                {t("bookings.bookingCheckinReceiptPdf.name")}
               </th>
               <th className="border-b border-r border-gray-300 px-1.5 py-2.5 text-left text-xs font-medium">
-                Qty
+                {t("bookings.bookingCheckinReceiptPdf.qty")}
               </th>
               <th className="border-b border-r border-gray-300 p-2.5 text-left text-xs font-medium">
-                Kit
+                {t("bookings.bookingCheckinReceiptPdf.kit")}
               </th>
               <th className="border-b border-r border-gray-300 p-2.5 text-left text-xs font-medium">
-                Code
+                {t("bookings.bookingCheckinReceiptPdf.code")}
               </th>
               <th className="border-b border-r border-gray-300 p-2.5 text-left text-xs font-medium">
-                Returned
+                {t("bookings.bookingCheckinReceiptPdf.returned")}
               </th>
               <th className="border-b border-r border-gray-300 px-1.5 py-2.5 text-left text-xs font-medium">
-                Checked in on
+                {t("bookings.bookingCheckinReceiptPdf.checkedInOn")}
               </th>
               <th className="border-b border-gray-300 p-2.5 text-left text-xs font-medium">
-                Checked in by
+                {t("bookings.bookingCheckinReceiptPdf.checkedInBy")}
               </th>
             </tr>
           </thead>
@@ -556,7 +619,9 @@ export const BookingCheckinReceiptPreview = ({
                       indistinguishable from a live kit member. */}
                   <When truthy={row.isRemovedFromKit}>
                     <span className="mt-1 block text-xs text-gray-500">
-                      Removed from kit, kept as a record of what was booked
+                      {t(
+                        "bookings.bookingCheckinReceiptPdf.removedFromKitKeptAs"
+                      )}
                     </span>
                   </When>
                 </td>
@@ -589,32 +654,59 @@ export const BookingCheckinReceiptPreview = ({
         {/* Every line prints, zeros included: a zero is evidence that nothing
             was lost, and a missing line reads as a number nobody checked. */}
         <div className="ml-auto mt-3 grid w-[250px] grid-cols-[1fr_auto] gap-x-6 gap-y-0.5 text-sm tabular-nums">
-          <TotalsLine label="Items booked" value={totals.itemsBooked} />
-          <TotalsLine label="Units sent out" value={totals.unitsSentOut} />
-          <TotalsLine label="Returned" value={totals.returned} />
-          <TotalsLine label="Consumed" value={totals.consumed} />
-          <TotalsLine label="Lost" value={totals.lost} />
-          <TotalsLine label="Damaged" value={totals.damaged} />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.itemsBooked")}
+            value={totals.itemsBooked}
+          />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.unitsSentOut")}
+            value={totals.unitsSentOut}
+          />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.returned")}
+            value={totals.returned}
+          />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.consumed2")}
+            value={totals.consumed}
+          />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.lost2")}
+            value={totals.lost}
+          />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.damaged2")}
+            value={totals.damaged}
+          />
           <div className="col-span-2 my-1 border-t border-black" />
-          <TotalsLine label="Still out" value={totals.stillOut} isSum />
+          <TotalsLine
+            label={t("bookings.bookingCheckinReceiptPdf.stillOut")}
+            value={totals.stillOut}
+            isSum
+          />
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-6">
           <div className="border-t border-gray-400 pt-1.5 text-xs text-gray-600">
             {anyReturned
-              ? "Returned by (custodian)"
-              : "Confirmed by (custodian)"}{" "}
-            · name, signature, date
+              ? t("bookings.bookingCheckinReceiptPdf.returnedByCustodian")
+              : t(
+                  "bookings.bookingCheckinReceiptPdf.confirmedByCustodian"
+                )}{" "}
+            {t("bookings.bookingCheckinReceiptPdf.nameSignatureDate")}
           </div>
           <div className="border-t border-gray-400 pt-1.5 text-xs text-gray-600">
-            {anyReturned ? "Received by" : "Recorded by"} · name, signature,
-            date
+            {anyReturned
+              ? t("bookings.bookingCheckinReceiptPdf.receivedBy")
+              : t("bookings.bookingCheckinReceiptPdf.recordedBy")}{" "}
+            {t("bookings.bookingCheckinReceiptPdf.nameSignatureDate")}
           </div>
         </div>
 
         <div className="mt-4 text-xs text-gray-400">
-          Times are the recorded check-in moments, in the printing user's date
-          format. Generated by {getAppName()}.
+          {t("bookings.bookingCheckinReceiptPdf.timesAreTheRecordedCheck", {
+            appName: getAppName(),
+          })}
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AssetStatus, AssetType } from "@prisma/client";
 import type { Booking } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { z } from "zod";
 import type { BookingExpectedAsset } from "~/atoms/qr-scanner";
@@ -256,6 +257,7 @@ export default function PartialCheckoutDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   const {
     booking,
     checkedOutAssetIds,
@@ -796,7 +798,7 @@ export default function PartialCheckoutDrawer({
       <>
         {scannedCount > 0 ? (
           <ScanItemGroup
-            label="Scanned this session"
+            label={t("scanner.partialCheckoutDrawer.scannedThisSession")}
             count={scannedCount}
             tone="active"
             openWhenCountGrows
@@ -829,7 +831,11 @@ export default function PartialCheckoutDrawer({
         {/* Pending rows are grouped by each entry's OWN `kitId`; the
             renderer is shared with check-in through `mode`. */}
         {pendingCount > 0 ? (
-          <ScanItemGroup label="Pending" count={pendingCount} tone="muted">
+          <ScanItemGroup
+            label={t("scanner.partialCheckoutDrawer.pending")}
+            count={pendingCount}
+            tone="muted"
+          >
             <PendingItemsList
               mode="checkout"
               pendingIndividuals={buckets.pendingIndividuals}
@@ -848,6 +854,7 @@ export default function PartialCheckoutDrawer({
     kitMetaById,
     onRemoveScanned,
     pendingCount,
+    t,
   ]);
 
   const contextValue: CheckoutDispositionContextValue = {
@@ -876,10 +883,17 @@ export default function PartialCheckoutDrawer({
         title={
           <div className="text-right">
             <span className="flex items-center justify-end gap-1 text-gray-600">
-              {submittedAssetIds.length}/{remainingBookedAssets} Assets scanned
+              {t("scanner.partialCheckoutDrawer.assetsScanned", {
+                submittedAssetIdsCount: submittedAssetIds.length,
+                remainingBookedAssets,
+              })}
               <InfoTooltip
                 iconClassName="size-4"
-                content={<p>All assets inside kits are counted individually</p>}
+                content={
+                  <p>
+                    {t("scanner.partialCheckoutDrawer.allAssetsInsideKitsAre")}
+                  </p>
+                }
               />
             </span>
             <span className="flex h-5 flex-col justify-center font-medium text-gray-900">
@@ -914,6 +928,7 @@ export default function PartialCheckoutDrawer({
 
 // Asset row renderer
 export function AssetRow({ asset }: { asset: AssetFromQr }) {
+  const { t } = useTranslation();
   const { booking, checkedOutAssetIds, remainingToCheckOutByAsset } =
     useLoaderData<typeof loader>();
   const items = useAtomValue(scannedItemsAtom);
@@ -1145,7 +1160,7 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
               "text-xs text-gray-700"
             )}
           >
-            asset
+            {t("scanner.partialCheckoutDrawer.asset")}
           </span>
           <AssetAvailabilityLabels />
         </div>
@@ -1189,6 +1204,7 @@ function QuantityCheckoutBlock({
   bookingAssetId: string;
   info: CheckoutQtyInfo;
 }) {
+  const { t } = useTranslation();
   const { dispositions, updateQuantity } = useCheckoutDispositionContext();
   // A pool at two or more locations going out for the first time asks
   // where its units leave from. The select lives in this row, outside the
@@ -1219,7 +1235,9 @@ function QuantityCheckoutBlock({
       )}
     >
       <label className="flex items-center justify-between gap-3">
-        <span className="text-xs font-medium text-gray-700">Check out</span>
+        <span className="text-xs font-medium text-gray-700">
+          {t("scanner.partialCheckoutDrawer.checkOut")}
+        </span>
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -1231,7 +1249,7 @@ function QuantityCheckoutBlock({
             value={value}
             onChange={(e) => updateQuantity(bookingAssetId, e.target.value)}
             inputMode="numeric"
-            aria-label="Check out quantity"
+            aria-label={t("scanner.partialCheckoutDrawer.checkOutQuantity")}
             className={tw(
               "w-14 rounded-md border border-gray-200 px-2 py-1 text-right text-sm tabular-nums text-gray-900",
               "focus:outline-none focus:ring-1 focus:ring-primary-500",
@@ -1241,7 +1259,9 @@ function QuantityCheckoutBlock({
             )}
           />
           <span className="text-xs tabular-nums text-gray-500">
-            of {info.remaining}
+            {t("scanner.partialCheckoutDrawer.of", {
+              remaining: info.remaining,
+            })}
             {info.unitOfMeasure ? ` ${info.unitOfMeasure}` : ""}
           </span>
         </div>
@@ -1260,6 +1280,7 @@ function QuantityCheckoutBlock({
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   const { booking, checkedOutAssetIds, remainingToCheckOutByAsset } =
     useLoaderData<typeof loader>();
   const items = useAtomValue(scannedItemsAtom);
@@ -1361,13 +1382,19 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
         <span className="text-[12px] font-normal text-gray-700">
           {isKitScanned ? (
             <>
-              ({uncheckedKitAssetsInBooking.length} of {totalKitAssetsInBooking}{" "}
-              assets to be checked out)
+              {t("scanner.partialCheckoutDrawer.ofAssetsToBeChecked", {
+                uncheckedKitAssetsInBookingCount:
+                  uncheckedKitAssetsInBooking.length,
+                totalKitAssetsInBooking,
+              })}
             </>
           ) : (
             <>
-              ({remainingKitAssetsInBooking.length} of {totalKitAssetsInBooking}{" "}
-              assets remaining)
+              {t("scanner.partialCheckoutDrawer.ofAssetsRemaining", {
+                remainingKitAssetsInBookingCount:
+                  remainingKitAssetsInBooking.length,
+                totalKitAssetsInBooking,
+              })}
             </>
           )}
         </span>
@@ -1381,7 +1408,7 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.partialCheckoutDrawer.kit")}
         </span>
         <KitAvailabilityLabels />
       </div>
@@ -1415,6 +1442,7 @@ const CustomForm = ({
   isLoading,
   hasBlockers,
 }: CustomFormProps) => {
+  const { t } = useTranslation();
   /** Use state instead of ref so the component re-renders once the form
    * mounts — this guarantees portalContainer is always the real DOM node
    * when the user opens the early-checkout dialog. */
@@ -1461,7 +1489,7 @@ const CustomForm = ({
 
         {/* Cancel button */}
         <Button type="button" variant="secondary" to=".." className="ml-auto">
-          Cancel
+          {t("scanner.partialCheckoutDrawer.cancel")}
         </Button>
 
         {/* Submit button - conditional based on early check-out */}
@@ -1492,7 +1520,7 @@ const CustomForm = ({
             }
             className="w-auto"
           >
-            Check out assets
+            {t("scanner.partialCheckoutDrawer.checkOutAssets")}
           </Button>
         )}
       </div>

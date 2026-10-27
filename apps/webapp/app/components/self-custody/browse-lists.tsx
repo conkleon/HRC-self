@@ -22,6 +22,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent, MouseEvent } from "react";
 import { ChevronDown, Package } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Form, useLocation, useNavigation, useSubmit } from "react-router";
 
 import Input from "~/components/forms/input";
@@ -145,16 +146,17 @@ function listSearch({
  * @param props.name - The chosen volunteer
  */
 export function VolunteerBar({ name }: { name: string }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-left">
       <p className="min-w-0 break-words text-gray-700">
-        You are <strong>{name}</strong>
+        {t("custody.browseLists.youAre")} <strong>{name}</strong>
       </p>
       <Form method="post">
         <input type="hidden" name="intent" value="forget" />
         <Button type="submit" variant="link" disabled={disabled}>
-          Not you?
+          {t("custody.browseLists.notYou")}
         </Button>
       </Form>
     </div>
@@ -182,13 +184,14 @@ export function ListTabs({
   offeredCount: number;
   mineCount: number;
 }) {
+  const { t } = useTranslation();
   const tabs: { id: BrowseTab; label: string; count: number }[] = [
     { id: "take", label: "Available", count: offeredCount },
     { id: "mine", label: "Your items", count: mineCount },
   ];
   return (
     <nav
-      aria-label="Lists"
+      aria-label={t("custody.browseLists.lists")}
       className="mb-4 grid grid-cols-2 gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1"
     >
       {tabs.map(({ id, label, count }) => {
@@ -292,13 +295,16 @@ function UnitsField({
   intent: "take" | "return";
   hintId: string | undefined;
 }) {
+  const { t } = useTranslation();
   const id = `units-${intent}-${item.id}`;
   // A consumable's whole hold ends on return, so nothing coming back is valid.
   const min = intent === "return" && units.oneWay ? 0 : 1;
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-medium text-gray-700">
-        {intent === "take" ? "How many" : "Back"}
+        {intent === "take"
+          ? t("custody.browseLists.howMany")
+          : t("custody.browseLists.back")}
       </label>
       <input
         id={id}
@@ -335,6 +341,7 @@ function ItemRow({
   label: string;
   disabled: boolean;
 }) {
+  const { t } = useTranslation();
   const details = [
     item.kind === "kit"
       ? `Kit of ${item.itemCount} item${item.itemCount === 1 ? "" : "s"}`
@@ -378,7 +385,9 @@ function ItemRow({
               )}
             />
             <span className="sr-only">
-              {open ? "Hide what is in this kit" : "Show what is in this kit"}
+              {open
+                ? t("custody.browseLists.hideWhatIsInThis")
+                : t("custody.browseLists.showWhatIsInThis")}
             </span>
           </button>
         ) : (
@@ -430,7 +439,7 @@ function ItemRow({
       {contents && open ? (
         <ul
           id={contentsId}
-          aria-label={`In ${item.title}`}
+          aria-label={t("custody.browseLists.in", { title: item.title })}
           className="w-full basis-full divide-y divide-gray-100 rounded-md border border-gray-100 bg-gray-50 px-3"
         >
           {contents.map((content) => (
@@ -497,21 +506,22 @@ export function MyItems({
   items: BrowseItem[];
   memberId: string;
 }) {
+  const { t } = useTranslation();
   return (
     <section aria-labelledby="my-items" className="text-left">
       <h2 id="my-items" className="sr-only">
-        Your items
+        {t("custody.browseLists.yourItems")}
       </h2>
       {items.length === 0 ? (
         <p className="py-6 text-center text-gray-600">
-          You have no items right now.
+          {t("custody.browseLists.youHaveNoItemsRight")}
         </p>
       ) : (
         <Rows
           items={items}
           memberId={memberId}
           intent="return"
-          label="Return"
+          label={t("custody.browseLists.return")}
         />
       )}
     </section>
@@ -537,6 +547,7 @@ function OfferedFilters({
   filters: BrowseListFilters;
   options: BrowseFilterOptions;
 }) {
+  const { t } = useTranslation();
   const submit = useSubmit();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -585,15 +596,15 @@ function OfferedFilters({
     <Form
       method="get"
       role="search"
-      aria-label="Search available items"
+      aria-label={t("custody.browseLists.searchAvailableItems")}
       onChange={handleChange}
       className="mb-4 flex flex-col gap-3"
     >
       <input type="hidden" name="member" value={memberId} />
       <Input
-        label="Search by name"
+        label={t("custody.browseLists.searchByName")}
         hideLabel
-        placeholder="Search by name"
+        placeholder={t("custody.browseLists.searchByName")}
         name="q"
         type="search"
         icon="search"
@@ -603,7 +614,7 @@ function OfferedFilters({
       />
 
       <fieldset>
-        <legend className="sr-only">Show</legend>
+        <legend className="sr-only">{t("custody.browseLists.show")}</legend>
         <div className="grid grid-cols-3 gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1">
           {KIND_OPTIONS.map(({ value, label }) => (
             <label
@@ -627,13 +638,13 @@ function OfferedFilters({
         <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
           {options.locations.length > 0 ? (
             <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-              Location
+              {t("custody.browseLists.location")}
               <select
                 name="location"
                 defaultValue={filters.locationId ?? ""}
                 className={SELECT_CLASSES}
               >
-                <option value="">Any location</option>
+                <option value="">{t("custody.browseLists.anyLocation")}</option>
                 {options.locations.map((location) => (
                   <option key={location.id} value={location.id}>
                     {location.name}
@@ -644,13 +655,13 @@ function OfferedFilters({
           ) : null}
           {options.categories.length > 0 ? (
             <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-              Category
+              {t("custody.browseLists.category")}
               <select
                 name="category"
                 defaultValue={filters.categoryId ?? ""}
                 className={SELECT_CLASSES}
               >
-                <option value="">Any category</option>
+                <option value="">{t("custody.browseLists.anyCategory")}</option>
                 {options.categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -669,7 +680,7 @@ function OfferedFilters({
           onClick={clearFilters}
           className="self-start"
         >
-          Clear search and filters
+          {t("custody.browseLists.clearSearchAndFilters")}
         </Button>
       ) : null}
     </Form>
@@ -696,6 +707,7 @@ export function OfferedItems({
   options: BrowseFilterOptions;
   memberId: string;
 }) {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { pathname } = useLocation();
   // A search, filter or page change of this list; not a take, whose
@@ -708,7 +720,7 @@ export function OfferedItems({
   return (
     <section aria-labelledby="offered-items" className="text-left">
       <h2 id="offered-items" className="sr-only">
-        Available to take
+        {t("custody.browseLists.availableToTake")}
       </h2>
 
       <OfferedFilters memberId={memberId} filters={filters} options={options} />
@@ -731,22 +743,22 @@ export function OfferedItems({
         {list.items.length === 0 ? (
           <p className="py-6 text-center text-gray-600">
             {isFiltered(filters)
-              ? "Nothing available matches your search."
-              : "Nothing is available to take right now."}
+              ? t("custody.browseLists.nothingAvailableMatchesYourSearch")
+              : t("custody.browseLists.nothingIsAvailableToTake")}
           </p>
         ) : (
           <Rows
             items={list.items}
             memberId={memberId}
             intent="take"
-            label="Take"
+            label={t("custody.browseLists.take")}
           />
         )}
       </div>
 
       {list.totalPages > 1 ? (
         <nav
-          aria-label="Pages"
+          aria-label={t("custody.browseLists.pages")}
           className="mt-4 flex items-center justify-between gap-2"
         >
           {list.page > 1 ? (
@@ -760,13 +772,16 @@ export function OfferedItems({
                 page: list.page - 1,
               })}
             >
-              Previous
+              {t("custody.browseLists.previous")}
             </Button>
           ) : (
             <span />
           )}
           <p className="text-sm text-gray-600">
-            Page {list.page} of {list.totalPages}
+            {t("custody.browseLists.pageOf", {
+              page: list.page,
+              totalPages: list.totalPages,
+            })}
           </p>
           {list.page < list.totalPages ? (
             <Button
@@ -779,7 +794,7 @@ export function OfferedItems({
                 page: list.page + 1,
               })}
             >
-              Next
+              {t("custody.browseLists.next")}
             </Button>
           ) : (
             <span />

@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -39,6 +40,7 @@ export const BulkAssignCustodySchema = z.object({
 });
 
 export default function BulkAssignCustodyDialog() {
+  const { t } = useTranslation();
   const zo = useZorm("BulkAssignCustody", BulkAssignCustodySchema);
 
   const assignsSelfOnly = useRoleAccess().custody.assign === "self";
@@ -66,9 +68,9 @@ export default function BulkAssignCustodyDialog() {
             <div className="mb-4">
               <WarningBox>
                 <span>
-                  {quantityTrackedCount} quantity-tracked asset(s) in your
-                  selection will be skipped. Quantity-tracked assets must be
-                  assigned custody individually with a specific quantity.
+                  {t("assets.bulkAssignCustodyDialog.quantityTrackedAssetSIn", {
+                    quantityTrackedCount,
+                  })}
                 </span>
               </WarningBox>
             </div>
@@ -95,10 +97,12 @@ export default function BulkAssignCustodyDialog() {
                   custodyPurpose: "custody-assignment",
                 }}
                 fieldName="custodian"
-                contentLabel="Team members"
+                contentLabel={t("assets.bulkAssignCustodyDialog.teamMembers")}
                 initialDataKey="teamMembers"
                 countKey="totalTeamMembers"
-                placeholder="Select a team member"
+                placeholder={t(
+                  "assets.bulkAssignCustodyDialog.selectATeamMember"
+                )}
                 allowClear
                 closeOnSelect
                 transformItem={toCustodyAssignmentItem}
@@ -130,7 +134,7 @@ export default function BulkAssignCustodyDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkAssignCustodyDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -138,7 +142,7 @@ export default function BulkAssignCustodyDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkAssignCustodyDialog.confirm")}
             </Button>
           </div>
         </div>

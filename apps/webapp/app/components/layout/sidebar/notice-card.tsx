@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useFetcher, useLoaderData } from "react-router";
 import { XIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
@@ -6,6 +7,7 @@ import type { loader } from "~/routes/_layout+/_layout";
 import { helpSiteUrl } from "~/utils/help-site";
 
 export const SidebarNoticeCard = () => {
+  const { t } = useTranslation();
   const { hideNoticeCard } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const tutorialUrl = helpSiteUrl(
@@ -22,7 +24,7 @@ export const SidebarNoticeCard = () => {
     <div className="support-banner mb-6 hidden rounded border bg-gray-50 px-2 py-3 md:block">
       <div className="flex justify-between align-middle">
         <h5 className="mb-1 font-semibold text-gray-900">
-          Install {getAppName()} for Mobile
+          {t("nav.noticeCard.installForMobile", { appName: getAppName() })}
         </h5>
         <div className="mt-[-6px]">
           <fetcher.Form
@@ -38,18 +40,19 @@ export const SidebarNoticeCard = () => {
       </div>
 
       <p className="text-gray-600">
-        Always available access to {getAppName()}, with all features you have on
-        desktop.
+        {t("nav.noticeCard.alwaysAvailableAccessToWith", {
+          appName: getAppName(),
+        })}
       </p>
       <img
         src="/static/images/carlos-support.jpg"
-        alt={`${getAppName()} support`}
+        alt={t("nav.noticeCard.support", { appName: getAppName() })}
         className="my-4 rounded"
       />
       {tutorialUrl ? (
         <p>
           <Button variant="link" to={tutorialUrl}>
-            Written Tutorial
+            {t("nav.noticeCard.writtenTutorial")}
           </Button>
         </p>
       ) : null}

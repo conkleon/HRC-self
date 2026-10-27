@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import z from "zod";
 import { BulkUpdateDialogContent } from "../bulk-update-dialog/bulk-update-dialog";
@@ -17,14 +18,15 @@ export const BulkRemoveFromKitsSchema = z.object({
  * (every selected asset's memberships, plus the select-all path). Deferred.
  */
 export default function BulkRemoveFromKits() {
+  const { t } = useTranslation();
   const zo = useZorm("BulkRemoveFromKits", BulkRemoveFromKitsSchema);
 
   return (
     <BulkUpdateDialogContent
       ref={zo.ref}
       type="remove-from-kit"
-      title="Remove assets from kits"
-      description="This action will remove the selected assets from their kits. Are you sure you want to remove them?"
+      title={t("assets.bulkRemoveFromKits.removeAssetsFromKits")}
+      description={t("assets.bulkRemoveFromKits.thisActionWillRemoveThe")}
       actionUrl="/api/assets/bulk-remove-from-kits"
       arrayFieldId="assetIds"
     >
@@ -42,7 +44,7 @@ export default function BulkRemoveFromKits() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkRemoveFromKits.cancel")}
             </Button>
             <Button
               type="submit"
@@ -50,7 +52,7 @@ export default function BulkRemoveFromKits() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkRemoveFromKits.confirm")}
             </Button>
           </div>
         </div>

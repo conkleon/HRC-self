@@ -1,4 +1,5 @@
 import { type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Form } from "react-router";
 import { useZorm } from "react-zorm";
 
@@ -36,6 +37,7 @@ export function RenamePresetDialog({
   isSubmitting: boolean;
   validationErrors?: Partial<Record<"name", { message: string | undefined }>>;
 }) {
+  const { t } = useTranslation();
   const zo = useZorm("rename-preset", RenamePresetFormSchema);
 
   /** Ref for the rename input — focuses the field whenever the dialog opens. */
@@ -53,9 +55,9 @@ export function RenamePresetDialog({
         onClose={() => onOpenChange(false)}
         title={
           <div className="-mb-3 w-full pb-6">
-            <h3>Rename filter preset</h3>
+            <h3>{t("assets.renamePresetDialog.renameFilterPreset")}</h3>
             <p className="text-gray-500">
-              Update the name of your saved filter preset.
+              {t("assets.renamePresetDialog.updateTheNameOfYour")}
             </p>
           </div>
         }
@@ -66,11 +68,11 @@ export function RenamePresetDialog({
             <input type="hidden" name="presetId" value={presetId} />
             <Input
               ref={nameInputRef}
-              label="New name"
+              label={t("assets.renamePresetDialog.newName")}
               name="name"
               value={name}
               onChange={onNameChange}
-              placeholder="Enter new name"
+              placeholder={t("assets.renamePresetDialog.enterNewName")}
               maxLength={60}
               error={nameError}
             />
@@ -80,10 +82,12 @@ export function RenamePresetDialog({
                 variant="secondary"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("assets.renamePresetDialog.cancel")}
               </Button>
               <Button type="submit" disabled={!name.trim() || isSubmitting}>
-                {isSubmitting ? "Renaming..." : "Rename"}
+                {isSubmitting
+                  ? "Renaming..."
+                  : t("assets.renamePresetDialog.rename")}
               </Button>
             </div>
           </Form>

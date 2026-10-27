@@ -1,4 +1,5 @@
 import { BellIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useLoaderData } from "react-router";
 import { useIsRouteActive } from "~/hooks/use-is-route-active";
 import type { loader } from "~/routes/_layout+/_layout";
@@ -6,13 +7,14 @@ import { tw } from "~/utils/tw";
 import { SidebarMenuButton, SidebarMenuItem } from "./sidebar";
 
 export default function UpdatesNavItem() {
+  const { t } = useTranslation();
   const { unreadUpdatesCount } = useLoaderData<typeof loader>();
   const hasUnread = unreadUpdatesCount > 0;
   const isActive = useIsRouteActive("/updates");
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild tooltip="Updates">
+      <SidebarMenuButton asChild tooltip={t("nav.updatesNavItem.updates")}>
         <NavLink
           to="/updates"
           className={tw(
@@ -31,7 +33,7 @@ export default function UpdatesNavItem() {
               />
             )}
           </div>
-          <span>Updates</span>
+          <span>{t("nav.updatesNavItem.updates")}</span>
         </NavLink>
       </SidebarMenuButton>
     </SidebarMenuItem>

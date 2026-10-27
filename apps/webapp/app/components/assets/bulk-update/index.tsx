@@ -7,6 +7,7 @@
  * @see {@link file://./../../../routes/_layout+/assets.import-update.tsx} Route handler
  */
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { UpdateImportForm } from "./form";
 import Icon from "../../icons/icon";
 import { Button } from "../../shared/button";
@@ -17,15 +18,13 @@ import { Button } from "../../shared/button";
  * and embeds the CSV upload form.
  */
 export const ImportUpdateContent = () => {
+  const { t } = useTranslation();
   const [showInstructions, setShowInstructions] = useState(true);
 
   return (
     <div className="w-full text-left">
-      <h3>Update existing assets</h3>
-      <p>
-        Edit your assets in Excel or Google Sheets, then upload the CSV here.
-        We'll show you exactly what will change before anything is saved.
-      </p>
+      <h3>{t("assets.index.updateExistingAssets")}</h3>
+      <p>{t("assets.index.editYourAssetsInExcel")}</p>
 
       {showInstructions ? (
         <>
@@ -38,18 +37,19 @@ export const ImportUpdateContent = () => {
             />
             <div className="flex-1">
               <p className="text-[14px] text-gray-600">
-                <b>Step 1:</b> Go to the{" "}
-                <Button variant="link" to="/assets">
-                  Asset Index
-                </Button>
-                , select the assets you want to update, and export them. In the
-                export dialog, choose the <b>Import-ready</b> format — it always
-                includes the asset ID this tool needs to match rows to existing
-                assets.
+                <Trans
+                  t={t}
+                  i18nKey="assets.index.text0Step10Go"
+                  components={[
+                    <b key="slot0" />,
+                    <Button key="slot1" variant="link" to="/assets" />,
+                    <b key="slot2" />,
+                  ]}
+                />
               </p>
             </div>
             <Button variant="secondary" to="/assets">
-              Go to Asset Index
+              {t("assets.index.goToAssetIndex")}
             </Button>
           </div>
 
@@ -62,43 +62,45 @@ export const ImportUpdateContent = () => {
                 className="mt-0.5 shrink-0 text-gray-500"
               />
               <div>
-                <h5 className="font-semibold">What you can update</h5>
+                <h5 className="font-semibold">
+                  {t("assets.index.whatYouCanUpdate")}
+                </h5>
                 <p className="text-[14px] text-gray-600">
-                  Name, Description, Category, Location, Tags, Value, Available
-                  to book, <b>Asset model</b>, and your custom fields (Text,
-                  Boolean, Date, Option, Number, Currency).
+                  <Trans
+                    t={t}
+                    i18nKey="assets.index.nameDescriptionCategoryLocationTags"
+                    components={[<b key="slot0" />]}
+                  />
                 </p>
                 <p className="mt-1 text-[14px] text-gray-600">
-                  <b>Asset model</b> is matched by name (case-insensitive) and
-                  created automatically if it doesn't exist yet. It applies to{" "}
-                  <b>individually tracked assets only</b> — on a
-                  quantity-tracked asset the cell is skipped with a warning and
-                  the rest of the row still applies.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.index.text0AssetModel0Is"
+                    components={[<b key="slot0" />, <b key="slot1" />]}
+                  />
                 </p>
                 <p className="mt-1 text-[14px] text-gray-600">
-                  For <b>quantity-tracked</b> assets you can also update
-                  Quantity, Min quantity, Unit of measure, and Consumption type.
-                  These columns are ignored on individually tracked assets.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.index.for0QuantityTracked0"
+                    components={[<b key="slot0" />]}
+                  />
                 </p>
                 <p className="mt-1 text-[14px] text-gray-600">
-                  <b>Heads up on quantity columns:</b> this depends on the
-                  export format. <b>Import-ready</b> (recommended in Step 1)
-                  already includes Min quantity, Unit of measure, and
-                  Consumption type, and its Quantity cell is already a plain
-                  number — no changes needed before re-uploading.{" "}
-                  <b>Standard</b> writes Quantity as <code>10 boxes</code> when
-                  the asset has a unit of measure — strip the unit before
-                  re-uploading, or the row's quantity update fails — and has no
-                  separate Unit of measure or Consumption type columns at all;
-                  add those columns yourself using exactly those header names if
-                  you need them.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.index.text0HeadsUpOnQuantity"
+                    components={[
+                      <b key="slot0" />,
+                      <b key="slot1" />,
+                      <b key="slot2" />,
+                      <code key="slot3" />,
+                    ]}
+                  />
                 </p>
                 <p className="mt-1 text-[14px] text-gray-600">
-                  <b>Not supported yet:</b> Status, Kit, and Custody can't be
-                  bulk-updated via CSV — they have their own dedicated workflows
-                  elsewhere in Shelf. Tracking method is fixed once an asset is
-                  created. These columns will be safely skipped if present in
-                  your file.
+                  <b>{t("assets.index.notSupportedYet")}</b>{" "}
+                  {t("assets.index.statusKitAndCustodyCant")}
                 </p>
               </div>
             </div>
@@ -111,18 +113,15 @@ export const ImportUpdateContent = () => {
                 className="mt-0.5 shrink-0 text-gray-500"
               />
               <div>
-                <h5 className="font-semibold">Empty cells clear values</h5>
+                <h5 className="font-semibold">
+                  {t("assets.index.emptyCellsClearValues")}
+                </h5>
                 <p className="text-[14px] text-gray-600">
-                  If a field currently has a value and you leave the cell empty,
-                  that value will be cleared. Fields that are already empty stay
-                  unchanged. Name, Description and boolean fields (Yes/No)
-                  cannot be cleared.
+                  {t("assets.index.ifAFieldCurrentlyHas")}
                 </p>
                 <p className="mt-1 text-[14px] text-gray-600">
-                  <b>Exceptions:</b> Asset model, Quantity, Min quantity, Unit
-                  of measure, and Consumption type are never cleared by an empty
-                  cell — blanking them leaves the current value in place. Change
-                  these on the asset itself if you need to remove them.
+                  <b>{t("assets.index.exceptions")}</b>{" "}
+                  {t("assets.index.assetModelQuantityMinQuantity")}
                 </p>
               </div>
             </div>
@@ -135,11 +134,15 @@ export const ImportUpdateContent = () => {
                 className="mt-0.5 shrink-0 text-gray-500"
               />
               <div>
-                <h5 className="font-semibold">How assets are matched</h5>
+                <h5 className="font-semibold">
+                  {t("assets.index.howAssetsAreMatched")}
+                </h5>
                 <p className="text-[14px] text-gray-600">
-                  By <b>Asset ID</b> or <b>ID</b> — keep these columns as they
-                  are. Categories, locations, tags, and asset models that don't
-                  exist yet will be created for you.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.index.by0AssetId0"
+                    components={[<b key="slot0" />, <b key="slot1" />]}
+                  />
                 </p>
               </div>
             </div>
@@ -152,28 +155,34 @@ export const ImportUpdateContent = () => {
                 className="mt-0.5 shrink-0 text-gray-500"
               />
               <div>
-                <h5 className="font-semibold">Limits</h5>
+                <h5 className="font-semibold">{t("assets.index.limits")}</h5>
                 <p className="text-[14px] text-gray-600">
-                  You can update up to <b>1,000 assets</b> per file. For larger
-                  batches, split your CSV into multiple files.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.index.youCanUpdateUpTo"
+                    components={[<b key="slot0" />]}
+                  />
                 </p>
               </div>
             </div>
           </div>
 
           <p className="text-[14px] text-gray-500">
-            <b>Tip:</b> Just need to change one field on many assets? Select
-            them in the{" "}
-            <Button variant="link" to="/assets">
-              Asset Index
-            </Button>{" "}
-            and use <b>Actions</b> — no CSV needed.
+            <Trans
+              t={t}
+              i18nKey="assets.index.text0Tip0JustNeed"
+              components={[
+                <b key="slot0" />,
+                <Button key="slot1" variant="link" to="/assets" />,
+                <b key="slot2" />,
+              ]}
+            />
           </p>
 
           <p className="mt-1 text-[14px] text-gray-400">
-            Looking to create new assets instead?{" "}
+            {t("assets.index.lookingToCreateNewAssets")}{" "}
             <Button variant="link" to="/assets/import">
-              Use the standard import
+              {t("assets.index.useTheStandardImport")}
             </Button>
           </p>
         </>
@@ -183,7 +192,7 @@ export const ImportUpdateContent = () => {
           className="my-2 text-sm text-gray-500 underline"
           onClick={() => setShowInstructions(true)}
         >
-          Show instructions
+          {t("assets.index.showInstructions")}
         </button>
       )}
 

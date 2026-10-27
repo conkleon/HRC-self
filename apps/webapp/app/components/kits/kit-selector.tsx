@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { CheckIcon, ChevronDownIcon, SearchIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
 import { handleActivationKeyPress } from "~/utils/keyboard";
 import { tw } from "~/utils/tw";
@@ -31,6 +32,7 @@ export default function KitSelector({
   isLoading = false,
   error,
 }: KitSelectorProps) {
+  const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -148,7 +150,7 @@ export default function KitSelector({
               <SearchIcon className="ml-4 size-4 text-gray-500" />
               <input
                 ref={searchInputRef}
-                placeholder="Search kits..."
+                placeholder={t("kits.kitSelector.searchKits")}
                 className="border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
                 value={searchQuery}
                 onChange={(event) => {
@@ -190,12 +192,14 @@ export default function KitSelector({
               })}
               {filteredKits.length === 0 && !isLoading && (
                 <div className="px-4 py-3 text-sm text-gray-500">
-                  {searchQuery ? "No kits found" : "No kits available"}
+                  {searchQuery
+                    ? t("kits.kitSelector.noKitsFound")
+                    : t("kits.kitSelector.noKitsAvailable")}
                 </div>
               )}
               {isLoading && (
                 <div className="px-4 py-3 text-sm text-gray-500">
-                  Loading kits...
+                  {t("kits.kitSelector.loadingKits")}
                 </div>
               )}
             </div>

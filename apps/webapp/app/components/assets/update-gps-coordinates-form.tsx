@@ -1,4 +1,5 @@
 import type { ComponentProps, MouseEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useFetcher, useParams } from "react-router";
 import { useClientNotification } from "~/hooks/use-client-notification";
 import type { action } from "~/routes/api+/asset.scan";
@@ -19,6 +20,7 @@ export const UpdateGpsCoordinatesForm = ({
   /** When set, the trigger is disabled (e.g. the asset is archived). */
   disabled?: ComponentProps<typeof Button>["disabled"];
 }) => {
+  const { t } = useTranslation();
   const fetcher = useFetcher<typeof action>();
   const { assetId } = useParams();
   const [sendNotification] = useClientNotification();
@@ -94,7 +96,8 @@ export const UpdateGpsCoordinatesForm = ({
       onClick={handleSubmit}
     >
       <span className="flex items-center gap-2">
-        <Icon icon="gps" /> Update GPS coordinates
+        <Icon icon="gps" />{" "}
+        {t("assets.updateGpsCoordinatesForm.updateGpsCoordinates")}
       </span>
     </Button>
   );

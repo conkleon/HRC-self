@@ -35,6 +35,7 @@ import {
   PopoverPortal,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
+import { useTranslation } from "react-i18next";
 import { useActionData, useFetcher } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -215,6 +216,7 @@ export function MoveUnitsDialog({
   onOpenChange: controlledOnOpenChange,
   actionUrl,
 }: MoveUnitsDialogProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
@@ -498,7 +500,9 @@ export function MoveUnitsDialog({
                             {selectedDestination
                               ? selectedDestination.name
                               : noDestinations
-                              ? "No destinations available"
+                              ? t(
+                                  "assets.moveUnitsDialog.noDestinationsAvailable"
+                                )
                               : copy.destinationPlaceholder}
                           </span>
                           <ChevronDownIcon className="text-gray-500" />
@@ -565,8 +569,8 @@ export function MoveUnitsDialog({
                 ref={quantityInputRef}
                 name={zo.fields.quantity()}
                 type="number"
-                label={`Quantity (${unitLabel})`}
-                placeholder={`Max: ${maxQuantity}`}
+                label={t("assets.moveUnitsDialog.quantity", { unitLabel })}
+                placeholder={t("assets.moveUnitsDialog.max2", { maxQuantity })}
                 min={1}
                 max={maxQuantity || undefined}
                 step={1}
@@ -578,7 +582,7 @@ export function MoveUnitsDialog({
                 }
               />
               <p id={quantityHelperId} className="text-xs text-gray-500">
-                Max: {maxQuantity} {unitLabel}
+                {t("assets.moveUnitsDialog.max", { maxQuantity, unitLabel })}
               </p>
             </div>
           </div>
@@ -586,7 +590,7 @@ export function MoveUnitsDialog({
           <AlertDialogFooter className="mt-4 gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary" disabled={isSubmitting}>
-                Cancel
+                {t("assets.moveUnitsDialog.cancel")}
               </Button>
             </AlertDialogCancel>
 

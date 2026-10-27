@@ -1,5 +1,6 @@
 import type { Booking } from "@prisma/client";
 import { Zap } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import type { CheckoutSourceQuestion } from "~/modules/booking/checkout-source-location";
 import { isBookingEarlyCheckout } from "~/modules/booking/helpers";
 import type { UnassignedModelUnits } from "~/utils/booking-model-requests";
@@ -122,6 +123,7 @@ export default function CheckoutDialog({
   unassignedUnits = NO_UNASSIGNED_UNITS,
   sourceQuestions = NO_SOURCE_QUESTIONS,
 }: CheckoutDialogProps) {
+  const { t } = useTranslation();
   const isEarlyCheckout =
     !suppressEarlyCheckoutPrompt && isBookingEarlyCheckout(booking.from);
   const unassignedSummary = summarizeUnassignedUnits(unassignedUnits);
@@ -204,29 +206,28 @@ export default function CheckoutDialog({
                     {unassignedSummary}
                   </span>{" "}
                   {unassignedUnitCount === 1
-                    ? "is not assigned yet. It stays on the booking so you can scan it later or release it."
-                    : "are not assigned yet. They stay on the booking so you can scan them later or release them."}
+                    ? t("bookings.checkoutDialog.isNotAssignedYetIt")
+                    : t("bookings.checkoutDialog.areNotAssignedYetThey")}
                 </p>
               ) : null}
               {isEarlyCheckout ? (
                 <p>
-                  You are checking out the booking more than 15 minutes before
-                  the start date. If you proceed, the start date will be
-                  adjusted to now:{" "}
-                  <span className="font-bold text-gray-700">
-                    <DateS date={new Date()} includeTime />
-                  </span>
-                  . Do you want to adjust the start date or keep the original
-                  date?
+                  <Trans
+                    t={t}
+                    i18nKey="bookings.checkoutDialog.youAreCheckingOutThe"
+                    components={[
+                      <span key="slot0" className="font-bold text-gray-700" />,
+                      <DateS key="slot1" date={new Date()} includeTime />,
+                    ]}
+                  />
                 </p>
               ) : null}
               {asksSource ? (
                 <p>
                   {sourceQuestions.length === 1
-                    ? "This item is kept at more than one location."
-                    : "These items are kept at more than one location."}{" "}
-                  Pick where the units leave from. Units used up on this booking
-                  come off that location at check-in.
+                    ? t("bookings.checkoutDialog.thisItemIsKeptAt")
+                    : t("bookings.checkoutDialog.theseItemsAreKeptAt")}{" "}
+                  {t("bookings.checkoutDialog.pickWhereTheUnitsLeave")}
                 </p>
               ) : null}
             </div>
@@ -250,7 +251,7 @@ export default function CheckoutDialog({
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
             <Button type="button" disabled={disabled} variant="secondary">
-              Cancel
+              {t("bookings.checkoutDialog.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -266,7 +267,7 @@ export default function CheckoutDialog({
                 value={CheckoutIntentEnum["without-adjusted-date"]}
                 form={formId}
               >
-                Don't Adjust Date
+                {t("bookings.checkoutDialog.dontAdjustDate")}
               </Button>
 
               <Button
@@ -277,7 +278,7 @@ export default function CheckoutDialog({
                 value={CheckoutIntentEnum["with-adjusted-date"]}
                 form={formId}
               >
-                Adjust Date
+                {t("bookings.checkoutDialog.adjustDate")}
               </Button>
             </>
           ) : (
@@ -289,7 +290,9 @@ export default function CheckoutDialog({
               value={intent}
               form={formId}
             >
-              {unassignedSummary ? "Check out anyway" : "Check out"}
+              {unassignedSummary
+                ? t("bookings.checkoutDialog.checkOutAnyway")
+                : t("bookings.checkoutDialog.checkOut")}
             </Button>
           )}
         </AlertDialogFooter>

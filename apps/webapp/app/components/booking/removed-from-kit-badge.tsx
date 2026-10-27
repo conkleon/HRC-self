@@ -20,6 +20,7 @@
  */
 
 import { TriangleAlertIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import {
   Tooltip,
@@ -50,6 +51,7 @@ const BADGE_STYLE = {
  * Renders unconditionally — callers gate on `item.isRemovedFromKit`.
  */
 export function RemovedFromKitBadge() {
+  const { t } = useTranslation();
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -59,17 +61,15 @@ export function RemovedFromKitBadge() {
           className="inline-flex cursor-help items-center gap-1 rounded-2xl px-2 py-[2px] text-xs font-medium"
         >
           <TriangleAlertIcon aria-hidden="true" className="size-3" />
-          Removed from kit
+          {t("bookings.removedFromKitBadge.removedFromKit")}
         </TooltipTrigger>
         <TooltipContent side="bottom" align="start">
           <div className="max-w-[260px] text-left sm:max-w-[320px]">
             <h6 className="mb-1 text-xs font-semibold text-gray-700">
-              No longer part of this kit
+              {t("bookings.removedFromKitBadge.noLongerPartOfThis")}
             </h6>
             <div className="whitespace-normal text-xs font-medium text-gray-500">
-              This asset was removed from the kit after this booking was made.
-              It stays on the booking as a record of what was booked, so
-              in-progress and past bookings aren&apos;t rewritten.
+              {t("bookings.removedFromKitBadge.thisAssetWasRemovedFrom")}
             </div>
           </div>
         </TooltipContent>

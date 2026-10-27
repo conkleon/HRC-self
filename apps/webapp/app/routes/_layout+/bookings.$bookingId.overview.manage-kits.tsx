@@ -7,6 +7,7 @@ import {
 } from "@prisma/client";
 import { archivedAssetsLeftOut } from "@shelf/labels";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import type {
   LinksFunction,
   LoaderFunctionArgs,
@@ -764,6 +765,7 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
 }
 
 export default function AddKitsToBooking() {
+  const { t } = useTranslation();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -888,7 +890,7 @@ export default function AddKitsToBooking() {
       <div className="border-b px-6 py-2">
         <TabsList className="w-full">
           <TabsTrigger className="flex-1 gap-x-2" value="assets">
-            Assets{" "}
+            {t("bookings.bookingsBookingidOverviewManageKits.assets")}{" "}
             {totalAssetsSelected > 0 ? (
               <GrayBadge className="size-[20px] border border-primary-200 bg-primary-50 text-[10px] leading-[10px] text-primary-700">
                 {totalAssetsSelected}
@@ -896,7 +898,7 @@ export default function AddKitsToBooking() {
             ) : null}
           </TabsTrigger>
           <TabsTrigger className="flex-1 gap-x-2" value="kits">
-            Kits
+            {t("bookings.bookingsBookingidOverviewManageKits.kits")}
             {selectedBulkItemsCount > 0 ? (
               <GrayBadge className="size-[20px] border border-primary-200 bg-primary-50 text-[10px] leading-[10px] text-primary-700">
                 {selectedBulkItemsCount}
@@ -913,7 +915,7 @@ export default function AddKitsToBooking() {
                   : ""
               }`}
             >
-              Models
+              {t("bookings.bookingsBookingidOverviewManageKits.models")}
               {totalModelRequestUnits > 0 ? (
                 <GrayBadge className="size-[20px] border border-primary-200 bg-primary-50 text-[10px] leading-[10px] text-primary-700">
                   {totalModelRequestUnits}
@@ -931,7 +933,13 @@ export default function AddKitsToBooking() {
        */}
       {activeTab === "kits" ? (
         <Filters
-          slots={{ "right-of-search": <AvailabilitySelect label="kits" /> }}
+          slots={{
+            "right-of-search": (
+              <AvailabilitySelect
+                label={t("bookings.bookingsBookingidOverviewManageKits.kits2")}
+              />
+            ),
+          }}
           innerWrapperClassName="justify-between"
           className="justify-between !border-t-0 border-b px-6 md:flex"
         />
@@ -964,9 +972,15 @@ export default function AddKitsToBooking() {
           headerChildren={
             <>
               <Th></Th>
-              <Th>Description</Th>
-              <Th>Location</Th>
-              <Th>Assets</Th>
+              <Th>
+                {t("bookings.bookingsBookingidOverviewManageKits.description")}
+              </Th>
+              <Th>
+                {t("bookings.bookingsBookingidOverviewManageKits.location")}
+              </Th>
+              <Th>
+                {t("bookings.bookingsBookingidOverviewManageKits.assets")}
+              </Th>
             </>
           }
         />
@@ -1003,12 +1017,14 @@ export default function AddKitsToBooking() {
       >
         {activeTab === "kits" ? (
           <div className="flex flex-col justify-center gap-1">
-            {selectedBulkItems.length} kits selected
+            {t("bookings.bookingsBookingidOverviewManageKits.kitsSelected", {
+              selectedBulkItemsCount: selectedBulkItems.length,
+            })}
           </div>
         ) : null}
         <div className="flex gap-3">
           <Button variant="secondary" to={".."}>
-            Close
+            {t("bookings.bookingsBookingidOverviewManageKits.close")}
           </Button>
           <Form method="post" ref={formRef}>
             {/* We create inputs for both the removed and selected assets, so we can compare and easily add/remove */}
@@ -1041,7 +1057,7 @@ export default function AddKitsToBooking() {
                 value="addKits"
                 disabled={isSearching}
               >
-                Confirm
+                {t("bookings.bookingsBookingidOverviewManageKits.confirm")}
               </Button>
             ) : null}
           </Form>
@@ -1058,8 +1074,7 @@ export default function AddKitsToBooking() {
           void submit(formRef.current);
         }}
       >
-        You have added some kits to the booking but haven't saved it yet. Do you
-        want to confirm adding those kits?
+        {t("bookings.bookingsBookingidOverviewManageKits.youHaveAddedSomeKits")}
       </UnsavedChangesAlert>
     </Tabs>
   );

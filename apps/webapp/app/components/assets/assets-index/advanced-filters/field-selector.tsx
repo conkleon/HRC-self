@@ -7,6 +7,7 @@ import {
   PopoverContent,
 } from "@radix-ui/react-popover";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { ChevronRight } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
@@ -30,6 +31,7 @@ export function FieldSelector({
   filters: Filter[];
   setFilter: (name: string) => void;
 }) {
+  const { t } = useTranslation();
   const { settings, lastAuditDateAccess } =
     useLoaderData<AssetIndexLoaderData>();
   // Same rule as the filter popover: a column the caller cannot query is not offered.
@@ -134,7 +136,7 @@ export function FieldSelector({
             <Search className="ml-4 size-4 text-gray-500" />
             <input
               ref={searchInputRef}
-              placeholder="Search column..."
+              placeholder={t("assets.fieldSelector.searchColumn")}
               className="border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
               value={searchQuery}
               onChange={handleSearch}
@@ -175,7 +177,7 @@ export function FieldSelector({
           ))}
           {filteredColumns.length === 0 && (
             <div className="px-4 py-2 text-[14px] text-gray-500">
-              No columns found
+              {t("assets.fieldSelector.noColumnsFound")}
             </div>
           )}
         </PopoverContent>

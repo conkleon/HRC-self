@@ -12,6 +12,7 @@
  */
 import type React from "react";
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
 import Input from "../../forms/input";
 import { Button } from "../../shared/button";
@@ -80,6 +81,7 @@ export function ConfirmImportDialog({
   open,
   onOpenChange,
 }: ConfirmImportDialogProps) {
+  const { t } = useTranslation();
   const [agreed, setAgreed] = useState("");
   const confirmed = agreed === CONFIRMATION_PHRASE;
 
@@ -104,7 +106,12 @@ export function ConfirmImportDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
           <AlertDialogDescription>
-            Type <b>"{CONFIRMATION_PHRASE}"</b> below to confirm.
+            <Trans
+              t={t}
+              i18nKey="assets.confirmImportDialog.type00BelowTo"
+              values={{ CONFIRMATION_PHRASE }}
+              components={[<b key="slot0" />]}
+            />
           </AlertDialogDescription>
           {errorDetails ? (
             <div className="max-h-64 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-3 text-sm">
@@ -112,7 +119,8 @@ export function ConfirmImportDialog({
             </div>
           ) : error ? (
             <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-              {error.message || "Something went wrong. Please try again."}
+              {error.message ||
+                t("assets.confirmImportDialog.somethingWentWrongPleaseTry")}
             </div>
           ) : null}
           <ConfirmationInput
@@ -125,7 +133,7 @@ export function ConfirmImportDialog({
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
             <Button type="button" variant="secondary">
-              Cancel
+              {t("assets.confirmImportDialog.cancel")}
             </Button>
           </AlertDialogCancel>
           <Button
@@ -157,13 +165,14 @@ function ConfirmationInput({
   canSubmit: boolean;
   onSubmit: () => void;
 }) {
+  const { t } = useTranslation();
   const inputRef = useAutoFocus<HTMLInputElement>();
 
   return (
     <Input
       ref={inputRef}
       type="text"
-      label="Confirmation"
+      label={t("assets.confirmImportDialog.confirmation")}
       name="agree"
       value={agreed}
       onChange={(e) => setAgreed(e.target.value.toUpperCase())}

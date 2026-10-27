@@ -25,6 +25,7 @@
  */
 
 import type { QrIdDisplayPreference } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { AssetCodeBadge } from "~/components/assets/asset-code-badge";
 import { CodePreviewDialog } from "~/components/code-preview/code-preview-dialog";
 import { EmptyTableValue } from "~/components/shared/empty-table-value";
@@ -123,6 +124,7 @@ function BarcodeChip({
   item: AdvancedIndexAsset;
   workspacePreference: QrIdDisplayPreference;
 }) {
+  const { t } = useTranslation();
   return (
     <CodePreviewDialog
       item={{
@@ -136,7 +138,10 @@ function BarcodeChip({
       trigger={
         <button
           type="button"
-          aria-label={`Show code preview for ${item.title} (${barcode.value})`}
+          aria-label={t("assets.barcodeCell.showCodePreviewFor", {
+            title: item.title,
+            value: barcode.value,
+          })}
           className={TRIGGER_CLASSES}
         >
           <AssetCodeBadge
@@ -212,7 +217,7 @@ function OverflowTrigger({
   itemTitle: string;
   onClick?: () => void;
 }) {
-  const plural = hiddenBarcodes.length === 1 ? "" : "s";
+  const { t } = useTranslation();
 
   return (
     <Tooltip>
@@ -220,7 +225,10 @@ function OverflowTrigger({
         <button
           type="button"
           onClick={onClick}
-          aria-label={`+${hiddenBarcodes.length} more code${plural} for ${itemTitle}`}
+          aria-label={t("assets.barcodeCell.moreCodesFor", {
+            count: hiddenBarcodes.length,
+            itemTitle,
+          })}
           className={TRIGGER_CLASSES}
         >
           <GrayBadge className="cursor-pointer transition-colors hover:bg-gray-200">
@@ -232,7 +240,9 @@ function OverflowTrigger({
       <TooltipContent side="top" className="max-w-72">
         <div className="text-left">
           <div className="mb-1 font-semibold text-gray-700">
-            {hiddenBarcodes.length} more code{plural}
+            {t("assets.barcodeCell.moreCodes", {
+              count: hiddenBarcodes.length,
+            })}
           </div>
           <div className="flex flex-col gap-0.5 font-normal text-gray-500">
             {hiddenBarcodes.map((barcode) => (

@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -11,6 +12,7 @@ import { Button } from "~/components/shared/button";
 import { Spinner } from "~/components/shared/spinner";
 import { config } from "~/config/shelf.config";
 import { useSearchParams } from "~/hooks/search-params";
+import { getServerT } from "~/i18n/i18n.server";
 import { supabaseClient } from "~/integrations/supabase/client";
 import { SsoAccountLinkedNotice } from "~/modules/auth/components/sso-account-linked-notice";
 import { refreshAccessToken } from "~/modules/auth/service.server";
@@ -168,13 +170,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 }
 
-export function loader({ context }: LoaderFunctionArgs) {
-  const title = "Signing in via SSO";
-  const subHeading = "Please wait while we connect your account";
-
+export async function loader({ context }: LoaderFunctionArgs) {
   if (context.isAuthenticated) {
     return redirect("/");
   }
+
+  const t = await getServerT(context);
+  const title = t("auth.pages.oauthCallback.title");
+  const subHeading = t("auth.pages.oauthCallback.subHeading");
 
   return data(payload({ title, subHeading }));
 }
@@ -184,6 +187,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function LoginCallback() {
+  const { t } = useTranslation();
   const fetcher = useFetcher<typeof action>();
   const { data } = fetcher;
   const [searchParams] = useSearchParams();
@@ -245,7 +249,7 @@ export default function LoginCallback() {
             <div className="text-sm text-error-500">{data.error.message}</div>
           )}
           <Button to="/" className="mt-4">
-            Back to login
+            {t("auth.oauthCallback.backToLogin")}
           </Button>
         </div>
       ) : (

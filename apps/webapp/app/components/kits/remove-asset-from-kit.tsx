@@ -1,4 +1,5 @@
 import type { Asset } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useNavigation } from "react-router";
 import { isFormProcessing } from "~/utils/form";
 import type { KitRemovalBookingImpact } from "./booking-removal-notice";
@@ -30,6 +31,7 @@ export default function RemoveAssetFromKit({
    */
   bookingImpact?: KitRemovalBookingImpact;
 }) {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const disabled = isFormProcessing(navigation.state);
 
@@ -43,7 +45,7 @@ export default function RemoveAssetFromKit({
           width="full"
           icon="trash"
         >
-          Remove
+          {t("kits.removeAssetFromKit.remove")}
         </Button>
       </AlertDialogTrigger>
 
@@ -54,14 +56,15 @@ export default function RemoveAssetFromKit({
               <Icon icon="trash" />
             </span>
           </div>
-          <AlertDialogTitle>Remove "{asset.title}" from kit</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("kits.removeAssetFromKit.removeFromKit", { title: asset.title })}
+          </AlertDialogTitle>
           {/* The notice lives INSIDE the description (as a block-displayed
               span, so the markup stays valid inside Radix's <p>) — Radix wires
               the description into the dialog's `aria-describedby`, so it is
               announced on open rather than appearing silently. */}
           <AlertDialogDescription>
-            Are you sure you want to remove this asset from the kit? Asset will
-            lose any status that is inherited by the kit.
+            {t("kits.removeAssetFromKit.areYouSureYouWant")}
             <BookingRemovalNotice
               // `text-left` because AlertDialogHeader centres its text on
               // mobile; a centred warning block reads as decoration.
@@ -82,7 +85,7 @@ export default function RemoveAssetFromKit({
           <div className="flex justify-center gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary">
-                Cancel
+                {t("kits.removeAssetFromKit.cancel")}
               </Button>
             </AlertDialogCancel>
 
@@ -94,7 +97,7 @@ export default function RemoveAssetFromKit({
                 value="removeAsset"
                 disabled={disabled}
               >
-                Remove
+                {t("kits.removeAssetFromKit.remove")}
               </Button>
             </Form>
           </div>

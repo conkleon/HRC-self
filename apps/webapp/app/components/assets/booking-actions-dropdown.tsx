@@ -1,4 +1,5 @@
 import { archivedAssetBlockedReason } from "@shelf/labels";
+import { Trans, useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useCanArchiveAssets } from "~/hooks/use-can-archive-assets";
 import { useCurrentOrganization } from "~/hooks/use-current-organization";
@@ -13,6 +14,7 @@ import type { BookLink } from "../shared/generic-add-to-bookings-actions-dropdow
 import { GenericBookActionsDropdown } from "../shared/generic-add-to-bookings-actions-dropdown";
 
 export default function BookingActionsDropdown() {
+  const { t } = useTranslation();
   const { asset } = useLoaderData<typeof loader>();
   const organization = useCurrentOrganization();
   const canReinstate = useCanArchiveAssets();
@@ -34,16 +36,18 @@ export default function BookingActionsDropdown() {
       ? {
           reason: (
             <>
-              Cannot book this asset directly because it's part of a kit. Please
-              book the{" "}
-              <Button
-                to={`/kits/${assetKit.id}`}
-                target="_blank"
-                variant="link"
-              >
-                kit
-              </Button>{" "}
-              instead.
+              <Trans
+                t={t}
+                i18nKey="assets.bookingActionsDropdown.cannotBookThisAssetDirectly"
+                components={[
+                  <Button
+                    key="slot0"
+                    to={`/kits/${assetKit.id}`}
+                    target="_blank"
+                    variant="link"
+                  />,
+                ]}
+              />
             </>
           ),
         }
@@ -85,7 +89,7 @@ export default function BookingActionsDropdown() {
       <GenericBookActionsDropdown
         links={links}
         key={"asset"}
-        label={"Book"}
+        label={t("assets.bookingActionsDropdown.book")}
         disabledTrigger={disabledTrigger}
       />
     </div>

@@ -7,6 +7,7 @@
  * @see {@link file://./preview-display.tsx} Parent component
  * @see {@link file://./../import-preview/import-grid.tsx} Generic grid
  */
+import { useTranslation } from "react-i18next";
 import type {
   ImportGridCell,
   ImportGridRow,
@@ -67,6 +68,7 @@ export function SpreadsheetPreview({
   displayLimit: number;
   totalChanges: number;
 }) {
+  const { t } = useTranslation();
   const totalAssets = assets.length;
   const rows = assets.slice(0, displayLimit).map(toGridRow);
 
@@ -104,7 +106,7 @@ export function SpreadsheetPreview({
       caption={caption}
       legend={UPDATE_LEGEND}
       labelHeading="Asset"
-      ariaLabel="Asset changes preview"
+      ariaLabel={t("assets.spreadsheetPreview.assetChangesPreview")}
     />
   );
 }

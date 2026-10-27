@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Prisma } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { z } from "zod";
 import {
@@ -72,6 +73,7 @@ export default function AddAssetsKitsToLocationDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   const { location } = useLoaderData<LoaderData>();
   // Get the scanned items from jotai
   const items = useAtomValue(scannedItemsAtom);
@@ -184,7 +186,7 @@ export default function AddAssetsKitsToLocationDrawer({
       }}
       items={items}
       onClearItems={clearList}
-      title="Items scanned"
+      title={t("scanner.addAssetsToLocationDrawer.itemsScanned")}
       isLoading={isLoading}
       renderItem={renderItemRow}
       Blockers={Blockers}
@@ -211,6 +213,7 @@ export function AssetRow({
     assetLocations: { asset: { id: string } }[];
   };
 }) {
+  const { t } = useTranslation();
   const primaryLocation = getPrimaryLocation(asset);
 
   // Use a combination of standard presets and custom configurations
@@ -277,12 +280,16 @@ export function AssetRow({
           {asset.title}
           {qtyTracked ? (
             <span className="ml-2 text-xs font-normal text-gray-500">
-              · {totalQty} {asset.unitOfMeasure || "units"}
+              · {totalQty}{" "}
+              {asset.unitOfMeasure ||
+                t("scanner.addAssetsToLocationDrawer.units")}
               {/* Surface the strict-available pool when smaller than
                   the total — mirrors the manage-assets picker. */}
               {pickerMeta && pickerMeta.maxAllowed < totalQty ? (
                 <span className="ml-1 text-warning-700">
-                  · {pickerMeta.maxAllowed} available
+                  {t("scanner.addAssetsToLocationDrawer.available", {
+                    maxAllowed: pickerMeta.maxAllowed,
+                  })}
                 </span>
               ) : null}
             </span>
@@ -297,7 +304,7 @@ export function AssetRow({
               "text-xs text-gray-700"
             )}
           >
-            asset
+            {t("scanner.addAssetsToLocationDrawer.asset")}
           </span>
           <AssetAvailabilityLabels />
         </div>
@@ -328,6 +335,7 @@ export function KitRow({
     "id" | "kits"
   >;
 }) {
+  const { t } = useTranslation();
   // Use a combination of standard presets and custom configurations
   const availabilityConfigs = [
     // Custom preset for "already in this kit"
@@ -378,7 +386,9 @@ export function KitRow({
       <p className="word-break whitespace-break-spaces font-medium">
         {kit.name}{" "}
         <span className="text-[12px] font-normal text-gray-700">
-          ({kit._count.assetKits} assets)
+          {t("scanner.addAssetsToLocationDrawer.assets", {
+            assetKits: kit._count.assetKits,
+          })}
         </span>
       </p>
 
@@ -390,7 +400,7 @@ export function KitRow({
             "text-xs text-gray-700"
           )}
         >
-          kit
+          {t("scanner.addAssetsToLocationDrawer.kit")}
         </span>
         <KitAvailabilityLabels />
       </div>

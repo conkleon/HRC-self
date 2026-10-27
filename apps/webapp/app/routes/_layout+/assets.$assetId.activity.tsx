@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { data } from "react-router";
 import { z } from "zod";
@@ -142,6 +143,7 @@ export const handle = {
 };
 
 export default function AssetActivity() {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const canReadNotes = userHasPermission({
     roles,
@@ -153,7 +155,10 @@ export default function AssetActivity() {
     <div className="w-full">
       {canReadNotes ? (
         <>
-          <TextualDivider text="Notes" className="mb-8 lg:hidden" />
+          <TextualDivider
+            text={t("assets.assetsAssetidActivity.notes")}
+            className="mb-8 lg:hidden"
+          />
           <Notes />
         </>
       ) : (
@@ -162,8 +167,8 @@ export default function AssetActivity() {
             <div className="mb-4 inline-flex size-8 items-center justify-center  rounded-full bg-primary-100 p-2 text-primary-600">
               <NoPermissionsIcon />
             </div>
-            <h5>Insufficient permissions</h5>
-            <p>You are not allowed to view asset notes</p>
+            <h5>{t("assets.assetsAssetidActivity.insufficientPermissions")}</h5>
+            <p>{t("assets.assetsAssetidActivity.youAreNotAllowedTo")}</p>
           </div>
         </div>
       )}

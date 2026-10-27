@@ -1,4 +1,5 @@
 import { type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Form } from "react-router";
 import { useZorm } from "react-zorm";
 
@@ -43,6 +44,7 @@ export function CreatePresetDialog({
     typeof getValidationErrors<typeof CreatePresetFormSchema>
   >;
 }) {
+  const { t } = useTranslation();
   const zo = useZorm("create-preset", CreatePresetFormSchema);
 
   /** Ref for the preset-name input so we can focus it on open without autoFocus. */
@@ -63,9 +65,9 @@ export function CreatePresetDialog({
         onClose={() => onOpenChange(false)}
         title={
           <div className="-mb-3 w-full pb-6">
-            <h3>Save filter preset</h3>
+            <h3>{t("assets.createPresetDialog.saveFilterPreset")}</h3>
             <p className="text-gray-500">
-              Give your filter a name and save it for quick access later.
+              {t("assets.createPresetDialog.giveYourFilterAName")}
             </p>
           </div>
         }
@@ -76,18 +78,20 @@ export function CreatePresetDialog({
             <input type="hidden" name="query" value={query} />
             <Input
               ref={nameInputRef}
-              label="Preset name"
+              label={t("assets.createPresetDialog.presetName")}
               name="name"
               value={name}
               onChange={onNameChange}
-              placeholder="e.g., Available laptops"
+              placeholder={t("assets.createPresetDialog.eGAvailableLaptops")}
               maxLength={60}
               error={nameError}
             />
 
             {/* Filter preview */}
             <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 p-3">
-              <p className="mb-1 text-xs font-medium text-gray-600">Preview</p>
+              <p className="mb-1 text-xs font-medium text-gray-600">
+                {t("assets.createPresetDialog.preview")}
+              </p>
               {preview}
             </div>
 
@@ -97,10 +101,12 @@ export function CreatePresetDialog({
                 variant="secondary"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("assets.createPresetDialog.cancel")}
               </Button>
               <Button type="submit" disabled={!name.trim() || isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save"}
+                {isSubmitting
+                  ? "Saving..."
+                  : t("assets.createPresetDialog.save")}
               </Button>
             </div>
           </Form>

@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { data, redirect, useLoaderData } from "react-router";
 import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { dynamicTitleAtom } from "~/atoms/dynamic-title-atom";
@@ -139,13 +140,14 @@ export async function action({ context, request }: LoaderFunctionArgs) {
 }
 
 export default function CreateNewKit() {
+  const { t } = useTranslation();
   const title = useAtomValue(dynamicTitleAtom);
   const { referer } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const qrId = searchParams.get("qrId");
   return (
     <>
-      <Header title={title ?? "Untitled kit"} />
+      <Header title={title ?? t("kits.kitsNew.untitledKit")} />
       <KitsForm qrId={qrId} referer={referer} />
     </>
   );

@@ -10,6 +10,7 @@
  * @see {@link file://./../blockers-factory.tsx} renders what the builders return
  */
 
+import { Trans } from "react-i18next";
 import type { ScanListItems } from "~/atoms/qr-scanner";
 import type {
   AssetFromQr,
@@ -149,10 +150,11 @@ export function invalidCodesBlocker(
     condition: errorQrIds.length > 0,
     count: errorQrIds.length,
     message: (count: number) => (
-      <>
-        <strong>{`${count} QR code${count > 1 ? "s" : ""}`}</strong>{" "}
-        {count > 1 ? "are" : "is"} invalid.
-      </>
+      <Trans
+        i18nKey="scanner.blockers.scanBlockerHelpers.invalidCodes.message"
+        count={count}
+        components={{ bold: <strong /> }}
+      />
     ),
     onResolve: () => removeItemsFromList(errorQrIds),
   };
@@ -176,10 +178,11 @@ export function archivedAssetsBlocker(
     condition: archivedAssetIds.length > 0,
     count: archivedAssetIds.length,
     message: (count: number) => (
-      <>
-        <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-        archived.
-      </>
+      <Trans
+        i18nKey="scanner.blockers.scanBlockerHelpers.assetsArchived.message"
+        count={count}
+        components={{ bold: <strong /> }}
+      />
     ),
     description,
     onResolve: () => removeAssetsFromList(archivedAssetIds),
@@ -205,10 +208,11 @@ export function kitsOnlyArchivedBlocker(
     condition: qrIds.length > 0,
     count: qrIds.length,
     message: (count: number) => (
-      <>
-        <strong>{`${count} kit${count > 1 ? "s hold" : " holds"}`}</strong> only
-        archived assets.
-      </>
+      <Trans
+        i18nKey="scanner.blockers.scanBlockerHelpers.kitsOnlyArchived.message"
+        count={count}
+        components={{ bold: <strong /> }}
+      />
     ),
     description,
     onResolve: () => removeItemsFromList(qrIds),

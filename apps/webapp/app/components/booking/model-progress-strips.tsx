@@ -13,6 +13,7 @@
 import { useState } from "react";
 import type { JSX } from "react";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Progress } from "~/components/shared/progress";
 import { tw } from "~/utils/tw";
 import type { ModelProgress } from "./model-pending-rows";
@@ -50,6 +51,7 @@ export function ModelProgressStrips({
   progressByModel,
   idPrefix,
 }: ModelProgressStripsProps): JSX.Element | null {
+  const { t } = useTranslation();
   const [showModels, setShowModels] = useState(false);
 
   if (progressByModel.length === 0) {
@@ -92,13 +94,19 @@ export function ModelProgressStrips({
         />
         <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800">
           {progressByModel.length}{" "}
-          {progressByModel.length === 1 ? "model" : "models"} reserved
+          {progressByModel.length === 1
+            ? t("bookings.modelProgressStrips.model")
+            : t("bookings.modelProgressStrips.models")}{" "}
+          {t("bookings.modelProgressStrips.reserved")}
         </span>
         <span className="shrink-0 text-xs tabular-nums text-gray-600">
           {totalFulfilled} / {totalBooked}
         </span>
         <Progress
-          aria-label={`${totalFulfilled} of ${totalBooked} units fulfilled across all reserved models`}
+          aria-label={t(
+            "bookings.modelProgressStrips.ofUnitsFulfilledAcrossAll",
+            { totalFulfilled, totalBooked }
+          )}
           value={totalPercentage}
           className="h-1.5 w-32 shrink-0"
         />
@@ -137,7 +145,11 @@ export function ModelProgressStrips({
                   {fulfilled} / {model.booked}
                 </span>
                 <Progress
-                  aria-label={`${model.assetModelName}: ${fulfilled} of ${model.booked} fulfilled`}
+                  aria-label={t("bookings.modelProgressStrips.ofFulfilled", {
+                    assetModelName: model.assetModelName,
+                    fulfilled,
+                    booked: model.booked,
+                  })}
                   value={percentage}
                   className="h-1.5 w-32 shrink-0"
                 />

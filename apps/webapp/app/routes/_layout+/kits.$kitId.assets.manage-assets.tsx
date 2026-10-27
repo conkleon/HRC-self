@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AssetStatus, AssetType, KitStatus } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
 import { AlertCircleIcon } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
   data,
@@ -309,6 +310,7 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
 const REMOVAL_NOTICE_ID = "manage-kit-assets-removal-notice";
 
 export default function ManageAssetsInKit() {
+  const { t } = useTranslation();
   const { kit, items, totalItems, bookingImpactByAssetId } =
     useLoaderData<LoaderData>();
   // why: `.map` returns a new array each render. The disabled-items effect
@@ -498,7 +500,9 @@ export default function ManageAssetsInKit() {
                   name="assetKitFilter"
                   items={ASSET_KIT_FILTERS}
                   defaultValue="ALL"
-                  placeholder="Filter by kit"
+                  placeholder={t(
+                    "kits.kitsKitidAssetsManageAssets.filterByKit"
+                  )}
                 />
               </div>
             ),
@@ -509,33 +513,36 @@ export default function ManageAssetsInKit() {
         <DynamicDropdown
           trigger={
             <div className="flex h-6 cursor-pointer items-center gap-2">
-              Categories <ChevronRight className="hidden rotate-90 md:inline" />
+              {t("kits.kitsKitidAssetsManageAssets.categories")}{" "}
+              <ChevronRight className="hidden rotate-90 md:inline" />
             </div>
           }
           model={{ name: "category", queryKey: "name" }}
-          label="Filter by category"
+          label={t("kits.kitsKitidAssetsManageAssets.filterByCategory")}
           initialDataKey="categories"
           countKey="totalCategories"
         />
         <DynamicDropdown
           trigger={
             <div className="flex h-6 cursor-pointer items-center gap-2">
-              Tags <ChevronRight className="hidden rotate-90 md:inline" />
+              {t("kits.kitsKitidAssetsManageAssets.tags")}{" "}
+              <ChevronRight className="hidden rotate-90 md:inline" />
             </div>
           }
           model={{ name: "tag", queryKey: "name" }}
-          label="Filter by tags"
+          label={t("kits.kitsKitidAssetsManageAssets.filterByTags")}
           initialDataKey="tags"
           countKey="totalTags"
         />
         <DynamicDropdown
           trigger={
             <div className="flex h-6 cursor-pointer items-center gap-2">
-              Locations <ChevronRight className="hidden rotate-90 md:inline" />
+              {t("kits.kitsKitidAssetsManageAssets.locations")}{" "}
+              <ChevronRight className="hidden rotate-90 md:inline" />
             </div>
           }
           model={{ name: "location", queryKey: "name" }}
-          label="Filter by Location"
+          label={t("kits.kitsKitidAssetsManageAssets.filterByLocation")}
           initialDataKey="locations"
           countKey="totalLocations"
           renderItem={({ metadata }) => (
@@ -605,10 +612,10 @@ export default function ManageAssetsInKit() {
           bulkActions={<> </>}
           headerChildren={
             <>
-              <Th>Kit</Th>
-              <Th>Category</Th>
-              <Th>Tags</Th>
-              <Th>Location</Th>
+              <Th>{t("kits.kitsKitidAssetsManageAssets.kit")}</Th>
+              <Th>{t("kits.kitsKitidAssetsManageAssets.category")}</Th>
+              <Th>{t("kits.kitsKitidAssetsManageAssets.tags")}</Th>
+              <Th>{t("kits.kitsKitidAssetsManageAssets.location")}</Th>
             </>
           }
           disableSelectAllItems={true}
@@ -623,12 +630,13 @@ export default function ManageAssetsInKit() {
       {/* Footer of the modal - fixed at the bottom */}
       <footer className="item-center mt-auto flex shrink-0 justify-between border-t px-6 py-3">
         <p>
-          {hasSelectedAllItems ? totalItems : selectedBulkItemsCount} selected
+          {hasSelectedAllItems ? totalItems : selectedBulkItemsCount}{" "}
+          {t("kits.kitsKitidAssetsManageAssets.selected")}
         </p>
 
         <div className="flex gap-3">
           <Button variant="secondary" to="..">
-            Close
+            {t("kits.kitsKitidAssetsManageAssets.close")}
           </Button>
           <Form method="post" ref={formRef}>
             {selectedBulkItems.map((asset, i) => (
@@ -651,7 +659,7 @@ export default function ManageAssetsInKit() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button type="button" disabled={isSearching}>
-                  Confirm
+                  {t("kits.kitsKitidAssetsManageAssets.confirm")}
                 </Button>
               </AlertDialogTrigger>
 
@@ -674,18 +682,21 @@ export default function ManageAssetsInKit() {
                     </div>
                   </div>
 
-                  <h3>Add Assets to kit?</h3>
+                  <h3>
+                    {t("kits.kitsKitidAssetsManageAssets.addAssetsToKit")}
+                  </h3>
                 </div>
 
                 <div>
                   {kitIsInCustody && (
                     <p className="mb-3">
-                      This kit is currently{" "}
                       {kit.status === KitStatus.IN_CUSTODY
-                        ? "in custody"
-                        : "checked out"}
-                      . Any assets you add will automatically inherit the kit's
-                      status.
+                        ? t(
+                            "kits.kitsKitidAssetsManageAssets.kitInCustodyInherit"
+                          )
+                        : t(
+                            "kits.kitsKitidAssetsManageAssets.kitCheckedOutInherit"
+                          )}
                     </p>
                   )}
                   {/* Qty-edit warning: when the user changed a qty-tracked
@@ -695,26 +706,38 @@ export default function ManageAssetsInKit() {
                       the cascade before they confirm. */}
                   {showInCustodyQtyWarning && (
                     <div className="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800">
-                      <strong>Quantity change notice:</strong> You changed the
-                      quantity for{" "}
-                      {qtyEditedInExistingKitRows.length === 1
-                        ? "1 asset"
-                        : `${qtyEditedInExistingKitRows.length} assets`}{" "}
-                      already in this kit. The custodian's allocation will be
-                      adjusted by the same amount when you confirm.
+                      <strong>
+                        {t(
+                          "kits.kitsKitidAssetsManageAssets.quantityChangeNotice"
+                        )}
+                      </strong>{" "}
+                      {t("kits.kitsKitidAssetsManageAssets.qtyChangedInKit", {
+                        count: qtyEditedInExistingKitRows.length,
+                      })}
                     </div>
                   )}
                   {kit.location ? (
                     <p className="mb-3">
-                      <strong>Location Update Notice:</strong> Adding assets to
-                      this kit will automatically update their location to{" "}
+                      <strong>
+                        {t(
+                          "kits.kitsKitidAssetsManageAssets.locationUpdateNotice"
+                        )}
+                      </strong>{" "}
+                      {t(
+                        "kits.kitsKitidAssetsManageAssets.addingAssetsToThisKit"
+                      )}{" "}
                       <strong>{kit.location.name}</strong>.
                     </p>
                   ) : (
                     <p className="mb-3">
-                      <strong>Location Update Notice:</strong> Adding assets to
-                      this kit will remove their current location since this kit
-                      has no location assigned.
+                      <strong>
+                        {t(
+                          "kits.kitsKitidAssetsManageAssets.locationUpdateNotice"
+                        )}
+                      </strong>{" "}
+                      {t(
+                        "kits.kitsKitidAssetsManageAssets.addingAssetsToThisKit2"
+                      )}
                     </p>
                   )}
                   {/* Removal notice: deselecting a row is destructive even
@@ -728,19 +751,21 @@ export default function ManageAssetsInKit() {
                     reserved={deselectedBookingImpact.reserved}
                     checkedOut={deselectedBookingImpact.checkedOut}
                   />
-                  <p>Are you sure you want to continue?</p>
+                  <p>
+                    {t("kits.kitsKitidAssetsManageAssets.areYouSureYouWant")}
+                  </p>
                 </div>
 
                 <AlertDialogFooter>
                   <AlertDialogCancel asChild>
                     <Button type="button" variant="secondary">
-                      Cancel
+                      {t("kits.kitsKitidAssetsManageAssets.cancel")}
                     </Button>
                   </AlertDialogCancel>
 
                   <AlertDialogAction asChild>
                     <Button type="button" onClick={handleSubmit}>
-                      Continue
+                      {t("kits.kitsKitidAssetsManageAssets.continue")}
                     </Button>
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -770,6 +795,7 @@ const RowComponent = ({
     initialKitQuantities: Record<string, number>;
   };
 }) => {
+  const { t } = useTranslation();
   const { category, tags } = item;
   const location = getPrimaryLocation(item);
   const isQty = isQuantityTracked(item);
@@ -822,7 +848,9 @@ const RowComponent = ({
                   mainImageExpiration: item.mainImageExpiration,
                   assetModel: item.assetModel ?? null,
                 }}
-                alt={`Image of ${item.title}`}
+                alt={t("kits.kitsKitidAssetsManageAssets.imageOf", {
+                  title: item.title,
+                })}
                 className="size-full rounded-[4px] border object-cover"
               />
             </div>
@@ -831,7 +859,9 @@ const RowComponent = ({
                 {item.title}
                 {isQuantityTracked(item) && item.quantity != null ? (
                   <span className="ml-2 text-xs font-normal text-gray-500">
-                    · {item.quantity} {item.unitOfMeasure || "units"}
+                    · {item.quantity}{" "}
+                    {item.unitOfMeasure ||
+                      t("kits.kitsKitidAssetsManageAssets.units")}
                     {/* Surface the strict-available pool when it's
                         smaller than the asset's total — clarifies why
                         the qty input's MAX may be lower than the
@@ -840,7 +870,9 @@ const RowComponent = ({
                         flag). */}
                     {meta && meta.maxAllowedForThisKit < item.quantity ? (
                       <span className="ml-1 text-warning-700">
-                        · {meta.maxAllowedForThisKit} available
+                        {t("kits.kitsKitidAssetsManageAssets.available", {
+                          maxAllowedForThisKit: meta.maxAllowedForThisKit,
+                        })}
                       </span>
                     ) : null}
                   </span>
@@ -862,7 +894,7 @@ const RowComponent = ({
                     .map((k) => `${k.kitName} (${k.quantity})`)
                     .join(", ")}
                 >
-                  Also in:{" "}
+                  {t("kits.kitsKitidAssetsManageAssets.alsoIn")}{" "}
                   {otherKits
                     .map((k) => `${k.kitName} (${k.quantity})`)
                     .join(", ")}
@@ -903,7 +935,7 @@ const RowComponent = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center justify-center rounded-md border border-warning-200 bg-warning-50 px-1.5 py-0.5 text-center text-xs text-warning-700">
-                          In custody
+                          {t("kits.kitsKitidAssetsManageAssets.inCustody")}
                         </div>
                       </TooltipTrigger>
 
@@ -913,12 +945,16 @@ const RowComponent = ({
                         className="md:w-80"
                       >
                         <h2 className="mb-1 text-xs font-semibold text-gray-700">
-                          Asset is in custody
+                          {t(
+                            "kits.kitsKitidAssetsManageAssets.assetIsInCustody"
+                          )}
                         </h2>
                         <div className="text-wrap text-xs font-medium text-gray-500">
-                          Asset is currently in custody of a team member. <br />{" "}
-                          Make sure the asset has an Available status in order
-                          to add it to this kit.
+                          <Trans
+                            t={t}
+                            i18nKey="kits.kitsKitidAssetsManageAssets.assetIsCurrentlyInCustody"
+                            components={[<br key="slot0" />]}
+                          />
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -931,7 +967,7 @@ const RowComponent = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center justify-center rounded-md border border-warning-200 bg-warning-50 px-1.5 py-0.5 text-center text-xs text-warning-700">
-                          Checked out
+                          {t("kits.kitsKitidAssetsManageAssets.checkedOut")}
                         </div>
                       </TooltipTrigger>
 
@@ -941,12 +977,16 @@ const RowComponent = ({
                         className="md:w-80"
                       >
                         <h2 className="mb-1 text-xs font-semibold text-gray-700">
-                          Asset is checked out
+                          {t(
+                            "kits.kitsKitidAssetsManageAssets.assetIsCheckedOut"
+                          )}
                         </h2>
                         <div className="text-wrap text-xs font-medium text-gray-500">
-                          Asset is currently in checked out via a booking.{" "}
-                          <br /> Make sure the asset has an Available status in
-                          order to add it to this kit.
+                          <Trans
+                            t={t}
+                            i18nKey="kits.kitsKitidAssetsManageAssets.assetIsCurrentlyInChecked2"
+                            components={[<br key="slot0" />]}
+                          />
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -957,7 +997,7 @@ const RowComponent = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center justify-center rounded-md border border-success-200 bg-success-50 px-1.5 py-0.5 text-center text-xs text-success-700">
-                          Part of kit
+                          {t("kits.kitsKitidAssetsManageAssets.partOfKit")}
                         </div>
                       </TooltipTrigger>
 
@@ -967,11 +1007,14 @@ const RowComponent = ({
                         className="md:w-80"
                       >
                         <h2 className="mb-1 text-xs font-semibold text-gray-700">
-                          Asset is already part of this kit
+                          {t(
+                            "kits.kitsKitidAssetsManageAssets.assetIsAlreadyPartOf"
+                          )}
                         </h2>
                         <div className="text-wrap text-xs font-medium text-gray-500">
-                          Asset is currently in checked out via a booking and is
-                          already part of this kit.
+                          {t(
+                            "kits.kitsKitidAssetsManageAssets.assetIsCurrentlyInChecked"
+                          )}
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -995,7 +1038,7 @@ const RowComponent = ({
                   htmlFor={`kit-qty-${item.id}`}
                   className="text-xs text-gray-500"
                 >
-                  Qty:
+                  {t("kits.kitsKitidAssetsManageAssets.qty")}
                 </label>
                 <input
                   id={`kit-qty-${item.id}`}
@@ -1017,13 +1060,18 @@ const RowComponent = ({
                     onQuantityChange(item.id, capped);
                   }}
                   className="h-8 w-16 rounded-md border border-gray-300 px-2 text-center text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                  aria-label={`Quantity for ${item.title}`}
+                  aria-label={t(
+                    "kits.kitsKitidAssetsManageAssets.quantityFor",
+                    { title: item.title }
+                  )}
                 />
                 <span className="text-xs text-gray-400">/ {max}</span>
               </div>
               {initialInThisKit > 0 && initialInThisKit !== currentValue ? (
                 <span className="text-xs text-warning-700">
-                  was {initialInThisKit}
+                  {t("kits.kitsKitidAssetsManageAssets.was", {
+                    initialInThisKit,
+                  })}
                 </span>
               ) : null}
             </div>

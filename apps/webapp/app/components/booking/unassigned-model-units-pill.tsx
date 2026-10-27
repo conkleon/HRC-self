@@ -28,6 +28,7 @@
  * @see {@link file://./list-bookings-content.tsx}
  * @see {@link file://./booking-model-reservations-section.tsx}
  */
+import { useTranslation } from "react-i18next";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import { Badge } from "../shared/badge";
 import {
@@ -64,6 +65,7 @@ export function UnassignedModelUnitsPill({
   count,
   canAssign,
 }: UnassignedModelUnitsPillProps) {
+  const { t } = useTranslation();
   if (count <= 0 || !canAssign) {
     return null;
   }
@@ -82,7 +84,10 @@ export function UnassignedModelUnitsPill({
               in `list-bookings-content.tsx`. */}
           <span
             role="img"
-            aria-label={`${label}. This booking reserves asset models that have not been matched to physical assets yet. Scan them in to assign them.`}
+            aria-label={t(
+              "bookings.unassignedModelUnitsPill.thisBookingReservesAssetModels",
+              { label }
+            )}
             className="cursor-help"
           >
             <Badge
@@ -95,8 +100,7 @@ export function UnassignedModelUnitsPill({
           </span>
         </TooltipTrigger>
         <TooltipContent side="top" align="center" className="max-w-xs">
-          Reserved models that have not been matched to physical assets yet.
-          Scan them in to assign them.
+          {t("bookings.unassignedModelUnitsPill.reservedModelsThatHaveNot")}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

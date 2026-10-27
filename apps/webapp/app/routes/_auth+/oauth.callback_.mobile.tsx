@@ -18,12 +18,18 @@
 
 import { useEffect } from "react";
 
-import type { ActionFunctionArgs, MetaFunction } from "react-router";
+import { useTranslation } from "react-i18next";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "react-router";
 import { data, useFetcher } from "react-router";
 import { z } from "zod";
 import { Button } from "~/components/shared/button";
 import { Spinner } from "~/components/shared/spinner";
 import { config } from "~/config/shelf.config";
+import { getServerT } from "~/i18n/i18n.server";
 import { supabaseClient } from "~/integrations/supabase/client";
 import { SsoAccountLinkedNotice } from "~/modules/auth/components/sso-account-linked-notice";
 import {
@@ -208,9 +214,10 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export function loader() {
-  const title = "Signing you in";
-  const subHeading = "Please wait while we connect your account";
+export async function loader({ context }: LoaderFunctionArgs) {
+  const t = await getServerT(context);
+  const title = t("auth.pages.oauthCallbackMobile.title");
+  const subHeading = t("auth.pages.oauthCallback.subHeading");
 
   return data(payload({ title, subHeading }));
 }
@@ -220,6 +227,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function MobileLoginCallback() {
+  const { t } = useTranslation();
   const fetcher = useFetcher<typeof action>();
   const result = fetcher.data;
 
@@ -267,7 +275,7 @@ export default function MobileLoginCallback() {
         <div>
           <div className="text-sm text-error-500">{errorMessage}</div>
           <Button to="/" className="mt-4">
-            Back to login
+            {t("auth.oauthCallbackMobile.backToLogin")}
           </Button>
         </div>
       ) : (

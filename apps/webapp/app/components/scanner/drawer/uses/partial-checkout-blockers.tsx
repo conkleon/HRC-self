@@ -15,6 +15,7 @@
 
 import { AssetStatus } from "@prisma/client";
 import type { AssetType } from "@prisma/client";
+import { Trans } from "react-i18next";
 import type { ScanListItems } from "~/atoms/qr-scanner";
 import { isQuantityTracked } from "~/modules/asset/utils";
 import type {
@@ -285,10 +286,11 @@ export function buildPartialCheckoutBlockers({
       condition: assetsNotInBookingIds.length > 0,
       count: assetsNotInBookingIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong> not
-          part of this booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.assetsNotInBooking.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(assetsNotInBookingIds),
     },
@@ -297,12 +299,15 @@ export function buildPartialCheckoutBlockers({
       condition: alreadyCheckedOutAssets.length > 0,
       count: alreadyCheckedOutAssets.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s" : ""}`}</strong> already
-          checked out for this booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.assetsAlreadyCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "These assets cannot be checked out again",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.assetsAlreadyCheckedOut.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfAlreadyCheckedOutAssets),
     },
     {
@@ -310,12 +315,15 @@ export function buildPartialCheckoutBlockers({
       condition: assetsInCustody.length > 0,
       count: assetsInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s" : ""}`}</strong> currently
-          in custody. Release custody first.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.assetsInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Release custody before checking these assets out",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.assetsInCustody.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfAssetsInCustody),
     },
     {
@@ -323,12 +331,15 @@ export function buildPartialCheckoutBlockers({
       condition: alreadyCheckedOutKits.length > 0,
       count: alreadyCheckedOutKits.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s have" : " has"}`}</strong>{" "}
-          already been checked out for this booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.kitsAlreadyCheckedOut.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "All assets from these kits have already been checked out",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.kitsAlreadyCheckedOut.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfAlreadyCheckedOutKits),
     },
     {
@@ -336,13 +347,15 @@ export function buildPartialCheckoutBlockers({
       condition: kitsInCustody.length > 0,
       count: kitsInCustody.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          currently <strong>in custody</strong>.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.kitInCustody.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Release the kit's custody before checking it out on a booking.",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.kitInCustody.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsInCustody),
     },
     {
@@ -350,13 +363,15 @@ export function buildPartialCheckoutBlockers({
       condition: kitsHeldElsewhere.length > 0,
       count: kitsHeldElsewhere.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already booked or checked out on another booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.kitsBookedElsewhere.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "Another booking holds this kit for an overlapping period, or it has not come back from an overdue one.",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.kitsBookedElsewhere.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsHeldElsewhere),
     },
     {
@@ -364,13 +379,15 @@ export function buildPartialCheckoutBlockers({
       condition: assetsHeldElsewhere.length > 0,
       count: assetsHeldElsewhere.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong> part
-          of a kit that is booked or checked out on another booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.kitAssetsBookedElsewhere.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description:
-        "The kit these assets belong to on this booking is held by another booking.",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.kitAssetsBookedElsewhere.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfAssetsHeldElsewhere),
     },
     {
@@ -378,12 +395,15 @@ export function buildPartialCheckoutBlockers({
       condition: redundantAssetIds.length > 0,
       count: redundantAssetIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already covered by scanned kit QR codes.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.redundantKitAssets.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
-      description: "Kit QR codes include all kit assets automatically",
+      description: (
+        <Trans i18nKey="scanner.blockers.partialCheckoutBlockers.redundantKitAssets.description" />
+      ),
       onResolve: () => removeItemsFromList(qrIdsOfRedundantAssets),
     },
     {
@@ -391,10 +411,11 @@ export function buildPartialCheckoutBlockers({
       condition: kitsNotInBooking.length > 0,
       count: kitsNotInBooking.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong> not
-          part of this booking.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.kitsNotInBooking.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsNotInBooking),
     },
@@ -410,10 +431,11 @@ export function buildPartialCheckoutBlockers({
       condition: errorQrIds.length > 0,
       count: errorQrIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} QR code${count > 1 ? "s" : ""}`}</strong>{" "}
-          {count > 1 ? "are" : "is"} invalid.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.partialCheckoutBlockers.invalidCodes.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(errorQrIds),
     },

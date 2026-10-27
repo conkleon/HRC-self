@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 import { m } from "framer-motion";
 import { useSetAtom } from "jotai";
 import { Package } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { useFetcher, useFetchers, useLoaderData } from "react-router";
 import { setDisabledBulkItemsAtom } from "~/atoms/list";
 import { List, type ListProps } from "~/components/list";
@@ -110,6 +111,7 @@ export const AssetsList = ({
    */
   titleContent?: ListProps["titleContent"];
 }) => {
+  const { t } = useTranslation();
   const {
     items,
     modelRollup,
@@ -214,7 +216,7 @@ export const AssetsList = ({
       <>
         <AssetModelSortHeader
           sortKey="name"
-          label="Name"
+          label={t("assets.assetsList.name")}
           columnName="name"
           className={tw(
             "!border-b-0 border-r border-r-transparent",
@@ -225,10 +227,12 @@ export const AssetsList = ({
         {/* "Default category", not "Category": the cell shows the model's
             DEFAULT, which applies at creation only, so its assets may sit in
             other categories. */}
-        <Th className={MODEL_HEADER_FILL}>Default category</Th>
+        <Th className={MODEL_HEADER_FILL}>
+          {t("assets.assetsList.defaultCategory")}
+        </Th>
         <AssetModelSortHeader
           sortKey="assets"
-          label="Assets"
+          label={t("assets.assetsList.assets")}
           className={MODEL_HEADER_FILL}
         />
         {/* "Status", not "Availability": the cell counts asset status, which is
@@ -238,18 +242,18 @@ export const AssetsList = ({
             what moved. */}
         <AssetModelSortHeader
           sortKey="available"
-          label="Status"
+          label={t("assets.assetsList.status")}
           sortsBy="assets in"
           className={MODEL_HEADER_FILL}
         />
         <AssetModelSortHeader
           sortKey="value"
-          label="Total value"
+          label={t("assets.assetsList.totalValue")}
           className={MODEL_HEADER_FILL}
         />
       </>
     ),
-    [canBookSelectedModels]
+    [canBookSelectedModels, t]
   );
   const setDisabledBulkItems = useSetAtom(setDisabledBulkItemsAtom);
   // The "No model" bucket is not a model, so there are no units of it to
@@ -269,30 +273,31 @@ export const AssetsList = ({
   const isSwappingMode = modeFetcher?.formData;
   const headerChildren = modeIsSimple ? (
     <>
-      <Th>Category</Th>
-      <Th>Tags</Th>
+      <Th>{t("assets.assetsList.category")}</Th>
+      <Th>{t("assets.assetsList.tags")}</Th>
       <When truthy={!isUserPage}>
         <Th className="flex items-center gap-1 whitespace-nowrap">
-          Custodian{" "}
+          {t("assets.assetsList.custodian")}{" "}
           <InfoTooltip
             iconClassName="size-4"
             content={
               <>
-                <h6>Asset custody</h6>
+                <h6>{t("assets.assetsList.assetCustody")}</h6>
                 <p>
-                  This column shows if a user has custody of the asset either
-                  via direct assignment or via a booking. If you see{" "}
-                  <GrayBadge>private</GrayBadge> that means you don't have the
-                  permissions to see who has custody of the asset.
+                  <Trans
+                    t={t}
+                    i18nKey="assets.assetsList.thisColumnShowsIfA"
+                    components={[<GrayBadge key="slot0" />]}
+                  />
                 </p>
               </>
             }
           />
         </Th>
       </When>
-      <Th>Location</Th>
-      <Th>Quantity</Th>
-      <Th>Actions</Th>
+      <Th>{t("assets.assetsList.location")}</Th>
+      <Th>{t("assets.assetsList.quantity")}</Th>
+      <Th>{t("assets.assetsList.actions")}</Th>
     </>
   ) : (
     <AdvancedTableHeader columns={columns} />
@@ -317,7 +322,7 @@ export const AssetsList = ({
           className="absolute inset-0 z-[100] flex flex-col items-center  bg-gray-25/95 pt-[30vh]"
         >
           <Spinner />
-          <p className="mt-2">Changing mode...</p>
+          <p className="mt-2">{t("assets.assetsList.changingMode")}</p>
         </m.div>
       </When>
 
@@ -346,12 +351,9 @@ export const AssetsList = ({
                     iconClassName="size-4"
                     content={
                       <>
-                        <h6>Asset models</h6>
+                        <h6>{t("assets.assetsList.assetModels")}</h6>
                         <p>
-                          Counts cover the assets matching your current filters.
-                          Asset models apply to individually-tracked assets
-                          only, so quantity-tracked assets are not included
-                          here.
+                          {t("assets.assetsList.countsCoverTheAssetsMatching")}
                         </p>
                       </>
                     }
@@ -376,19 +378,22 @@ export const AssetsList = ({
                   truthy={totalAssetModels === 0 && modelRollupItems.length > 0}
                 >
                   <p>
-                    No asset models in this workspace yet.{" "}
-                    {ASSET_MODEL_EXPLAINER}{" "}
+                    {t("assets.assetsList.noAssetModelsInThis", {
+                      ASSET_MODEL_EXPLAINER,
+                    })}{" "}
                     {canCreateAssetModels ? (
                       <Button
                         to="/settings/asset-models/new"
                         variant="link"
                         className="font-normal"
                       >
-                        Create an asset model
+                        {t("assets.assetsList.createAnAssetModel")}
                       </Button>
                     ) : (
                       <span>
-                        A workspace administrator creates them in settings.
+                        {t(
+                          "assets.assetsList.aWorkspaceAdministratorCreatesThem"
+                        )}
                       </span>
                     )}
                   </p>
@@ -400,7 +405,7 @@ export const AssetsList = ({
                   header would slide over unpinned body cells. */}
               <AssetIndexSettingsProvider freezeColumn={false}>
                 <List
-                  title="Asset models"
+                  title={t("assets.assetsList.assetModels")}
                   // The ONLY model count on this screen. `totalItems` counts
                   // rendered rows, which includes the "No model" bucket, and a
                   // bucket is not a model; `totalModels` excludes it. Two
@@ -491,7 +496,9 @@ export const AssetsList = ({
                           assetModel:
                             resource.extendedProps?.assetModel ?? null,
                         }}
-                        alt={`Image of ${resource.title}`}
+                        alt={t("assets.assetsList.imageOf", {
+                          title: resource.title,
+                        })}
                         className="size-14 shrink-0 rounded border object-cover"
                         withPreview
                       />
@@ -525,7 +532,7 @@ export const AssetsList = ({
             </>
           ) : (
             <List
-              title="Assets"
+              title={t("assets.assetsList.assets")}
               ItemComponent={modeIsSimple ? ListAssetContent : AdvancedAssetRow}
               customPagination={<AssetIndexPagination />}
               bulkActions={
@@ -558,6 +565,7 @@ export const ListAssetContent = ({
   bulkActions?: ReactNode;
   isUserPage?: boolean;
 }) => {
+  const { t } = useTranslation();
   const { category, tags, custody: custodyArray } = item;
   // Render only the single primary-location badge in the list column —
   // a qty-tracked asset can sit at multiple locations via AssetLocation.
@@ -596,7 +604,7 @@ export const ListAssetContent = ({
                   mainImageExpiration: item.mainImageExpiration,
                   assetModel: item.assetModel ?? null,
                 }}
-                alt={`Image of ${item.title}`}
+                alt={t("assets.assetsList.imageOf", { title: item.title })}
                 className="size-full rounded-[4px] border object-cover"
                 withPreview
               />
@@ -758,12 +766,13 @@ export const ListAssetContent = ({
 };
 
 function AdvancedModeMobileFallback() {
+  const { t } = useTranslation();
   const fetcher = useFetcher();
   const disabled = useDisabled(fetcher);
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2">
       <p className="text-center">
-        Advanced mode is currently not available on mobile.
+        {t("assets.assetsList.advancedModeIsCurrentlyNot")}
       </p>
       <fetcher.Form
         method="post"
@@ -778,7 +787,7 @@ function AdvancedModeMobileFallback() {
         <input type="hidden" name="intent" value="changeMode" />
 
         <Button type="submit" name="mode" value="SIMPLE" disabled={disabled}>
-          Change to simple mode
+          {t("assets.assetsList.changeToSimpleMode")}
         </Button>
       </fetcher.Form>
     </div>

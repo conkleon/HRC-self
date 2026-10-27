@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import { Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   formatOverdueDuration,
   getLatenessMs,
@@ -15,6 +16,7 @@ export function TimeRemaining({
   from: Date;
   status: BookingStatus;
 }) {
+  const { t } = useTranslation();
   const currentDate = new Date();
 
   // For these statuses, don't render anything (using direct comparison)
@@ -61,18 +63,20 @@ export function TimeRemaining({
         <div className="flex items-center text-sm text-gray-600 md:ml-4 [&_span]:whitespace-nowrap">
           <Clock className="mr-1 size-4 text-gray-400" />
           <span className="font-medium text-gray-900">
-            Overdue by {overdueDays} days
+            {t("bookings.timeRemaining.overdueByDays", { overdueDays })}
           </span>
           {overdueHours > 0 && (
             <>
               <span className="mx-1">·</span>
-              <span>{overdueHours} hours</span>
+              <span>{t("bookings.timeRemaining.hours", { overdueHours })}</span>
             </>
           )}
           {overdueMinutes > 0 && (
             <>
               <span className="mx-1">·</span>
-              <span>{overdueMinutes} minutes</span>
+              <span>
+                {t("bookings.timeRemaining.minutes", { overdueMinutes })}
+              </span>
             </>
           )}
         </div>
@@ -93,18 +97,22 @@ export function TimeRemaining({
       <div className="flex items-center text-sm text-gray-600 md:ml-4 [&_span]:whitespace-nowrap">
         <Clock className="mr-1 size-4 text-gray-400" />
         <span className="font-medium text-gray-900">
-          Starts in: {remainingDays} days
+          {t("bookings.timeRemaining.startsInDays", { remainingDays })}
         </span>
         {remainingHours > 0 && (
           <>
             <span className="mx-1">·</span>
-            <span>{remainingHours} hours</span>
+            <span>
+              {t("bookings.timeRemaining.hours2", { remainingHours })}
+            </span>
           </>
         )}
         {remainingMinutes > 0 && (
           <>
             <span className="mx-1">·</span>
-            <span>{remainingMinutes} minutes</span>
+            <span>
+              {t("bookings.timeRemaining.minutes2", { remainingMinutes })}
+            </span>
           </>
         )}
       </div>
@@ -115,20 +123,24 @@ export function TimeRemaining({
   return (
     <div className="flex items-center text-sm text-gray-600 md:ml-4 [&_span]:whitespace-nowrap">
       <Clock className="mr-1 size-4 text-gray-400" />
-      <span className="font-medium text-gray-900">{remainingDays} days</span>
+      <span className="font-medium text-gray-900">
+        {t("bookings.timeRemaining.days", { remainingDays })}
+      </span>
       {remainingHours > 0 && (
         <>
           <span className="mx-1">·</span>
-          <span>{remainingHours} hours</span>
+          <span>{t("bookings.timeRemaining.hours2", { remainingHours })}</span>
         </>
       )}
       {remainingMinutes > 0 && (
         <>
           <span className="mx-1">·</span>
-          <span>{remainingMinutes} minutes</span>
+          <span>
+            {t("bookings.timeRemaining.minutes2", { remainingMinutes })}
+          </span>
         </>
       )}
-      <span className="ml-1">remaining</span>
+      <span className="ml-1">{t("bookings.timeRemaining.remaining")}</span>
     </div>
   );
 }

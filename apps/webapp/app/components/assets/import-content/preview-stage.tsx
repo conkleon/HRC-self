@@ -18,6 +18,7 @@
  * @see {@link file://./../../../routes/api+/asset-imports.$importId.preview-rows.ts} Next-page endpoint
  */
 import { useMemo, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useApiQuery from "~/hooks/use-api-query";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
 import { useDisabled } from "~/hooks/use-disabled";
@@ -130,6 +131,7 @@ export function PreviewStage({
   onReset,
   confirmFetcher,
 }: PreviewStageProps) {
+  const { t } = useTranslation();
   const isConfirming = useDisabled(confirmFetcher);
   const { counts, newEntities, totalRows, valueWarnings, totalValueWarnings } =
     preview;
@@ -191,21 +193,31 @@ export function PreviewStage({
   return (
     <div className="mt-4 w-full">
       <h4 ref={headingRef} tabIndex={-1} className="mb-2">
-        {preview.fileName ? `Preview of ${preview.fileName}` : "Import preview"}
+        {preview.fileName
+          ? `Preview of ${preview.fileName}`
+          : t("assets.previewStage.importPreview")}
       </h4>
       <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-        <SummaryPill count={totalRows} label="assets" color="blue" />
+        <SummaryPill
+          count={totalRows}
+          label={t("assets.previewStage.assets")}
+          color="blue"
+        />
         <SummaryPill
           count={counts.withImage}
-          label="with images"
+          label={t("assets.previewStage.withImages")}
           color="gray"
         />
         <SummaryPill
           count={counts.withCustodian}
-          label="with custodian"
+          label={t("assets.previewStage.withCustodian")}
           color="gray"
         />
-        <SummaryPill count={counts.inKit} label="in kits" color="gray" />
+        <SummaryPill
+          count={counts.inKit}
+          label={t("assets.previewStage.inKits")}
+          color="gray"
+        />
       </div>
 
       <NewEntitiesNotice
@@ -223,13 +235,13 @@ export function PreviewStage({
       {totalValueWarnings > 0 ? (
         <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-4">
           <p className="mb-2 font-medium text-amber-800">
-            <AlertIcon className="inline-block size-4" /> {totalValueWarnings}{" "}
-            barcode {totalValueWarnings === 1 ? "value" : "values"} may not
-            match {totalValueWarnings === 1 ? "its label" : "their labels"}
+            <AlertIcon className="inline-block size-4" />{" "}
+            {t("assets.previewStage.barcodeValueWarnings", {
+              count: totalValueWarnings,
+            })}
           </p>
           <p className="text-sm text-amber-700">
-            Scanning matches the exact text a QR code encodes. You can import
-            anyway, or fix the file and upload it again.
+            {t("assets.previewStage.scanningMatchesTheExactText")}
           </p>
           <ImportRowErrorsTable
             rowErrors={valueWarnings}
@@ -261,20 +273,24 @@ export function PreviewStage({
             ? [{ tone: "warning" as const, label: "Check this value" }]
             : []),
         ]}
-        ariaLabel="Import preview"
+        ariaLabel={t("assets.previewStage.importPreview")}
       />
       {moreRows.error ? (
         <p role="alert" className="-mt-2 mb-4 text-sm text-error-600">
-          Could not load more rows: {moreRows.error}
+          {t("assets.previewStage.couldNotLoadMoreRows", {
+            error: moreRows.error,
+          })}
         </p>
       ) : null}
 
       <div className="my-4 flex flex-wrap items-center gap-3">
         <ConfirmImportDialog
           triggerLabel={`Import ${formatAssetCount(totalRows)}`}
-          title="Confirm asset import"
-          description="The import runs in the background. You can leave this page; we will email you when it finishes."
-          confirmLabel={isConfirming ? "Starting..." : "Import"}
+          title={t("assets.previewStage.confirmAssetImport")}
+          description={t("assets.previewStage.theImportRunsInThe")}
+          confirmLabel={
+            isConfirming ? "Starting..." : t("assets.previewStage.import")
+          }
           isSubmitting={isConfirming}
           errorDetails={
             confirmError ? <ImportErrorDetails error={confirmError} /> : null
@@ -290,7 +306,7 @@ export function PreviewStage({
           }}
         />
         <Button type="button" variant="secondary" onClick={onReset}>
-          Choose a different file
+          {t("assets.previewStage.chooseADifferentFile")}
         </Button>
       </div>
     </div>

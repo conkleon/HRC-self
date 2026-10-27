@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import z from "zod";
@@ -26,6 +27,7 @@ export const BulkRemoveAssetsAndKitSchema = z.object({
 });
 
 export default function BulkRemoveAssetAndKitDialog() {
+  const { t } = useTranslation();
   const zo = useZorm("BulkRemoveAssetAndKit", BulkRemoveAssetsAndKitSchema);
   const totalSelectedItems = useAtomValue(selectedBulkItemsCountAtom);
   const selectedItems = useAtomValue(selectedBulkItemsAtom);
@@ -48,9 +50,13 @@ export default function BulkRemoveAssetAndKitDialog() {
     <BulkUpdateDialogContent
       ref={zo.ref}
       type="trash"
-      title={`Remove selected items (${totalSelectedItems})`}
+      title={t("bookings.bulkRemoveAssetAndKitDialog.removeSelectedItems", {
+        totalSelectedItems,
+      })}
       arrayFieldId="assetOrKitIds"
-      description={`Are you sure you want to remove ${totalSelectedItems} selected item(s)? This action cannot be undone.`}
+      description={t("bookings.bulkRemoveAssetAndKitDialog.areYouSureYouWant", {
+        totalSelectedItems,
+      })}
       actionUrl={`/bookings/${booking.id}/overview`}
     >
       {({ fetcherError, disabled, handleCloseDialog }) => (
@@ -78,7 +84,7 @@ export default function BulkRemoveAssetAndKitDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("bookings.bulkRemoveAssetAndKitDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -87,7 +93,7 @@ export default function BulkRemoveAssetAndKitDialog() {
               disabled={disabled}
               className="border-error-600 bg-error-600 hover:border-error-800 hover:!bg-error-800"
             >
-              Confirm
+              {t("bookings.bulkRemoveAssetAndKitDialog.confirm")}
             </Button>
           </div>
         </>

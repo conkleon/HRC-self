@@ -1,4 +1,7 @@
 import "@testing-library/jest-dom/vitest";
+// Components rendered without the root loader have no I18nextProvider; the
+// global English instance lets `useTranslation` render real text for them.
+import "~/i18n/global";
 import { server } from "./mocks";
 
 declare global {

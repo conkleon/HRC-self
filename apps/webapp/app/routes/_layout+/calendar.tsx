@@ -10,6 +10,7 @@ import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { type BookingStatus, type Tag } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { data, Link, useLoaderData } from "react-router";
 import { ClientOnly } from "remix-utils/client-only";
@@ -225,6 +226,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 
 // Calendar Component
 export default function Calendar() {
+  const { t } = useTranslation();
   const { isMd } = useViewportHeight();
   const { prefs } = useDateFormatter();
   // Drive FullCalendar's clock (12h vs 24h) from the user's time-format pref.
@@ -301,8 +303,11 @@ export default function Calendar() {
       <Header hidePageDescription>
         <CreateBookingDialog
           trigger={
-            <Button type="button" aria-label="new booking">
-              New booking
+            <Button
+              type="button"
+              aria-label={t("bookings.calendar.newBooking2")}
+            >
+              {t("bookings.calendar.newBooking")}
             </Button>
           }
         />
@@ -350,7 +355,7 @@ export default function Calendar() {
               className="ml-3"
               onClick={() => setSubscribeOpen(true)}
             >
-              Subscribe
+              {t("bookings.calendar.subscribe")}
             </Button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
+import { useTranslation } from "react-i18next";
 import { handleActivationKeyPress } from "~/utils/keyboard";
 import { tw } from "~/utils/tw";
 import { XIcon } from "../icons/library";
@@ -23,6 +24,7 @@ export const Dialog = ({
   headerClassName?: string;
   wrapperClassName?: string;
 }) => {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const onCloseRef = useRef(onClose);
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
@@ -135,7 +137,7 @@ export const Dialog = ({
               onClick={onClose}
               variant="link"
               className={"mt-2 leading-none text-gray-500 md:right-6"}
-              aria-label="Close dialog"
+              aria-label={t("nav.dialog.closeDialog")}
             >
               <XIcon />
             </Button>

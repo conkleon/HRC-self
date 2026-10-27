@@ -90,6 +90,7 @@ declare global {
       BRANDING_DIR: string;
       HELP_SITE_URL: string;
       LABEL_STORE_URL: string;
+      DEFAULT_LOCALE: string;
       RATE_LIMIT_MULTIPLIER: string;
       MIN_COMPANION_VERSION: string;
       LATEST_COMPANION_VERSION: string;
@@ -424,6 +425,18 @@ export const SUPPORT_EMAIL = getEnv("SUPPORT_EMAIL", {
  * @see {@link file://./help-site.ts}
  */
 export const HELP_SITE_URL = getEnv("HELP_SITE_URL", {
+  isSecret: false,
+  isRequired: false,
+});
+
+/**
+ * UI language for users who have not picked one (e.g. `el`). Optional:
+ * unset or unsupported values fall back to English. Server side only; the
+ * resolved locale reaches the browser through the root loader.
+ *
+ * @see {@link file://../i18n/config.ts}
+ */
+export const DEFAULT_LOCALE = getEnv("DEFAULT_LOCALE", {
   isSecret: false,
   isRequired: false,
 });

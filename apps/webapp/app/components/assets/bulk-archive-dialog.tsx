@@ -12,6 +12,7 @@
  * @see {@link file://./bulk-mark-availability-dialog.tsx}
  */
 
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import {
@@ -46,6 +47,7 @@ export default function BulkArchiveDialog({
 }: {
   type: z.infer<typeof BulkArchiveSchema>["type"];
 }) {
+  const { t } = useTranslation();
   const zo = useZorm("BulkArchive", BulkArchiveSchema);
   const isArchive = type === "archive";
 
@@ -53,11 +55,15 @@ export default function BulkArchiveDialog({
     <BulkUpdateDialogContent
       ref={zo.ref}
       type={type}
-      title={isArchive ? "Archive assets" : "Reinstate assets"}
+      title={
+        isArchive
+          ? t("assets.bulkArchiveDialog.archiveAssets")
+          : t("assets.bulkArchiveDialog.reinstateAssets")
+      }
       description={
         isArchive
-          ? "Archive all selected assets. They will be hidden from your lists and can't be booked or assigned custody. Assets that are checked out, in custody, in a reserved or checked-out booking, quantity-tracked, or already archived are skipped. You can reinstate them at any time."
-          : "Reinstate all selected assets. They will be active and bookable again. Assets that aren't archived are skipped."
+          ? t("assets.bulkArchiveDialog.archiveAllSelectedAssetsThey")
+          : t("assets.bulkArchiveDialog.reinstateAllSelectedAssetsThey")
       }
       actionUrl="/api/assets/bulk-archive"
       arrayFieldId="assetIds"
@@ -101,7 +107,7 @@ export default function BulkArchiveDialog({
                 disabled={disabled}
                 onClick={handleCloseDialog}
               >
-                Cancel
+                {t("assets.bulkArchiveDialog.cancel")}
               </Button>
               <Button
                 type="submit"
@@ -109,7 +115,9 @@ export default function BulkArchiveDialog({
                 width="full"
                 disabled={disabled}
               >
-                {needsShortfallConfirm ? "Archive anyway" : "Confirm"}
+                {needsShortfallConfirm
+                  ? t("assets.bulkArchiveDialog.archiveAnyway")
+                  : t("assets.bulkArchiveDialog.confirm")}
               </Button>
             </div>
           </div>

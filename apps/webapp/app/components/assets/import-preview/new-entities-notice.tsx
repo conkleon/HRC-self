@@ -6,6 +6,7 @@
  *
  * @see {@link file://./../bulk-update/preview-display.tsx} Update-flow consumer
  */
+import { useTranslation } from "react-i18next";
 import { AlertIcon } from "../../icons/library";
 
 /** One kind of record the import creates, with the names it creates. */
@@ -23,17 +24,18 @@ export type NewEntityList = {
  * @returns The notice, or `null` when every list is empty
  */
 export function NewEntitiesNotice({ entities }: { entities: NewEntityList[] }) {
+  const { t } = useTranslation();
   const nonEmpty = entities.filter((entity) => entity.names.length > 0);
   if (nonEmpty.length === 0) return null;
 
   return (
     <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-4">
       <p className="mb-2 font-medium text-amber-800">
-        <AlertIcon className="inline-block size-4" /> New items will be created
+        <AlertIcon className="inline-block size-4" />{" "}
+        {t("assets.newEntitiesNotice.newItemsWillBeCreated")}
       </p>
       <p className="mb-2 text-sm text-amber-700">
-        The following items don't exist yet and will be created automatically.
-        Please check for typos:
+        {t("assets.newEntitiesNotice.theFollowingItemsDontExist")}
       </p>
       <div className="space-y-1 text-sm text-amber-800">
         {nonEmpty.map((entity) => (

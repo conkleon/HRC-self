@@ -28,6 +28,7 @@ import type { ReactNode } from "react";
 import { AssetStatus } from "@prisma/client";
 import type { BookingStatus, Prisma } from "@prisma/client";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link, useFetcher } from "react-router";
 import { Button } from "~/components/shared/button";
 import {
@@ -395,6 +396,7 @@ function AssetTitleAndStatus({
     { bookable: number; physicalNow: number; reserved: number }
   >;
 }) {
+  const { t } = useTranslation();
   // Workspace pref + addon entitlement — resolveDisplayCode short-circuits to
   // QR when the org has lost the barcode add-on, so this read is always safe.
   const currentOrganization = useCurrentOrganization();
@@ -541,11 +543,13 @@ function AssetTitleAndStatus({
                   <div className="flex flex-col gap-1 text-xs">
                     <div className="font-semibold text-gray-900">
                       {qtyRemaining === 0
-                        ? "All units checked in"
-                        : "Partially checked in"}
+                        ? t("bookings.bookingAssetsSidebar.allUnitsCheckedIn")
+                        : t("bookings.bookingAssetsSidebar.partiallyCheckedIn")}
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-gray-600">Booked</span>
+                      <span className="text-gray-600">
+                        {t("bookings.bookingAssetsSidebar.booked")}
+                      </span>
                       <span className="tabular-nums text-gray-900">
                         {qtyBooked}
                       </span>
@@ -557,7 +561,9 @@ function AssetTitleAndStatus({
                       <>
                         {qtyBreakdown.returned > 0 ? (
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-gray-600">Returned</span>
+                            <span className="text-gray-600">
+                              {t("bookings.bookingAssetsSidebar.returned")}
+                            </span>
                             <span className="tabular-nums text-emerald-700">
                               {qtyBreakdown.returned}
                             </span>
@@ -565,7 +571,9 @@ function AssetTitleAndStatus({
                         ) : null}
                         {qtyBreakdown.consumed > 0 ? (
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-gray-600">Consumed</span>
+                            <span className="text-gray-600">
+                              {t("bookings.bookingAssetsSidebar.consumed")}
+                            </span>
                             <span className="tabular-nums text-gray-900">
                               {qtyBreakdown.consumed}
                             </span>
@@ -573,7 +581,9 @@ function AssetTitleAndStatus({
                         ) : null}
                         {qtyBreakdown.lost > 0 ? (
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-gray-600">Lost</span>
+                            <span className="text-gray-600">
+                              {t("bookings.bookingAssetsSidebar.lost")}
+                            </span>
                             <span className="tabular-nums text-rose-700">
                               {qtyBreakdown.lost}
                             </span>
@@ -581,7 +591,9 @@ function AssetTitleAndStatus({
                         ) : null}
                         {qtyBreakdown.damaged > 0 ? (
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-gray-600">Damaged</span>
+                            <span className="text-gray-600">
+                              {t("bookings.bookingAssetsSidebar.damaged")}
+                            </span>
                             <span className="tabular-nums text-amber-700">
                               {qtyBreakdown.damaged}
                             </span>
@@ -590,14 +602,18 @@ function AssetTitleAndStatus({
                       </>
                     ) : (
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-gray-600">Checked in</span>
+                        <span className="text-gray-600">
+                          {t("bookings.bookingAssetsSidebar.checkedIn")}
+                        </span>
                         <span className="tabular-nums text-gray-900">
                           {qtyDispositioned}
                         </span>
                       </div>
                     )}
                     <div className="mt-1 flex items-center justify-between gap-3 border-t border-gray-100 pt-1">
-                      <span className="text-gray-600">Remaining</span>
+                      <span className="text-gray-600">
+                        {t("bookings.bookingAssetsSidebar.remaining")}
+                      </span>
                       <span
                         className={tw(
                           "tabular-nums",
@@ -661,6 +677,7 @@ export function BookingAssetsSidebar({
   trigger,
   availableUnitsByAsset,
 }: BookingAssetsSidebarProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedKits, setExpandedKits] = useState<Record<string, boolean>>({});
 
@@ -759,7 +776,7 @@ export function BookingAssetsSidebar({
       onClick={hasItems ? () => handleOpenChange(true) : undefined}
       className={!hasItems ? "hover:text-gray cursor-default no-underline" : ""}
     >
-      {assetCount} assets
+      {t("bookings.bookingAssetsSidebar.assets", { assetCount })}
     </Button>
   );
 
@@ -771,11 +788,16 @@ export function BookingAssetsSidebar({
         <div className="flex h-dvh w-full flex-col">
           <SheetHeader className="border-color-200 border-b px-6 py-3">
             <SheetTitle className="text-left">
-              Assets in "{booking.name}"
+              {t("bookings.bookingAssetsSidebar.assetsIn", {
+                name: booking.name,
+              })}
             </SheetTitle>
             <SheetDescription className="text-left">
-              {assetCount} {assetCount === 1 ? "asset" : "assets"} in this
-              booking
+              {assetCount}{" "}
+              {assetCount === 1
+                ? t("bookings.bookingAssetsSidebar.asset")
+                : t("bookings.bookingAssetsSidebar.assets3")}{" "}
+              {t("bookings.bookingAssetsSidebar.inThisBooking")}
             </SheetDescription>
           </SheetHeader>
 
@@ -797,7 +819,7 @@ export function BookingAssetsSidebar({
                         to={`/bookings/${booking.id}/overview/scan-assets`}
                         className="whitespace-nowrap text-[12px] font-medium text-primary-700 hover:text-primary-800 hover:underline"
                       >
-                        Scan to assign
+                        {t("bookings.bookingAssetsSidebar.scanToAssign")}
                       </Link>
                     )
                   : undefined
@@ -810,12 +832,14 @@ export function BookingAssetsSidebar({
                 aria-live="polite"
               >
                 <Spinner />
-                <span className="sr-only">Loading assets</span>
+                <span className="sr-only">
+                  {t("bookings.bookingAssetsSidebar.loadingAssets")}
+                </span>
               </div>
             ) : hasFetchError ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
                 <p className="text-gray-600">
-                  We couldn&apos;t load the assets for this booking.
+                  {t("bookings.bookingAssetsSidebar.weCouldntLoadTheAssets")}
                 </p>
                 <Button
                   type="button"
@@ -823,13 +847,15 @@ export function BookingAssetsSidebar({
                   size="sm"
                   onClick={loadSidebarAssets}
                 >
-                  Try again
+                  {t("bookings.bookingAssetsSidebar.tryAgain")}
                 </Button>
               </div>
             ) : (
               <>
                 <div className="border border-b-0 bg-white px-4 pb-3 pt-4 text-left font-normal text-gray-600 md:mx-0 md:px-6">
-                  <h5 className="text-left capitalize">Assets & kits</h5>
+                  <h5 className="text-left capitalize">
+                    {t("bookings.bookingAssetsSidebar.assetsKits")}
+                  </h5>
                   <p>
                     {/* Same helper the booking overview uses. This drawer groups
                     kits into one row exactly as the overview does, so a bare
@@ -844,11 +870,11 @@ export function BookingAssetsSidebar({
                     <thead>
                       <tr className="border-b border-gray-200 text-left ">
                         <th className="px-6 py-3 font-normal text-gray-600">
-                          Name
+                          {t("bookings.bookingAssetsSidebar.name")}
                         </th>
                         <th className="px-6 py-3"> </th>
                         <th className="px-6 py-3 font-normal text-gray-600">
-                          Category
+                          {t("bookings.bookingAssetsSidebar.category")}
                         </th>
                         <th className="px-6 py-3"> </th>
                       </tr>
@@ -885,14 +911,19 @@ export function BookingAssetsSidebar({
                                         className="text-gray-900 hover:text-gray-700"
                                         target="_blank"
                                         onlyNewTabIconOnHover={true}
-                                        aria-label="Go to kit"
+                                        aria-label={t(
+                                          "bookings.bookingAssetsSidebar.goToKit"
+                                        )}
                                       >
                                         <div className="max-w-[200px] truncate sm:max-w-[250px] md:max-w-[350px] lg:max-w-[450px]">
                                           {kit.name}
                                         </div>
                                       </Button>
                                       <p className="text-sm text-gray-600">
-                                        {item.assets.length} assets
+                                        {t(
+                                          "bookings.bookingAssetsSidebar.assets2",
+                                          { assetsCount: item.assets.length }
+                                        )}
                                       </p>
                                     </div>
                                   </div>
@@ -911,7 +942,9 @@ export function BookingAssetsSidebar({
                                       onClick={() => toggleKitExpansion(kit.id)}
                                       variant="link"
                                       className="text-center font-bold text-gray-600 hover:text-gray-900"
-                                      aria-label="Toggle kit expand"
+                                      aria-label={t(
+                                        "bookings.bookingAssetsSidebar.toggleKitExpand"
+                                      )}
                                     >
                                       <ChevronDownIcon
                                         className={tw(
@@ -948,7 +981,10 @@ export function BookingAssetsSidebar({
                                                 assetModel:
                                                   asset.assetModel ?? null,
                                               }}
-                                              alt={`Image of ${asset.title}`}
+                                              alt={t(
+                                                "bookings.bookingAssetsSidebar.imageOf",
+                                                { title: asset.title }
+                                              )}
                                               className="size-full rounded-[4px] border border-gray-300 object-cover"
                                               withPreview
                                             />
@@ -1014,7 +1050,10 @@ export function BookingAssetsSidebar({
                                           asset.mainImageExpiration,
                                         assetModel: asset.assetModel ?? null,
                                       }}
-                                      alt={`Image of ${asset.title}`}
+                                      alt={t(
+                                        "bookings.bookingAssetsSidebar.imageOf",
+                                        { title: asset.title }
+                                      )}
                                       className="size-full rounded-[4px] border object-cover"
                                       withPreview
                                     />

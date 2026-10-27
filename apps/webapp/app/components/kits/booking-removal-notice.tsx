@@ -25,6 +25,7 @@
  */
 
 import { PackageCheckIcon, TriangleAlertIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { tw } from "~/utils/tw";
 
 /** Minimal booking shape the notice needs — id for dedupe, name for the copy. */
@@ -113,7 +114,7 @@ function formatBookingNames(bookings: BookingForNotice[]): string {
  * @returns The reserved-group block
  */
 function ReservedGroup({ bookings, assetCount }: BookingRemovalNoticeGroup) {
-  const bookingPlural = bookings.length === 1 ? "" : "s";
+  const { t } = useTranslation();
 
   return (
     <span className="block rounded border border-warning-200 bg-warning-50 p-2 text-xs text-warning-800">
@@ -123,14 +124,17 @@ function ReservedGroup({ bookings, assetCount }: BookingRemovalNoticeGroup) {
         aria-hidden="true"
         className="mr-1 inline size-3.5 -translate-y-px"
       />
-      <strong>Reserved booking notice:</strong>{" "}
-      {assetCount <= 1
-        ? "Removing this asset from the kit also removes it from"
-        : `Removing these ${assetCount} assets from the kit also removes them from`}{" "}
-      {bookings.length} reserved booking{bookingPlural}:{" "}
-      {formatBookingNames(bookings)}. Nothing has been checked out yet, so{" "}
-      {bookings.length === 1 ? "that booking follows" : "those bookings follow"}{" "}
-      the kit's contents.
+      <strong>{t("kits.bookingRemovalNotice.reservedBookingNotice")}</strong>{" "}
+      {t(
+        assetCount <= 1
+          ? "kits.bookingRemovalNotice.reservedOneAsset"
+          : "kits.bookingRemovalNotice.reservedManyAssets",
+        {
+          count: bookings.length,
+          assetCount,
+          names: formatBookingNames(bookings),
+        }
+      )}
     </span>
   );
 }
@@ -147,7 +151,7 @@ function ReservedGroup({ bookings, assetCount }: BookingRemovalNoticeGroup) {
  * @returns The checked-out-group block
  */
 function CheckedOutGroup({ bookings, assetCount }: BookingRemovalNoticeGroup) {
-  const bookingPlural = bookings.length === 1 ? "" : "s";
+  const { t } = useTranslation();
   const isSingleAsset = assetCount <= 1;
 
   return (
@@ -156,12 +160,17 @@ function CheckedOutGroup({ bookings, assetCount }: BookingRemovalNoticeGroup) {
         aria-hidden="true"
         className="mr-1 inline size-3.5 -translate-y-px"
       />
-      <strong>In-progress booking notice:</strong>{" "}
-      {isSingleAsset ? "This asset is on" : `These ${assetCount} assets are on`}{" "}
-      {bookings.length} booking{bookingPlural} already in progress:{" "}
-      {formatBookingNames(bookings)}. {isSingleAsset ? "It stays" : "They stay"}{" "}
-      on {bookings.length === 1 ? "that booking" : "those bookings"}, marked as
-      removed from the kit, so the record of what was booked is preserved.
+      <strong>{t("kits.bookingRemovalNotice.inProgressBookingNotice")}</strong>{" "}
+      {t(
+        isSingleAsset
+          ? "kits.bookingRemovalNotice.inProgressOneAsset"
+          : "kits.bookingRemovalNotice.inProgressManyAssets",
+        {
+          count: bookings.length,
+          assetCount,
+          names: formatBookingNames(bookings),
+        }
+      )}
     </span>
   );
 }

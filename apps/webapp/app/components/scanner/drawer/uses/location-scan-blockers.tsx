@@ -17,6 +17,7 @@
  * @see {@link file://./../blockers-factory.tsx} renders what these return
  */
 
+import { Trans } from "react-i18next";
 import type { ScanListItems } from "~/atoms/qr-scanner";
 import type { BlockerConfig } from "../blockers-factory";
 import {
@@ -84,10 +85,11 @@ export function buildAddToLocationBlockers({
       condition: assetsAlreadyAddedIds.length > 0,
       count: assetsAlreadyAddedIds.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already added to this location.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.locationScanBlockers.assetsAlreadyAdded.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeAssetsFromList(assetsAlreadyAddedIds),
     },
@@ -96,10 +98,11 @@ export function buildAddToLocationBlockers({
       condition: qrIdsOfAlreadyAddedKits.length > 0,
       count: qrIdsOfAlreadyAddedKits.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already added to this location.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.locationScanBlockers.kitsAlreadyAdded.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(qrIdsOfAlreadyAddedKits),
     },

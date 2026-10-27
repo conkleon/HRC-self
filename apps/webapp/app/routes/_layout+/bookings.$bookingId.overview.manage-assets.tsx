@@ -21,6 +21,7 @@ import type {
 } from "@prisma/client";
 import { AssetStatus, AssetType, BookingStatus } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LinksFunction,
@@ -1324,6 +1325,7 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
  * specifying how many units to reserve for QUANTITY_TRACKED assets.
  */
 export default function AddAssetsToNewBooking() {
+  const { t } = useTranslation();
   const {
     booking,
     bookingKitIds,
@@ -1607,7 +1609,7 @@ export default function AddAssetsToNewBooking() {
                 : ""
             }`}
           >
-            Assets{" "}
+            {t("bookings.bookingsBookingidOverviewManageAssets.assets")}{" "}
             {selectedBulkItemsCount > 0 ? (
               <GrayBadge className="size-[20px] border border-primary-200 bg-primary-50 text-[10px] leading-[10px] text-primary-700">
                 {hasSelectedAllItems ? totalItems : selectedBulkItemsCount}
@@ -1623,7 +1625,7 @@ export default function AddAssetsToNewBooking() {
                 : ""
             }`}
           >
-            Kits
+            {t("bookings.bookingsBookingidOverviewManageAssets.kits")}
             {bookingKitIds.length > 0 ? (
               <GrayBadge className="size-[20px] border border-primary-200 bg-primary-50 text-[10px] leading-[10px] text-primary-700">
                 {bookingKitIds.length}
@@ -1640,7 +1642,7 @@ export default function AddAssetsToNewBooking() {
                   : ""
               }`}
             >
-              Models
+              {t("bookings.bookingsBookingidOverviewManageAssets.models")}
               {totalModelRequestUnits > 0 ? (
                 <GrayBadge className="size-[20px] border border-primary-200 bg-primary-50 text-[10px] leading-[10px] text-primary-700">
                   {totalModelRequestUnits}
@@ -1675,36 +1677,49 @@ export default function AddAssetsToNewBooking() {
             <DynamicDropdown
               trigger={
                 <div className="flex h-6 cursor-pointer items-center gap-2">
-                  Categories{" "}
+                  {t(
+                    "bookings.bookingsBookingidOverviewManageAssets.categories"
+                  )}{" "}
                   <ChevronRight className="hidden rotate-90 md:inline" />
                 </div>
               }
               model={{ name: "category", queryKey: "name" }}
-              label="Filter by category"
-              placeholder="Search categories"
+              label={t(
+                "bookings.bookingsBookingidOverviewManageAssets.filterByCategory"
+              )}
+              placeholder={t(
+                "bookings.bookingsBookingidOverviewManageAssets.searchCategories"
+              )}
               initialDataKey="categories"
               countKey="totalCategories"
             />
             <DynamicDropdown
               trigger={
                 <div className="flex h-6 cursor-pointer items-center gap-2">
-                  Tags <ChevronRight className="hidden rotate-90 md:inline" />
+                  {t("bookings.bookingsBookingidOverviewManageAssets.tags")}{" "}
+                  <ChevronRight className="hidden rotate-90 md:inline" />
                 </div>
               }
               model={{ name: "tag", queryKey: "name" }}
-              label="Filter by tag"
+              label={t(
+                "bookings.bookingsBookingidOverviewManageAssets.filterByTag"
+              )}
               initialDataKey="tags"
               countKey="totalTags"
             />
             <DynamicDropdown
               trigger={
                 <div className="flex h-6 cursor-pointer items-center gap-2">
-                  Locations{" "}
+                  {t(
+                    "bookings.bookingsBookingidOverviewManageAssets.locations"
+                  )}{" "}
                   <ChevronRight className="hidden rotate-90 md:inline" />
                 </div>
               }
               model={{ name: "location", queryKey: "name" }}
-              label="Filter by location"
+              label={t(
+                "bookings.bookingsBookingidOverviewManageAssets.filterByLocation"
+              )}
               initialDataKey="locations"
               countKey="totalLocations"
               renderItem={({ metadata }) => (
@@ -1773,9 +1788,15 @@ export default function AddAssetsToNewBooking() {
           disableSelectAllItems
           headerChildren={
             <>
-              <Th>Category</Th>
-              <Th>Tags</Th>
-              <Th>Location</Th>
+              <Th>
+                {t("bookings.bookingsBookingidOverviewManageAssets.category")}
+              </Th>
+              <Th>
+                {t("bookings.bookingsBookingidOverviewManageAssets.tags")}
+              </Th>
+              <Th>
+                {t("bookings.bookingsBookingidOverviewManageAssets.location")}
+              </Th>
             </>
           }
         />
@@ -1817,8 +1838,10 @@ export default function AddAssetsToNewBooking() {
         {activeTab === "assets" ? (
           <div className="min-w-0 pr-3">
             <p>
-              {hasSelectedAllItems ? totalItems : selectedBulkItemsCount} assets
-              selected
+              {hasSelectedAllItems ? totalItems : selectedBulkItemsCount}{" "}
+              {t(
+                "bookings.bookingsBookingidOverviewManageAssets.assetsSelected"
+              )}
             </p>
             {/* `role="alert"` is what makes a submit-time rejection audible —
                 the message appears after the user has already pressed Confirm,
@@ -1833,7 +1856,7 @@ export default function AddAssetsToNewBooking() {
 
         <div className="flex gap-3">
           <Button variant="secondary" to={".."}>
-            Close
+            {t("bookings.bookingsBookingidOverviewManageAssets.close")}
           </Button>
           <Form method="post" ref={formRef}>
             {/* We create inputs for both the removed and selected assets, so we can compare and easily add/remove */}
@@ -1871,7 +1894,7 @@ export default function AddAssetsToNewBooking() {
                 value="addAssets"
                 disabled={isSearching}
               >
-                Confirm
+                {t("bookings.bookingsBookingidOverviewManageAssets.confirm")}
               </Button>
             ) : null}
           </Form>
@@ -1888,8 +1911,9 @@ export default function AddAssetsToNewBooking() {
           void submit(formRef.current);
         }}
       >
-        You have added some assets to the booking but haven't saved it yet. Do
-        you want to confirm adding those assets?
+        {t(
+          "bookings.bookingsBookingidOverviewManageAssets.youHaveAddedSomeAssets"
+        )}
       </UnsavedChangesAlert>
     </Tabs>
   );
@@ -1913,6 +1937,7 @@ const RowComponent = ({
     onQuantityChange?: (assetId: string, quantity: number) => void;
   };
 }) => {
+  const { t } = useTranslation();
   const selectedBulkItems = useAtomValue(selectedBulkItemsAtom);
   const currentOrganization = useCurrentOrganization();
   const checked = selectedBulkItems.some((asset) => asset.id === item.id);
@@ -1938,7 +1963,10 @@ const RowComponent = ({
                   mainImageExpiration: item.mainImageExpiration,
                   assetModel: item.assetModel ?? null,
                 }}
-                alt={`Image of ${item.title}`}
+                alt={t(
+                  "bookings.bookingsBookingidOverviewManageAssets.imageOf",
+                  { title: item.title }
+                )}
                 className="size-full rounded-[4px] border object-cover"
               />
             </div>
@@ -2010,7 +2038,7 @@ const RowComponent = ({
                 htmlFor={`qty-${item.id}`}
                 className="text-xs text-gray-500"
               >
-                Qty:
+                {t("bookings.bookingsBookingidOverviewManageAssets.qty")}
               </label>
               <input
                 id={`qty-${item.id}`}
@@ -2029,7 +2057,10 @@ const RowComponent = ({
                   extraProps?.onQuantityChange?.(item.id, val);
                 }}
                 className="h-8 w-16 rounded-md border border-gray-300 px-2 text-center text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                aria-label={`Quantity for ${item.title}`}
+                aria-label={t(
+                  "bookings.bookingsBookingidOverviewManageAssets.quantityFor",
+                  { title: item.title }
+                )}
               />
               {(item.availableQuantity ?? item.quantity) != null ? (
                 <span className="text-xs text-gray-400">

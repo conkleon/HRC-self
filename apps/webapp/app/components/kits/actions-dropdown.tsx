@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Prisma } from "@prisma/client";
 import { kitWithoutActiveAssetsReason } from "@shelf/labels";
 import { MapPinIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useHydrated } from "remix-utils/use-hydrated";
 import { StartAuditFromContextDialog } from "~/components/audit/start-audit-from-context-dialog";
@@ -35,13 +36,15 @@ export default function ActionsDropdown({
 }: {
   fullWidth?: boolean;
 }) {
+  const { t } = useTranslation();
   const isHydrated = useHydrated();
 
   if (!isHydrated) {
     return (
       <Button variant="secondary" to="#" className={fullWidth && "w-full"}>
         <span className="flex items-center gap-2">
-          Actions <ChevronRight className="chev rotate-90" />
+          {t("kits.actionsDropdown.actions")}{" "}
+          <ChevronRight className="chev rotate-90" />
         </span>
       </Button>
     );
@@ -55,6 +58,7 @@ export default function ActionsDropdown({
 }
 
 function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
+  const { t } = useTranslation();
   const { kit, archivedMemberCount } = useLoaderData<typeof loader>();
   const kitCanBeReleased = kit.custody;
   const kitIsCheckedOut = kit.status === "CHECKED_OUT";
@@ -133,10 +137,11 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
           <Button
             type="button"
             variant="secondary"
-            aria-label="Actions Trigger"
+            aria-label={t("kits.actionsDropdown.actionsTrigger")}
           >
             <span className="flex items-center gap-2">
-              Actions <ChevronRight className="chev" />
+              {t("kits.actionsDropdown.actions")}{" "}
+              <ChevronRight className="chev" />
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -148,10 +153,11 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
           className="actions-dropdown md:hidden"
           width="full"
           onClick={() => setOpen(true)}
-          aria-label="Actions Trigger"
+          aria-label={t("kits.actionsDropdown.actionsTrigger")}
         >
           <span className="flex items-center gap-2">
-            Actions <ChevronRight className="chev" />
+            {t("kits.actionsDropdown.actions")}{" "}
+            <ChevronRight className="chev" />
           </span>
         </Button>
 
@@ -181,10 +187,11 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
                     width="full"
                     onClick={() => setOpen(false)}
                     disabled={disableReleaseForSelfService}
-                    aria-label="Release Custody"
+                    aria-label={t("kits.actionsDropdown.releaseCustody2")}
                   >
                     <span className="flex items-center gap-1">
-                      <Icon icon="release-custody" /> Release custody
+                      <Icon icon="release-custody" />{" "}
+                      {t("kits.actionsDropdown.releaseCustody")}
                     </span>
                   </Button>
                 ) : (
@@ -196,11 +203,14 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
                     width="full"
                     onClick={() => setOpen(false)}
                     disabled={assignCustodyDisabled}
-                    aria-label="Assign/Take Custody"
+                    aria-label={t("kits.actionsDropdown.assignTakeCustody")}
                   >
                     <span className="flex items-center gap-2">
                       <Icon icon="assign-custody" />{" "}
-                      {assignsSelfOnly ? "Take" : "Assign"} custody
+                      {assignsSelfOnly
+                        ? t("kits.actionsDropdown.take")
+                        : t("kits.actionsDropdown.assign")}{" "}
+                      {t("kits.actionsDropdown.custody")}
                     </span>
                   </Button>
                 )}
@@ -227,7 +237,8 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
                   }}
                 >
                   <span className="flex items-center gap-2">
-                    <Icon icon="start-audit" /> Create audit
+                    <Icon icon="start-audit" />{" "}
+                    {t("kits.actionsDropdown.createAudit")}
                   </span>
                 </Button>
               </DropdownMenuItem>
@@ -250,7 +261,8 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
                   onClick={() => setOpen(false)}
                 >
                   <span className="flex items-center gap-2">
-                    <MapPinIcon className="size-4" /> Update location
+                    <MapPinIcon className="size-4" />{" "}
+                    {t("kits.actionsDropdown.updateLocation")}
                   </span>
                 </Button>
               </DropdownMenuItem>
@@ -269,7 +281,7 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
                 >
                   <span className="flex items-center gap-2">
                     <Icon icon="barcode" />
-                    Relink QR Code
+                    {t("kits.actionsDropdown.relinkQrCode")}
                   </span>
                 </Button>
               </DropdownMenuItem>
@@ -283,7 +295,7 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
                   width="full"
                 >
                   <span className="flex items-center gap-2">
-                    <Icon icon="pen" /> Edit
+                    <Icon icon="pen" /> {t("kits.actionsDropdown.edit")}
                   </span>
                 </Button>
               </DropdownMenuItem>
@@ -302,7 +314,7 @@ function ConditionalActionsDropdown({ fullWidth }: { fullWidth?: boolean }) {
             <When truthy={!assignsSelfOnly}>
               {kitIsCheckedOut || someAssetIsNotAvailable ? (
                 <div className=" border-t p-2 text-left text-xs">
-                  Some actions are disabled due to asset(s) not being Available.
+                  {t("kits.actionsDropdown.someActionsAreDisabledDue")}
                 </div>
               ) : null}
             </When>

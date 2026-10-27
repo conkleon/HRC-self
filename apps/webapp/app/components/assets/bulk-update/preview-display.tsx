@@ -8,6 +8,7 @@
  * @see {@link file://./../../../utils/import-update.server.ts} Server-side preview logic
  */
 import type React from "react";
+import { Trans, useTranslation } from "react-i18next";
 import type useFetcherWithReset from "~/hooks/use-fetcher-with-reset";
 import type { action } from "~/routes/_layout+/assets.import-update";
 import type { UpdatePreview } from "~/utils/import-update.server";
@@ -51,6 +52,7 @@ export function PreviewDisplay({
   isReanalyzing: boolean;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const totalChanges = preview.totalFieldChanges;
   /**
    * Assets that have at least one change the apply layer will actually write.
@@ -116,17 +118,23 @@ export function PreviewDisplay({
     <div className="mt-4 w-full">
       {/* Summary section — always first */}
       <div className="mb-4 rounded-md border bg-gray-50 p-4">
-        <h4 className="mb-3 text-base font-semibold">Analysis Summary</h4>
+        <h4 className="mb-3 text-base font-semibold">
+          {t("assets.previewDisplay.analysisSummary")}
+        </h4>
         <div className="flex flex-wrap gap-3">
-          <SummaryPill count={totalAssets} label="to update" color="blue" />
+          <SummaryPill
+            count={totalAssets}
+            label={t("assets.previewDisplay.toUpdate")}
+            color="blue"
+          />
           <SummaryPill
             count={preview.skippedAssets.length}
-            label="unchanged"
+            label={t("assets.previewDisplay.unchanged")}
             color="gray"
           />
           <SummaryPill
             count={preview.failedRows.length}
-            label="failed"
+            label={t("assets.previewDisplay.failed")}
             color="red"
           />
         </div>
@@ -157,9 +165,9 @@ export function PreviewDisplay({
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-red-50">
                 <Tr>
-                  <Th>Asset</Th>
-                  <Th>Field</Th>
-                  <Th>Problem</Th>
+                  <Th>{t("assets.previewDisplay.asset")}</Th>
+                  <Th>{t("assets.previewDisplay.field")}</Th>
+                  <Th>{t("assets.previewDisplay.problem")}</Th>
                 </Tr>
               </thead>
               <tbody>
@@ -177,9 +185,7 @@ export function PreviewDisplay({
             </Table>
           </div>
           <p className="mt-2 text-sm text-red-700">
-            Fix these values in your CSV and re-upload, or apply anyway — rows
-            with invalid values will be partially updated (valid fields will
-            still be saved, invalid ones will be skipped).
+            {t("assets.previewDisplay.fixTheseValuesInYour")}
           </p>
         </div>
       )}
@@ -193,11 +199,9 @@ export function PreviewDisplay({
       {preview.unrecognizedColumns.length > 0 && (
         <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-4">
           <p className="mb-1 font-medium text-blue-800">
-            We skipped{" "}
-            {preview.unrecognizedColumns.length === 1
-              ? "a column"
-              : `${preview.unrecognizedColumns.length} columns`}{" "}
-            that don't match a field in your workspace
+            {t("assets.previewDisplay.skippedColumns", {
+              count: preview.unrecognizedColumns.length,
+            })}
           </p>
           <div className="mb-2 flex flex-wrap gap-1.5">
             {preview.unrecognizedColumns.map((col) => (
@@ -214,12 +218,18 @@ export function PreviewDisplay({
             ))}
           </div>
           <p className="text-sm text-blue-700">
-            Double-check these for typos against your column headers. If they're
-            meant to hold custom data, create matching{" "}
-            <Button variant="link" to="/settings/custom-fields" target="_blank">
-              Custom Fields
-            </Button>{" "}
-            first, then come back and re-analyze.
+            <Trans
+              t={t}
+              i18nKey="assets.previewDisplay.doubleCheckTheseForTypos"
+              components={[
+                <Button
+                  key="slot0"
+                  variant="link"
+                  to="/settings/custom-fields"
+                  target="_blank"
+                />,
+              ]}
+            />
           </p>
           <Button
             type="button"
@@ -228,7 +238,9 @@ export function PreviewDisplay({
             onClick={onReanalyze}
             disabled={isReanalyzing}
           >
-            {isReanalyzing ? "Re-analyzing..." : "Re-analyze file"}
+            {isReanalyzing
+              ? "Re-analyzing..."
+              : t("assets.previewDisplay.reAnalyzeFile")}
           </Button>
         </div>
       )}
@@ -249,13 +261,8 @@ export function PreviewDisplay({
             but doesn't update through bulk import (click to see which)
           </summary>
           <p className="mt-1 text-xs text-gray-500">
-            {preview.ignoredColumns.join(", ")} — Shelf recognizes each of
-            these, but doesn't write to them here: some (e.g. Status, Kit,
-            Custody) have their own dedicated workflows elsewhere in Shelf, some
-            (e.g. Tracking method, QR ID, barcodes, or long-text custom fields)
-            aren't supported for bulk update yet, and a duplicate identifier
-            column is simply unused. Any edits you made to them in this file are
-            kept in the file but won't be applied.
+            {preview.ignoredColumns.join(", ")}{" "}
+            {t("assets.previewDisplay.shelfRecognizesEachOfThese")}
           </p>
         </details>
       )}
@@ -273,15 +280,17 @@ export function PreviewDisplay({
       {preview.failedRows.length > 0 && (
         <div className="mb-4">
           <h4 className="mb-2 text-red-600">
-            Failed rows ({preview.failedRows.length})
+            {t("assets.previewDisplay.failedRows", {
+              failedRowsCount: preview.failedRows.length,
+            })}
           </h4>
           <div className="max-h-[200px] overflow-y-auto rounded-md border border-red-200">
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-red-50">
                 <Tr>
-                  <Th>Row</Th>
+                  <Th>{t("assets.previewDisplay.row")}</Th>
                   <Th>ID</Th>
-                  <Th>Reason</Th>
+                  <Th>{t("assets.previewDisplay.reason")}</Th>
                 </Tr>
               </thead>
               <tbody>
@@ -290,7 +299,9 @@ export function PreviewDisplay({
                   // per row in the uploaded file.
                   <Tr key={row.rowNumber}>
                     <Td>{row.rowNumber}</Td>
-                    <Td className="font-mono text-xs">{row.id || "(empty)"}</Td>
+                    <Td className="font-mono text-xs">
+                      {row.id || t("assets.previewDisplay.empty")}
+                    </Td>
                     <Td className="text-red-600">{row.reason}</Td>
                   </Tr>
                 ))}
@@ -324,8 +335,8 @@ export function PreviewDisplay({
             <Table className="[&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5">
               <thead className="sticky top-0 bg-gray-50">
                 <Tr>
-                  <Th>Asset</Th>
-                  <Th>Reason</Th>
+                  <Th>{t("assets.previewDisplay.asset")}</Th>
+                  <Th>{t("assets.previewDisplay.reason")}</Th>
                 </Tr>
               </thead>
               <tbody>
@@ -349,31 +360,47 @@ export function PreviewDisplay({
       <div className="mt-2 flex items-center gap-3">
         {totalAssets > 0 && (
           <ConfirmImportDialog
-            triggerLabel={`Apply ${totalChanges} change${
-              totalChanges !== 1 ? "s" : ""
-            } to ${totalAssets} asset${totalAssets !== 1 ? "s" : ""}`}
-            title="Confirm bulk update"
+            triggerLabel={t("assets.previewDisplay.applyChangesToAssets", {
+              changes: t("assets.previewDisplay.changes", {
+                count: totalChanges,
+              }),
+              assets: t("assets.previewDisplay.assetCount", {
+                count: totalAssets,
+              }),
+            })}
+            title={t("assets.previewDisplay.confirmBulkUpdate")}
             description={
               <>
-                You are about to apply{" "}
-                <strong>
-                  {totalChanges} change
-                  {totalChanges !== 1 ? "s" : ""}
-                </strong>{" "}
-                across <strong>{totalAssets}</strong> asset
-                {totalAssets !== 1 ? "s" : ""}. This action cannot be undone.
-                Empty cells will clear existing values where applicable.
+                <Trans
+                  t={t}
+                  i18nKey="assets.previewDisplay.aboutToApply"
+                  values={{
+                    changes: t("assets.previewDisplay.changes", {
+                      count: totalChanges,
+                    }),
+                    assets: t("assets.previewDisplay.assetCount", {
+                      count: totalAssets,
+                    }),
+                  }}
+                  components={{ bold: <strong /> }}
+                />
                 {hasNewEntities && (
                   <span className="mt-2 block text-amber-600">
-                    This will also create {newEntitiesSummary}.
+                    {t("assets.previewDisplay.thisWillAlsoCreate", {
+                      newEntitiesSummary,
+                    })}
                   </span>
                 )}
               </>
             }
             confirmLabel={
               isApplyLoading
-                ? "Applying..."
-                : `Apply ${totalChanges} change${totalChanges !== 1 ? "s" : ""}`
+                ? t("assets.previewDisplay.applying")
+                : t("assets.previewDisplay.applyChanges", {
+                    changes: t("assets.previewDisplay.changes", {
+                      count: totalChanges,
+                    }),
+                  })
             }
             isSubmitting={isApplyLoading}
             onConfirm={submitApply}
@@ -389,15 +416,15 @@ export function PreviewDisplay({
           />
         )}
         <Button type="button" variant="secondary" onClick={onReset}>
-          Start over
+          {t("assets.previewDisplay.startOver")}
         </Button>
       </div>
 
       {totalAssets === 0 && (
         <p className="mt-4 text-gray-500">
           {preview.assetsToUpdate.length > 0
-            ? "Nothing to apply — every proposed change needs fixing first. Correct the flagged values in your CSV and re-upload."
-            : "No changes detected. All assets are already up to date, or all rows failed validation."}
+            ? t("assets.previewDisplay.nothingToApplyEveryProposed")
+            : t("assets.previewDisplay.noChangesDetectedAllAssets")}
         </p>
       )}
     </div>

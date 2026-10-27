@@ -17,6 +17,8 @@
 
 import { KitStatus } from "@prisma/client";
 import { ASSET_UNAVAILABLE_LABEL, KIT_STATUS_LABELS } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
+import { useLabel } from "~/i18n/use-label";
 import { BADGE_COLORS, type BadgeColorScheme } from "~/utils/badge-colors";
 import type { ExtendedKitStatus } from "~/utils/booking-assets";
 import { Badge } from "../shared/badge";
@@ -80,13 +82,14 @@ export function KitStatusBadge({
   status: ExtendedKitStatus;
   availableToBook: boolean;
 }) {
-  const title =
-    "This kit is not available for bookings because some of its assets are marked as unavailable";
+  const { t } = useTranslation();
+  const translate = useLabel();
+  const title = t("kits.kitStatusBadge.unavailableTitle");
   if (!availableToBook && status === KitStatus.AVAILABLE) {
     return (
       <div className="flex items-center gap-[6px]" title={title}>
         <Badge color={BADGE_COLORS.gray.bg} textColor={BADGE_COLORS.gray.text}>
-          {ASSET_UNAVAILABLE_LABEL}
+          {translate(ASSET_UNAVAILABLE_LABEL)}
         </Badge>
       </div>
     );
@@ -96,7 +99,7 @@ export function KitStatusBadge({
   return (
     <div className="flex items-center gap-[6px]">
       <Badge color={colors.bg} textColor={colors.text}>
-        {userFriendlyKitStatus(status)}
+        {translate(userFriendlyKitStatus(status))}
       </Badge>
       {!availableToBook && <UnavailableBadge title={title} />}
     </div>

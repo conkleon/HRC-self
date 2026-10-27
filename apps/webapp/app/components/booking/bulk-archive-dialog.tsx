@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
@@ -14,6 +15,7 @@ export const BulkArchiveBookingsSchema = z.object({
 });
 
 export default function BulkArchiveDialog() {
+  const { t } = useTranslation();
   const { totalItems } = useLoaderData<BookingsIndexLoaderData>();
 
   const bookingsSelected = useAtomValue(selectedBulkItemsAtom);
@@ -29,8 +31,11 @@ export default function BulkArchiveDialog() {
       type="archive"
       arrayFieldId="bookingIds"
       actionUrl="/api/bookings/bulk-actions"
-      title={`Archive (${totalSelected}) bookings`}
-      description={`Archive these (${totalSelected}) bookings? Completed bookings and past-due reserved bookings will be moved to your archive.`}
+      title={t("bookings.bulkArchiveDialog.archiveBookings", { totalSelected })}
+      description={t(
+        "bookings.bulkArchiveDialog.archiveTheseBookingsCompletedBookings",
+        { totalSelected }
+      )}
     >
       {({ disabled, fetcherError, handleCloseDialog }) => (
         <>
@@ -49,7 +54,7 @@ export default function BulkArchiveDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("bookings.bulkArchiveDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -58,7 +63,7 @@ export default function BulkArchiveDialog() {
               disabled={disabled}
               className="border-error-600 bg-error-600 hover:border-error-800 hover:bg-error-800"
             >
-              Confirm
+              {t("bookings.bulkArchiveDialog.confirm")}
             </Button>
           </div>
         </>

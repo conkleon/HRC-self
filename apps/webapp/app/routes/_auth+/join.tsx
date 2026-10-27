@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   LoaderFunctionArgs,
   ActionFunctionArgs,
@@ -21,6 +22,7 @@ import { Button } from "~/components/shared/button";
 import { config } from "~/config/shelf.config";
 import { useSearchParams } from "~/hooks/search-params";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
+import { getServerT } from "~/i18n/i18n.server";
 import { ContinueWithEmailForm } from "~/modules/auth/components/continue-with-email-form";
 import { signUpWithEmailPass } from "~/modules/auth/service.server";
 import { getAppName } from "~/modules/branding/instance-branding";
@@ -56,8 +58,11 @@ import { validateNonSSOSignup } from "~/utils/sso.server";
 import { passwordSchema } from "~/utils/zod";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const title = "Create an account";
-  const subHeading = `Start your journey with ${getAppName()}`;
+  const t = await getServerT(context);
+  const title = t("auth.pages.join.title");
+  const subHeading = t("auth.pages.join.subHeading", {
+    appName: getAppName(),
+  });
   const { disableSignup } = config;
 
   try {
@@ -183,6 +188,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function Join() {
+  const { t } = useTranslation();
   const { signupIntent } = useLoaderData<typeof loader>();
   const zo = useZorm("NewQuestionWizardScreen", JoinFormSchema);
   const [searchParams] = useSearchParams();
@@ -215,7 +221,7 @@ export default function Join() {
             <Input
               ref={emailInputRef}
               data-test-id="email"
-              label="Email address"
+              label={t("auth.join.emailAddress")}
               placeholder="zaans@huisje.com"
               required
               name={zo.fields.email()}
@@ -228,7 +234,7 @@ export default function Join() {
           </div>
 
           <PasswordInput
-            label="Password"
+            label={t("auth.join.password")}
             placeholder="**********"
             required
             data-test-id="password"
@@ -242,7 +248,7 @@ export default function Join() {
             }
           />
           <PasswordInput
-            label="Confirm Password"
+            label={t("auth.join.confirmPassword")}
             placeholder="**********"
             required
             data-test-id="confirmPassword"
@@ -269,7 +275,7 @@ export default function Join() {
             disabled={disabled}
             width="full"
           >
-            Get Started
+            {t("auth.join.getStarted")}
           </Button>
         </Form>
         <div className="mt-6">
@@ -279,7 +285,7 @@ export default function Join() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="bg-white px-2 text-gray-500">
-                {"Or use a One Time Password"}
+                {t("auth.join.orUseAOneTime")}
               </span>
             </div>
           </div>
@@ -289,7 +295,7 @@ export default function Join() {
         </div>
         <div className="flex items-center justify-center pt-5">
           <div className="text-center text-sm text-gray-500">
-            {"Already have an account? "}
+            {t("auth.join.alreadyHaveAnAccount")}{" "}
             <Button
               variant="link"
               to={{
@@ -297,7 +303,7 @@ export default function Join() {
                 search: searchParams.toString(),
               }}
             >
-              Log in
+              {t("auth.join.logIn")}
             </Button>
           </div>
         </div>

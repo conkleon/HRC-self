@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import { selectedBulkItemsAtom } from "~/atoms/list";
@@ -20,6 +21,7 @@ export const BulkReleaseCustodySchema = z.object({
 });
 
 export default function BulkReleaseCustodyDialog() {
+  const { t } = useTranslation();
   const zo = useZorm("BulkReleaseCustody", BulkReleaseCustodySchema);
 
   const selectedItems = useAtomValue(selectedBulkItemsAtom);
@@ -31,8 +33,8 @@ export default function BulkReleaseCustodyDialog() {
     <BulkUpdateDialogContent
       ref={zo.ref}
       type="release-custody"
-      title="Release custody of assets"
-      description="Are you sure you want to release custody of all selected assets?"
+      title={t("assets.bulkReleaseCustodyDialog.releaseCustodyOfAssets")}
+      description={t("assets.bulkReleaseCustodyDialog.areYouSureYouWant")}
       actionUrl="/api/assets/bulk-release-custody"
       arrayFieldId="assetIds"
     >
@@ -42,9 +44,10 @@ export default function BulkReleaseCustodyDialog() {
             <div className="mb-4">
               <WarningBox>
                 <span>
-                  {quantityTrackedCount} quantity-tracked asset(s) in your
-                  selection will be skipped. Quantity-tracked assets must have
-                  custody released individually.
+                  {t(
+                    "assets.bulkReleaseCustodyDialog.quantityTrackedAssetSIn",
+                    { quantityTrackedCount }
+                  )}
                 </span>
               </WarningBox>
             </div>
@@ -61,7 +64,7 @@ export default function BulkReleaseCustodyDialog() {
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkReleaseCustodyDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -69,7 +72,7 @@ export default function BulkReleaseCustodyDialog() {
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkReleaseCustodyDialog.confirm")}
             </Button>
           </div>
         </div>

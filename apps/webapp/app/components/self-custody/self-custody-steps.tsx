@@ -10,6 +10,7 @@
  * @see {@link file://./../../routes/self-service+/$token.tsx}
  */
 import { useId, useReducer, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Form, useFetcher } from "react-router";
 
 import Input from "~/components/forms/input";
@@ -32,17 +33,24 @@ type ErrorProps = { error?: string | null };
 
 /** Title and location of the scanned item, and the size of a kit. */
 export function ItemCard({ item }: { item: SelfCustodyItem }) {
+  const { t } = useTranslation();
   const isKit = item.itemCount != null;
   return (
     <div className="mb-6 rounded-md border border-gray-200 bg-white p-4 text-left">
       <p className="text-lg font-semibold text-gray-900">{item.title}</p>
       {isKit ? (
         <p className="text-sm text-gray-600">
-          Kit of {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
+          {t("custody.selfCustodySteps.kitOfItems", {
+            count: item.itemCount,
+          })}
         </p>
       ) : null}
       {item.locationName ? (
-        <p className="text-sm text-gray-600">Location: {item.locationName}</p>
+        <p className="text-sm text-gray-600">
+          {t("custody.selfCustodySteps.location", {
+            locationName: item.locationName,
+          })}
+        </p>
       ) : null}
     </div>
   );
@@ -64,12 +72,13 @@ export function FormError({ error }: ErrorProps) {
  * @param props.error - Message from a failed attempt
  */
 export function PinForm({ error }: ErrorProps) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   return (
     <Form method="post" className="text-left">
       <input type="hidden" name="intent" value="unlock" />
       <Input
-        label="Workspace PIN"
+        label={t("custody.selfCustodySteps.workspacePin")}
         name="pin"
         type="password"
         inputMode="numeric"
@@ -80,11 +89,10 @@ export function PinForm({ error }: ErrorProps) {
         className="mb-4"
       />
       <p className="mb-4 text-sm text-gray-600">
-        Ask your team leader for the PIN. You only need to enter it once every
-        12 hours on this phone.
+        {t("custody.selfCustodySteps.askYourTeamLeaderFor")}
       </p>
       <Button type="submit" disabled={disabled} className="w-full max-w-full">
-        {disabled ? "Checking..." : "Continue"}
+        {disabled ? "Checking..." : t("custody.selfCustodySteps.continue")}
       </Button>
     </Form>
   );
@@ -139,6 +147,7 @@ export function VolunteerPicker({
   nameError?: string | null;
   emailError?: string | null;
 }) {
+  const { t } = useTranslation();
   const search = useFetcher<{ volunteers?: Volunteer[] }>();
   const [state, dispatch] = useReducer(pickerReducer, {
     query: "",
@@ -169,7 +178,7 @@ export function VolunteerPicker({
         />
         <FormError error={error} />
         <Input
-          label="Your full name"
+          label={t("custody.selfCustodySteps.yourFullName")}
           name="name"
           autoComplete="name"
           required
@@ -180,7 +189,7 @@ export function VolunteerPicker({
           className="mb-4"
         />
         <Input
-          label="Your email (optional)"
+          label={t("custody.selfCustodySteps.yourEmailOptional")}
           name="email"
           type="email"
           autoComplete="email"
@@ -188,7 +197,7 @@ export function VolunteerPicker({
           aria-describedby={emailHintId}
         />
         <p id={emailHintId} className="mb-4 mt-1 text-sm text-gray-600">
-          Add it to get your booking details by email. You can leave it empty.
+          {t("custody.selfCustodySteps.addItToGetYour")}
         </p>
         <Button
           type="submit"
@@ -199,7 +208,7 @@ export function VolunteerPicker({
             ? "Saving..."
             : itemTitle
             ? `Take ${itemTitle}`
-            : "Continue"}
+            : t("custody.selfCustodySteps.continue")}
         </Button>
         <Button
           type="button"
@@ -207,7 +216,7 @@ export function VolunteerPicker({
           className="w-full max-w-full"
           onClick={() => dispatch({ type: "back" })}
         >
-          Back to search
+          {t("custody.selfCustodySteps.backToSearch")}
         </Button>
       </Form>
     );
@@ -221,17 +230,20 @@ export function VolunteerPicker({
     <div className="text-left">
       <FormError error={error} />
       <Input
-        label="Find your name"
+        label={t("custody.selfCustodySteps.findYourName")}
         name="q"
         autoComplete="off"
-        placeholder="Type at least 3 letters"
+        placeholder={t("custody.selfCustodySteps.typeAtLeast3Letters")}
         value={state.query}
         onChange={(event) => onType(event.target.value)}
         className="mb-3"
       />
 
       {volunteers.length > 0 ? (
-        <ul aria-label="Matching names" className="mb-4 flex flex-col gap-2">
+        <ul
+          aria-label={t("custody.selfCustodySteps.matchingNames")}
+          className="mb-4 flex flex-col gap-2"
+        >
           {volunteers.map((volunteer) => (
             <li key={volunteer.id}>
               <Button
@@ -249,7 +261,9 @@ export function VolunteerPicker({
           ))}
         </ul>
       ) : searched && search.data ? (
-        <p className="mb-4 text-sm text-gray-600">No one by that name yet.</p>
+        <p className="mb-4 text-sm text-gray-600">
+          {t("custody.selfCustodySteps.noOneByThatName")}
+        </p>
       ) : null}
 
       {state.selected && !itemTitle ? (
@@ -284,7 +298,7 @@ export function VolunteerPicker({
         variant="link"
         onClick={() => dispatch({ type: "add_new" })}
       >
-        I'm not on the list, add me
+        {t("custody.selfCustodySteps.imNotOnTheList")}
       </Button>
     </div>
   );
@@ -306,20 +320,21 @@ export function ReturnPanel({
   isKit?: boolean;
   error?: string | null;
 }) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   return (
     <Form method="post" className="text-left">
       <input type="hidden" name="intent" value="return" />
       <FormError error={error} />
       <p className="mb-4 text-gray-700">
-        Held by <strong>{holderName}</strong>.
+        {t("custody.selfCustodySteps.heldBy")} <strong>{holderName}</strong>.
       </p>
       <Button type="submit" disabled={disabled} className="w-full max-w-full">
         {disabled
           ? "Saving..."
           : isKit
-          ? "Return this kit"
-          : "Return this item"}
+          ? t("custody.selfCustodySteps.returnThisKit")
+          : t("custody.selfCustodySteps.returnThisItem")}
       </Button>
     </Form>
   );
@@ -354,13 +369,17 @@ const KIT_SCAN_REASONS = new Set(["kit-member", "kit-custody"]);
  * @param props.reason - The unsupported reason from the server
  */
 export function StaffOnlyNotice({ reason }: { reason: string }) {
+  const { t } = useTranslation();
   return (
     <div className="text-left">
       <p className="mb-2 text-gray-700">
-        {UNSUPPORTED_COPY[reason] ?? "This item can't be handled here."}
+        {UNSUPPORTED_COPY[reason] ??
+          t("custody.selfCustodySteps.thisItemCantBeHandled")}
       </p>
       {KIT_SCAN_REASONS.has(reason) ? null : (
-        <p className="text-gray-700">Please ask a staff member.</p>
+        <p className="text-gray-700">
+          {t("custody.selfCustodySteps.pleaseAskAStaffMember")}
+        </p>
       )}
     </div>
   );
@@ -382,6 +401,7 @@ export function DoneNotice({
   assetTitle: string;
   volunteerName: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div role="status" className="text-left">
       <p className="mb-2 text-lg font-semibold text-gray-900">
@@ -393,7 +413,7 @@ export function DoneNotice({
           : `${assetTitle} is returned.`}
       </p>
       <p className="text-sm text-gray-600">
-        You can close this page, or scan the next item.
+        {t("custody.selfCustodySteps.youCanCloseThisPage")}
       </p>
     </div>
   );

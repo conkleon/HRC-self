@@ -42,6 +42,7 @@ import { AssetStatus } from "@prisma/client";
 import type { Booking } from "@prisma/client";
 import { useAtomValue, useSetAtom } from "jotai";
 import { ChevronDownIcon } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { z } from "zod";
 import type { BookingExpectedAsset } from "~/atoms/qr-scanner";
@@ -339,6 +340,7 @@ export default function PartialCheckinDrawer({
   isLoading?: boolean;
   defaultExpanded?: boolean;
 }) {
+  const { t } = useTranslation();
   const {
     booking,
     partialCheckinProgress,
@@ -829,8 +831,8 @@ export default function PartialCheckinDrawer({
       count: assetsNotInBookingIds.length,
       message: (count: number) => (
         <>
-          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong> not
-          part of this booking.
+          <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
+          {t("scanner.partialCheckinDrawer.notPartOfThisBooking")}
         </>
       ),
       onResolve: () => removeAssetsFromList(assetsNotInBookingIds),
@@ -841,7 +843,7 @@ export default function PartialCheckinDrawer({
       message: (count: number) => (
         <>
           <strong>{`${count} asset${count > 1 ? "s have" : " has"}`}</strong>{" "}
-          already been checked in for this booking.
+          {t("scanner.partialCheckinDrawer.alreadyBeenCheckedInFor")}
         </>
       ),
       description: "These assets cannot be checked in again",
@@ -855,7 +857,7 @@ export default function PartialCheckinDrawer({
           <strong>{`${count} asset${
             count > 1 ? "s haven't" : " hasn't"
           }`}</strong>{" "}
-          been checked out yet and can't be checked in.
+          {t("scanner.partialCheckinDrawer.beenCheckedOutYetAnd")}
         </>
       ),
       description:
@@ -868,7 +870,7 @@ export default function PartialCheckinDrawer({
       message: (count: number) => (
         <>
           <strong>{`${count} kit${count > 1 ? "s have" : " has"}`}</strong>{" "}
-          already been checked in for this booking.
+          {t("scanner.partialCheckinDrawer.alreadyBeenCheckedInFor")}
         </>
       ),
       description: "All assets from these kits have already been checked in",
@@ -880,7 +882,7 @@ export default function PartialCheckinDrawer({
       message: (count: number) => (
         <>
           <strong>{`${count} asset${count > 1 ? "s are" : " is"}`}</strong>{" "}
-          already covered by scanned kit QR codes.
+          {t("scanner.partialCheckinDrawer.alreadyCoveredByScannedKit")}
         </>
       ),
       description: "Kit QR codes include all kit assets automatically",
@@ -891,8 +893,8 @@ export default function PartialCheckinDrawer({
       count: kitsNotInBooking.length,
       message: (count: number) => (
         <>
-          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong> not
-          part of this booking.
+          <strong>{`${count} kit${count > 1 ? "s are" : " is"} `}</strong>{" "}
+          {t("scanner.partialCheckinDrawer.notPartOfThisBooking")}
         </>
       ),
       onResolve: () => removeItemsFromList(qrIdsOfKitsNotInBooking),
@@ -901,10 +903,11 @@ export default function PartialCheckinDrawer({
       condition: errors.length > 0,
       count: errors.length,
       message: (count: number) => (
-        <>
-          <strong>{`${count} QR code${count > 1 ? "s" : ""}`}</strong>{" "}
-          {count > 1 ? "are" : "is"} invalid.
-        </>
+        <Trans
+          i18nKey="scanner.blockers.fulfilReservationsDrawer.invalidCodes.message"
+          count={count}
+          components={{ bold: <strong /> }}
+        />
       ),
       onResolve: () => removeItemsFromList(errors.map(([qrId]) => qrId)),
     },
@@ -916,7 +919,7 @@ export default function PartialCheckinDrawer({
           <strong>{`${count} quantity-tracked asset${
             count > 1 ? "s have" : " has"
           }`}</strong>{" "}
-          no quantity entered.
+          {t("scanner.partialCheckinDrawer.noQuantityEntered")}
         </>
       ),
       description:
@@ -931,7 +934,7 @@ export default function PartialCheckinDrawer({
           <strong>{`${count} quantity-tracked asset${
             count > 1 ? "s exceed" : " exceeds"
           }`}</strong>{" "}
-          the remaining quantity on this booking.
+          {t("scanner.partialCheckinDrawer.theRemainingQuantityOnThis")}
         </>
       ),
       description:
@@ -1305,7 +1308,7 @@ export default function PartialCheckinDrawer({
             "Scanned this session" card. */}
         {scannedCount > 0 ? (
           <ScanItemGroup
-            label="Scanned this session"
+            label={t("scanner.partialCheckinDrawer.scannedThisSession")}
             count={scannedCount}
             tone="active"
             openWhenCountGrows
@@ -1362,7 +1365,11 @@ export default function PartialCheckinDrawer({
          * drawer can reuse it under `mode="checkout"`.
          */}
         {pendingCount > 0 ? (
-          <ScanItemGroup label="Pending" count={pendingCount} tone="muted">
+          <ScanItemGroup
+            label={t("scanner.partialCheckinDrawer.pending2")}
+            count={pendingCount}
+            tone="muted"
+          >
             <PendingItemsList
               mode="checkin"
               pendingIndividuals={pendingIndividuals}
@@ -1377,7 +1384,7 @@ export default function PartialCheckinDrawer({
             operator usually only cares about what is still outstanding. */}
         {alreadyReconciled.length > 0 ? (
           <ScanItemGroup
-            label="Already checked in"
+            label={t("scanner.partialCheckinDrawer.alreadyCheckedIn")}
             count={alreadyReconciled.length}
             tone="done"
             defaultOpen={false}
@@ -1398,6 +1405,7 @@ export default function PartialCheckinDrawer({
     kitMetaById,
     handleQuickCheckin,
     onRemoveScanned,
+    t,
   ]);
 
   const progressLabel = (
@@ -1405,7 +1413,7 @@ export default function PartialCheckinDrawer({
       <span className="block text-gray-600">
         {progress.denom > 0
           ? `${progress.num}/${progress.denom} units checked in`
-          : "No assets in this booking"}
+          : t("scanner.partialCheckinDrawer.noAssetsInThisBooking")}
       </span>
       <span className="flex h-5 flex-col justify-center font-medium text-gray-900">
         <Progress
@@ -1573,6 +1581,7 @@ function ReconciledKitGroup({
   kit: { id: string; name: string; mainImage: string | null };
   assets: BookingExpectedAsset[];
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -1596,13 +1605,13 @@ function ReconciledKitGroup({
               {kit.mainImage ? (
                 <ImageWithPreview
                   thumbnailUrl={kit.mainImage}
-                  alt={kit.name || "Kit"}
+                  alt={kit.name || t("scanner.partialCheckinDrawer.kit")}
                   className="size-[54px] rounded-[2px]"
                 />
               ) : (
                 <div className="flex size-[54px] shrink-0 items-center justify-center rounded-[2px] border border-gray-200 bg-gray-50">
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                    Kit
+                    {t("scanner.partialCheckinDrawer.kit")}
                   </span>
                 </div>
               )}
@@ -1610,15 +1619,25 @@ function ReconciledKitGroup({
                 <span className="word-break whitespace-break-spaces font-medium text-gray-800">
                   {kit.name}
                   <span className="ml-1 text-xs font-normal text-gray-500">
-                    ({assets.length} {assets.length === 1 ? "asset" : "assets"})
+                    ({assets.length}{" "}
+                    {assets.length === 1
+                      ? t("scanner.partialCheckinDrawer.asset")
+                      : t("scanner.partialCheckinDrawer.assets")}
+                    )
                   </span>
                 </span>
                 <div className="flex flex-wrap items-center gap-1">
-                  <span className={assetTypePillClass}>kit</span>
+                  <span className={assetTypePillClass}>
+                    {t("scanner.partialCheckinDrawer.kit2")}
+                  </span>
                   <AvailabilityBadge
-                    badgeText="Checked in"
-                    tooltipTitle="Already checked in"
-                    tooltipContent="All of this kit's assets on the booking have been reconciled."
+                    badgeText={t("scanner.partialCheckinDrawer.checkedIn")}
+                    tooltipTitle={t(
+                      "scanner.partialCheckinDrawer.alreadyCheckedIn"
+                    )}
+                    tooltipContent={t(
+                      "scanner.partialCheckinDrawer.allOfThisKitsAssets"
+                    )}
                     className="border-green-200 bg-green-50 text-green-700"
                   />
                 </div>
@@ -1641,7 +1660,9 @@ function ReconciledKitGroup({
                   <div className="flex items-center gap-2">
                     <ImageWithPreview
                       thumbnailUrl={asset.thumbnailImage || asset.mainImage}
-                      alt={asset.title || "Asset"}
+                      alt={
+                        asset.title || t("scanner.partialCheckinDrawer.asset2")
+                      }
                       className="size-[40px] rounded-[2px]"
                     />
                     <div className="flex flex-col gap-1">
@@ -1649,14 +1670,24 @@ function ReconciledKitGroup({
                         {asset.title}
                       </span>
                       <div className="flex flex-wrap items-center gap-1">
-                        <span className={assetTypePillClass}>asset</span>
+                        <span className={assetTypePillClass}>
+                          {t("scanner.partialCheckinDrawer.asset")}
+                        </span>
                         <AvailabilityBadge
-                          badgeText="Checked in"
-                          tooltipTitle="Already checked in"
+                          badgeText={t(
+                            "scanner.partialCheckinDrawer.checkedIn"
+                          )}
+                          tooltipTitle={t(
+                            "scanner.partialCheckinDrawer.alreadyCheckedIn"
+                          )}
                           tooltipContent={
                             asset.kind === "QUANTITY_TRACKED"
-                              ? "All booked units for this quantity-tracked asset have already been reconciled on this booking."
-                              : "This asset was already checked in during a previous session."
+                              ? t(
+                                  "scanner.partialCheckinDrawer.allBookedUnitsForThis"
+                                )
+                              : t(
+                                  "scanner.partialCheckinDrawer.thisAssetWasAlreadyChecked"
+                                )
                           }
                           className="border-green-200 bg-green-50 text-green-700"
                         />
@@ -1687,6 +1718,7 @@ function ReconciledQtySummary({
 }: {
   asset: BookingExpectedAsset;
 }): ReactNode {
+  const { t } = useTranslation();
   if (asset.kind !== "QUANTITY_TRACKED" || asset.booked <= 0) return null;
   const { booked, logged, remaining, breakdown } = asset;
   return (
@@ -1707,16 +1739,20 @@ function ReconciledQtySummary({
           <div className="flex flex-col gap-1 text-xs">
             <div className="font-semibold text-gray-900">
               {remaining === 0
-                ? "All units checked in"
-                : "Partially checked in"}
+                ? t("scanner.partialCheckinDrawer.allUnitsCheckedIn")
+                : t("scanner.partialCheckinDrawer.partiallyCheckedIn")}
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-gray-600">Booked</span>
+              <span className="text-gray-600">
+                {t("scanner.partialCheckinDrawer.booked")}
+              </span>
               <span className="tabular-nums text-gray-900">{booked}</span>
             </div>
             {breakdown.returned > 0 ? (
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-600">Returned</span>
+                <span className="text-gray-600">
+                  {t("scanner.partialCheckinDrawer.returned")}
+                </span>
                 <span className="tabular-nums text-emerald-700">
                   {breakdown.returned}
                 </span>
@@ -1724,7 +1760,9 @@ function ReconciledQtySummary({
             ) : null}
             {breakdown.consumed > 0 ? (
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-600">Consumed</span>
+                <span className="text-gray-600">
+                  {t("scanner.partialCheckinDrawer.consumed")}
+                </span>
                 <span className="tabular-nums text-gray-900">
                   {breakdown.consumed}
                 </span>
@@ -1732,7 +1770,9 @@ function ReconciledQtySummary({
             ) : null}
             {breakdown.lost > 0 ? (
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-600">Lost</span>
+                <span className="text-gray-600">
+                  {t("scanner.partialCheckinDrawer.lost")}
+                </span>
                 <span className="tabular-nums text-rose-700">
                   {breakdown.lost}
                 </span>
@@ -1740,14 +1780,18 @@ function ReconciledQtySummary({
             ) : null}
             {breakdown.damaged > 0 ? (
               <div className="flex items-center justify-between gap-3">
-                <span className="text-gray-600">Damaged</span>
+                <span className="text-gray-600">
+                  {t("scanner.partialCheckinDrawer.damaged")}
+                </span>
                 <span className="tabular-nums text-amber-700">
                   {breakdown.damaged}
                 </span>
               </div>
             ) : null}
             <div className="mt-1 flex items-center justify-between gap-3 border-t border-gray-100 pt-1">
-              <span className="text-gray-600">Remaining</span>
+              <span className="text-gray-600">
+                {t("scanner.partialCheckinDrawer.remaining")}
+              </span>
               <span
                 className={tw(
                   "tabular-nums",
@@ -1812,6 +1856,7 @@ function renderAlreadyReconciledAsset(asset: BookingExpectedAsset): ReactNode {
 
 // Asset row renderer
 export function AssetRow({ asset }: { asset: AssetFromQr }) {
+  const { t } = useTranslation();
   const { booking, partialCheckinDetails } = useLoaderData<typeof loader>();
   const items = useAtomValue(scannedItemsAtom);
   const expectedAssets = useAtomValue(bookingExpectedAssetsAtom);
@@ -1972,7 +2017,9 @@ export function AssetRow({ asset }: { asset: AssetFromQr }) {
         </p>
 
         <div className="flex flex-wrap items-center gap-1">
-          <span className={assetTypePillClass}>asset</span>
+          <span className={assetTypePillClass}>
+            {t("scanner.partialCheckinDrawer.asset")}
+          </span>
           <AssetAvailabilityLabels />
         </div>
       </div>
@@ -2025,6 +2072,7 @@ function QuantityDispositionBlock({
   >;
   shouldFocusOnMount?: boolean;
 }) {
+  const { t } = useTranslation();
   const { dispositions, updateField } = useDispositionContext();
   const state = dispositions[bookingAssetId] ?? {
     primary: "",
@@ -2105,11 +2153,15 @@ function QuantityDispositionBlock({
               updateField(bookingAssetId, "primary", e.target.value)
             }
             inputMode="numeric"
-            aria-label={`${primaryLabel} quantity`}
+            aria-label={t("scanner.partialCheckinDrawer.quantity", {
+              primaryLabel,
+            })}
             className={numInput}
           />
           <span className="text-xs tabular-nums text-gray-500">
-            of {info.remaining}
+            {t("scanner.partialCheckinDrawer.of", {
+              remaining: info.remaining,
+            })}
           </span>
           {isFullyReturned ? (
             <CheckIcon className="size-3.5 text-emerald-500" />
@@ -2128,7 +2180,9 @@ function QuantityDispositionBlock({
               the primary input for returned, so this slot is hidden. */}
           {isOneWay ? (
             <label className="flex items-center gap-2">
-              <span className="text-gray-600">Returned</span>
+              <span className="text-gray-600">
+                {t("scanner.partialCheckinDrawer.returned")}
+              </span>
               <input
                 type="number"
                 {...numberInputWheelGuard}
@@ -2140,13 +2194,15 @@ function QuantityDispositionBlock({
                   updateField(bookingAssetId, "returned", e.target.value)
                 }
                 inputMode="numeric"
-                aria-label="Returned quantity"
+                aria-label={t("scanner.partialCheckinDrawer.returnedQuantity")}
                 className={tw(numInput, "w-12")}
               />
             </label>
           ) : null}
           <label className="flex items-center gap-2">
-            <span className="text-gray-600">Lost</span>
+            <span className="text-gray-600">
+              {t("scanner.partialCheckinDrawer.lost")}
+            </span>
             <input
               type="number"
               {...numberInputWheelGuard}
@@ -2158,12 +2214,14 @@ function QuantityDispositionBlock({
                 updateField(bookingAssetId, "lost", e.target.value)
               }
               inputMode="numeric"
-              aria-label="Lost quantity"
+              aria-label={t("scanner.partialCheckinDrawer.lostQuantity")}
               className={tw(numInput, "w-12")}
             />
           </label>
           <label className="flex items-center gap-2">
-            <span className="text-gray-600">Damaged</span>
+            <span className="text-gray-600">
+              {t("scanner.partialCheckinDrawer.damaged")}
+            </span>
             <input
               type="number"
               {...numberInputWheelGuard}
@@ -2175,18 +2233,18 @@ function QuantityDispositionBlock({
                 updateField(bookingAssetId, "damaged", e.target.value)
               }
               inputMode="numeric"
-              aria-label="Damaged quantity"
+              aria-label={t("scanner.partialCheckinDrawer.damagedQuantity")}
               className={tw(numInput, "w-12")}
             />
           </label>
           <span
             className="ml-auto italic text-gray-500"
-            title="Units left for a future check-in session"
+            title={t("scanner.partialCheckinDrawer.unitsLeftForAFuture")}
           >
             <span className="font-medium not-italic tabular-nums text-gray-700">
               {pending}
             </span>{" "}
-            pending
+            {t("scanner.partialCheckinDrawer.pending")}
           </span>
         </div>
       ) : null}
@@ -2207,6 +2265,7 @@ function QuantityDispositionBlock({
  * operator can edit before submit.
  */
 function ScannedKitQtyMemberRow({ asset }: { asset: QtyExpectedAsset }) {
+  const { t } = useTranslation();
   const { qtyRemainingByBookingAssetId, recentlyAddedBookingAssetId } =
     useDispositionContext();
   const info = qtyRemainingByBookingAssetId[asset.bookingAssetId] ?? null;
@@ -2222,11 +2281,17 @@ function ScannedKitQtyMemberRow({ asset }: { asset: QtyExpectedAsset }) {
               {asset.title}
             </span>
             <div className="flex flex-wrap items-center gap-1">
-              <span className={assetTypePillClass}>asset</span>
+              <span className={assetTypePillClass}>
+                {t("scanner.partialCheckinDrawer.asset")}
+              </span>
               <AvailabilityBadge
-                badgeText="From kit"
-                tooltipTitle="Quantity-tracked kit member"
-                tooltipContent="This quantity-tracked asset is part of the scanned kit. Enter how its units are being returned / consumed / lost / damaged."
+                badgeText={t("scanner.partialCheckinDrawer.fromKit")}
+                tooltipTitle={t(
+                  "scanner.partialCheckinDrawer.quantityTrackedKitMember"
+                )}
+                tooltipContent={t(
+                  "scanner.partialCheckinDrawer.thisQuantityTrackedAssetIs"
+                )}
                 className="border-indigo-200 bg-indigo-50 text-indigo-700"
               />
             </div>
@@ -2248,6 +2313,7 @@ function ScannedKitQtyMemberRow({ asset }: { asset: QtyExpectedAsset }) {
 }
 
 export function KitRow({ kit }: { kit: KitFromQr }) {
+  const { t } = useTranslation();
   const { booking, partialCheckinProgress, partialCheckinDetails } =
     useLoaderData<typeof loader>();
   const items = useAtomValue(scannedItemsAtom);
@@ -2337,20 +2403,28 @@ export function KitRow({ kit }: { kit: KitFromQr }) {
         <span className="text-[12px] font-normal text-gray-700">
           {isKitScanned ? (
             <>
-              ({uncheckedKitAssetsInBooking.length} of {totalKitAssetsInBooking}{" "}
-              assets to be checked in)
+              {t("scanner.partialCheckinDrawer.ofAssetsToBeChecked", {
+                uncheckedKitAssetsInBookingCount:
+                  uncheckedKitAssetsInBooking.length,
+                totalKitAssetsInBooking,
+              })}
             </>
           ) : (
             <>
-              ({remainingKitAssetsInBooking.length} of {totalKitAssetsInBooking}{" "}
-              assets remaining)
+              {t("scanner.partialCheckinDrawer.ofAssetsRemaining", {
+                remainingKitAssetsInBookingCount:
+                  remainingKitAssetsInBooking.length,
+                totalKitAssetsInBooking,
+              })}
             </>
           )}
         </span>
       </p>
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className={assetTypePillClass}>kit</span>
+        <span className={assetTypePillClass}>
+          {t("scanner.partialCheckinDrawer.kit2")}
+        </span>
         <KitAvailabilityLabels />
       </div>
     </div>
@@ -2384,6 +2458,7 @@ const CustomForm = ({
   hasBlockers,
   checkinsJson,
 }: CustomFormProps) => {
+  const { t } = useTranslation();
   /** Use state instead of ref so the component re-renders once the form
    * mounts — this guarantees portalContainer is always the real DOM node
    * when the user opens the early-checkin dialog. */
@@ -2422,7 +2497,7 @@ const CustomForm = ({
 
         {/* Cancel button */}
         <Button type="button" variant="secondary" to=".." className="ml-auto">
-          Cancel
+          {t("scanner.partialCheckinDrawer.cancel")}
         </Button>
 
         {/* Submit button - conditional based on early check-in */}
@@ -2434,7 +2509,7 @@ const CustomForm = ({
               to: booking.to,
               from: booking.from,
             }}
-            label="Check in assets"
+            label={t("scanner.partialCheckinDrawer.checkInAssets")}
             variant="default"
             disabled={
               isLoading || hasBlockers || assetIdsForCheckin.length === 0
@@ -2451,7 +2526,7 @@ const CustomForm = ({
             }
             className="w-auto"
           >
-            Check in assets
+            {t("scanner.partialCheckinDrawer.checkInAssets")}
           </Button>
         )}
       </div>

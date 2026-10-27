@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -17,6 +18,7 @@ import { Button } from "~/components/shared/button";
 import { config } from "~/config/shelf.config";
 import { useSearchParams } from "~/hooks/search-params";
 import { useAutoFocus } from "~/hooks/use-auto-focus";
+import { getServerT } from "~/i18n/i18n.server";
 import { signInWithSSO } from "~/modules/auth/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { mobilePkceChallengeCookie } from "~/utils/cookies.server";
@@ -46,8 +48,9 @@ const SSOLoginFormSchema = z.object({
 });
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  const title = "Log in with SSO";
-  const subHeading = "Enter your company's domain to login with SSO.";
+  const t = await getServerT(context);
+  const title = t("auth.pages.ssoLogin.title");
+  const subHeading = t("auth.pages.ssoLogin.subHeading");
   const { disableSSO } = config;
 
   const url = new URL(request.url);
@@ -154,6 +157,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function SSOLogin() {
+  const { t } = useTranslation();
   const zo = useZorm("NewQuestionWizardScreen", SSOLoginFormSchema);
   const navigation = useNavigation();
   const disabled = isFormProcessing(navigation.state);
@@ -176,7 +180,7 @@ export default function SSOLogin() {
             <Input
               ref={domainInputRef}
               data-test-id="domain"
-              label="Company domain"
+              label={t("auth.ssoLogin.companyDomain")}
               placeholder="yourdomain.com"
               required
               name={zo.fields.domain()}
@@ -193,7 +197,7 @@ export default function SSOLogin() {
               disabled={disabled}
               width="full"
             >
-              Log In
+              {t("auth.ssoLogin.logIn")}
             </Button>
           </div>
         </Form>
@@ -202,13 +206,13 @@ export default function SSOLogin() {
         )}
         {SUPPORT_EMAIL ? (
           <div>
-            Want to enable SSO for your organization?{" "}
+            {t("auth.ssoLogin.wantToEnableSsoFor")}{" "}
             <Button
               as="a"
               href={`mailto:${SUPPORT_EMAIL}?subject=SSO request`}
               variant="link"
             >
-              Contact us
+              {t("auth.ssoLogin.contactUs")}
             </Button>
           </div>
         ) : null}

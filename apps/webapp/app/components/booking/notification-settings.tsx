@@ -12,6 +12,7 @@
  */
 import { useCallback, useMemo, useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { useZorm } from "react-zorm";
 import z from "zod";
@@ -63,6 +64,7 @@ export function NotificationSettings({
 }: {
   bookingSettings: BookingSettings;
 }) {
+  const { t } = useTranslation();
   const creatorFetcher = useFetcher();
   const adminsFetcher = useFetcher();
   const alwaysNotifyFetcher = useFetcher();
@@ -138,12 +140,10 @@ export function NotificationSettings({
     <Card className="mt-0 overflow-visible">
       <div className="mb-4 border-b pb-4">
         <h3 className="text-text-lg font-semibold">
-          Email Notification Recipients
+          {t("bookings.notificationSettings.emailNotificationRecipients")}
         </h3>
         <p className="text-sm text-gray-600">
-          The booking custodian always receives all notifications. These
-          settings control who else gets notified. You can also add per-booking
-          recipients when creating or editing a booking.
+          {t("bookings.notificationSettings.theBookingCustodianAlwaysReceives")}
         </p>
       </div>
 
@@ -156,11 +156,10 @@ export function NotificationSettings({
         }}
       >
         <FormRow
-          rowLabel="Notify booking creator"
+          rowLabel={t("bookings.notificationSettings.notifyBookingCreator")}
           subHeading={
             <div>
-              When someone creates a booking on behalf of another person, the
-              creator will receive all email updates for that booking.
+              {t("bookings.notificationSettings.whenSomeoneCreatesABooking")}
             </div>
           }
           className="border-b-0 pb-[10px] pt-0"
@@ -170,7 +169,7 @@ export function NotificationSettings({
               name={creatorZo.fields.notifyBookingCreator()}
               disabled={creatorDisabled}
               defaultChecked={bookingSettings.notifyBookingCreator}
-              title="Notify booking creator"
+              title={t("bookings.notificationSettings.notifyBookingCreator")}
             />
           </div>
         </FormRow>
@@ -186,14 +185,14 @@ export function NotificationSettings({
         }}
       >
         <FormRow
-          rowLabel={`Notify all ${RESERVATION_AUDIENCE} on new booking requests`}
+          rowLabel={t("bookings.notificationSettings.notifyAllOnNewBooking", {
+            RESERVATION_AUDIENCE,
+          })}
           subHeading={
             <div>
-              When a booking is reserved, all workspace {RESERVATION_AUDIENCE}{" "}
-              receive a notification so someone can review and handle the
-              request. They will not receive subsequent updates (checkout,
-              checkin, etc.) unless they are added as a notification recipient
-              on the booking.
+              {t("bookings.notificationSettings.whenABookingIsReserved", {
+                RESERVATION_AUDIENCE,
+              })}
             </div>
           }
           className="border-b-0 pb-[10px] pt-0"
@@ -203,7 +202,9 @@ export function NotificationSettings({
               name={adminsZo.fields.notifyAdminsOnNewBooking()}
               disabled={adminsDisabled}
               defaultChecked={bookingSettings.notifyAdminsOnNewBooking}
-              title={`Notify all ${RESERVATION_AUDIENCE} on new booking requests`}
+              title={t("bookings.notificationSettings.notifyAllOnNewBooking", {
+                RESERVATION_AUDIENCE,
+              })}
             />
           </div>
         </FormRow>
@@ -217,12 +218,10 @@ export function NotificationSettings({
       {/* DynamicDropdown picker: Always notify these users */}
       <alwaysNotifyFetcher.Form method="post">
         <FormRow
-          rowLabel="Always notify these users"
+          rowLabel={t("bookings.notificationSettings.alwaysNotifyTheseUsers")}
           subHeading={
             <div>
-              These users receive all booking email notifications for every
-              booking in this workspace. Use this for people who need complete
-              visibility, like an office manager or operations lead.
+              {t("bookings.notificationSettings.theseUsersReceiveAllBooking")}
             </div>
           }
           className="mt-4 border-b-0 pb-[10px] pt-0"
@@ -237,7 +236,7 @@ export function NotificationSettings({
                       ? `${selectedIds.length} user${
                           selectedIds.length !== 1 ? "s" : ""
                         } selected`
-                      : "Select users..."}
+                      : t("bookings.notificationSettings.selectUsers")}
                   </span>
                   <ChevronDownIcon className="size-4 shrink-0 text-gray-400" />
                 </div>
@@ -266,17 +265,19 @@ export function NotificationSettings({
               defaultValues={selectedIds}
               onSelectionChange={setSelectedIds}
               renderItem={renderItem}
-              label="Always notify"
-              placeholder="Search team members..."
+              label={t("bookings.notificationSettings.alwaysNotify")}
+              placeholder={t("bookings.notificationSettings.searchTeamMembers")}
             />
 
             <p className="mt-1.5 text-[13px] text-gray-500">
-              Only {PICKABLE_RECIPIENT_AUDIENCE} can be added.
+              {t("bookings.notificationSettings.onlyCanBeAdded", {
+                PICKABLE_RECIPIENT_AUDIENCE,
+              })}
             </p>
 
             {hasUnsavedChanges ? (
               <p className="mt-1.5 text-[13px] font-medium text-warning-600">
-                You have unsaved changes.
+                {t("bookings.notificationSettings.youHaveUnsavedChanges")}
               </p>
             ) : null}
 
@@ -303,7 +304,11 @@ export function NotificationSettings({
             value="updateAlwaysNotifyTeamMembers"
             name="intent"
           >
-            {alwaysNotifyDisabled ? <Spinner /> : "Save notification settings"}
+            {alwaysNotifyDisabled ? (
+              <Spinner />
+            ) : (
+              t("bookings.notificationSettings.saveNotificationSettings")
+            )}
           </Button>
         </div>
       </alwaysNotifyFetcher.Form>

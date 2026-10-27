@@ -33,6 +33,7 @@ import {
   Loader2Icon,
   XIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { formatAssetCount, formatCount } from "~/modules/asset-import/format";
 import type { AssetImportStatusPayload } from "~/modules/asset-import/types";
@@ -187,6 +188,7 @@ const ICON_BUTTON_CLASS = tw(
  * @param props - See {@link ImportCardBodyProps}
  */
 function ImportCardBody({ initial, onDismiss }: ImportCardBodyProps) {
+  const { t } = useTranslation();
   const status = useAssetImportStatus(initial.id, initial);
   const cardRef = useToastOffset<HTMLElement>();
   const [collapsed, setCollapsed] = useState(false);
@@ -274,7 +276,7 @@ function ImportCardBody({ initial, onDismiss }: ImportCardBodyProps) {
   return (
     <section
       ref={cardRef}
-      aria-label="Asset import progress"
+      aria-label={t("nav.assetImportCard.assetImportProgress")}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocusWithin(true)}
@@ -311,8 +313,8 @@ function ImportCardBody({ initial, onDismiss }: ImportCardBodyProps) {
               aria-expanded={!collapsed}
               aria-label={
                 collapsed
-                  ? "Expand import progress"
-                  : "Collapse import progress"
+                  ? t("nav.assetImportCard.expandImportProgress")
+                  : t("nav.assetImportCard.collapseImportProgress")
               }
               className={ICON_BUTTON_CLASS}
             >
@@ -325,7 +327,7 @@ function ImportCardBody({ initial, onDismiss }: ImportCardBodyProps) {
             <button
               type="button"
               onClick={onDismiss}
-              aria-label="Close import progress"
+              aria-label={t("nav.assetImportCard.closeImportProgress")}
               className={ICON_BUTTON_CLASS}
             >
               <XIcon className="size-4" aria-hidden="true" />
@@ -338,16 +340,23 @@ function ImportCardBody({ initial, onDismiss }: ImportCardBodyProps) {
             {finished ? (
               status.warningCount > 0 ? (
                 <p className="text-sm text-gray-600">
-                  {formatCount(status.warningCount)}{" "}
-                  {status.warningCount === 1 ? "warning" : "warnings"}
+                  {t("nav.assetImportCard.warningCount", {
+                    count: status.warningCount,
+                    formatted: formatCount(status.warningCount),
+                  })}
                 </p>
               ) : null
             ) : (
               <>
-                <Progress value={percent} aria-label="Import progress" />
+                <Progress
+                  value={percent}
+                  aria-label={t("nav.assetImportCard.importProgress")}
+                />
                 <p className="mt-2 text-sm text-gray-600">
-                  {formatCount(status.processedRows)} of{" "}
-                  {formatCount(status.totalRows)}
+                  {t("nav.assetImportCard.progress", {
+                    processed: formatCount(status.processedRows),
+                    total: formatCount(status.totalRows),
+                  })}
                 </p>
               </>
             )}
@@ -357,7 +366,7 @@ function ImportCardBody({ initial, onDismiss }: ImportCardBodyProps) {
               size="xs"
               className="mt-3"
             >
-              View progress
+              {t("nav.assetImportCard.viewProgress")}
             </Button>
           </div>
         ) : null}

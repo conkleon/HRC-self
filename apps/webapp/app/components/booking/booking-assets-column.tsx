@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { BookingStatus } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { useBookingBulkActions } from "~/hooks/use-booking-bulk-actions";
 import { useBookingStatusHelpers } from "~/hooks/use-booking-status";
@@ -67,6 +68,7 @@ function asEnrichedAsset<T extends AssetWithResolvableImage>(
 }
 
 export function BookingAssetsColumn() {
+  const { t } = useTranslation();
   const {
     userId,
     booking,
@@ -214,7 +216,10 @@ export function BookingAssetsColumn() {
   return (
     <div className="flex-1">
       <div className="w-full">
-        <TextualDivider text="Assets & Kits" className="mb-8 lg:hidden" />
+        <TextualDivider
+          text={t("bookings.bookingAssetsColumn.assetsKits")}
+          className="mb-8 lg:hidden"
+        />
         <div className="mb-3 flex gap-4 lg:hidden"></div>
 
         <div className="flex flex-col">
@@ -254,7 +259,7 @@ export function BookingAssetsColumn() {
                   disabled={manageAssetsButtonDisabled}
                   className="whitespace-nowrap"
                 >
-                  Scan to assign
+                  {t("bookings.bookingAssetsColumn.scanToAssign")}
                 </Button>
               ) : null
             }
@@ -328,34 +333,36 @@ export function BookingAssetsColumn() {
                     >
                       <BulkListHeader itemsGetter={itemsGetter} />
                     </When>
-                    <Th>Name</Th>
-                    <Th>Qty</Th>
+                    <Th>{t("bookings.bookingAssetsColumn.name")}</Th>
+                    <Th>{t("bookings.bookingAssetsColumn.qty")}</Th>
                     <Th> </Th>
-                    <Th>Category</Th>
-                    <Th>Tags</Th>
-                    <Th>Location</Th>
+                    <Th>{t("bookings.bookingAssetsColumn.category")}</Th>
+                    <Th>{t("bookings.bookingAssetsColumn.tags")}</Th>
+                    <Th>{t("bookings.bookingAssetsColumn.location")}</Th>
                     {shouldShowCheckoutColumns && (
                       <>
                         <Th className="whitespace-nowrap">
-                          Checked out on{" "}
+                          {t("bookings.bookingAssetsColumn.checkedOutOn")}{" "}
                           <InfoTooltip
                             iconClassName="size-4"
                             content={
                               <p>
-                                Shows the date when the asset was checked out
-                                via a partial check-out.
+                                {t(
+                                  "bookings.bookingAssetsColumn.showsTheDateWhenThe"
+                                )}
                               </p>
                             }
                           />
                         </Th>
                         <Th className="whitespace-nowrap">
-                          Checked out by{" "}
+                          {t("bookings.bookingAssetsColumn.checkedOutBy")}{" "}
                           <InfoTooltip
                             iconClassName="size-4"
                             content={
                               <p>
-                                Shows the user who checked out the asset via a
-                                partial check-out.
+                                {t(
+                                  "bookings.bookingAssetsColumn.showsTheUserWhoChecked"
+                                )}
                               </p>
                             }
                           />
@@ -365,25 +372,27 @@ export function BookingAssetsColumn() {
                     {shouldShowCheckinColumns && (
                       <>
                         <Th className="whitespace-nowrap">
-                          Checked in on{" "}
+                          {t("bookings.bookingAssetsColumn.checkedInOn")}{" "}
                           <InfoTooltip
                             iconClassName="size-4"
                             content={
                               <p>
-                                Shows the date when the asset was checked in via
-                                a partial check-in.
+                                {t(
+                                  "bookings.bookingAssetsColumn.showsTheDateWhenThe2"
+                                )}
                               </p>
                             }
                           />
                         </Th>
                         <Th className="whitespace-nowrap">
-                          Checked in by{" "}
+                          {t("bookings.bookingAssetsColumn.checkedInBy")}{" "}
                           <InfoTooltip
                             iconClassName="size-4"
                             content={
                               <p>
-                                Shows the user who checked in the asset via a
-                                partial check-in.
+                                {t(
+                                  "bookings.bookingAssetsColumn.showsTheUserWhoChecked2"
+                                )}
                               </p>
                             }
                           />
@@ -466,6 +475,7 @@ function BookingAssetsHeader({
   manageAssetsUrl,
   manageAssetsButtonDisabled,
 }: BookingAssetsHeaderProps) {
+  const { t } = useTranslation();
   const { items } = useLoaderData<BookingPageLoaderData>();
   const rowsLabel = useCallback(() => describeBookingRows(items), [items]);
 
@@ -489,7 +499,7 @@ function BookingAssetsHeader({
     return (
       <div className="flex justify-between">
         <ListTitle
-          title={"Assets & Kits"}
+          title={t("bookings.bookingAssetsColumn.assetsKits")}
           titleClassName="text-transform normal-case"
           hasBulkActions
           itemsGetter={itemsGetter}
@@ -506,14 +516,14 @@ function BookingAssetsHeader({
               to="scan-assets"
               disabled={manageAssetsButtonDisabled}
             >
-              Scan to add
+              {t("bookings.bookingAssetsColumn.scanToAdd")}
             </Button>
             <Button
               to={manageAssetsUrl}
               className="whitespace-nowrap"
               disabled={manageAssetsButtonDisabled}
             >
-              Add assets
+              {t("bookings.bookingAssetsColumn.addAssets")}
             </Button>
           </div>
         </When>
@@ -527,7 +537,7 @@ function BookingAssetsHeader({
       {/* First row: ListTitle and ListBulkActionsDropdown */}
       <div className="flex items-start justify-between">
         <ListTitle
-          title="Assets & Kits"
+          title={t("bookings.bookingAssetsColumn.assetsKits")}
           hasBulkActions
           itemsGetter={itemsGetter}
           disableSelectAllItems
@@ -548,14 +558,14 @@ function BookingAssetsHeader({
             disabled={manageAssetsButtonDisabled}
             className="flex-1"
           >
-            Scan
+            {t("bookings.bookingAssetsColumn.scan")}
           </Button>
           <Button
             to={manageAssetsUrl}
             className="flex-1 whitespace-nowrap"
             disabled={manageAssetsButtonDisabled}
           >
-            Add assets
+            {t("bookings.bookingAssetsColumn.addAssets")}
           </Button>
         </div>
       </When>

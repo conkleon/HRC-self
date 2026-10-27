@@ -6,6 +6,7 @@ import {
   PopoverContent,
 } from "@radix-ui/react-popover";
 import { Check, SwitchCamera } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "~/components/shared/button";
 import { tw } from "~/utils/tw";
 
@@ -25,6 +26,7 @@ export function CameraSelector({
   disabled = false,
   showLabel = false,
 }: CameraSelectorProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   // Don't render if only one camera
@@ -48,10 +50,10 @@ export function CameraSelector({
             "gap-2 py-[7px] text-[12px] font-normal",
             open ? "bg-gray-50" : ""
           )}
-          aria-label="Switch camera"
+          aria-label={t("scanner.cameraSelector.switchCamera")}
         >
           <SwitchCamera className="size-4" />
-          {showLabel && <span>Switch camera</span>}
+          {showLabel && <span>{t("scanner.cameraSelector.switchCamera")}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverPortal>
@@ -62,7 +64,11 @@ export function CameraSelector({
             "z-[999999] mt-2 min-w-[200px] max-w-[300px] rounded-md border border-gray-200 bg-white shadow-md"
           )}
         >
-          <div className="p-1" role="listbox" aria-label="Camera selection">
+          <div
+            className="p-1"
+            role="listbox"
+            aria-label={t("scanner.cameraSelector.cameraSelection")}
+          >
             {devices.map((device, index) => (
               <button
                 key={device.deviceId}

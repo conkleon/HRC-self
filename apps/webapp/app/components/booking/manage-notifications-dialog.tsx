@@ -13,6 +13,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BellIcon, ChevronDownIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import DynamicDropdown from "~/components/dynamic-dropdown/dynamic-dropdown";
 import { useBookingSettings } from "~/hooks/use-booking-settings";
@@ -33,6 +34,7 @@ import { Button } from "../shared/button";
  * Triggered from the booking Actions dropdown.
  */
 export default function ManageNotificationsDialog() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const fetcher = useFetcherWithReset<DataOrErrorResponse>();
   const disabled = useDisabled(fetcher);
@@ -180,7 +182,7 @@ export default function ManageNotificationsDialog() {
         width="full"
         onClick={handleOpen}
       >
-        Manage notifications
+        {t("bookings.manageNotificationsDialog.manageNotifications")}
       </Button>
 
       <DialogPortal>
@@ -197,9 +199,13 @@ export default function ManageNotificationsDialog() {
           }
         >
           <div className="px-6 pb-4">
-            <h3 className="mb-1">Manage notifications</h3>
+            <h3 className="mb-1">
+              {t("bookings.manageNotificationsDialog.manageNotifications")}
+            </h3>
             <p className="mb-4 text-sm text-gray-600">
-              Choose who receives email notifications for this booking.
+              {t(
+                "bookings.manageNotificationsDialog.chooseWhoReceivesEmailNotifications"
+              )}
             </p>
 
             <fetcher.Form method="POST">
@@ -245,11 +251,17 @@ export default function ManageNotificationsDialog() {
                   defaultValues={selectedIds}
                   onSelectionChange={handleSelectionChange}
                   renderItem={renderItem}
-                  label="Notification recipients"
-                  placeholder="Search team members..."
+                  label={t(
+                    "bookings.manageNotificationsDialog.notificationRecipients"
+                  )}
+                  placeholder={t(
+                    "bookings.manageNotificationsDialog.searchTeamMembers"
+                  )}
                 />
                 <p className="mt-1.5 text-[13px] text-gray-500">
-                  Only {PICKABLE_RECIPIENT_AUDIENCE} can be added.
+                  {t("bookings.manageNotificationsDialog.onlyCanBeAdded", {
+                    PICKABLE_RECIPIENT_AUDIENCE,
+                  })}
                 </p>
               </div>
 
@@ -281,10 +293,10 @@ export default function ManageNotificationsDialog() {
                   className="flex-1"
                   onClick={handleClose}
                 >
-                  Cancel
+                  {t("bookings.manageNotificationsDialog.cancel")}
                 </Button>
                 <Button type="submit" className="flex-1" disabled={disabled}>
-                  Save
+                  {t("bookings.manageNotificationsDialog.save")}
                 </Button>
               </div>
             </fetcher.Form>

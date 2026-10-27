@@ -30,7 +30,9 @@ import {
   ASSET_QTY_STATUS_LABELS,
   ASSET_UNAVAILABLE_LABEL,
 } from "@shelf/labels";
+import { useTranslation } from "react-i18next";
 import useApiQuery from "~/hooks/use-api-query";
+import { useLabel } from "~/i18n/use-label";
 import { isQuantityTracked } from "~/modules/asset/utils";
 import { BADGE_COLORS } from "~/utils/badge-colors";
 import type { ExtendedAssetStatus } from "~/utils/booking-assets";
@@ -52,18 +54,17 @@ import { UnavailableBadge } from "../../shared/unavailable-badge";
 import When from "../../when/when";
 import { ArchivedBadge } from "../archived-badge";
 
-/** Tooltip of the unavailable icon and the "Unavailable" badge. */
-const UNAVAILABLE_TITLE = "This asset is marked as unavailable for bookings";
-
 /**
  * The badge for an asset marked unavailable that would otherwise read
  * "Available". Grey, like the unavailable icon it replaces.
  */
 function UnavailableStatusBadge() {
+  const { t } = useTranslation();
+  const translate = useLabel();
   return (
-    <span title={UNAVAILABLE_TITLE}>
+    <span title={t("assets.assetStatusBadge.unavailableTitle")}>
       <Badge color={BADGE_COLORS.gray.bg} textColor={BADGE_COLORS.gray.text}>
-        {ASSET_UNAVAILABLE_LABEL}
+        {translate(ASSET_UNAVAILABLE_LABEL)}
       </Badge>
     </span>
   );
@@ -117,6 +118,8 @@ export function AssetStatusBadge({
    */
   asset?: QuantityAwareAsset | null;
 }) {
+  const { t } = useTranslation();
+  const translate = useLabel();
   const inlineQuantityData = useMemo(() => getQuantityData(asset), [asset]);
 
   // Whether the asset is actually QT (by schema type). Used to gate the
@@ -243,7 +246,7 @@ export function AssetStatusBadge({
           <HoverCardTrigger asChild>
             <span>
               <Badge color={colors.bg} textColor={colors.text}>
-                {label}
+                {translate(label)}
               </Badge>
             </span>
           </HoverCardTrigger>
@@ -261,7 +264,11 @@ export function AssetStatusBadge({
             </HoverCardContent>
           )}
         </HoverCard>
-        {!availableToBook && <UnavailableBadge title={UNAVAILABLE_TITLE} />}
+        {!availableToBook && (
+          <UnavailableBadge
+            title={t("assets.assetStatusBadge.unavailableTitle")}
+          />
+        )}
       </span>
     );
   }
@@ -278,9 +285,13 @@ export function AssetStatusBadge({
       <HoverCardTrigger asChild>
         <span className="flex items-center gap-1.5">
           <Badge color={colors.bg} textColor={colors.text}>
-            {userFriendlyAssetStatus(status)}
+            {translate(userFriendlyAssetStatus(status))}
           </Badge>
-          {!availableToBook && <UnavailableBadge title={UNAVAILABLE_TITLE} />}
+          {!availableToBook && (
+            <UnavailableBadge
+              title={t("assets.assetStatusBadge.unavailableTitle")}
+            />
+          )}
         </span>
       </HoverCardTrigger>
 

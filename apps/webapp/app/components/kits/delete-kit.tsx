@@ -10,6 +10,7 @@
 import type { ReactElement } from "react";
 import { cloneElement, useId } from "react";
 import type { Kit } from "@prisma/client";
+import { useTranslation } from "react-i18next";
 import {
   TypeToConfirm,
   useTypeToConfirm,
@@ -35,6 +36,7 @@ type DeleteKitProps = {
 };
 
 export default function DeleteKit({ kit, trigger }: DeleteKitProps) {
+  const { t } = useTranslation();
   const disabled = useDisabled();
   const confirm = useTypeToConfirm(kit.name);
   // The field sits outside the form that submits; this links the two.
@@ -58,7 +60,7 @@ export default function DeleteKit({ kit, trigger }: DeleteKitProps) {
             className="justify-start rounded-sm px-4 py-3 text-sm font-semibold text-gray-700 outline-none  hover:bg-slate-100 hover:text-gray-700"
             width="full"
           >
-            Delete
+            {t("kits.deleteKit.delete")}
           </Button>
         )}
       </AlertDialogTrigger>
@@ -70,12 +72,11 @@ export default function DeleteKit({ kit, trigger }: DeleteKitProps) {
               <TrashIcon />
             </span>
           </div>
-          <AlertDialogTitle>Delete {kit.name}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("kits.deleteKit.delete2", { name: kit.name })}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently deletes the kit. Its assets stay in your workspace
-            and keep their location, but leave the draft and reserved bookings
-            the kit was on. Custody of the kit is released and its QR code is
-            unlinked. This cannot be undone.
+            {t("kits.deleteKit.thisPermanentlyDeletesTheKit")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -90,7 +91,7 @@ export default function DeleteKit({ kit, trigger }: DeleteKitProps) {
           <div className="flex justify-center gap-2">
             <AlertDialogCancel asChild>
               <Button type="button" variant="secondary" disabled={disabled}>
-                Cancel
+                {t("kits.deleteKit.cancel")}
               </Button>
             </AlertDialogCancel>
 
@@ -101,7 +102,7 @@ export default function DeleteKit({ kit, trigger }: DeleteKitProps) {
                 className="border-error-600 bg-error-600 hover:border-error-800 hover:bg-error-800"
                 disabled={disabled || !confirm.isConfirmed}
               >
-                {disabled ? "Deleting..." : "Delete"}
+                {disabled ? "Deleting..." : t("kits.deleteKit.delete")}
               </Button>
             </Form>
           </div>

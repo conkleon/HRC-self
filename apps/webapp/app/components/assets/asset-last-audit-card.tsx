@@ -11,6 +11,7 @@
  * @see {@link file://./../../routes/_layout+/assets.$assetId.overview.tsx}
  * @see {@link file://./../audit/asset-audit-history-list.tsx}
  */
+import { useTranslation } from "react-i18next";
 import type { AuditHistoryListItem } from "~/components/audit/asset-audit-history-list";
 import {
   AssetAuditHistoryList,
@@ -44,6 +45,7 @@ export function AssetLastAuditCard({
     upcoming: AuditHistoryListItem[];
   } | null;
 }) {
+  const { t } = useTranslation();
   if (!history) return null;
 
   // The newest counted audit is the headline; the rest are "Earlier".
@@ -54,14 +56,16 @@ export function AssetLastAuditCard({
     <Card className="my-3">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <p className="text-[14px] font-medium text-gray-700">Last audit</p>
+          <p className="text-[14px] font-medium text-gray-700">
+            {t("assets.assetLastAuditCard.lastAudit")}
+          </p>
           {lastAudit ? (
             <ul>
               <AuditRow item={lastAudit} section="recent" />
             </ul>
           ) : (
             <p className="text-[12px] text-gray-600">
-              This asset has never been audited
+              {t("assets.assetLastAuditCard.thisAssetHasNeverBeen")}
             </p>
           )}
         </div>

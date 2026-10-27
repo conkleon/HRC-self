@@ -14,6 +14,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useFetcher } from "react-router";
 import Input from "~/components/forms/input";
 import { Button } from "~/components/shared/button";
@@ -109,6 +110,7 @@ export function AdjustBookingAssetQuantityDialog({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: AdjustBookingAssetQuantityDialogProps) {
+  const { t } = useTranslation();
   // The link opens the bookings index; offer it exactly when that index would
   // show this member other people's bookings.
   const canViewOtherBookings = useRoleAccess().bookings.seeAll;
@@ -205,11 +207,20 @@ export function AdjustBookingAssetQuantityDialog({
 
       <AlertDialogContent onEscapeKeyDown={() => setOpen(false)}>
         <AlertDialogHeader>
-          <AlertDialogTitle>Adjust booked quantity</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t(
+              "bookings.adjustBookingAssetQuantityDialog.adjustBookedQuantity"
+            )}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Set how many {unitLabel} of
-            {assetTitle ? ` "${assetTitle}"` : " this asset"} to reserve for
-            this booking.
+            {assetTitle
+              ? t("bookings.adjustBookingAssetQuantityDialog.setHowManyNamed", {
+                  unitLabel,
+                  assetTitle,
+                })
+              : t("bookings.adjustBookingAssetQuantityDialog.setHowMany", {
+                  unitLabel,
+                })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -225,7 +236,9 @@ export function AdjustBookingAssetQuantityDialog({
               ref={quantityInputRef}
               name="quantity"
               type="number"
-              label={`Quantity (${unitLabel})`}
+              label={t("bookings.adjustBookingAssetQuantityDialog.quantity", {
+                unitLabel,
+              })}
               min={1}
               max={maxQuantity ?? undefined}
               step={1}
@@ -243,35 +256,52 @@ export function AdjustBookingAssetQuantityDialog({
                   {/* Hero: the number the user most needs — how many they can
                       book for these dates — reads first and boldest. */}
                   <p className="text-xs font-semibold text-gray-700">
-                    {maxQuantity} of {totalQuantity} {unitLabel} available
+                    {t(
+                      "bookings.adjustBookingAssetQuantityDialog.ofAvailable",
+                      { maxQuantity, totalQuantity, unitLabel }
+                    )}
                   </p>
                   <p className="text-xs text-gray-500">
                     {windowFrom && windowTo ? (
                       <>
-                        for <DateS date={windowFrom} /> to{" "}
-                        <DateS date={windowTo} />
+                        <Trans
+                          t={t}
+                          i18nKey="bookings.adjustBookingAssetQuantityDialog.for00To1"
+                          components={[
+                            <DateS key="slot0" date={windowFrom} />,
+                            <DateS key="slot1" date={windowTo} />,
+                          ]}
+                        />
                       </>
                     ) : (
-                      "for the selected dates"
+                      t(
+                        "bookings.adjustBookingAssetQuantityDialog.forTheSelectedDates"
+                      )
                     )}
                   </p>
                   {reservedByOthers != null && reservedByOthers > 0 ? (
                     canViewOtherBookings ? (
                       <p className="text-xs text-gray-500">
-                        {reservedByOthers} {unitLabel} reserved by other
-                        bookings.{" "}
+                        {t(
+                          "bookings.adjustBookingAssetQuantityDialog.reservedByOtherBookings",
+                          { reservedByOthers, unitLabel }
+                        )}{" "}
                         <Link
                           to={`/assets/${assetId}/bookings`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="font-medium text-primary underline"
                         >
-                          View bookings
+                          {t(
+                            "bookings.adjustBookingAssetQuantityDialog.viewBookings"
+                          )}
                         </Link>
                       </p>
                     ) : (
                       <p className="text-xs text-gray-500">
-                        Some units are also reserved by other bookings.
+                        {t(
+                          "bookings.adjustBookingAssetQuantityDialog.someUnitsAreAlsoReserved"
+                        )}
                       </p>
                     )
                   ) : null}
@@ -280,7 +310,10 @@ export function AdjustBookingAssetQuantityDialog({
                 // Non-booking usage (e.g. custody release) — no workspace
                 // total to compare against, so keep the plain figure.
                 <p className="-mt-2 text-xs text-gray-500">
-                  Max: {maxQuantity} {unitLabel}
+                  {t("bookings.adjustBookingAssetQuantityDialog.max", {
+                    maxQuantity,
+                    unitLabel,
+                  })}
                 </p>
               )
             ) : null}
@@ -290,7 +323,7 @@ export function AdjustBookingAssetQuantityDialog({
         <AlertDialogFooter className="mt-4 gap-2">
           <AlertDialogCancel asChild>
             <Button type="button" variant="secondary" disabled={isSubmitting}>
-              Cancel
+              {t("bookings.adjustBookingAssetQuantityDialog.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -300,7 +333,9 @@ export function AdjustBookingAssetQuantityDialog({
             onClick={handleSubmit}
             disabled={disabled}
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting
+              ? "Saving..."
+              : t("bookings.adjustBookingAssetQuantityDialog.save")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

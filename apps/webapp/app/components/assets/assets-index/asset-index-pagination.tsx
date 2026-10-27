@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useFetcher } from "react-router";
 import { ChevronRight } from "~/components/icons/library";
 import { useSidebar } from "~/components/layout/sidebar/sidebar";
@@ -18,6 +19,7 @@ import { Button } from "../../shared/button";
 import { ButtonGroup } from "../../shared/button-group";
 
 export function AssetIndexPagination() {
+  const { t } = useTranslation();
   const roles = useOrganizationRoles();
   const fetcher = useFetcher({ key: "asset-index-settings-mode" });
   const { isMd } = useViewportHeight();
@@ -59,8 +61,8 @@ export function AssetIndexPagination() {
             type="button"
             onClick={handleScrollToTop}
             variant="secondary"
-            title="Scroll to top"
-            aria-label="Scroll to top"
+            title={t("assets.assetIndexPagination.scrollToTop")}
+            aria-label={t("assets.assetIndexPagination.scrollToTop")}
             className="h-[34px]"
           >
             <ChevronRight className="chev -rotate-90" />
@@ -92,9 +94,11 @@ export function AssetIndexPagination() {
                   )}
                   name="mode"
                   value="SIMPLE"
-                  aria-label="Switch to simple mode"
+                  aria-label={t(
+                    "assets.assetIndexPagination.switchToSimpleMode"
+                  )}
                 >
-                  Simple
+                  {t("assets.assetIndexPagination.simple")}
                 </Button>
                 <Button
                   type="submit"
@@ -105,9 +109,11 @@ export function AssetIndexPagination() {
                   )}
                   name="mode"
                   value="ADVANCED"
-                  aria-label="Switch to advanced mode"
+                  aria-label={t(
+                    "assets.assetIndexPagination.switchToAdvancedMode"
+                  )}
                 >
-                  Advanced
+                  {t("assets.assetIndexPagination.advanced")}
                 </Button>
               </ButtonGroup>
             </fetcher.Form>

@@ -13,6 +13,7 @@ import {
 } from "@radix-ui/react-popover";
 import { Reorder } from "framer-motion";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import { FakeCheckbox } from "~/components/forms/fake-checkbox";
 import { Switch } from "~/components/forms/switch";
@@ -102,6 +103,7 @@ const getTriggerClasses = (
 
 // react-doctor:no-giant-component — deferred for follow-up refactor
 function AdvancedFilter() {
+  const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { settings, customFields, lastAuditDateAccess } =
     useLoaderData<AssetIndexLoaderData>();
@@ -308,7 +310,7 @@ function AdvancedFilter() {
             {/* Count = server-active column filters + the low-stock quick filter */}
             {activeFilterCount > 0
               ? `Filtered by ${activeFilterCount}`
-              : "Filter"}
+              : t("assets.advancedAssetIndexFiltersAndSorting.filter")}
           </Button>
         </PopoverTrigger>
         <PopoverPortal>
@@ -321,8 +323,16 @@ function AdvancedFilter() {
             <div className="border-b p-4 pb-5">
               {filters.length === 0 && !lowStockActive ? (
                 <div>
-                  <h5>No filters applied to this view</h5>
-                  <p>Add a column below to filter the view</p>
+                  <h5>
+                    {t(
+                      "assets.advancedAssetIndexFiltersAndSorting.noFiltersAppliedToThis"
+                    )}
+                  </h5>
+                  <p>
+                    {t(
+                      "assets.advancedAssetIndexFiltersAndSorting.addAColumnBelowTo"
+                    )}
+                  </p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
@@ -480,9 +490,11 @@ function AdvancedFilter() {
                     lowStockActive ? "text-primary" : "text-white"
                   )}
                 />
-                Low stock only
+                {t("assets.advancedAssetIndexFiltersAndSorting.lowStockOnly")}
                 <span className="text-gray-500">
-                  — at or below reorder threshold
+                  {t(
+                    "assets.advancedAssetIndexFiltersAndSorting.atOrBelowReorderThreshold"
+                  )}
                 </span>
               </button>
             </When>
@@ -507,7 +519,9 @@ function AdvancedFilter() {
                   <div className="mr-1 inline-block size-[14px] align-middle">
                     <PlusIcon />
                   </div>
-                  <span className="inline-block align-middle">Add filter</span>
+                  <span className="inline-block align-middle">
+                    {t("assets.advancedAssetIndexFiltersAndSorting.addFilter")}
+                  </span>
                 </Button>
                 {SUPPORT_EMAIL ? (
                   <Button
@@ -516,7 +530,9 @@ function AdvancedFilter() {
                     className="ml-1"
                     to={`mailto:${SUPPORT_EMAIL}?subject=Advanced filtering suggestions`}
                   >
-                    Need more filtering options?
+                    {t(
+                      "assets.advancedAssetIndexFiltersAndSorting.needMoreFilteringOptions"
+                    )}
                   </Button>
                 ) : null}
               </div>
@@ -529,7 +545,7 @@ function AdvancedFilter() {
                     className="mt-0 whitespace-nowrap text-[14px]"
                     onClick={clearAllFilters}
                   >
-                    Clear all
+                    {t("assets.advancedAssetIndexFiltersAndSorting.clearAll")}
                   </Button>
                 )}
 
@@ -543,7 +559,7 @@ function AdvancedFilter() {
                   disabled={!validation.canApplyFilters || disabled}
                   onClick={applyFilters}
                 >
-                  Apply filters
+                  {t("assets.advancedAssetIndexFiltersAndSorting.applyFilters")}
                 </Button>
               </div>
             </div>
@@ -555,6 +571,7 @@ function AdvancedFilter() {
 }
 
 function AdvancedSorting() {
+  const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [sorts, setSorts] = useState<Sort[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -669,7 +686,7 @@ function AdvancedSorting() {
           {/* We use the initial sorts, as we only count the ones returned from the server as those are already active filters */}
           {initialSorts.length > 0
             ? `Sorted by ${initialSorts.length}`
-            : "Sort"}
+            : t("assets.advancedAssetIndexFiltersAndSorting.sort")}
         </Button>
       </PopoverTrigger>
       <PopoverPortal>
@@ -682,8 +699,16 @@ function AdvancedSorting() {
           <div className="border-b p-4 pb-5">
             {sorts.length === 0 ? (
               <div>
-                <h5>No sorting applied to this view</h5>
-                <p>Add a column below to sort by</p>
+                <h5>
+                  {t(
+                    "assets.advancedAssetIndexFiltersAndSorting.noSortingAppliedToThis"
+                  )}
+                </h5>
+                <p>
+                  {t(
+                    "assets.advancedAssetIndexFiltersAndSorting.addAColumnBelowTo2"
+                  )}
+                </p>
               </div>
             ) : (
               <Reorder.Group values={sorts} onReorder={setSorts}>
@@ -696,7 +721,14 @@ function AdvancedSorting() {
                         </div>
                         <div className="mt-[-2px]">
                           <span className="text-gray-500 ">
-                            {index === 0 ? "sort" : "then"} by
+                            {index === 0
+                              ? t(
+                                  "assets.advancedAssetIndexFiltersAndSorting.sort2"
+                                )
+                              : t(
+                                  "assets.advancedAssetIndexFiltersAndSorting.then"
+                                )}{" "}
+                            {t("assets.advancedAssetIndexFiltersAndSorting.by")}
                           </span>{" "}
                           {parseColumnName(s.name)}
                         </div>
@@ -707,7 +739,9 @@ function AdvancedSorting() {
                             htmlFor={`sort-${s.name}`}
                             className="text-[12px] text-gray-500"
                           >
-                            ascending:{" "}
+                            {t(
+                              "assets.advancedAssetIndexFiltersAndSorting.ascending"
+                            )}{" "}
                           </label>
                           <Switch
                             id={`sort-${s.name}`}
@@ -759,7 +793,7 @@ function AdvancedSorting() {
                   className="mt-0 text-[14px]"
                   onClick={clearAllSorts}
                 >
-                  Clear all
+                  {t("assets.advancedAssetIndexFiltersAndSorting.clearAll")}
                 </Button>
               )}
 
@@ -771,7 +805,7 @@ function AdvancedSorting() {
                 disabled={!haveSortsChanged || disabled}
                 onClick={applySorting}
               >
-                Apply sorting
+                {t("assets.advancedAssetIndexFiltersAndSorting.applySorting")}
               </Button>
             </div>
           </div>
@@ -788,6 +822,7 @@ function PickAColumnToSortBy({
   sorts: Sort[];
   setSorts: Dispatch<SetStateAction<Sort[]>>;
 }) {
+  const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -903,7 +938,9 @@ function PickAColumnToSortBy({
               : false
           }
         >
-          <span>Pick a column to sort by</span>{" "}
+          <span>
+            {t("assets.advancedAssetIndexFiltersAndSorting.pickAColumnToSort")}
+          </span>{" "}
           <ChevronRight className="ml-2 inline-block rotate-90" />
         </Button>
       </PopoverTrigger>
@@ -918,7 +955,9 @@ function PickAColumnToSortBy({
             <Search className="ml-4 size-4 text-gray-500" />
             <input
               ref={searchInputRef}
-              placeholder="Search column..."
+              placeholder={t(
+                "assets.advancedAssetIndexFiltersAndSorting.searchColumn"
+              )}
               className="border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
               value={searchQuery}
               onChange={handleSearch}
@@ -952,7 +991,7 @@ function PickAColumnToSortBy({
             ))}
             {filteredOptions.length === 0 && (
               <div className="px-4 py-2 text-[14px] text-gray-500">
-                No columns found
+                {t("assets.advancedAssetIndexFiltersAndSorting.noColumnsFound")}
               </div>
             )}
           </div>

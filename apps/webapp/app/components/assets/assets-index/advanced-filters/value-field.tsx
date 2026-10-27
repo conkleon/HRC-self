@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/react-popover";
 import { parseISO } from "date-fns";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLoaderData } from "react-router";
 import DynamicDropdown from "~/components/dynamic-dropdown/dynamic-dropdown";
 import DynamicSelect from "~/components/dynamic-select/dynamic-select";
@@ -163,6 +164,7 @@ export function ValueField({
   zormError?: string;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
   const customFields = useMemo(() => data?.customFields || [], [data]);
   const [localValue, setLocalValue] = useState<[string, string]>(
@@ -336,13 +338,12 @@ export function ValueField({
                     <TooltipContent side="bottom" className="z-[9999999]">
                       <div className="max-w-[260px] sm:max-w-[320px]">
                         <h6 className="mb-1 text-xs font-semibold text-gray-700">
-                          Barcode scanner ready
+                          {t("assets.valueField.barcodeScannerReady")}
                         </h6>
                         <p className="text-xs font-medium text-gray-500">
-                          This fields supports barcode scanners. Simply place
-                          your cursor in the field and scan a Shelf QR code with
-                          your barcode scanner. The value will be automatically
-                          filled in for you.
+                          {t(
+                            "assets.valueField.thisFieldsSupportsBarcodeScanners"
+                          )}
                         </p>
                       </div>
                     </TooltipContent>
@@ -361,7 +362,7 @@ export function ValueField({
         return (
           <div className="relative">
             <div className="absolute left-2 top-1/2 z-50 -translate-y-1/2 text-gray-500">
-              SAM-
+              {t("assets.valueField.sam")}
             </div>
             <Input
               {...commonInputProps}
@@ -546,7 +547,7 @@ export function ValueField({
         <Input
           {...commonInputProps}
           type="text"
-          label="Values"
+          label={t("assets.valueField.values")}
           value={
             Array.isArray(filter.value)
               ? filter.value.join(", ")
@@ -583,6 +584,7 @@ function BooleanField({
   handleBooleanChange: (value: "true" | "false") => void;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -645,7 +647,11 @@ function BooleanField({
           >
             <ChevronRight className="ml-[2px] inline-block rotate-90" />
             <span className="ml-2">
-              {disabled ? "Select a column first" : boolValue ? "Yes" : "No"}
+              {disabled
+                ? t("assets.valueField.selectAColumnFirst")
+                : boolValue
+                ? t("assets.valueField.yes")
+                : t("assets.valueField.no")}
             </span>{" "}
           </Button>
         </PopoverTrigger>
@@ -667,7 +673,7 @@ function BooleanField({
               onClick={() => handleSelect("true")}
               onKeyDown={handleActivationKeyPress(() => handleSelect("true"))}
             >
-              <span>Yes</span>
+              <span>{t("assets.valueField.yes")}</span>
             </div>
             <div
               className={tw(
@@ -679,7 +685,7 @@ function BooleanField({
               onClick={() => handleSelect("false")}
               onKeyDown={handleActivationKeyPress(() => handleSelect("false"))}
             >
-              <span>No</span>
+              <span>{t("assets.valueField.no")}</span>
             </div>
           </PopoverContent>
         </PopoverPortal>
@@ -719,6 +725,7 @@ function EnumField({
   name,
   disabled = false,
 }: EnumFieldProps) {
+  const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -872,8 +879,8 @@ function EnumField({
               <div className="flex items-center border-b">
                 <Search className="ml-4 size-4 text-gray-500" />
                 <input
-                  placeholder="Search options..."
-                  aria-label="Search options"
+                  placeholder={t("assets.valueField.searchOptions")}
+                  aria-label={t("assets.valueField.searchOptions2")}
                   className="border-0 px-4 py-2 pl-2 text-[14px] focus:border-0 focus:ring-0"
                   value={searchQuery}
                   onChange={(event) => {
@@ -885,11 +892,12 @@ function EnumField({
             ) : null}
             {options.length === 0 ? (
               <div className="max-w-[400px] p-4">
-                No options available. Please contact support if you believe this
-                is an error.
+                {t("assets.valueField.noOptionsAvailablePleaseContact")}
               </div>
             ) : visibleOptions.length === 0 ? (
-              <div className="max-w-[400px] p-4">No options found</div>
+              <div className="max-w-[400px] p-4">
+                {t("assets.valueField.noOptionsFound")}
+              </div>
             ) : (
               visibleOptions.map((option, index) => {
                 const isSelected = selectedValues.includes(option.id);
@@ -1001,6 +1009,7 @@ function CustodyEnumField({
   name,
   disabled,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parse the existing value to get selected TeamMember IDs
@@ -1078,7 +1087,7 @@ function CustodyEnumField({
                         });
                       })
                       .join(", ")
-                  : "Select custodian"}
+                  : t("assets.valueField.selectCustodian")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1107,7 +1116,7 @@ function CustodyEnumField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder="Select custodian"
+      placeholder={t("assets.valueField.selectCustodian")}
       defaultValue={value as string}
       onChange={(selectedId) => {
         if (selectedId !== undefined) {
@@ -1117,7 +1126,7 @@ function CustodyEnumField({
       closeOnSelect={true}
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="Custodian"
+      contentLabel={t("assets.valueField.custodian")}
     />
   );
 }
@@ -1130,6 +1139,7 @@ function CategoryEnumField({
   name,
   disabled = false,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parse the existing value to get selected Category IDs
@@ -1194,7 +1204,7 @@ function CategoryEnumField({
                 )}
               >
                 {disabled
-                  ? "Select a column first"
+                  ? t("assets.valueField.selectAColumnFirst")
                   : selectedIds.length > 0
                   ? selectedIds
                       .map((id) => {
@@ -1207,7 +1217,7 @@ function CategoryEnumField({
                         return category?.name || "";
                       })
                       .join(", ")
-                  : "Select category"}
+                  : t("assets.valueField.selectCategory")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1229,7 +1239,11 @@ function CategoryEnumField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder={disabled ? "Select a column first" : "Select category"}
+      placeholder={
+        disabled
+          ? t("assets.valueField.selectAColumnFirst")
+          : t("assets.valueField.selectCategory")
+      }
       defaultValue={value as string}
       onChange={(selectedId) => {
         if (selectedId !== undefined) {
@@ -1239,7 +1253,7 @@ function CategoryEnumField({
       closeOnSelect={true}
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="Category"
+      contentLabel={t("assets.valueField.category")}
     />
   );
 }
@@ -1252,6 +1266,7 @@ function AssetModelEnumField({
   name,
   disabled = false,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parse the existing value to get selected asset model IDs
@@ -1307,7 +1322,7 @@ function AssetModelEnumField({
                 )}
               >
                 {disabled
-                  ? "Select a column first"
+                  ? t("assets.valueField.selectAColumnFirst")
                   : selectedIds.length > 0
                   ? selectedIds
                       .map((id) => {
@@ -1322,7 +1337,7 @@ function AssetModelEnumField({
                         return model?.name || "";
                       })
                       .join(", ")
-                  : "Select asset model"}
+                  : t("assets.valueField.selectAssetModel")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1344,7 +1359,11 @@ function AssetModelEnumField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder={disabled ? "Select a column first" : "Select asset model"}
+      placeholder={
+        disabled
+          ? t("assets.valueField.selectAColumnFirst")
+          : t("assets.valueField.selectAssetModel")
+      }
       defaultValue={value as string}
       onChange={(selectedId) => {
         if (selectedId !== undefined) {
@@ -1354,7 +1373,7 @@ function AssetModelEnumField({
       closeOnSelect={true}
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="Asset model"
+      contentLabel={t("assets.valueField.assetModel")}
     />
   );
 }
@@ -1367,6 +1386,7 @@ function LocationEnumField({
   name,
   disabled = false,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parse the existing value to get selected Category IDs
@@ -1427,7 +1447,7 @@ function LocationEnumField({
                 )}
               >
                 {disabled
-                  ? "Select column first"
+                  ? t("assets.valueField.selectColumnFirst")
                   : selectedIds.length > 0
                   ? selectedIds
                       .map((id) => {
@@ -1443,7 +1463,7 @@ function LocationEnumField({
                         return location?.name || "";
                       })
                       .join(", ")
-                  : "Select location"}
+                  : t("assets.valueField.selectLocation")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1473,7 +1493,11 @@ function LocationEnumField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder={disabled ? "Select a column first" : "Select location"}
+      placeholder={
+        disabled
+          ? t("assets.valueField.selectAColumnFirst")
+          : t("assets.valueField.selectLocation")
+      }
       defaultValue={value as string}
       onChange={(selectedId) => {
         if (selectedId !== undefined) {
@@ -1483,7 +1507,7 @@ function LocationEnumField({
       closeOnSelect={true}
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="Location"
+      contentLabel={t("assets.valueField.location")}
     />
   );
 }
@@ -1496,6 +1520,7 @@ function KitEnumField({
   name,
   disabled,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parse the existing value to get selected Category IDs
@@ -1556,7 +1581,7 @@ function KitEnumField({
                 )}
               >
                 {disabled
-                  ? "Select a column first"
+                  ? t("assets.valueField.selectAColumnFirst")
                   : selectedIds.length > 0 && data.kits && data.kits.length > 0
                   ? selectedIds
                       .map((id) => {
@@ -1570,7 +1595,7 @@ function KitEnumField({
                         return kit?.name || "";
                       })
                       .join(", ")
-                  : "Select kit"}
+                  : t("assets.valueField.selectKit")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1600,7 +1625,11 @@ function KitEnumField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder={disabled ? "Select a column first" : "Select kit"}
+      placeholder={
+        disabled
+          ? t("assets.valueField.selectAColumnFirst")
+          : t("assets.valueField.selectKit")
+      }
       defaultValue={value as string}
       onChange={(selectedId) => {
         if (selectedId !== undefined) {
@@ -1610,7 +1639,7 @@ function KitEnumField({
       closeOnSelect={true}
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="Kit"
+      contentLabel={t("assets.valueField.kit")}
     />
   );
 }
@@ -1623,6 +1652,7 @@ function UpcomingBookingsEnumField({
   name,
   disabled,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parse the existing value to get selected Booking IDs
@@ -1683,7 +1713,7 @@ function UpcomingBookingsEnumField({
                 )}
               >
                 {disabled
-                  ? "Select a column first"
+                  ? t("assets.valueField.selectAColumnFirst")
                   : selectedIds.length > 0 &&
                     data.bookings &&
                     data.bookings.length > 0
@@ -1699,7 +1729,7 @@ function UpcomingBookingsEnumField({
                         return booking?.name || "";
                       })
                       .join(", ")
-                  : "Select booking"}
+                  : t("assets.valueField.selectBooking")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1729,7 +1759,11 @@ function UpcomingBookingsEnumField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder={disabled ? "Select a column first" : "Select booking"}
+      placeholder={
+        disabled
+          ? t("assets.valueField.selectAColumnFirst")
+          : t("assets.valueField.selectBooking")
+      }
       defaultValue={value as string}
       onChange={(selectedId) => {
         if (selectedId !== undefined) {
@@ -1739,7 +1773,7 @@ function UpcomingBookingsEnumField({
       closeOnSelect={true}
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="Booking"
+      contentLabel={t("assets.valueField.booking")}
     />
   );
 }
@@ -1752,6 +1786,7 @@ function TagsField({
   multiSelect,
   name,
 }: Omit<EnumFieldProps, "options">) {
+  const { t } = useTranslation();
   const data = useLoaderData<AssetIndexLoaderData>();
 
   // Parsing the existing value to get selected Tag Ids
@@ -1804,18 +1839,20 @@ function TagsField({
                 )}
               >
                 {disabled
-                  ? "Select a column first"
+                  ? t("assets.valueField.selectAColumnFirst")
                   : selectedIds.length > 0
                   ? selectedIds
                       .map((id) => {
                         if (id === "untagged") {
                           return "Untagged";
                         }
-                        const tag = data.tags?.find((t) => t.id === id);
+                        const tag = data.tags?.find(
+                          (candidate) => candidate.id === id
+                        );
                         return tag?.name || "";
                       })
                       .join(", ")
-                  : "Select Tag"}
+                  : t("assets.valueField.selectTag")}
               </span>
               <ChevronRight className="mr-1 inline-block rotate-90" />
             </div>
@@ -1825,7 +1862,7 @@ function TagsField({
         className="z-[999999]"
         selectionMode="none"
         defaultValues={selectedIds}
-        placeholder="Select tags"
+        placeholder={t("assets.valueField.selectTags")}
         onSelectionChange={(selectedTagIds) => {
           handleChange(selectedTagIds.join(","));
         }}
@@ -1837,7 +1874,11 @@ function TagsField({
     <DynamicSelect
       {...commonProps}
       fieldName={name}
-      placeholder={disabled ? "Select a column first" : "Select tag"}
+      placeholder={
+        disabled
+          ? t("assets.valueField.selectAColumnFirst")
+          : t("assets.valueField.selectTag2")
+      }
       defaultValue={value}
       onChange={(selectedId) => {
         if (selectedId) {
@@ -1847,7 +1888,7 @@ function TagsField({
       closeOnSelect
       triggerWrapperClassName="w-full text-gray-700"
       className="z-[999999]"
-      contentLabel="tags"
+      contentLabel={t("assets.valueField.tags")}
     />
   );
 }
@@ -1867,6 +1908,7 @@ function TrackingTypeEnumField({
   name?: string;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -1937,7 +1979,9 @@ function TrackingTypeEnumField({
           >
             <ChevronRight className="ml-[2px] inline-block rotate-90" />
             <span className="ml-2">
-              {disabled ? "Select a column first" : selectedLabel}
+              {disabled
+                ? t("assets.valueField.selectAColumnFirst")
+                : selectedLabel}
             </span>
           </Button>
         </PopoverTrigger>
@@ -2171,6 +2215,7 @@ export function DateField({
   error,
   disabled = false,
 }: DateFieldProps) {
+  const { t } = useTranslation();
   // Acting user's resolved PREF timezone (not the browser hint) — keeps the
   // advanced date filters consistent with the user-level date/time system.
   const { timeZone } = useFormatPrefs();
@@ -2283,7 +2328,7 @@ export function DateField({
         {...commonInputProps}
         label={""}
         type="text"
-        placeholder="Select a column first"
+        placeholder={t("assets.valueField.selectAColumnFirst")}
       />
     );
   }
@@ -2326,7 +2371,7 @@ export function DateField({
     return (
       <DateTimePicker
         mode="date"
-        label="Date"
+        label={t("assets.valueField.date")}
         hideLabel
         value={localValue[0]}
         onChange={(next) =>
@@ -2356,6 +2401,7 @@ function MultiDateInput({
   name?: string;
   error?: string;
 }) {
+  const { t } = useTranslation();
   /**
    * Each row has a stable `id` so we can key the list by it. Using array
    * index as the key would cause React to reuse DOM nodes across reorders
@@ -2411,7 +2457,7 @@ function MultiDateInput({
         <div key={entry.id} className="relative flex items-center gap-2">
           <DateTimePicker
             mode="date"
-            label="Date"
+            label={t("assets.valueField.date")}
             hideLabel
             value={entry.value}
             onChange={(next) =>
@@ -2447,7 +2493,9 @@ function MultiDateInput({
         <div className="mr-1 inline-block size-[14px] align-middle">
           <PlusIcon />
         </div>
-        <span className="inline-block align-middle">Add another date</span>
+        <span className="inline-block align-middle">
+          {t("assets.valueField.addAnotherDate")}
+        </span>
       </Button>
     </div>
   );

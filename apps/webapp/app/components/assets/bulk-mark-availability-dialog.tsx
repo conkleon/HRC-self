@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useZorm } from "react-zorm";
 import { z } from "zod";
 import { BulkUpdateDialogContent } from "../bulk-update-dialog/bulk-update-dialog";
@@ -13,14 +14,18 @@ export default function BulkMarkAvailabilityDialog({
 }: {
   type: z.infer<typeof BulkMarkAvailabilitySchema>["type"];
 }) {
+  const { t } = useTranslation();
   const zo = useZorm("BulkMarkAvailability", BulkMarkAvailabilitySchema);
 
   return (
     <BulkUpdateDialogContent
       ref={zo.ref}
       type={type}
-      title={`Mark assets as ${type}`}
-      description={`Mark all selected assets as ${type}. Assets that are already ${type}, will be skipped.`}
+      title={t("assets.bulkMarkAvailabilityDialog.markAssetsAs", { type })}
+      description={t(
+        "assets.bulkMarkAvailabilityDialog.markAllSelectedAssetsAs",
+        { type, type2: type }
+      )}
       actionUrl="/api/assets/bulk-mark-availability"
       arrayFieldId="assetIds"
     >
@@ -40,7 +45,7 @@ export default function BulkMarkAvailabilityDialog({
               disabled={disabled}
               onClick={handleCloseDialog}
             >
-              Cancel
+              {t("assets.bulkMarkAvailabilityDialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -48,7 +53,7 @@ export default function BulkMarkAvailabilityDialog({
               width="full"
               disabled={disabled}
             >
-              Confirm
+              {t("assets.bulkMarkAvailabilityDialog.confirm")}
             </Button>
           </div>
         </div>
