@@ -24,6 +24,7 @@ import { useLoaderData } from "react-router";
 import { UpgradeMessage } from "~/components/marketing/upgrade-message";
 import When from "~/components/when/when";
 import type { loader } from "~/routes/_layout+/_layout";
+import { LABEL_STORE_URL } from "~/utils/env";
 import { isPersonalOrg } from "~/utils/organization";
 import type { AdminArea } from "~/utils/permissions/admin-areas";
 import { canSeeAdminArea } from "~/utils/permissions/admin-areas";
@@ -291,7 +292,8 @@ export function useSidebarNavItems() {
     {
       type: "child",
       title: "Asset labels",
-      to: `https://store.shelf.nu/?ref=shelf_webapp_sidebar`,
+      to: LABEL_STORE_URL?.trim() ?? "",
+      hidden: !LABEL_STORE_URL?.trim(),
       Icon: QrCodeIcon,
       target: "_blank",
     },

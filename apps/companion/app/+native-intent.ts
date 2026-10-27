@@ -9,7 +9,7 @@
  *
  * IMPORTANT (verified against expo-router 6.0.23 source,
  * `build/getLinkingConfig.js` + `build/link/linking.js`): in a bare app the
- * `path` argument is the RAW FULL URL (`https://app.shelf.nu/assets/:id/overview`,
+ * `path` argument is the RAW FULL URL (`https://<server host>/assets/:id/overview`,
  * `shelf://assets/:id`), not a path — so this function normalises scheme and
  * host before matching.
  *
@@ -23,7 +23,7 @@
  *
  * Kept in sync with the claimed-path allowlist — see
  * `.claude/rules/companion-deep-link-allowlist.md`, the iOS AASA route and
- * `android.intentFilters` in app.json. `/qr/:id` is the one claimed path that
+ * `android.intentFilters` in app.config.js. `/qr/:id` is the one claimed path that
  * cannot be rewritten synchronously (needs an API resolve to know whether it
  * is an asset or a kit) — it lands on the start screen and
  * `useDeepLinkHandler` (lib/deep-links.ts) finishes the job from the original
@@ -46,7 +46,7 @@ type RedirectSystemPathArgs = {
  * Extracts the resource path segments and query string from a raw incoming URL.
  *
  * Handles all three shapes the router hands us:
- * - `https://app.shelf.nu/assets/:id/overview` → host dropped → ["assets", ":id", "overview"]
+ * - `https://<server host>/assets/:id/overview` → host dropped → ["assets", ":id", "overview"]
  * - `shelf://assets/:id` → custom scheme: the first component IS the resource → ["assets", ":id"]
  * - `/assets/:id` (already a path) → ["assets", ":id"]
  *

@@ -15,13 +15,19 @@
  */
 import { formatCount } from "~/modules/asset-import/format";
 import type { AssetImportStatusPayload } from "~/modules/asset-import/types";
+import { getAppName } from "~/modules/branding/instance-branding";
+import { helpSiteUrl } from "~/utils/help-site";
 import { useBarcodePermissions } from "~/utils/permissions/use-barcode-permissions";
+import { slugify } from "~/utils/slugify";
 import { ContentImportFlow } from "./flow";
 import { isActiveStatus, useAssetImportStatus } from "./import-progress";
 import Icon from "../../icons/icon";
 import { Button } from "../../shared/button";
 import { WarningBox } from "../../shared/warning-box";
 import When from "../../when/when";
+
+/** CSV helper tool on the help site; null hides the hint. */
+const CSV_HELPER_URL = helpSiteUrl("/csv-helper");
 
 /** Props for {@link ImportContent}. */
 type ImportContentProps = {
@@ -134,7 +140,7 @@ function ImportContentBody({
               : "/static/shelf.nu-example-asset-import-from-content.csv"
           }
           target="_blank"
-          download
+          download={`${slugify(getAppName())}-example-asset-import.csv`}
         >
           CSV template
         </Button>{" "}
@@ -391,17 +397,15 @@ function ImportContentBody({
         </div>
       </div>
 
-      <p className="text-[14px] text-gray-500">
-        Need help preparing your file? Try our{" "}
-        <Button
-          variant="link"
-          to="https://www.shelf.nu/csv-helper"
-          target="_blank"
-        >
-          CSV Helper Tool
-        </Button>
-        .
-      </p>
+      {CSV_HELPER_URL ? (
+        <p className="text-[14px] text-gray-500">
+          Need help preparing your file? Try our{" "}
+          <Button variant="link" to={CSV_HELPER_URL} target="_blank">
+            CSV Helper Tool
+          </Button>
+          .
+        </p>
+      ) : null}
 
       <ContentImportFlow uploadBlocked={!!runningStatus} />
     </div>

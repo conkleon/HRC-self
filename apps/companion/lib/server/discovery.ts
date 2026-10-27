@@ -19,8 +19,8 @@
  *
  * Shelf Cloud must be reachable to connect, because the registry lives there.
  * Nothing afterwards needs it: once connected, login and every request go to
- * the connected server alone, so a network that blocks `shelf.nu` still works
- * for daily use.
+ * the connected server alone, so a network that blocks the default server
+ * (`EXPO_PUBLIC_API_URL`) still works for daily use.
  *
  * @see ./contract.ts — the pure decisions this orchestrates
  * @see ./active-server.ts — owns the switch and its teardown

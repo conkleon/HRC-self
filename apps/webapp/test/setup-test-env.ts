@@ -35,6 +35,7 @@ process.env.SUPABASE_SERVICE_ROLE = "{SERVICE_ROLE}";
 process.env.SUPABASE_URL = "https://supabase-project.supabase.co";
 process.env.SERVER_URL = "http://localhost:3000";
 process.env.APP_NAME = "Shelf";
+process.env.HELP_SITE_URL = "https://www.shelf.nu";
 process.env.ENABLE_PREMIUM_FEATURES = "true";
 process.env.STRIPE_SECRET_KEY = "stripe-secret-key";
 process.env.STRIPE_PUBLIC_KEY = "stripe-public-key";

@@ -51,6 +51,15 @@ const THEME_OPTIONS: {
   { key: "system", label: "System", icon: "phone-portrait-outline" },
 ];
 
+/**
+ * Privacy policy on the help site this build was configured with
+ * (`EXPO_PUBLIC_HELP_SITE_URL`); null hides the row.
+ */
+const privacyPolicyUrl = (() => {
+  const base = process.env.EXPO_PUBLIC_HELP_SITE_URL?.trim().replace(/\/+$/, "");
+  return base ? `${base}/privacy` : null;
+})();
+
 export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const { currentOrg, organizations, setCurrentOrg, userProfile } = useOrg();
@@ -423,30 +432,29 @@ export default function SettingsScreen() {
       {/* Legal links + account actions */}
       <View style={styles.section}>
         <View style={styles.card}>
-          <TouchableOpacity
-            style={styles.settingRow}
-            // Stays Shelf's own site on every server, unlike the links
-            // around it: this policy covers the APP, which is Shelf's
-            // regardless of who hosts the instance its data lives on.
-            onPress={() =>
-              WebBrowser.openBrowserAsync("https://www.shelf.nu/privacy")
-            }
-            activeOpacity={0.7}
-            accessibilityLabel="Privacy Policy"
-            accessibilityRole="link"
-          >
-            <View style={styles.settingLeft}>
-              <Ionicons
-                name="shield-checkmark-outline"
-                size={20}
-                color={colors.foreground}
-              />
-              <Text style={styles.settingLabel}>Privacy Policy</Text>
-            </View>
-            <Ionicons name="open-outline" size={18} color={colors.mutedLight} />
-          </TouchableOpacity>
+          {privacyPolicyUrl ? (
+            <>
+              <TouchableOpacity
+                style={styles.settingRow}
+                onPress={() => WebBrowser.openBrowserAsync(privacyPolicyUrl)}
+                activeOpacity={0.7}
+                accessibilityLabel="Privacy Policy"
+                accessibilityRole="link"
+              >
+                <View style={styles.settingLeft}>
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={20}
+                    color={colors.foreground}
+                  />
+                  <Text style={styles.settingLabel}>Privacy Policy</Text>
+                </View>
+                <Ionicons name="open-outline" size={18} color={colors.mutedLight} />
+              </TouchableOpacity>
 
-          <View style={styles.separator} />
+              <View style={styles.separator} />
+            </>
+          ) : null}
 
           <TouchableOpacity
             style={styles.settingRow}

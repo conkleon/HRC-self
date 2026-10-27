@@ -26,6 +26,7 @@ import { Td, Th } from "~/components/table";
 import { TeamUsersActionsDropdown } from "~/components/workspace/users-actions-dropdown";
 import { db } from "~/database/db.server";
 
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import { getPaginatedAndFilterableSettingInvites } from "~/modules/invite/service.server";
 import type { TeamMembersWithUserOrInvite } from "~/modules/settings/service.server";
 import type { RouteHandleWithName } from "~/modules/types";
@@ -158,18 +159,25 @@ export default function UserInvitesSetting() {
   ];
 
   const shouldRenderIndex = allowedRoutes.includes(currentRoute?.handle?.name);
+  const { appName } = useInstanceBranding();
 
   return shouldRenderIndex ? (
     <div>
       <ContextualModal />
 
       <p className="mb-6 text-xs text-gray-600">
-        Users by default have a mail registered in shelf and can get reminders,
-        log in or perform other actions. Read more about our{" "}
-        <Link to={ROLES_HELP_URL} target="_blank" className="underline">
-          permissions here
-        </Link>
-        .
+        Users by default have a mail registered in {appName} and can get
+        reminders, log in or perform other actions.
+        {ROLES_HELP_URL ? (
+          <>
+            {" "}
+            Read more about our{" "}
+            <Link to={ROLES_HELP_URL} target="_blank" className="underline">
+              permissions here
+            </Link>
+            .
+          </>
+        ) : null}
       </p>
 
       <ListContentWrapper>

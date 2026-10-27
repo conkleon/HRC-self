@@ -18,6 +18,7 @@ import { config } from "~/config/shelf.config";
 import { useSearchParams } from "~/hooks/search-params";
 import { getAuditAddonPrices } from "~/modules/audit/addon.server";
 import { getBarcodeAddonPrices } from "~/modules/barcode/addon.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { parsePlanIntentFromSearchParams } from "~/modules/signup-intent/schema";
 import { getUserByID } from "~/modules/user/service.server";
 import type { BillingInterval } from "~/utils/addon-price";
@@ -39,7 +40,7 @@ import {
 import { tw } from "~/utils/tw";
 
 export const meta: MetaFunction = () => [
-  { title: appendToMetaTitle("Welcome to shelf.nu") },
+  { title: appendToMetaTitle(`Welcome to ${getAppName()}`) },
 ];
 
 export async function loader({ context, request }: LoaderFunctionArgs) {

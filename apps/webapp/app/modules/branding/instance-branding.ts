@@ -20,6 +20,9 @@ import { APP_NAME } from "~/utils/env";
 /** Product name used when `APP_NAME` is unset. */
 export const DEFAULT_APP_NAME = "Shelf";
 
+/** Host shown on labels and URL prefixes when `SERVER_URL` cannot be parsed. */
+export const DEFAULT_APP_HOST = "shelf.nu";
+
 /** The files an operator may place in `BRANDING_DIR`. */
 export type BrandingFile = "icon" | "favicon" | "login-bg";
 
@@ -40,6 +43,11 @@ export type InstanceBranding = {
   appName: string;
   /** Server name shown under the auth logo; null when unset or equal to `appName`. */
   instanceName: string | null;
+  /**
+   * Host this instance is served from (`SERVER_URL` without scheme), shown on
+   * printed labels and as the prefix of URL-like fields such as the username.
+   */
+  appHost: string;
   /** Normalized `#RRGGBB` accent color. */
   primaryColor: string;
   /** `:root{...}` rule with the `--primary-*` variables. */
@@ -58,6 +66,7 @@ export type InstanceBranding = {
 export const DEFAULT_INSTANCE_BRANDING: InstanceBranding = {
   appName: DEFAULT_APP_NAME,
   instanceName: null,
+  appHost: DEFAULT_APP_HOST,
   primaryColor: DEFAULT_PRIMARY_COLOR,
   primaryCssVars: paletteToCssVars(
     generatePrimaryPalette(DEFAULT_PRIMARY_COLOR)
@@ -76,6 +85,22 @@ export const DEFAULT_INSTANCE_BRANDING: InstanceBranding = {
  */
 export function getAppName(): string {
   return APP_NAME?.trim() || DEFAULT_APP_NAME;
+}
+
+/**
+ * Extracts the host to show users from a server URL.
+ *
+ * @param serverUrl - The instance's `SERVER_URL`
+ * @returns The URL's host (with port when not the default), or "shelf.nu"
+ * when the URL is missing or unparseable
+ */
+export function resolveAppHost(serverUrl: string | undefined): string {
+  if (!serverUrl) return DEFAULT_APP_HOST;
+  try {
+    return new URL(serverUrl).host || DEFAULT_APP_HOST;
+  } catch {
+    return DEFAULT_APP_HOST;
+  }
 }
 
 /**

@@ -1,4 +1,5 @@
 import { transporter } from "~/emails/transporter.server";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { ShelfError } from "~/utils/error";
 import { Logger } from "~/utils/logger";
 import { QueueNames, scheduler } from "~/utils/scheduler.server";
@@ -105,7 +106,7 @@ export const triggerEmail = async ({
   try {
     // send mail with defined transport object
     await transporter.sendMail({
-      from: from || SMTP_FROM || `"Shelf" <hello@example.com>`, // sender address
+      from: from || SMTP_FROM || `"${getAppName()}" <hello@example.com>`, // sender address
       replyTo: replyTo || SUPPORT_EMAIL, // reply to
       to: toHeader, // list of receivers
       subject, // Subject line

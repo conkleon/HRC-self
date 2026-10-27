@@ -4,9 +4,11 @@ import { UploadIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import type { z } from "zod";
 import useFetcherWithReset from "~/hooks/use-fetcher-with-reset";
+import { getAppName } from "~/modules/branding/instance-branding";
 import { INVITABLE_ROLES } from "~/modules/invite/roles";
 import { isFormProcessing } from "~/utils/form";
 import { readImportRowErrors } from "~/utils/import-row-errors";
+import { slugify } from "~/utils/slugify";
 import { tw } from "~/utils/tw";
 import ImportUsersSuccessContent from "./import-users-success-content";
 import Input from "../../forms/input";
@@ -120,7 +122,7 @@ export default function ImportUsersDialog({
                   variant="link"
                   to="/static/shelf.nu-example-import-users-from-content.csv"
                   target="_blank"
-                  download
+                  download={`${slugify(getAppName())}-example-import-users.csv`}
                 >
                   download our CSV template.
                 </Button>

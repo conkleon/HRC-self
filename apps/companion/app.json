@@ -11,7 +11,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shelf.companion",
-      "associatedDomains": ["applinks:app.shelf.nu"],
       "infoPlist": {
         "NSCameraUsageDescription": "Shelf needs camera access to scan QR codes and barcodes on your assets.",
         "NSPhotoLibraryUsageDescription": "Shelf needs photo library access so you can attach photos to assets and audits.",
@@ -30,36 +29,7 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "category": ["BROWSABLE", "DEFAULT"],
-          "data": [
-            {
-              "scheme": "https",
-              "host": "app.shelf.nu",
-              "pathPrefix": "/qr/"
-            },
-            {
-              "scheme": "https",
-              "host": "app.shelf.nu",
-              "pathPrefix": "/assets/"
-            },
-            {
-              "scheme": "https",
-              "host": "app.shelf.nu",
-              "pathPrefix": "/bookings/"
-            },
-            {
-              "scheme": "https",
-              "host": "app.shelf.nu",
-              "pathPrefix": "/audits/"
-            }
-          ]
-        }
-      ]
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",

@@ -15,6 +15,7 @@ import type { action as editCustomFieldsAction } from "~/routes/_layout+/setting
 import type { action as newCustomFieldsAction } from "~/routes/_layout+/settings.custom-fields.new";
 import { FIELD_TYPE_NAME } from "~/utils/custom-fields";
 import { isFormProcessing } from "~/utils/form";
+import { helpSiteUrl } from "~/utils/help-site";
 import { getValidationErrors } from "~/utils/http";
 import { zodFieldIsRequired } from "~/utils/zod";
 import { Form } from "../custom-form";
@@ -33,6 +34,11 @@ import { Switch } from "../forms/switch";
 import { Button } from "../shared/button";
 import { Card } from "../shared/card";
 import { Spinner } from "../shared/spinner";
+
+/** Article on limiting a custom field to categories; null without a help site. */
+const LINKING_CUSTOM_FIELDS_KB_URL = helpSiteUrl(
+  "/knowledge-base/linking-custom-fields-to-categories"
+);
 
 /** Shown when an OPTION field would be saved with nothing to choose from. */
 export const MISSING_OPTIONS_MESSAGE =
@@ -337,12 +343,11 @@ export const CustomFieldForm = ({
               <p>
                 Select asset categories for which you want to use this custom
                 field.{" "}
-                <Link
-                  to="https://www.shelf.nu/knowledge-base/linking-custom-fields-to-categories"
-                  target="_blank"
-                >
-                  Read more
-                </Link>
+                {LINKING_CUSTOM_FIELDS_KB_URL ? (
+                  <Link to={LINKING_CUSTOM_FIELDS_KB_URL} target="_blank">
+                    Read more
+                  </Link>
+                ) : null}
               </p>
             }
           >

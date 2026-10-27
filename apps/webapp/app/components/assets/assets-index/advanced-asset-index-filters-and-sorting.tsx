@@ -32,6 +32,7 @@ import {
   stripModelViewInapplicableParams,
 } from "~/modules/asset-model/view-params";
 import type { AssetIndexLoaderData } from "~/routes/_layout+/assets._index";
+import { SUPPORT_EMAIL } from "~/utils/env";
 import { handleActivationKeyPress } from "~/utils/keyboard";
 import { tw } from "~/utils/tw";
 import { FieldSelector } from "./advanced-filters/field-selector";
@@ -508,14 +509,16 @@ function AdvancedFilter() {
                   </div>
                   <span className="inline-block align-middle">Add filter</span>
                 </Button>
-                <Button
-                  variant="block-link-gray"
-                  size="xs"
-                  className="ml-1"
-                  to="mailto:nikolay@shelf.nu?subject=Advanced filtering suggestions"
-                >
-                  Need more filtering options?
-                </Button>
+                {SUPPORT_EMAIL ? (
+                  <Button
+                    variant="block-link-gray"
+                    size="xs"
+                    className="ml-1"
+                    to={`mailto:${SUPPORT_EMAIL}?subject=Advanced filtering suggestions`}
+                  >
+                    Need more filtering options?
+                  </Button>
+                ) : null}
               </div>
               <div className="ml-8 flex items-center justify-between gap-2">
                 {(filters.length > 0 || lowStockActive) && (

@@ -1485,7 +1485,7 @@ function ScannerContent() {
               label: "Link in Browser",
               icon: "open-outline",
               onPress: () => {
-                void openShelfWebUrl(`https://app.shelf.nu/qr/${qrId}`);
+                void openShelfWebUrl(`${getApiBaseUrl()}/qr/${qrId}`);
                 dismissResult();
               },
             };

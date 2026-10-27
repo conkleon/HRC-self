@@ -49,6 +49,14 @@ vi.mock("~/hooks/search-params", () => ({
   useSearchParams: () => [hoisted.searchParams, vi.fn()] as const,
 }));
 
+// why: branding comes from root loader data, which this isolated render does not have
+vi.mock("~/hooks/use-instance-branding", async () => {
+  const { DEFAULT_INSTANCE_BRANDING } = await import(
+    "~/modules/branding/instance-branding"
+  );
+  return { useInstanceBranding: () => DEFAULT_INSTANCE_BRANDING };
+});
+
 // why: replace only `useLoaderData` so the dialog reads a small `totalItems`
 // (keeping the "more than 100" branch off) without running a real route loader.
 vi.mock("react-router", async (importActual) => {

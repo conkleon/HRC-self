@@ -106,6 +106,7 @@ import {
 import { sendNotification } from "~/utils/emitter/send-notification.server";
 import { makeShelfError, ShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
+import { helpSiteUrl } from "~/utils/help-site";
 import { error, getParams, payload, parseData } from "~/utils/http.server";
 import { isLink } from "~/utils/misc";
 import {
@@ -121,6 +122,9 @@ import { hasPermission } from "~/utils/permissions/permission.validator.server";
 import { useBarcodePermissions } from "~/utils/permissions/use-barcode-permissions";
 import { requirePermission } from "~/utils/roles.server";
 import { tw } from "~/utils/tw";
+
+/** Knowledge-base article on barcode support; null hides the link. */
+const BARCODES_KB_URL = helpSiteUrl("/knowledge-base/alternative-barcodes");
 
 type AssetWithOptionalBarcodes = ReturnType<
   typeof useLoaderData<typeof loader>
@@ -1282,17 +1286,19 @@ export default function AssetOverview() {
                           content={
                             <>
                               <h6>Barcodes support</h6>
-                              <p>
-                                Want to know more about barcodes? Check out our
-                                knowledge base article on{" "}
-                                <Button
-                                  variant="link"
-                                  target="_blank"
-                                  to="https://www.shelf.nu/knowledge-base/alternative-barcodes"
-                                >
-                                  barcode support
-                                </Button>
-                              </p>
+                              {BARCODES_KB_URL ? (
+                                <p>
+                                  Want to know more about barcodes? Check out
+                                  our knowledge base article on{" "}
+                                  <Button
+                                    variant="link"
+                                    target="_blank"
+                                    to={BARCODES_KB_URL}
+                                  >
+                                    barcode support
+                                  </Button>
+                                </p>
+                              ) : null}
                             </>
                           }
                         />

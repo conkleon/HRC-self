@@ -49,10 +49,10 @@ export function pushIntoTab(tabRoot: TabRoot, nestedHref?: Href) {
 }
 
 /**
- * Open a `shelf.nu` web URL in an in-app browser (Custom Tab on Android,
+ * Open a web URL on the connected server in an in-app browser (Custom Tab on Android,
  * SFSafariViewController on iOS).
  *
- * Use this — NOT `Linking.openURL` — for any `https://app.shelf.nu/...` link
+ * Use this, NOT `Linking.openURL`, for any `${getApiBaseUrl()}/...` link
  * whose path the app claims as a Universal Link / App Link (`/qr`, `/assets`,
  * `/bookings`, `/audits`). On Android, `Linking.openURL` of a *verified*
  * app-link is re-intercepted by the system and re-launches this app — so a

@@ -16,6 +16,11 @@ Shelf.
 | `INSTANCE_NAME`       | `HRC Patras` | The server name in the Companion app, and a line under the login logo when it differs from `APP_NAME` |
 | `BRAND_PRIMARY_COLOR` | `#C8102E`    | The accent color: buttons, links, focus rings, highlights, charts, email buttons                      |
 | `BRANDING_DIR`        | `/branding`  | The folder the images below are read from                                                             |
+| `HELP_SITE_URL`       | `https://help.example.org` | Base of every "Learn more", knowledge-base, blog and privacy link. Unset hides them      |
+| `LABEL_STORE_URL`     | `https://store.example.org` | The sidebar's "Asset labels" link. Unset hides it                                       |
+
+The host in `SERVER_URL` is printed on QR and barcode labels ("Powered by
+<host>") and shown as the prefix of the username field.
 
 The app name and icon also name the installed app: `/manifest.webmanifest` is
 built from them, so "Add to Home Screen" on a phone shows your name and icon.

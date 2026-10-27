@@ -13,10 +13,14 @@ import { useFormatPrefs } from "~/hooks/use-format-prefs";
 import { DATE_TIME_FORMAT } from "~/utils/constants";
 import { toIsoDateTimeToUserTimezone } from "~/utils/date-fns";
 import { isFormProcessing } from "~/utils/form";
+import { helpSiteUrl } from "~/utils/help-site";
 import { getValidationErrors } from "~/utils/http";
 import type { DataOrErrorResponse } from "~/utils/http.server";
 import TeamMembersSelector from "./team-members-selector";
 import { Dialog, DialogPortal } from "../layout/dialog";
+
+/** Knowledge-base article with a sample reminder email; null hides the link. */
+const REMINDERS_KB_URL = helpSiteUrl("/knowledge-base/asset-reminders");
 
 /** Options accepted by {@link createSetReminderSchema}. */
 type CreateSetReminderSchemaOptions = {
@@ -295,15 +299,21 @@ export default function SetOrEditReminderDialog({
               />
               <p className="text-gray-500">
                 This will show in the reminder mail that gets sent to selected
-                team member(s). Curious about the reminder mail?{" "}
-                <Button
-                  variant="link"
-                  to="https://www.shelf.nu/knowledge-base/asset-reminders"
-                  target="_blank"
-                >
-                  See a sample
-                </Button>
-                .
+                team member(s).
+                {REMINDERS_KB_URL ? (
+                  <>
+                    {" "}
+                    Curious about the reminder mail?{" "}
+                    <Button
+                      variant="link"
+                      to={REMINDERS_KB_URL}
+                      target="_blank"
+                    >
+                      See a sample
+                    </Button>
+                    .
+                  </>
+                ) : null}
               </p>
             </div>
 

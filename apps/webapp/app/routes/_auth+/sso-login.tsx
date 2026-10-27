@@ -21,6 +21,7 @@ import { signInWithSSO } from "~/modules/auth/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { mobilePkceChallengeCookie } from "~/utils/cookies.server";
 import { DEFAULT_SSO_DOMAIN } from "~/utils/env";
+import { SUPPORT_EMAIL } from "~/utils/env";
 import { makeShelfError, notAllowedMethod, ShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
 import {
@@ -199,16 +200,18 @@ export default function SSOLogin() {
         {data?.error?.message && (
           <div className="text-sm text-error-500">{data.error.message}</div>
         )}
-        <div>
-          Want to enable SSO for your organization?{" "}
-          <Button
-            as="a"
-            href="mailto:hello@shelf.nu?subject=SSO request"
-            variant="link"
-          >
-            Contact us
-          </Button>
-        </div>
+        {SUPPORT_EMAIL ? (
+          <div>
+            Want to enable SSO for your organization?{" "}
+            <Button
+              as="a"
+              href={`mailto:${SUPPORT_EMAIL}?subject=SSO request`}
+              variant="link"
+            >
+              Contact us
+            </Button>
+          </div>
+        ) : null}
       </div>
     </>
   );

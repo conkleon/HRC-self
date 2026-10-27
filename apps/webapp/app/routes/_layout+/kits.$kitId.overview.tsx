@@ -17,6 +17,7 @@ import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { getClientHint } from "~/utils/client-hints";
 import { formatCurrency } from "~/utils/currency";
 import { makeShelfError } from "~/utils/error";
+import { helpSiteUrl } from "~/utils/help-site";
 import { error, getParams, payload } from "~/utils/http.server";
 import {
   PermissionAction,
@@ -24,6 +25,9 @@ import {
 } from "~/utils/permissions/permission.data";
 import { useBarcodePermissions } from "~/utils/permissions/use-barcode-permissions";
 import { requirePermission } from "~/utils/roles.server";
+
+/** Knowledge-base article on barcode support; null hides the link. */
+const BARCODES_KB_URL = helpSiteUrl("/knowledge-base/alternative-barcodes");
 
 type KitWithOptionalBarcodes = ReturnType<
   typeof useLoaderData<typeof loader>
@@ -214,17 +218,19 @@ export default function KitOverview() {
                 content={
                   <>
                     <h6>Barcodes support</h6>
-                    <p>
-                      Want to know more about barcodes? Check out our knowledge
-                      base article on{" "}
-                      <Button
-                        variant="link"
-                        target="_blank"
-                        to="https://www.shelf.nu/knowledge-base/alternative-barcodes"
-                      >
-                        barcode support
-                      </Button>
-                    </p>
+                    {BARCODES_KB_URL ? (
+                      <p>
+                        Want to know more about barcodes? Check out our
+                        knowledge base article on{" "}
+                        <Button
+                          variant="link"
+                          target="_blank"
+                          to={BARCODES_KB_URL}
+                        >
+                          barcode support
+                        </Button>
+                      </p>
+                    ) : null}
                   </>
                 }
               />

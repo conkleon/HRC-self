@@ -7,8 +7,10 @@ import { useReactToPrint } from "react-to-print";
 import { BarcodeDisplay } from "~/components/barcode/barcode-display";
 import { Button } from "~/components/shared/button";
 import { useCurrentOrganization } from "~/hooks/use-current-organization";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import { useOrganizationRoles } from "~/hooks/use-organization-roles";
 import { useRoleAccess } from "~/hooks/use-role-access";
+import { DEFAULT_APP_HOST } from "~/modules/branding/instance-branding";
 import { resolveShowShelfBranding } from "~/utils/branding";
 import {
   PermissionAction,
@@ -145,6 +147,7 @@ export const CodePreview = ({
     action: PermissionAction.update,
   });
   const organization = useCurrentOrganization();
+  const { appHost } = useInstanceBranding();
   const resolvedShowShelfBranding = resolveShowShelfBranding(
     showShelfBranding,
     organization?.showShelfBranding
@@ -388,6 +391,7 @@ export const CodePreview = ({
             qrIdDisplayPreference={organization?.qrIdDisplayPreference}
             sequentialId={sequentialId}
             showShelfBranding={resolvedShowShelfBranding}
+            appHost={appHost}
           />
         ) : selectedCode?.type === "barcode" ? (
           <BarcodeLabel
@@ -395,6 +399,7 @@ export const CodePreview = ({
             data={selectedCode.barcodeData}
             title={item.name}
             showShelfBranding={resolvedShowShelfBranding}
+            appHost={appHost}
           />
         ) : null}
       </div>
@@ -449,6 +454,11 @@ interface QrLabelProps {
   qrIdDisplayPreference?: string;
   sequentialId?: string | null;
   showShelfBranding?: boolean;
+  /**
+   * Host printed in the "Powered by" line. Passed in rather than read from a
+   * hook because bulk downloads render labels outside the router.
+   */
+  appHost?: string;
 }
 
 export const QrLabel = React.forwardRef<HTMLDivElement, QrLabelProps>(
@@ -459,6 +469,7 @@ export const QrLabel = React.forwardRef<HTMLDivElement, QrLabelProps>(
       qrIdDisplayPreference,
       sequentialId,
       showShelfBranding = true,
+      appHost = DEFAULT_APP_HOST,
     } = props ?? {};
     return (
       <div style={QR_LABEL_STYLE} ref={ref}>
@@ -478,7 +489,7 @@ export const QrLabel = React.forwardRef<HTMLDivElement, QrLabelProps>(
           {showShelfBranding ? (
             <div>
               Powered by{" "}
-              <span className="font-semibold text-black">shelf.nu</span>
+              <span className="font-semibold text-black">{appHost}</span>
             </div>
           ) : null}
         </div>
@@ -495,11 +506,18 @@ interface BarcodeLabelProps {
   };
   title: string;
   showShelfBranding?: boolean;
+  /** Host printed in the "Powered by" line. See `QrLabelProps.appHost`. */
+  appHost?: string;
 }
 
 export const BarcodeLabel = React.forwardRef<HTMLDivElement, BarcodeLabelProps>(
   function BarcodeLabel(props, ref) {
-    const { data, title, showShelfBranding = true } = props ?? {};
+    const {
+      data,
+      title,
+      showShelfBranding = true,
+      appHost = DEFAULT_APP_HOST,
+    } = props ?? {};
 
     if (!data) return null;
 
@@ -531,7 +549,7 @@ export const BarcodeLabel = React.forwardRef<HTMLDivElement, BarcodeLabelProps>(
           {showShelfBranding ? (
             <div>
               Powered by{" "}
-              <span className="font-semibold text-black">shelf.nu</span>
+              <span className="font-semibold text-black">{appHost}</span>
             </div>
           ) : null}
         </div>

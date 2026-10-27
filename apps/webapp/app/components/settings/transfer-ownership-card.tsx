@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useCanTransferOwnership } from "~/hooks/use-can-transfer-ownership";
 import { useCurrentOrganization } from "~/hooks/use-current-organization";
 import { useDisabled } from "~/hooks/use-disabled";
+import { helpSiteUrl } from "~/utils/help-site";
 import { getValidationErrors } from "~/utils/http";
 import type { DataOrErrorResponse } from "~/utils/http.server";
 import type { OwnerSubscriptionInfo } from "~/utils/stripe.server";
@@ -41,9 +42,13 @@ type Admin = UserNameFields & {
   email: string;
 };
 
-/** Knowledge-base walkthrough linked from every state of the transfer card */
-export const TRANSFER_OWNERSHIP_KB_URL =
-  "https://www.shelf.nu/knowledge-base/transfer-workspace-ownership";
+/**
+ * Knowledge-base walkthrough linked from every state of the transfer card;
+ * null when the instance has no help site, which hides the link.
+ */
+export const TRANSFER_OWNERSHIP_KB_URL = helpSiteUrl(
+  "/knowledge-base/transfer-workspace-ownership"
+);
 
 type TransferOwnershipCardProps = {
   className?: string;
@@ -69,6 +74,7 @@ type TransferOwnershipCardProps = {
 };
 
 function LearnMoreLink() {
+  if (!TRANSFER_OWNERSHIP_KB_URL) return null;
   return (
     <Link
       to={TRANSFER_OWNERSHIP_KB_URL}

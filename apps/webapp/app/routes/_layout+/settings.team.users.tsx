@@ -21,6 +21,7 @@ import { InfoTooltip } from "~/components/shared/info-tooltip";
 import { Td, Th } from "~/components/table";
 import { SSOUserBadge } from "~/components/user/sso-user-badge";
 import { TeamUsersActionsDropdown } from "~/components/workspace/users-actions-dropdown";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import { useOrganizationRoles } from "~/hooks/use-organization-roles";
 import type { TeamMembersWithUserOrInvite } from "~/modules/settings/service.server";
 import { getPaginatedAndFilterableSettingUsers } from "~/modules/settings/service.server";
@@ -150,6 +151,7 @@ export default function UserTeamSetting() {
   ];
 
   const shouldRenderIndex = allowedRoutes.includes(currentRoute?.handle?.name);
+  const { appName } = useInstanceBranding();
 
   const roles = useOrganizationRoles();
   /* Importing users sends invites too, so both buttons need the invite grant. */
@@ -164,12 +166,18 @@ export default function UserTeamSetting() {
       <ContextualModal />
 
       <p className="mb-6 text-xs text-gray-600">
-        Users by default have a mail registered in shelf and can get reminders,
-        log in or perform other actions. Read more about our{" "}
-        <Link to={ROLES_HELP_URL} target="_blank" className="underline">
-          permissions here
-        </Link>
-        .
+        Users by default have a mail registered in {appName} and can get
+        reminders, log in or perform other actions.
+        {ROLES_HELP_URL ? (
+          <>
+            {" "}
+            Read more about our{" "}
+            <Link to={ROLES_HELP_URL} target="_blank" className="underline">
+              permissions here
+            </Link>
+            .
+          </>
+        ) : null}
       </p>
 
       <ListContentWrapper>

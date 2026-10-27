@@ -18,6 +18,7 @@ import {
   useMatches,
   useRouteLoaderData,
 } from "react-router";
+import { helpSiteUrl } from "~/utils/help-site";
 import { ErrorContent } from "./components/errors";
 import BlockInteractions from "./components/layout/maintenance-mode";
 import { SidebarTrigger } from "./components/layout/sidebar/sidebar";
@@ -336,7 +337,7 @@ function App() {
         "Apologies, we’re down for scheduled maintenance. Please try again later."
       }
       cta={{
-        to: "https://www.shelf.nu/blog-categories/updates-maintenance",
+        to: helpSiteUrl("/blog-categories/updates-maintenance") ?? undefined,
         text: "Learn more",
       }}
       icon="tool"

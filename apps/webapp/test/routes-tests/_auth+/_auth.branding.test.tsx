@@ -38,16 +38,19 @@ beforeEach(() => {
 });
 
 describe("auth layout branding", () => {
-  it("shows the Shelf painting and shelf.nu link by default", async () => {
+  it("shows the Shelf painting and a link to the help site by default", async () => {
     await renderAuth();
     expect(screen.getByAltText(/John Singer Sargent/i)).toHaveAttribute(
       "src",
       "/static/images/auth-cover.webp"
     );
-    expect(screen.getByRole("link", { name: "shelf.nu" })).toBeInTheDocument();
+    // The test env sets HELP_SITE_URL to https://www.shelf.nu
+    expect(
+      screen.getByRole("link", { name: "www.shelf.nu" })
+    ).toBeInTheDocument();
   });
 
-  it("shows the custom background without the shelf.nu link", async () => {
+  it("shows the custom background without the help site link", async () => {
     branding = {
       ...DEFAULT_INSTANCE_BRANDING,
       loginBgUrl: "/branding/login-bg.jpg",
@@ -58,7 +61,7 @@ describe("auth layout branding", () => {
       "/branding/login-bg.jpg"
     );
     expect(
-      screen.queryByRole("link", { name: "shelf.nu" })
+      screen.queryByRole("link", { name: "www.shelf.nu" })
     ).not.toBeInTheDocument();
   });
 

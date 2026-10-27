@@ -1,6 +1,7 @@
 import { Link, useFetcher, useLoaderData } from "react-router";
 import { getAppName } from "~/modules/branding/instance-branding";
 import type { loader } from "~/routes/_layout+/home";
+import { helpSiteUrl } from "~/utils/help-site";
 import { tw } from "~/utils/tw";
 import {
   AddUserIcon,
@@ -14,6 +15,22 @@ import {
 import { Button } from "../shared/button";
 import Heading from "../shared/heading";
 import SubHeading from "../shared/sub-heading";
+
+/**
+ * "Learn more" link to a knowledge-base article on the help site. Renders
+ * nothing when the instance has no help site.
+ *
+ * @param props.path - Article path on the help site
+ */
+function LearnMoreLink({ path }: { path: string }) {
+  const href = helpSiteUrl(path);
+  if (!href) return null;
+  return (
+    <Link to={href} target="_blank" className=" font-semibold text-gray-600">
+      Learn more
+    </Link>
+  );
+}
 
 export default function OnboardingChecklist() {
   const fetcher = useFetcher();
@@ -60,13 +77,7 @@ export default function OnboardingChecklist() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Link
-                      to="https://www.shelf.nu/knowledge-base/adding-new-assets"
-                      target="_blank"
-                      className=" font-semibold text-gray-600"
-                    >
-                      Learn more
-                    </Link>
+                    <LearnMoreLink path="/knowledge-base/adding-new-assets" />
                     <Button variant="link" to="/assets/new">
                       New asset
                     </Button>
@@ -100,13 +111,7 @@ export default function OnboardingChecklist() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Link
-                      to="https://www.shelf.nu/knowledge-base/using-categories-to-organize-your-asset-inventory"
-                      target="_blank"
-                      className=" font-semibold text-gray-600"
-                    >
-                      Learn more
-                    </Link>
+                    <LearnMoreLink path="/knowledge-base/using-categories-to-organize-your-asset-inventory" />
                     <Button variant="link" to="/categories/new">
                       New category
                     </Button>
@@ -182,13 +187,7 @@ export default function OnboardingChecklist() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Link
-                      to="https://www.shelf.nu/knowledge-base/onboarding-your-team-members"
-                      target="_blank"
-                      className=" font-semibold text-gray-600"
-                    >
-                      Learn more
-                    </Link>
+                    <LearnMoreLink path="/knowledge-base/onboarding-your-team-members" />
                     <Button variant="link" to="/settings/team">
                       New team member
                     </Button>
@@ -222,13 +221,7 @@ export default function OnboardingChecklist() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Link
-                      to="https://www.shelf.nu/knowledge-base/custody-feature-for-long-term-equipment-lend-outs"
-                      target="_blank"
-                      className=" font-semibold text-gray-600"
-                    >
-                      Learn more
-                    </Link>
+                    <LearnMoreLink path="/knowledge-base/custody-feature-for-long-term-equipment-lend-outs" />
                   </div>
                 </div>
               </div>
@@ -269,13 +262,7 @@ export default function OnboardingChecklist() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <Link
-                      to="https://www.shelf.nu/knowledge-base/adding-additional-fields-to-assets"
-                      target="_blank"
-                      className=" font-semibold text-gray-600"
-                    >
-                      Learn more
-                    </Link>
+                    <LearnMoreLink path="/knowledge-base/adding-additional-fields-to-assets" />
                     <Button variant="link" to="/settings/custom-fields/new">
                       New custom field
                     </Button>

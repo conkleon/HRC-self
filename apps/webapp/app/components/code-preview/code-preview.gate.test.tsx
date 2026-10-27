@@ -37,6 +37,19 @@ vi.mock("~/hooks/use-current-organization", () => ({
   }),
 }));
 
+// why: branding comes from root loader data, which this isolated render does not have
+vi.mock("~/hooks/use-instance-branding", async () => {
+  const { DEFAULT_INSTANCE_BRANDING } = await import(
+    "~/modules/branding/instance-branding"
+  );
+  return {
+    useInstanceBranding: () => ({
+      ...DEFAULT_INSTANCE_BRANDING,
+      appHost: "assets.example.org",
+    }),
+  };
+});
+
 // why: the dialog mounts a fetcher form that needs a data router; only the
 // button that opens it is under test
 vi.mock("./add-barcode-dialog", () => ({
@@ -83,5 +96,15 @@ describe("CodePreview: Add code button", () => {
     expect(
       screen.queryByRole("button", { name: /add code/i })
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("CodePreview: label branding", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("prints the instance host on the label", () => {
+    renderAs(["ADMIN"]);
+    expect(screen.getByText("assets.example.org")).toBeInTheDocument();
+    expect(screen.queryByText("shelf.nu")).not.toBeInTheDocument();
   });
 });

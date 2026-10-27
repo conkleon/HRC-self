@@ -17,7 +17,9 @@
  * @see {@link file://./../../routes/api+/scim+/v2+/ResourceTypes.ts}
  * @see {@link file://./../../routes/api+/scim+/v2+/Schemas.ts}
  */
+import { getAppName } from "~/modules/branding/instance-branding";
 import { SERVER_URL } from "~/utils/env";
+import { helpSiteUrl } from "~/utils/help-site";
 import {
   SCIM_SCHEMA_LIST_RESPONSE,
   SCIM_SCHEMA_RESOURCE_TYPE,
@@ -26,11 +28,16 @@ import {
   SCIM_SCHEMA_USER,
 } from "./types";
 
-/** Base URL for all SCIM v2 endpoints, e.g. `https://app.shelf.nu/api/scim/v2`. */
+/** Base URL for all SCIM v2 endpoints: `${SERVER_URL}/api/scim/v2`. */
 const SCIM_BASE_URL = `${SERVER_URL}/api/scim/v2`;
 
-/** Documentation link surfaced in the ServiceProviderConfig. */
-const SCIM_DOCS_URL = "https://docs.shelf.nu/";
+/**
+ * Documentation link surfaced in the ServiceProviderConfig: the instance's
+ * help site. `documentationUri` is optional in RFC 7643, so it is left out
+ * when no help site is configured.
+ */
+const SCIM_DOCS = helpSiteUrl("/");
+const SCIM_DOCS_FIELD = SCIM_DOCS ? { documentationUri: SCIM_DOCS } : {};
 
 /**
  * Builds the ServiceProviderConfig resource (RFC 7643 §5).
@@ -41,7 +48,7 @@ const SCIM_DOCS_URL = "https://docs.shelf.nu/";
 export function buildServiceProviderConfig() {
   return {
     schemas: [SCIM_SCHEMA_SERVICE_PROVIDER_CONFIG],
-    documentationUri: SCIM_DOCS_URL,
+    ...SCIM_DOCS_FIELD,
     patch: { supported: true },
     bulk: { supported: false, maxOperations: 0, maxPayloadSize: 0 },
     filter: { supported: true, maxResults: 100 },
@@ -52,10 +59,9 @@ export function buildServiceProviderConfig() {
       {
         type: "oauthbearertoken",
         name: "OAuth Bearer Token",
-        description:
-          "Authentication via the long-lived SCIM bearer token issued in the Shelf workspace settings.",
+        description: `Authentication via the long-lived SCIM bearer token issued in the ${getAppName()} workspace settings.`,
         specUri: "https://www.rfc-editor.org/info/rfc6750",
-        documentationUri: SCIM_DOCS_URL,
+        ...SCIM_DOCS_FIELD,
         primary: true,
       },
     ],

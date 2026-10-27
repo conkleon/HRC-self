@@ -151,9 +151,9 @@ precisely when we are shipping blind hotfixes and most need to read them.
 > environment's values and reports success. This is why step 1 carries `--clear`
 > and step 1b reads the values back out of the artifact.
 >
-> Only `EXPO_PUBLIC_API_URL` has a backstop: `lib/api/client.ts` falls back to
-> `https://app.shelf.nu` outside `__DEV__`, and only when the variable is UNSET,
-> not when it is set to something wrong. `lib/supabase.ts` has none — it reads
+> No variable has a usable backstop: `lib/server/active-server.ts` falls back to
+> `http://localhost:3000` when `EXPO_PUBLIC_API_URL` is UNSET, which no device
+> can reach, and uses whatever it is set to otherwise. `lib/supabase.ts` has none: it reads
 > `EXPO_PUBLIC_SUPABASE_URL` / `_ANON_PUBLIC` with non-null assertions and builds
 > the client at module scope. A bundle carrying the wrong Supabase project points
 > every updated device at that project, where the session it holds was never

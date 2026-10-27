@@ -30,6 +30,7 @@ import When from "~/components/when/when";
 import { config } from "~/config/shelf.config";
 import { sendEmail } from "~/emails/mail.server";
 import { onboardingEmailText } from "~/emails/onboarding-email";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import {
   getAuthUserById,
   signInWithEmail,
@@ -54,7 +55,7 @@ import { resolveOnboardingDestination } from "~/modules/signup-intent/schema";
 import { getUserByID, updateUser } from "~/modules/user/service.server";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
 import { setCookie } from "~/utils/cookies.server";
-import { ENABLE_PREMIUM_FEATURES, SMTP_FROM } from "~/utils/env";
+import { ENABLE_PREMIUM_FEATURES } from "~/utils/env";
 import { isZodValidationError, makeShelfError } from "~/utils/error";
 import { isFormProcessing } from "~/utils/form";
 import { getValidationErrors } from "~/utils/http";
@@ -488,11 +489,11 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
     if (config.sendOnboardingEmail) {
       /** Send onboarding email */
+      // Sender and reply-to fall back to SMTP_FROM and SUPPORT_EMAIL in
+      // `triggerEmail`, so the instance's own addresses are used.
       sendEmail({
-        from: SMTP_FROM || `"Carlos from shelf.nu" <carlos@emails.shelf.nu>`,
-        replyTo: "carlos@shelf.nu",
         to: user.email,
-        subject: "🏷️ Welcome to Shelf - can I ask you a question?",
+        subject: `🏷️ Welcome to ${getAppName()} - can I ask you a question?`,
         text: onboardingEmailText({ firstName: resolveUserGreetingName(user) }),
       });
     }
@@ -543,6 +544,7 @@ export default function Onboarding() {
     requireCompanyName,
     organizationId,
   } = useLoaderData<typeof loader>();
+  const { appHost } = useInstanceBranding();
 
   const OnboardingFormSchema = createOnboardingSchema({
     userSignedUpWithPassword,
@@ -619,7 +621,7 @@ export default function Onboarding() {
         <div>
           <Input
             label="Username"
-            addOn="shelf.nu/"
+            addOn={`${appHost}/`}
             autoComplete="username"
             required
             type="text"

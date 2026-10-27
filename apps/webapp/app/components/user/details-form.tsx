@@ -4,6 +4,7 @@ import { useZorm } from "react-zorm";
 import z from "zod";
 import { fileErrorAtom } from "~/atoms/file";
 import { useDisabled } from "~/hooks/use-disabled";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import type { getUserWithContact } from "~/modules/user/service.server";
 import type { UserPageActionData } from "~/routes/_layout+/account-details.general";
 import { getValidationErrors } from "~/utils/http";
@@ -46,6 +47,7 @@ export function UserDetailsForm({
     getValidationErrors<typeof UserDetailsFormSchema>(data?.error)?.username
       ?.message || zo.errors.username()?.message;
   const fileError = useAtomValue(fileErrorAtom);
+  const { appHost } = useInstanceBranding();
 
   const disabled = useDisabled();
   const isDisabled =
@@ -145,7 +147,7 @@ export function UserDetailsForm({
           <Input
             label="Username"
             hideLabel={true}
-            addOn="shelf.nu/"
+            addOn={`${appHost}/`}
             type="text"
             name={zo.fields.username()}
             defaultValue={user?.username || undefined}

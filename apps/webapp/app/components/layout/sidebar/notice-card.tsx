@@ -3,10 +3,14 @@ import { XIcon } from "~/components/icons/library";
 import { Button } from "~/components/shared/button";
 import { getAppName } from "~/modules/branding/instance-branding";
 import type { loader } from "~/routes/_layout+/_layout";
+import { helpSiteUrl } from "~/utils/help-site";
 
 export const SidebarNoticeCard = () => {
   const { hideNoticeCard } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
+  const tutorialUrl = helpSiteUrl(
+    "/blog/new-shelf-pwa-progresive-web-application-live-learn-how-to-use"
+  );
 
   let optimisticHideNoticeCard = hideNoticeCard;
   if (fetcher.formData) {
@@ -34,21 +38,21 @@ export const SidebarNoticeCard = () => {
       </div>
 
       <p className="text-gray-600">
-        Always available access to shelf, with all features you have on desktop.
+        Always available access to {getAppName()}, with all features you have on
+        desktop.
       </p>
       <img
         src="/static/images/carlos-support.jpg"
-        alt="Carlos support shelf.nu"
+        alt={`${getAppName()} support`}
         className="my-4 rounded"
       />
-      <p>
-        <Button
-          variant="link"
-          to="https://www.shelf.nu/blog/new-shelf-pwa-progresive-web-application-live-learn-how-to-use"
-        >
-          Written Tutorial
-        </Button>
-      </p>
+      {tutorialUrl ? (
+        <p>
+          <Button variant="link" to={tutorialUrl}>
+            Written Tutorial
+          </Button>
+        </p>
+      ) : null}
     </div>
   );
 };

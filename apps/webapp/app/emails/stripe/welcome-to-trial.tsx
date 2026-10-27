@@ -10,10 +10,36 @@ import {
 import { config } from "~/config/shelf.config";
 import { SERVER_URL, SUPPORT_EMAIL } from "~/utils/env";
 import { ShelfError } from "~/utils/error";
+import { helpSiteUrl } from "~/utils/help-site";
 import { Logger } from "~/utils/logger";
 import { LogoForEmail } from "../logo";
 import { sendEmail } from "../mail.server";
 import { styles } from "../styles";
+
+/**
+ * Features the email points trial users at, each with its help-site article.
+ * `url` is null when the instance has no help site; the feature is then named
+ * without a link.
+ */
+const KEY_FEATURES = [
+  {
+    name: "Custom Fields",
+    blurb: "Tailor Shelf to your specific needs",
+    url: helpSiteUrl("/knowledge-base/custom-field-types-in-shelf"),
+  },
+  {
+    name: "Bookings",
+    blurb: "Efficiently manage equipment reservations",
+    url: helpSiteUrl(
+      "/knowledge-base/use-case-scenarios-explaing-our-bookings-feature"
+    ),
+  },
+  {
+    name: "Kits",
+    blurb: "Group related assets for easier management",
+    url: helpSiteUrl("/features/kits"),
+  },
+];
 
 interface TeamTrialWelcomeProps {
   firstName?: string | null;
@@ -67,9 +93,9 @@ Start populating your inventory to see Shelf in action. Try our QR code feature 
 Collaboration is key. Add your colleagues to truly experience the power of Shelf.
 
 Explore Key Features:
-- Custom Fields: Tailor Shelf to your specific needs - https://www.shelf.nu/knowledge-base/custom-field-types-in-shelf
-- Bookings: Efficiently manage equipment reservations - https://www.shelf.nu/knowledge-base/use-case-scenarios-explaing-our-bookings-feature
-- Kits: Group related assets for easier management - https://www.shelf.nu/features/kits
+${KEY_FEATURES.map(
+  ({ name, blurb, url }) => `- ${name}: ${blurb}${url ? ` - ${url}` : ""}`
+).join("\n")}
 
 Need help? Check out our Knowledge Base for quick answers, or reach out to us at ${SUPPORT_EMAIL}.
 
@@ -145,35 +171,18 @@ function WelcomeToTrialEmailTemplate({
 
           <Text style={{ ...styles.h2 }}>Explore Key Features:</Text>
 
-          <Text style={{ ...styles.p }}>
-            <Link
-              href="https://www.shelf.nu/knowledge-base/custom-field-types-in-shelf"
-              style={{ color: emailPrimaryColor }}
-            >
-              Custom Fields
-            </Link>
-            : Tailor Shelf to your specific needs
-          </Text>
-
-          <Text style={{ ...styles.p }}>
-            <Link
-              href="https://www.shelf.nu/knowledge-base/use-case-scenarios-explaing-our-bookings-feature"
-              style={{ color: emailPrimaryColor }}
-            >
-              Bookings
-            </Link>
-            : Efficiently manage equipment reservations
-          </Text>
-
-          <Text style={{ ...styles.p }}>
-            <Link
-              href="https://www.shelf.nu/features/kits"
-              style={{ color: emailPrimaryColor }}
-            >
-              Kits
-            </Link>
-            : Group related assets for easier management
-          </Text>
+          {KEY_FEATURES.map(({ name, blurb, url }) => (
+            <Text key={name} style={{ ...styles.p }}>
+              {url ? (
+                <Link href={url} style={{ color: emailPrimaryColor }}>
+                  {name}
+                </Link>
+              ) : (
+                name
+              )}
+              : {blurb}
+            </Text>
+          ))}
 
           <Text style={{ marginTop: "24px", ...styles.p }}>
             Need help? Check out our Knowledge Base for quick answers, or reach

@@ -4,6 +4,7 @@ import { InfoIcon } from "lucide-react";
 import { useRouteLoaderData } from "react-router";
 import type Stripe from "stripe";
 import type { loader as layoutLoader } from "~/routes/_layout+/_layout";
+import { helpSiteUrl } from "~/utils/help-site";
 import type { CustomerWithSubscriptions } from "~/utils/stripe.server";
 import { tw } from "~/utils/tw";
 import { CustomerPortalForm } from "./customer-portal-form";
@@ -442,6 +443,7 @@ function TrialPaymentTooltip() {
 }
 
 function LegacyPricingTooltip() {
+  const legacyPlanFaqUrl = helpSiteUrl("/legacy-plan-faq");
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -453,13 +455,13 @@ function LegacyPricingTooltip() {
         <TooltipContent side="bottom" className="max-w-[300px]">
           <p>
             You are on a{" "}
-            <Button
-              to="https://www.shelf.nu/legacy-plan-faq"
-              target="_blank"
-              variant="link"
-            >
-              legacy pricing plan
-            </Button>
+            {legacyPlanFaqUrl ? (
+              <Button to={legacyPlanFaqUrl} target="_blank" variant="link">
+                legacy pricing plan
+              </Button>
+            ) : (
+              "legacy pricing plan"
+            )}
             . We have since updated our pricing plans. <br />
             You can view the new pricing plans in the customer portal. If you
             cancel your subscription, you will not be able to renew it. For any

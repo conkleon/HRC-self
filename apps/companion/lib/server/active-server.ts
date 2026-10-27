@@ -29,19 +29,17 @@ import {
 } from "./contract";
 
 /**
- * The bundled Shelf Cloud default — used on first run, and whenever stored
- * state is missing or unreadable.
+ * The bundled default server, used on first run and whenever stored state is
+ * missing or unreadable.
  *
- * The `__DEV__` split in the base-URL fallback mirrors the original
- * `API_BASE_URL` logic: `EXPO_PUBLIC_*` values are inlined at bundle time, so
- * an OTA update published without the production env scope would bake the
- * fallback into every install. Falling back to production makes the worst case
- * "points at prod", which is what release builds want anyway.
+ * Its address is `EXPO_PUBLIC_API_URL`, inlined at bundle time, so every build
+ * and every OTA update must be published with it set. The localhost fallback
+ * exists for local development only; a release bundle without the variable
+ * cannot reach any server until the user connects to one by hand.
  */
 export const CLOUD_SERVER: ServerConfig = {
   baseUrl: normalizeBaseUrl(
-    process.env.EXPO_PUBLIC_API_URL ||
-      (__DEV__ ? "http://localhost:3000" : "https://app.shelf.nu")
+    process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000"
   ),
   supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL!,
   supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_PUBLIC!,

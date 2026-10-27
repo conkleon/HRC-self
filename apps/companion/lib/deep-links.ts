@@ -17,12 +17,12 @@ import { isSameOrigin } from "./server/contract";
  *
  * Also handles HTTPS universal links (iOS) / App Links (Android), which the OS
  * delivers through the same `Linking` APIs once the native association is in
- * place (see apps/companion/app.json + the server `/.well-known/*` routes):
+ * place (see apps/companion/app.config.js + the server `/.well-known/*` routes):
  *
- *   https://app.shelf.nu/qr/{id}
- *   https://app.shelf.nu/assets/{id}
- *   https://app.shelf.nu/bookings/{id}
- *   https://app.shelf.nu/audits/{id}
+ *   https://<server host>/qr/{id}
+ *   https://<server host>/assets/{id}
+ *   https://<server host>/bookings/{id}
+ *   https://<server host>/audits/{id}
  *
  * The host above is illustrative, not exhaustive: the app can be connected to a
  * self-hosted Shelf instance, and the parsing here is host-agnostic (it matches
@@ -66,7 +66,7 @@ function parseDeepLink(url: string): ParsedLink {
     const parsed = Linking.parse(url);
     const path = parsed.path ?? "";
     // Custom app scheme (shelf://kits/abc) vs https universal link
-    // (https://app.shelf.nu/kits/abc): for the custom scheme expo-linking puts
+    // (https://<server host>/kits/abc): for the custom scheme expo-linking puts
     // the first segment in `hostname` ("kits") and the rest in `path` ("abc"),
     // whereas for https the hostname is the domain and the resource lives in the
     // path. Normalise both to one segment list so native scheme links resolve.

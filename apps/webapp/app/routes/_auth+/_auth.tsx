@@ -4,6 +4,7 @@ import { ShelfSymbolLogo } from "~/components/marketing/logos";
 import SubHeading from "~/components/shared/sub-heading";
 import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import { appendToMetaTitle } from "~/utils/append-to-meta-title";
+import { helpSiteUrl } from "~/utils/help-site";
 
 export const loader = () => null;
 
@@ -18,6 +19,10 @@ export default function App() {
   };
   const { title, subHeading } = data;
   const { instanceName, loginBgUrl } = useInstanceBranding();
+  const helpSiteHref = helpSiteUrl("/?ref=shelf_app_auth_image");
+  const helpSite = helpSiteHref
+    ? { href: helpSiteHref, host: new URL(helpSiteHref).host }
+    : null;
 
   return (
     <main className="flex h-screen">
@@ -51,14 +56,16 @@ export default function App() {
           />
         ) : (
           <>
-            {/* eslint-disable react/jsx-no-target-blank */}
-            <a
-              href="https://www.shelf.nu/?ref=shelf_app_auth_image"
-              className="relative z-20 mt-4 w-[150px] text-right text-sm text-white no-underline hover:text-white/80"
-              target="_blank"
-            >
-              shelf.nu
-            </a>
+            {helpSite ? (
+              // eslint-disable-next-line react/jsx-no-target-blank
+              <a
+                href={helpSite.href}
+                className="relative z-20 mt-4 w-[150px] text-right text-sm text-white no-underline hover:text-white/80"
+                target="_blank"
+              >
+                {helpSite.host}
+              </a>
+            ) : null}
             <img
               className="absolute inset-0 size-full max-w-none object-cover"
               src="/static/images/auth-cover.webp"

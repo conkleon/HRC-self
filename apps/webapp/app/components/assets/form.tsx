@@ -43,6 +43,7 @@ import { ASSET_DESCRIPTION_MAX_LENGTH } from "~/utils/constants";
 import type { CustomFieldZodSchema } from "~/utils/custom-fields";
 import { mergedSchema } from "~/utils/custom-fields";
 import { isFormProcessing } from "~/utils/form";
+import { helpSiteUrl } from "~/utils/help-site";
 import { getValidationErrors } from "~/utils/http";
 import type { DataOrErrorResponse } from "~/utils/http.server";
 import { useBarcodePermissions } from "~/utils/permissions/use-barcode-permissions";
@@ -1588,10 +1589,12 @@ function BulkCreatePreview({ titles }: { titles: string[] }) {
 
 /**
  * Knowledge-base guide behind the tracking-method row: the individual /
- * model / quantity decision, and what can still change after creation.
+ * model / quantity decision, and what can still change after creation. Null
+ * when the instance has no help site, which hides the link.
  */
-const TRACKING_METHOD_KB_URL =
-  "https://www.shelf.nu/knowledge-base/how-to-choose-a-tracking-method";
+const TRACKING_METHOD_KB_URL = helpSiteUrl(
+  "/knowledge-base/how-to-choose-a-tracking-method"
+);
 
 /**
  * Link into that guide. Create mode opens the decision guide itself; edit
@@ -1599,6 +1602,7 @@ const TRACKING_METHOD_KB_URL =
  * method is locked by then and the question is what to do about it.
  */
 function TrackingMethodGuideLink({ isEditMode }: { isEditMode: boolean }) {
+  if (!TRACKING_METHOD_KB_URL) return null;
   return (
     <Button
       to={

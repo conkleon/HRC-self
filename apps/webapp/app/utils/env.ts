@@ -32,6 +32,8 @@ declare global {
       APP_NAME: string;
       INSTANCE_NAME: string;
       BRAND_PRIMARY_COLOR: string;
+      HELP_SITE_URL: string;
+      LABEL_STORE_URL: string;
     };
   }
 }
@@ -86,6 +88,8 @@ declare global {
       APP_NAME: string;
       BRAND_PRIMARY_COLOR: string;
       BRANDING_DIR: string;
+      HELP_SITE_URL: string;
+      LABEL_STORE_URL: string;
       RATE_LIMIT_MULTIPLIER: string;
       MIN_COMPANION_VERSION: string;
       LATEST_COMPANION_VERSION: string;
@@ -410,6 +414,29 @@ export const SUPPORT_EMAIL = getEnv("SUPPORT_EMAIL", {
   isRequired: false,
 });
 
+/**
+ * Base URL of the help and marketing site that in-app "learn more" links,
+ * knowledge-base articles, the blog and the store point at (e.g.
+ * `https://www.shelf.nu`). Optional: when unset every such link is hidden, so
+ * users are never sent to a site this instance does not run. Read through
+ * `helpSiteUrl()`.
+ *
+ * @see {@link file://./help-site.ts}
+ */
+export const HELP_SITE_URL = getEnv("HELP_SITE_URL", {
+  isSecret: false,
+  isRequired: false,
+});
+
+/**
+ * Where users can buy printed asset labels (e.g. `https://store.shelf.nu`).
+ * Optional: the sidebar's "Asset labels" entry is hidden when unset.
+ */
+export const LABEL_STORE_URL = getEnv("LABEL_STORE_URL", {
+  isSecret: false,
+  isRequired: false,
+});
+
 export const GEOCODING_USER_AGENT = getEnv("GEOCODING_USER_AGENT", {
   isSecret: false,
   isRequired: false,
@@ -517,5 +544,7 @@ export function getBrowserEnv() {
     APP_NAME,
     INSTANCE_NAME,
     BRAND_PRIMARY_COLOR,
+    HELP_SITE_URL,
+    LABEL_STORE_URL,
   };
 }

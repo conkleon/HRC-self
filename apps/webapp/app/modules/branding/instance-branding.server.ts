@@ -19,12 +19,18 @@ import {
   paletteToCssVars,
 } from "~/utils/brand-palette";
 import { getContrastRatio } from "~/utils/color-contrast";
-import { BRAND_PRIMARY_COLOR, BRANDING_DIR, INSTANCE_NAME } from "~/utils/env";
+import {
+  BRAND_PRIMARY_COLOR,
+  BRANDING_DIR,
+  INSTANCE_NAME,
+  SERVER_URL,
+} from "~/utils/env";
 import { Logger } from "~/utils/logger";
 import type { BrandingFile, InstanceBranding } from "./instance-branding";
 import {
   DEFAULT_INSTANCE_BRANDING,
   getAppName,
+  resolveAppHost,
   resolveBrandingFiles,
 } from "./instance-branding";
 
@@ -92,6 +98,7 @@ export function getInstanceBranding(): InstanceBranding {
     appName,
     instanceName:
       instanceName && instanceName !== appName ? instanceName : null,
+    appHost: resolveAppHost(SERVER_URL),
     primaryColor,
     primaryCssVars: paletteToCssVars(generatePrimaryPalette(primaryColor)),
     iconUrl: iconUrl ?? DEFAULT_INSTANCE_BRANDING.iconUrl,

@@ -6,6 +6,7 @@ import { DownloadIcon } from "lucide-react";
 import { useLoaderData } from "react-router";
 import { selectedBulkItemsAtom } from "~/atoms/list";
 import { useSearchParams } from "~/hooks/search-params";
+import { useInstanceBranding } from "~/hooks/use-instance-branding";
 import type { BulkQrDownloadLoaderData } from "~/routes/api+/assets.get-assets-for-bulk-qr-download";
 import { generateHtmlFromComponent } from "~/utils/component-to-html";
 import { isSelectingAllItems } from "~/utils/list";
@@ -34,6 +35,7 @@ export default function BulkDownloadQrDialog({
   onClose,
 }: BulkDownloadQrDialogProps) {
   const { totalItems } = useLoaderData<{ totalItems: number }>();
+  const { appHost } = useInstanceBranding();
 
   const [downloadState, setDownloadState] = useState<DownloadState>({
     status: "idle",
@@ -123,6 +125,7 @@ export default function BulkDownloadQrDialog({
               qrIdDisplayPreference={qrIdDisplayPreference}
               sequentialId={asset.sequentialId}
               showShelfBranding={showShelfBranding}
+              appHost={appHost}
             />
           )
         );
@@ -203,7 +206,7 @@ export default function BulkDownloadQrDialog({
         });
       }
     },
-    []
+    [appHost]
   );
 
   /**

@@ -153,7 +153,12 @@ cat > apps/companion/.env.local << 'EOF'
 EXPO_PUBLIC_SUPABASE_URL="http://<YOUR_LAN_IP>:54321"
 EXPO_PUBLIC_SUPABASE_ANON_PUBLIC="<your-supabase-anon-key>"
 EXPO_PUBLIC_API_URL="http://<YOUR_LAN_IP>:3000"
+# Optional: base of the Privacy Policy link in Settings (hidden when unset)
+# EXPO_PUBLIC_HELP_SITE_URL="https://help.example.org"
 EOF
+# App links: release builds claim the host in APP_LINK_HOST (or the https host
+# of EXPO_PUBLIC_API_URL) for Universal Links / App Links. iOS builds must have
+# APP_LINK_HOST in their environment; see app.config.js.
 # Replace <YOUR_LAN_IP> with your actual LAN IP from step above
 # Get the anon key from: supabase status (Publishable key)
 #
